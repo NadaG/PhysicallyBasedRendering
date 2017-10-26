@@ -1,0 +1,171 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\ShaderProgram">
+      <UniqueIdentifier>{69990197-91e5-4b54-b00b-d71130cf5cad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Debug">
+      <UniqueIdentifier>{e4ec2be3-9d0e-4279-ab13-6375651a717c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\InputManager">
+      <UniqueIdentifier>{7bcee99e-7742-49d1-8db5-42e170e5862f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader Files">
+      <UniqueIdentifier>{235228da-a903-4667-8a70-696607d67e5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\WindowManager">
+      <UniqueIdentifier>{d0486940-34b2-4ddb-b9e1-463b1a4d94bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\SceneObject">
+      <UniqueIdentifier>{65341de4-8367-44df-b29b-9883047ec312}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Mesh">
+      <UniqueIdentifier>{0451c2ab-f7ae-4638-9c54-ab91d656db54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\SceneManager">
+      <UniqueIdentifier>{00d1b6e1-46db-43d9-8da2-d894c29fc8cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Texture">
+      <UniqueIdentifier>{d6542cf9-e9b2-4b92-8e5f-a881497b0c60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\FrameBufferObject">
+      <UniqueIdentifier>{71bd6ca2-dfdf-4cc4-aef9-40b71c64e691}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\RenderBufferObject">
+      <UniqueIdentifier>{9c0a9713-4edf-4246-8cb1-67ddac6668c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Renderer">
+      <UniqueIdentifier>{6ab3a25f-36e5-438c-8ef8-0b3c3b91be90}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderProgram.cpp">
+      <Filter>Source Files\ShaderProgram</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug.cpp">
+      <Filter>Source Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="InputManager.cpp">
+      <Filter>Source Files\InputManager</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowManager.cpp">
+      <Filter>Source Files\WindowManager</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneObject.cpp">
+      <Filter>Source Files\SceneObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Source Files\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneManager.cpp">
+      <Filter>Source Files\SceneManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Source Files\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderBufferObject.cpp">
+      <Filter>Source Files\RenderBufferObject</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameBufferObject.cpp">
+      <Filter>Source Files\FrameBufferObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="PBRRenderer.cpp">
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="FluidRenderer.cpp">
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="DebugQuad.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="DebugQuad.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Depth.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Depth.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="PBR.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="PBR.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Basic.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Basic.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="ParticleSphere.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="ParticleSphere.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ShaderProgram.h">
+      <Filter>Source Files\ShaderProgram</Filter>
+    </ClInclude>
+    <ClInclude Include="Debug.h">
+      <Filter>Source Files\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="InputManager.h">
+      <Filter>Source Files\InputManager</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowManager.h">
+      <Filter>Source Files\WindowManager</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneObject.h">
+      <Filter>Source Files\SceneObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Source Files\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneManager.h">
+      <Filter>Source Files\SceneManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Source Files\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderBufferObject.h">
+      <Filter>Source Files\RenderBufferObject</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameBufferObject.h">
+      <Filter>Source Files\FrameBufferObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>Source Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="PBRRenderer.h">
+      <Filter>Source Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="FluidRenderer.h">
+      <Filter>Source Files\Renderer</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

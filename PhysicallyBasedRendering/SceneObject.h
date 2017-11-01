@@ -33,6 +33,8 @@ public:
 	void LoadMesh(const char* s);
 	void LoadMesh(const MeshType& meshType);
 
+	void SetColor(const glm::vec3 color) { mesh.SetAllColor(color); }
+
 	void TerminateMesh();
 private:
 	

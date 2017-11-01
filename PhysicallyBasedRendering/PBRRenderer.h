@@ -14,6 +14,7 @@ public:
 
 private:
 	ShaderProgram* pbrShader;
+	ShaderProgram* lightShader;
 
 	Texture aoTex;
 	Texture albedoTex;

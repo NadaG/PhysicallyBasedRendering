@@ -23,6 +23,8 @@ public:
 
 	void DrawBuffers();
 
+	const GLenum& CheckStatus();
+
 private:
 
 	GLuint fbo;

@@ -5,6 +5,7 @@ in vec2 outUV;
 out vec3 color;
 
 uniform sampler2D depthMap;
+uniform sampler2D colorMap;
 
 uniform float near;
 uniform float far;
@@ -26,5 +27,5 @@ void main()
 	// 자극이 적을 때는 살짝의 자극으로도 자극이 된다는 베버의 법칙에 근거함
 	depthColor = pow(depthColor, 0.5);
 	color = vec3(depthColor);
-	//color = vec3(depthValue);
+	//color = texture(colorMap, outUV).rgb;
 }

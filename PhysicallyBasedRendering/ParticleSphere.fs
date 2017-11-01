@@ -2,8 +2,8 @@
 
 in vec3 eyeSpacePos;
 
-out vec3 color;
-out float depth;
+layout(location = 0) out vec3 color;
+layout(location = 1) out float depth;
 
 float radius = 0.01;
 

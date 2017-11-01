@@ -4,12 +4,11 @@
 #include<assimp\scene.h>
 #include<assimp\postprocess.h>
 #include<glm\glm.hpp>
-#include<GL/glew.h>
 #include<string>
 #include<cstdio>
 #include<vector>
 
-#include "Debug.h"
+#include "VertexArrayObject.h"
 
 using std::string;
 using std::vector;
@@ -37,12 +36,10 @@ private:
 	int vertexNum;
 	int indexNum;
 
-	// Question color 정보는 보통 어디에? material information
-	glm::vec3 ambientColor;
-	glm::vec3 diffuseColor;
-	glm::vec3 specularColor;
+	glm::vec3 albedo;
 
-	GLuint vao, vbo, ibo;
+	//GLuint vao, vbo, ibo;
+	VertexArrayObject vao;
 
 public:
 	Mesh();
@@ -53,15 +50,14 @@ public:
 	void LoadMesh(MeshType meshType);
 	
 	void GenerateAndSetVAO();
-	
+	void SetAllColor(const glm::vec3& color);
+
 	void Draw();
 
 	void Terminate();
 
-	const glm::vec3& GetAmbient() { return ambientColor; }
-	const glm::vec3& GetDiffuse() { return diffuseColor; }
-	const glm::vec3& GetSpecular() { return specularColor; }
-	
+	const glm::vec3& GetAlbedo() { return albedo; }
+
 	const Vertex& GetVertice(int index) { return vertices[index]; }
 	const int& GetVertexNum() { return vertexNum; }
 	GLuint* GetIndices() { return indices; }

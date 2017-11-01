@@ -122,42 +122,35 @@ void Mesh::LoadMesh(MeshType meshType)
 
 void Mesh::GenerateAndSetVAO()
 {
-	glGenVertexArrays(1, &vao);
-	glGenBuffers(1, &vbo);
-	glGenBuffers(1, &ibo);
+	vao.GenVAOVBOIBO();
 
-	glBindVertexArray(vao);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexNum, vertices, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indexNum, indices, GL_STATIC_DRAW);
+	vao.VertexBufferData(sizeof(Vertex) * vertexNum, vertices);
+	vao.IndexBufferData(sizeof(GLuint) * indexNum, indices);
 
 	// position
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 14, (void*)0);
-
+	vao.VertexAttribPointer(3, 14);
 	// normal
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 14, (void*)(3 * sizeof(GLfloat)));
-
+	vao.VertexAttribPointer(3, 14);
 	// coordinate
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 14, (void*)(6 * sizeof(GLfloat)));
-
+	vao.VertexAttribPointer(2, 14);
 	// color
-	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 14, (void*)(8 * sizeof(GLfloat)));
-
+	vao.VertexAttribPointer(3, 14);
 	// tangent
-	glEnableVertexAttribArray(4);
-	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 14, (void*)(11 * sizeof(GLfloat)));
+	vao.VertexAttribPointer(3, 14);
+}
+
+// TODO 중간에 color를 바꾸는 코드를 작성할 것
+// 이 코드를 이용해서 광원들의 색을 정해주자
+void Mesh::SetAllColor(const glm::vec3& color)
+{
+	for (int i = 0; i < vertexNum; i++)
+		vertices[i].color = color;
 }
 
 void Mesh::Draw()
 {
 	// 마지막 인자를 0으로 함으로써 단순히 현재 bind된 vao에 bind된 index buffer대로
-	glBindVertexArray(vao);
+	vao.Bind();
 	glDrawElements(GL_TRIANGLES, indexNum, GL_UNSIGNED_INT, 0);
 }
 

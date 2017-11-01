@@ -5,6 +5,13 @@ Texture::Texture(char const * path)
 	LoadTexture(path);
 }
 
+void Texture::LoadTexture(const GLint& internalformat, const GLsizei& width, const GLsizei& height, const GLenum& format, const GLenum& type)
+{
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height, 0, format, type, 0);
+}
+
 void Texture::LoadTexture(char const * path)
 {
 	glGenTextures(1, &texture);
@@ -22,9 +29,8 @@ void Texture::LoadTexture(char const * path)
 			format = GL_RGB;
 		else if (nrComponents == 4)
 			format = GL_RGBA;
-		else
-			cout << "?";
 
+		// 보통 이미지의 경우 unsigned byte로 저장하고
 		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -33,7 +39,7 @@ void Texture::LoadTexture(char const * path)
 	else
 	{
 		cout << "Texture failed to load at path: " << path << endl;
-		cout<<stbi_failure_reason();
+		cout << stbi_failure_reason();
 		stbi_image_free(data);
 	}
 }
@@ -42,6 +48,7 @@ void Texture::LoadDepthTexture(const float& width, const float& height)
 {
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
+	// depth texture의 경우 float으로 저장한다는 것을 주의!
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 }
 

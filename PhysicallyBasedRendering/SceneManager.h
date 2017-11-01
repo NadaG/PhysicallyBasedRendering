@@ -23,6 +23,7 @@ public:
 	void TerminateObjects();
 
 	vector<SceneObject> sceneObjs;
+	vector<SceneObject> lightObjs;
 	SceneObject cameraObj;
 	SceneObject quadObj;
 

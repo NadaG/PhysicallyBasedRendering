@@ -20,6 +20,17 @@ void Renderer::UseDefaultFrameBufferObject()
 	glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
 }
 
+void Renderer::RenderObjects(ShaderProgram * shader, vector<SceneObject> objs)
+{
+	shader->Use();
+	for (int i = 0; i < objs.size(); i++)
+	{
+		glm::mat4 model = objs[i].GetModelMatrix();
+		shader->SetUniformMatrix4f("model", model);
+		objs[i].Draw();
+	}
+}
+
 // VAO(vertex array object), VBO(vertex buffer object), IBO(index buffer object) 정리
 // 생성
 // glGenVertexArrays(1, &vao);

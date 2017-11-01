@@ -25,6 +25,7 @@ public:
 	Texture(char const* path);
 
 	void LoadTexture(char const* path);
+	void LoadTexture(const GLint& internalformat, const GLsizei& width, const GLsizei& height, const GLenum& format, const GLenum& type);
 	void LoadDepthTexture(const float& width, const float& height);
 	
 	void SetParameters(const GLint& minFilter, const GLint& magFilter, const GLint& wrapS, const GLint& wrapT);

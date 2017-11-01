@@ -49,6 +49,12 @@
     <Filter Include="Source Files\Renderer">
       <UniqueIdentifier>{6ab3a25f-36e5-438c-8ef8-0b3c3b91be90}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\FluidSimulationImporter">
+      <UniqueIdentifier>{bc1ae529-61bc-410a-8127-8de2f557781c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\VertexArrayObject">
+      <UniqueIdentifier>{8e9898b3-7e8b-4d81-8c35-54959ea7382c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -93,6 +99,12 @@
     <ClCompile Include="FluidRenderer.cpp">
       <Filter>Source Files\Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="FluidSimulationImporter.cpp">
+      <Filter>Source Files\FluidSimulationImporter</Filter>
+    </ClCompile>
+    <ClCompile Include="VertexArrayObject.cpp">
+      <Filter>Source Files\VertexArrayObject</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -124,6 +136,15 @@
       <Filter>Shader Files</Filter>
     </None>
     <None Include="ParticleSphere.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Light.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Light.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="DepthBlur.fs">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>
@@ -166,6 +187,12 @@
     </ClInclude>
     <ClInclude Include="FluidRenderer.h">
       <Filter>Source Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="FluidSimulationImporter.h">
+      <Filter>Source Files\FluidSimulationImporter</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexArrayObject.h">
+      <Filter>Source Files\VertexArrayObject</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

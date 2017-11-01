@@ -27,8 +27,6 @@ void FrameBufferObject::BindTexture(GLenum attachment, GLenum textarget, Texture
 		textarget, 
 		texture.GetTexture(), 
 		0);
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
 	attachments.push_back(attachment);
 }
 
@@ -47,4 +45,10 @@ void FrameBufferObject::DrawBuffers()
 		atts[i] = attachments[i];
 	glDrawBuffers(attaSize, atts);
 	delete atts;
+}
+
+const GLenum& FrameBufferObject::CheckStatus()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	return glCheckFramebufferStatus(GL_FRAMEBUFFER);
 }

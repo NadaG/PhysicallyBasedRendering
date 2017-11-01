@@ -154,6 +154,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="FluidRenderer.cpp" />
+    <ClCompile Include="FluidSimulationImporter.cpp" />
     <ClCompile Include="FrameBufferObject.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="PBRRenderer.cpp" />
@@ -166,6 +167,7 @@
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="VertexArrayObject.cpp" />
     <ClCompile Include="WindowManager.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -175,6 +177,9 @@
     <None Include="DebugQuad.vs" />
     <None Include="Depth.fs" />
     <None Include="Depth.vs" />
+    <None Include="DepthBlur.fs" />
+    <None Include="Light.fs" />
+    <None Include="Light.vs" />
     <None Include="packages.config" />
     <None Include="ParticleSphere.fs" />
     <None Include="ParticleSphere.vs" />
@@ -183,6 +188,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FluidRenderer.h" />
+    <ClInclude Include="FluidSimulationImporter.h" />
     <ClInclude Include="FrameBufferObject.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="PBRRenderer.h" />
@@ -194,6 +200,7 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="VertexArrayObject.h" />
     <ClInclude Include="WindowManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

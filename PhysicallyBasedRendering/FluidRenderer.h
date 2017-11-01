@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Renderer.h"
+#include "FluidSimulationImporter.h"
 
 class FluidRenderer : public Renderer
 {
@@ -14,16 +15,24 @@ public:
 
 private:
 	ShaderProgram* depthShader;
+	// TODO 이것은 debug용 나중에 지울것임
 	ShaderProgram* quadShader;
 	ShaderProgram* particleSphereShader;
+	ShaderProgram* depthBlurShader;
 
-	RenderBufferObject depthRBO;
+	Texture colorTex;
 	Texture depthTex;
+	Texture depthBlurTex[2];
+	Texture depthBlurDepthTex[2];
+
 	int depthWidth = 1024;
 	int depthHeight = 1024;
 
 	FrameBufferObject depthFBO;
+	FrameBufferObject depthBlurFBO[2];
 
-	GLuint vbo, vao;
-	GLfloat* v;
+	VertexArrayObject vao;
+
+	GLfloat* fluidVertices;
+	FluidSimulationImporter importer;
 };

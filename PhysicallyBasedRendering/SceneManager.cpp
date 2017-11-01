@@ -30,6 +30,12 @@ void SceneManager::InitializeObjects()
 	}
 	
 	cameraObj.Translate(glm::vec3(0.0f, 0.0f, 15.0f));
+
+	SceneObject lightObj;
+	lightObj.LoadMesh("Obj/Sphere.obj");
+	lightObjs.push_back(lightObj);
+	lightObjs[0].Scale(glm::vec3(0.1f));
+	lightObjs[0].SetColor(glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
 void SceneManager::InitializeObjectsFluid()
@@ -69,6 +75,30 @@ void SceneManager::Update()
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_O))
 	{
 		cameraObj.Translate(glm::vec3(0.0f, -0.2f, 0.0f));
+	}
+
+	if (InputManager::GetInstance()->IsKey(GLFW_KEY_A))
+	{
+		glm::mat4 view = glm::lookAt(
+			cameraObj.GetWorldPosition(),
+			glm::vec3(0.0f, cameraObj.GetPosition().y, 0.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f)
+		);
+
+		glm::vec4 v = glm::inverse(view) * glm::vec4(-0.2f, 0.0f, 0.0f, 0.0f);
+		lightObjs[0].Translate(v);
+	}
+
+	if (InputManager::GetInstance()->IsKey(GLFW_KEY_D))
+	{
+		glm::mat4 view = glm::lookAt(
+			cameraObj.GetWorldPosition(),
+			glm::vec3(0.0f, cameraObj.GetPosition().y, 0.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f)
+		);
+
+		glm::vec4 v = glm::inverse(view) * glm::vec4(0.2f, 0.0f, 0.0f, 0.0f);
+		lightObjs[0].Translate(v);
 	}
 }
 

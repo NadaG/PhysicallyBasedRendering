@@ -28,28 +28,8 @@ public:
 
 protected:
 	void UseDefaultFrameBufferObject();
+	void RenderObjects(ShaderProgram* shader, vector<SceneObject> objs);
 
 	glm::vec4 backgroundColor;
 	GLFWwindow* window;
-
-private:
-	ShaderProgram* basicShader;
-	ShaderProgram* pbrShader;
-	ShaderProgram* depthShader;
-	ShaderProgram* quadShader;
-	ShaderProgram* particleSphereShader;
-
-	RenderBufferObject depthRBO;
-	Texture depthTex;
-	int depthWidth = 1024;
-	int depthHeight = 1024;
-
-	Texture aoTex;
-	Texture albedoTex;
-	Texture heightTex;
-	Texture metallicTex;
-	Texture normalTex;
-	Texture roughnessTex;
-
-	FrameBufferObject depthFBO;
 };

@@ -108,12 +108,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="DebugQuad.fs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="DebugQuad.vs">
-      <Filter>Shader Files</Filter>
-    </None>
     <None Include="Depth.fs">
       <Filter>Shader Files</Filter>
     </None>
@@ -145,6 +139,15 @@
       <Filter>Shader Files</Filter>
     </None>
     <None Include="DepthBlur.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Normal.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Quad.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Quad.vs">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>

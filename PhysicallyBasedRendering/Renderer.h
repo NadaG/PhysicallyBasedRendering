@@ -12,6 +12,8 @@
 
 #include "FrameBufferObject.h"
 
+#include "Debug.h"
+
 using std::vector;
 
 class Renderer

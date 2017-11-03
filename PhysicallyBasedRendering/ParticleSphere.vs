@@ -10,6 +10,6 @@ out vec3 eyeSpacePos;
 
 void main()
 {
-	eyeSpacePos = vec3(view * model * vec4(vertexPos, 1.0));
+	eyeSpacePos = vec3(view * vec4(vertexPos, 1.0));
 	gl_Position = projection * view * vec4(vertexPos, 1.0);
 }

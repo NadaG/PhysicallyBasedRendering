@@ -42,6 +42,11 @@ void SceneManager::InitializeObjectsFluid()
 {
 	quadObj.LoadMesh(QUAD);
 
+	SceneObject trex;
+	trex.LoadMesh("Obj/Trex.obj");
+	sceneObjs.push_back(trex);
+	sceneObjs[0].Scale(glm::vec3(0.01f));
+
 	cameraObj.Translate(glm::vec3(0.0f, 0.0f, 15.0f));
 }
 
@@ -86,7 +91,7 @@ void SceneManager::Update()
 		);
 
 		glm::vec4 v = glm::inverse(view) * glm::vec4(-0.2f, 0.0f, 0.0f, 0.0f);
-		lightObjs[0].Translate(v);
+		sceneObjs[0].Translate(v);
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_D))
@@ -98,7 +103,31 @@ void SceneManager::Update()
 		);
 
 		glm::vec4 v = glm::inverse(view) * glm::vec4(0.2f, 0.0f, 0.0f, 0.0f);
-		lightObjs[0].Translate(v);
+		sceneObjs[0].Translate(v);
+	}
+
+	if (InputManager::GetInstance()->IsKey(GLFW_KEY_W))
+	{
+		glm::mat4 view = glm::lookAt(
+			cameraObj.GetWorldPosition(),
+			glm::vec3(0.0f, cameraObj.GetPosition().y, 0.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f)
+		);
+
+		glm::vec4 v = glm::inverse(view) * glm::vec4(0.0f, 0.2f, 0.0f, 0.0f);
+		sceneObjs[0].Translate(v);
+	}
+
+	if (InputManager::GetInstance()->IsKey(GLFW_KEY_S))
+	{
+		glm::mat4 view = glm::lookAt(
+			cameraObj.GetWorldPosition(),
+			glm::vec3(0.0f, cameraObj.GetPosition().y, 0.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f)
+		);
+
+		glm::vec4 v = glm::inverse(view) * glm::vec4(0.0f, -0.2f, 0.0f, 0.0f);
+		sceneObjs[0].Translate(v);
 	}
 }
 

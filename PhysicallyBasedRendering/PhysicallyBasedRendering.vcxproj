@@ -139,7 +139,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;SOLUTION_DIR=LR"($(SolutionDir))";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>C:\Users\RENDER4\Desktop\Files\OpenGL\GL64;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -173,13 +173,14 @@
   <ItemGroup>
     <None Include="Basic.fs" />
     <None Include="Basic.vs" />
-    <None Include="DebugQuad.fs" />
-    <None Include="DebugQuad.vs" />
+    <None Include="Quad.fs" />
+    <None Include="Quad.vs" />
     <None Include="Depth.fs" />
     <None Include="Depth.vs" />
     <None Include="DepthBlur.fs" />
     <None Include="Light.fs" />
     <None Include="Light.vs" />
+    <None Include="Normal.fs" />
     <None Include="packages.config" />
     <None Include="ParticleSphere.fs" />
     <None Include="ParticleSphere.vs" />

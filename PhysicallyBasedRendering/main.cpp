@@ -14,7 +14,7 @@ int main(int argc, char **argv)
 	WindowManager::GetInstance()->WindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	WindowManager::GetInstance()->WindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	WindowManager::GetInstance()->WindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	GLFWwindow* window = WindowManager::GetInstance()->CreateMyWindow(1280, 720, "OpenGL");
+	GLFWwindow* window = WindowManager::GetInstance()->CreateMyWindow(1024, 1024, "OpenGL");
 
 	InputManager::GetInstance()->Initialize(window);
 

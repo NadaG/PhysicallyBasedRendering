@@ -30,7 +30,11 @@ struct SimulationParam
 	float surfaceThreshold;
 
 	int box2d;
+	int box2d_particle;
+
 	float vAtten;
+
+	float yMaxValue;
 };
 
 SimulationParam sparam;
@@ -45,12 +49,6 @@ struct ObstacleCube
 {
 	float3 pos;
 	int3 size;
-};
-
-struct ObstacleObj
-{
-	float3* vertices;
-	int vertexNum;
 };
 
 struct ObstacleSphere
@@ -73,26 +71,29 @@ void FluidSimulationImporter::Initialize()
 	sparam.boundaryPos.x = 0.0f;
 	sparam.boundaryPos.y = 0.0f;
 	sparam.boundaryPos.z = 0.0f;
-	sparam.boundarySize.x = 10.0f;
-	sparam.boundarySize.y = 10.0f;
-	sparam.boundarySize.z = 10.0f;
+	sparam.boundarySize.x = 20.0f;
+	sparam.boundarySize.y = 20.0f;
+	sparam.boundarySize.z = 20.0f;
 	sparam.objNum = 1;
 	sparam.obsobjNum = 0;
 
-	sparam.viscosity = 0.03f;
-	sparam.restDensity = 1000.0f;
+	sparam.viscosity = 0.002f;
+	sparam.restDensity = 4000.0f;
 	sparam.pressure = 0.1f;
-	sparam.surfacetension = 0.0002f;
+	sparam.surfacetension = 0.002f;
 	sparam.threshold = 1.0f;
 	sparam.surfaceThreshold = 0.005f;
-	sparam.vAtten = 0.2f;
+	sparam.vAtten = 1.0f;
 
 	sparam.box2d = 0;
+	sparam.box2d_particle = 0;
+
+	sparam.yMaxValue = 10000.0f;
 
 	FluidCube* cubes = new FluidCube[sparam.objNum];
-	cubes[0].size.x = 10;
-	cubes[0].size.y = 10;
-	cubes[0].size.z = 10;
+	cubes[0].size.x = 30;
+	cubes[0].size.y = 30;
+	cubes[0].size.z = 30;
 	cubes[0].pos.x = 0.0f;
 	cubes[0].pos.y = 0.0f;
 	cubes[0].pos.z = 0.0f;

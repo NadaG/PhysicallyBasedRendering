@@ -96,7 +96,7 @@ void ShaderProgram::SetUniform1i(string name, int value)
 	glUniform1i(glGetUniformLocation(shaderProgramID, name.c_str()), value);
 }
 
-void ShaderProgram::SetUniformMatrix4f(string name, glm::mat4 mat)
+void ShaderProgram::SetUniformMatrix4f(string name, glm::mat4 &mat)
 {
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgramID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 }

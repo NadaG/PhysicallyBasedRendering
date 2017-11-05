@@ -71,14 +71,14 @@ void FluidSimulationImporter::Initialize()
 	sparam.boundaryPos.x = 0.0f;
 	sparam.boundaryPos.y = 0.0f;
 	sparam.boundaryPos.z = 0.0f;
-	sparam.boundarySize.x = 20.0f;
-	sparam.boundarySize.y = 20.0f;
-	sparam.boundarySize.z = 20.0f;
+	sparam.boundarySize.x = 10.0f;
+	sparam.boundarySize.y = 10.0f;
+	sparam.boundarySize.z = 10.0f;
 	sparam.objNum = 1;
 	sparam.obsobjNum = 0;
 
 	sparam.viscosity = 0.002f;
-	sparam.restDensity = 4000.0f;
+	sparam.restDensity = 2000.0f;
 	sparam.pressure = 0.1f;
 	sparam.surfacetension = 0.002f;
 	sparam.threshold = 1.0f;
@@ -91,9 +91,9 @@ void FluidSimulationImporter::Initialize()
 	sparam.yMaxValue = 10000.0f;
 
 	FluidCube* cubes = new FluidCube[sparam.objNum];
-	cubes[0].size.x = 30;
-	cubes[0].size.y = 30;
-	cubes[0].size.z = 30;
+	cubes[0].size.x = 20;
+	cubes[0].size.y = 20;
+	cubes[0].size.z = 20;
 	cubes[0].pos.x = 0.0f;
 	cubes[0].pos.y = 0.0f;
 	cubes[0].pos.z = 0.0f;

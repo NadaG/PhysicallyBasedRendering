@@ -22,6 +22,10 @@ float LinearizeDepth(float depth)
 void main()
 {
 	float depthValue = texture(depthMap, outUV).r;
+
+	if(depthValue == 0.0f)
+		discard;
+	// TODO 이것 확인할 것
 	float depthColor = LinearizeDepth(depthValue) / far;
 	// 값이 선형적으로 변하는 것처럼 만들기 위한 감마 보정
 	// 자극이 적을 때는 살짝의 자극으로도 자극이 된다는 베버의 법칙에 근거함

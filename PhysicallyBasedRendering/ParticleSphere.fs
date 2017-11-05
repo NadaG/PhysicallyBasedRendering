@@ -2,10 +2,9 @@
 
 in vec3 eyeSpacePos;
 
-//uniform vec3 eyeSpacePos;
-
 layout(location = 0) out vec3 color;
 layout(location = 1) out vec3 depth;
+layout(location = 2) out vec3 thickness;
 
 float radius = 1.0;
 
@@ -30,6 +29,7 @@ void main()
 	{ 
 		discard;
 	}
+
 	n.z = sqrt(1.0 - r2);
 
 	// eye space에서의 각 픽셀의 위치
@@ -38,18 +38,19 @@ void main()
 	
 	//clipSpacePos.z = (clipSpacePos.z - near) / (far - near);
 	//clipSpacePos.z = clipSpacePos.z * 0.5;
-	
 
+	// 비선형적인 0~1값
 	float tmpDepth = clipSpacePos.z / clipSpacePos.w;
 	// 0~1
 	depth = vec3(tmpDepth);
 	color = n;
+	
 	//depth = vec3(clipSpacePos);
 
 	//depth = vec3((clipSpacePos.w+2*n.z) / far);
 	
-//	float diffuse = max(0.0, dot(n, lightPos));
-//	color = vec3(0.3, 0.7, 1.0) * diffuse;
+	//	float diffuse = max(0.0, dot(n, lightPos));
+	//	color = vec3(0.3, 0.7, 1.0) * diffuse;
 
 	//color = worldSpacePos;
 

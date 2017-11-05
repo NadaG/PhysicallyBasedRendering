@@ -141,13 +141,13 @@
     <None Include="DepthBlur.fs">
       <Filter>Shader Files</Filter>
     </None>
-    <None Include="Normal.fs">
-      <Filter>Shader Files</Filter>
-    </None>
     <None Include="Quad.fs">
       <Filter>Shader Files</Filter>
     </None>
     <None Include="Quad.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Surface.fs">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>

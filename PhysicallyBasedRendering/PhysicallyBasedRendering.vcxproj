@@ -180,7 +180,7 @@
     <None Include="DepthBlur.fs" />
     <None Include="Light.fs" />
     <None Include="Light.vs" />
-    <None Include="Normal.fs" />
+    <None Include="Surface.fs" />
     <None Include="packages.config" />
     <None Include="ParticleSphere.fs" />
     <None Include="ParticleSphere.vs" />

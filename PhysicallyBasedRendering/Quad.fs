@@ -5,7 +5,6 @@ in vec2 outUV;
 out vec3 color;
 
 uniform sampler2D depthMap;
-//uniform sampler2D colorMap;
 
 uniform float near;
 uniform float far;
@@ -29,7 +28,5 @@ void main()
 	float depthColor = LinearizeDepth(depthValue) / far;
 	// 값이 선형적으로 변하는 것처럼 만들기 위한 감마 보정
 	// 자극이 적을 때는 살짝의 자극으로도 자극이 된다는 베버의 법칙에 근거함
-	//depthColor = pow(depthColor, 0.5);
 	color = vec3(depthColor);
-	//color = texture(colorMap, outUV).rgb;
 }

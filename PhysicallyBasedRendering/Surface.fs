@@ -2,6 +2,7 @@
 
 uniform sampler2D bluredDepthMap;
 uniform sampler2D worldMap;
+uniform sampler2D thicknessMap;
 
 uniform mat4 projection;
 uniform mat4 view;
@@ -15,11 +16,6 @@ uniform float far;
 in vec2 outUV;
 
 out vec3 color;
-
-//float linearizeDepth(float depth)
-//{
-//	return  ((2.0 * near) / (far + near -  depth * (far - near))); 
-//}
 
 vec3 getEyePos(sampler2D tex, vec2 uv)
 {
@@ -40,9 +36,11 @@ vec3 getEyePos(sampler2D tex, vec2 uv)
 void main()
 {
 	vec3 depth = texture(bluredDepthMap, outUV).rgb;
+	vec3 worldColor = texture(worldMap, outUV).rgb;
+	// depth가 없는 곳에서는 배경 색이 보임
 	if(depth.r == 0.0f)
 	{
-		discard;
+		color = worldColor;
 		return;
 	}
 
@@ -88,6 +86,5 @@ void main()
 	
 	//color = vec3(outUV.x);
 	//color = ambient + diffuse + specular + texture(worldMap, outUV).rgb;
-	color = ambient + diffuse + specular;
-	//color = posEye;
+	color = ambient + diffuse + specular + worldColor;
 }

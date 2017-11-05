@@ -11,7 +11,6 @@ void FluidRenderer::InitializeRender(GLenum cap, glm::vec4 color)
 	quadShader = new ShaderProgram("Quad.vs", "Quad.fs");
 	quadShader->Use();
 	quadShader->SetUniform1i("depthMap", 0);
-	quadShader->SetUniform1i("colorMap", 1);
 
 	particleSphereShader = new ShaderProgram("ParticleSphere.vs", "ParticleSphere.fs");
 	particleSphereShader->Use();
@@ -21,12 +20,12 @@ void FluidRenderer::InitializeRender(GLenum cap, glm::vec4 color)
 	depthBlurShader->Use();
 	depthBlurShader->SetUniform1i("depthMap", 0);
 
-	normalShader = new ShaderProgram("Quad.vs", "Normal.fs");
-	normalShader->Use();
-	normalShader->SetUniform1i("bluredDepthMap", 0);
-	normalShader->SetUniform1i("worldMap", 1);
-	normalShader->SetUniform1f("near", depthNear);
-	normalShader->SetUniform1f("far", depthFar);
+	surfaceShader = new ShaderProgram("Quad.vs", "Surface.fs");
+	surfaceShader->Use();
+	surfaceShader->SetUniform1i("bluredDepthMap", 0);
+	surfaceShader->SetUniform1i("worldMap", 1);
+	surfaceShader->SetUniform1f("near", depthNear);
+	surfaceShader->SetUniform1f("far", depthFar);
 
 	///////////////////
 	tmpDepthRBO.GenRenderBufferObject(depthWidth, depthHeight);
@@ -36,6 +35,9 @@ void FluidRenderer::InitializeRender(GLenum cap, glm::vec4 color)
 
 	depthTex.LoadTexture(GL_RGBA32F, depthWidth, depthHeight, GL_RGBA, GL_FLOAT);
 	depthTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_REPEAT, GL_REPEAT);
+
+	thicknessTex.LoadTexture(GL_RGBA32F, depthWidth, depthHeight, GL_RGBA, GL_FLOAT);
+	thicknessTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_REPEAT, GL_REPEAT);
 
 	///////////////////
 	pbrDepthTex.LoadDepthTexture(depthWidth, depthHeight);
@@ -50,6 +52,7 @@ void FluidRenderer::InitializeRender(GLenum cap, glm::vec4 color)
 	depthFBO.BindRenderBuffer(GL_DEPTH_ATTACHMENT, tmpDepthRBO);
 	depthFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTex);
 	depthFBO.BindTexture(GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, depthTex);
+	depthFBO.BindTexture(GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, thicknessTex);
 	depthFBO.DrawBuffers();
 
 	if (depthFBO.CheckStatus() == GL_FRAMEBUFFER_COMPLETE)
@@ -78,13 +81,13 @@ void FluidRenderer::InitializeRender(GLenum cap, glm::vec4 color)
 	importer.Initialize();
 	fluidVertices = new GLfloat[importer.particleNum * 6];
 
-	vao.GenVAOVBOIBO();
-	vao.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
+	fluidVAO.GenVAOVBOIBO();
+	fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
 	
 	// position
-	vao.VertexAttribPointer(3, 6);
+	fluidVAO.VertexAttribPointer(3, 6);
 	// color
-	vao.VertexAttribPointer(3, 6);
+	fluidVAO.VertexAttribPointer(3, 6);
 }
 
 void FluidRenderer::Render()
@@ -93,12 +96,11 @@ void FluidRenderer::Render()
 
 	importer.Update(fluidVertices);
 
-	vao.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
+	fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
 
 	SceneObject& camera = SceneManager::GetInstance()->cameraObj;
 	SceneObject& quad = SceneManager::GetInstance()->quadObj;
 	vector<SceneObject>& objs = SceneManager::GetInstance()->sceneObjs;
-	vector<SceneObject>& lights = SceneManager::GetInstance()->lightObjs;
 
 	glm::mat4 model = objs[0].GetModelMatrix();
 
@@ -144,12 +146,12 @@ void FluidRenderer::Render()
 	particleSphereShader->SetUniform1f("near", depthNear);
 	particleSphereShader->SetUniform1f("far", depthFar);
 
-	vao.Bind();
+	fluidVAO.Bind();
 	// TODO 고정 픽셀을 사용하기 때문에 멀리서 보면 같은 픽셀이라서 더 조밀해 보이고
 	// 가까이서 보면 더 멀리 떨어져 보임
 	// 이 문제를 해결하기 위해 model matrix를 사용해야 하는가? 아니면 단순히 거리에 따라 point size를 다르게 해야 하는가
 	float dist = glm::distance(camera.GetPosition(), glm::vec3(0.0f, camera.GetPosition().y, 0.0f));
-	glPointSize(800 / dist);
+	glPointSize(15000 / (dist*dist));
 	glDrawArrays(GL_POINTS, 0, importer.particleNum);
 	// 파티클들 depth map 그리기 끝
 
@@ -180,17 +182,15 @@ void FluidRenderer::Render()
 	UseDefaultFrameBufferObject();
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 
-	normalShader->Use();
-	normalShader->SetUniformMatrix4f("projection", projection);
-	normalShader->SetUniformMatrix4f("view", view);
-	normalShader->SetUniformVector3f("eyePos", camera.GetWorldPosition());
-	normalShader->SetUniformVector3f("lightDir", glm::vec3(0.0f, -1.0f, 0.0f));
+	surfaceShader->Use();
+	surfaceShader->SetUniformMatrix4f("projection", projection);
+	surfaceShader->SetUniformMatrix4f("view", view);
+	surfaceShader->SetUniformVector3f("eyePos", camera.GetWorldPosition());
+	surfaceShader->SetUniformVector3f("lightDir", glm::vec3(0.0f, -1.0f, 0.0f));
 
-	//depthBlurTex[1].Bind(GL_TEXTURE0);
-	//colorTex.Bind(GL_TEXTURE0);
 	depthBlurTex[0].Bind(GL_TEXTURE0);
-	//depthTex.Bind(GL_TEXTURE0);
-	//colorTex.Bind(GL_TEXTURE0);
+	pbrColorTex.Bind(GL_TEXTURE1);
+	
 
 	quad.Draw();
 	// quad 그리기 끝

@@ -19,17 +19,22 @@ private:
 	ShaderProgram* quadShader;
 	ShaderProgram* particleSphereShader;
 	ShaderProgram* depthBlurShader;
-	ShaderProgram* normalShader;
+	ShaderProgram* surfaceShader;
 	ShaderProgram* pbrShader;
 
+	// world
 	Texture pbrColorTex;
 	Texture pbrDepthTex;
 
+	// debugøÎ¿” 
 	Texture colorTex;
+
 	Texture depthTex;
-	Texture normalTex;
+	Texture thicknessTex;
+	
 	RenderBufferObject tmpDepthRBO;
 	
+	// blur
 	Texture depthBlurTex[2];
 	Texture depthBlurTmpDepthTex[2];
 
@@ -45,7 +50,7 @@ private:
 	FrameBufferObject depthFBO;
 	FrameBufferObject depthBlurFBO[2];
 
-	VertexArrayObject vao;
+	VertexArrayObject fluidVAO;
 
 	GLfloat* fluidVertices;
 	FluidSimulationImporter importer;

@@ -4,11 +4,9 @@ in vec3 eyeSpacePos;
 
 layout(location = 0) out vec3 color;
 layout(location = 1) out vec3 depth;
-layout(location = 2) out vec3 thickness;
 
 float radius = 1.0;
 
-uniform vec3 lightPos;
 uniform mat4 projection;
 
 uniform float near;
@@ -28,6 +26,7 @@ void main()
 	if(r2 > 1.0)
 	{ 
 		discard;
+		return;
 	}
 
 	n.z = sqrt(1.0 - r2);
@@ -53,6 +52,4 @@ void main()
 	//	color = vec3(0.3, 0.7, 1.0) * diffuse;
 
 	//color = worldSpacePos;
-
-	//thickness = 0.01;
 }

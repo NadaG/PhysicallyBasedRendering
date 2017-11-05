@@ -87,4 +87,6 @@ void main()
 	//color = vec3(outUV.x);
 	//color = ambient + diffuse + specular + texture(worldMap, outUV).rgb;
 	color = ambient + diffuse + specular + worldColor;
+
+	color = texture(thicknessMap, outUV).rgb;
 }

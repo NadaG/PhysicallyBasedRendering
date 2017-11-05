@@ -1,9 +1,8 @@
 #include "FluidRenderer.h"
 
-void FluidRenderer::InitializeRender(GLenum cap, glm::vec4 color)
+void FluidRenderer::InitializeRender()
 {
-	glEnable(cap);
-	glClearColor(color.r, color.g, color.b, color.a);
+	UseDefaultFrameBufferObject();
 
 	pbrShader = new ShaderProgram("PBR.vs", "PBR.fs");
 	pbrShader->Use();
@@ -12,9 +11,11 @@ void FluidRenderer::InitializeRender(GLenum cap, glm::vec4 color)
 	quadShader->Use();
 	quadShader->SetUniform1i("depthMap", 0);
 
-	particleSphereShader = new ShaderProgram("ParticleSphere.vs", "ParticleSphere.fs");
-	particleSphereShader->Use();
-	particleSphereShader->SetUniform1f("far", depthFar);
+	particleDepthShader = new ShaderProgram("ParticleSphere.vs", "ParticleDepth.fs");
+	particleDepthShader->Use();
+
+	particleThicknessShader = new ShaderProgram("ParticleSphere.vs", "particleThickness.fs");
+	particleThicknessShader->Use();
 
 	depthBlurShader = new ShaderProgram("Quad.vs", "DepthBlur.fs");
 	depthBlurShader->Use();
@@ -24,6 +25,7 @@ void FluidRenderer::InitializeRender(GLenum cap, glm::vec4 color)
 	surfaceShader->Use();
 	surfaceShader->SetUniform1i("bluredDepthMap", 0);
 	surfaceShader->SetUniform1i("worldMap", 1);
+	surfaceShader->SetUniform1i("thicknessMap", 2);
 	surfaceShader->SetUniform1f("near", depthNear);
 	surfaceShader->SetUniform1f("far", depthFar);
 
@@ -40,29 +42,29 @@ void FluidRenderer::InitializeRender(GLenum cap, glm::vec4 color)
 	thicknessTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_REPEAT, GL_REPEAT);
 
 	///////////////////
-	pbrDepthTex.LoadDepthTexture(depthWidth, depthHeight);
-	pbrDepthTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_REPEAT, GL_REPEAT);
+	worldDepthTex.LoadDepthTexture(depthWidth, depthHeight);
+	worldDepthTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_REPEAT, GL_REPEAT);
 
-	pbrColorTex.LoadTexture(GL_RGBA32F, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height, GL_RGBA, GL_FLOAT);
-	pbrColorTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+	worldColorTex.LoadTexture(GL_RGBA32F, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height, GL_RGBA, GL_FLOAT);
+	worldColorTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
-	depthFBO.GenFrameBufferObject();
+	depthThicknessFBO.GenFrameBufferObject();
 	// rbo는 texture로 쓰이지 않을 것이라는 것을 뜻함
 	// 이 힌트를 미리 줌으로써 가속화를 할 수 있음
-	depthFBO.BindRenderBuffer(GL_DEPTH_ATTACHMENT, tmpDepthRBO);
-	depthFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTex);
-	depthFBO.BindTexture(GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, depthTex);
-	depthFBO.BindTexture(GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, thicknessTex);
-	depthFBO.DrawBuffers();
+	depthThicknessFBO.BindRenderBuffer(GL_DEPTH_ATTACHMENT, tmpDepthRBO);
+	depthThicknessFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTex);
+	depthThicknessFBO.BindTexture(GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, depthTex);
+	depthThicknessFBO.BindTexture(GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, thicknessTex);
+	depthThicknessFBO.DrawBuffers();
 
-	if (depthFBO.CheckStatus() == GL_FRAMEBUFFER_COMPLETE)
+	if (depthThicknessFBO.CheckStatus() == GL_FRAMEBUFFER_COMPLETE)
 	{
 		cout << "depth FBO complete" << endl;
 	}
 
 	pbrFBO.GenFrameBufferObject();
-	pbrFBO.BindTexture(GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, pbrDepthTex);
-	pbrFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pbrColorTex);
+	pbrFBO.BindTexture(GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, worldDepthTex);
+	pbrFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, worldColorTex);
 	pbrFBO.DrawBuffers();
 
 	for (int i = 0; i < 2; i++)
@@ -136,24 +138,29 @@ void FluidRenderer::Render()
 	// 파티클들 depth map 그리기
 	glViewport(0, 0, depthWidth, depthHeight);
 
-	depthFBO.Use();
-	particleSphereShader->Use();
+	depthThicknessFBO.Use();
+	particleDepthShader->Use();
 
-	particleSphereShader->SetUniformMatrix4f("view", view);
-	particleSphereShader->SetUniformMatrix4f("projection", projection);
-	particleSphereShader->SetUniformVector3f("lightPos", glm::vec3(10.0f, 0.0f, 0.0f));
+	particleDepthShader->SetUniformMatrix4f("view", view);
+	particleDepthShader->SetUniformMatrix4f("projection", projection);
 
-	particleSphereShader->SetUniform1f("near", depthNear);
-	particleSphereShader->SetUniform1f("far", depthFar);
-
-	fluidVAO.Bind();
-	// TODO 고정 픽셀을 사용하기 때문에 멀리서 보면 같은 픽셀이라서 더 조밀해 보이고
-	// 가까이서 보면 더 멀리 떨어져 보임
-	// 이 문제를 해결하기 위해 model matrix를 사용해야 하는가? 아니면 단순히 거리에 따라 point size를 다르게 해야 하는가
-	float dist = glm::distance(camera.GetPosition(), glm::vec3(0.0f, camera.GetPosition().y, 0.0f));
-	glPointSize(15000 / (dist*dist));
-	glDrawArrays(GL_POINTS, 0, importer.particleNum);
+	particleDepthShader->SetUniform1f("near", depthNear);
+	particleDepthShader->SetUniform1f("far", depthFar);
+	DrawFluids(glm::distance(camera.GetPosition(), glm::vec3(0.0f, camera.GetPosition().y, 0.0f)));
 	// 파티클들 depth map 그리기 끝
+	
+	// 파티클들 thickness map 그리기
+	glEnable(GL_BLEND);
+	glDisable(GL_DEPTH_TEST);
+	glBlendFunc(GL_ONE, GL_ONE);
+	particleThicknessShader->Use();
+	particleThicknessShader->SetUniformMatrix4f("view", view);
+	particleThicknessShader->SetUniformMatrix4f("projection", projection);
+	
+	DrawFluids(glm::distance(camera.GetPosition(), glm::vec3(0.0f, camera.GetPosition().y, 0.0f)));
+	glDisable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
+	// 파티클들 thickness map 그리기 끝
 
 	// blur 그리기
 	depthBlurFBO[0].Use();
@@ -167,7 +174,7 @@ void FluidRenderer::Render()
 
 	quad.Draw();
 
-	for (int i = 0; i < blurNum; i++)
+	for (int i = 0; i < blurNum * 2; i++)
 	{
 		depthBlurFBO[(i + 1) % 2].Use();
 
@@ -189,8 +196,8 @@ void FluidRenderer::Render()
 	surfaceShader->SetUniformVector3f("lightDir", glm::vec3(0.0f, -1.0f, 0.0f));
 
 	depthBlurTex[0].Bind(GL_TEXTURE0);
-	pbrColorTex.Bind(GL_TEXTURE1);
-	
+	worldColorTex.Bind(GL_TEXTURE1);
+	thicknessTex.Bind(GL_TEXTURE2);
 
 	quad.Draw();
 	// quad 그리기 끝
@@ -203,8 +210,15 @@ void FluidRenderer::TerminateRender()
 	quadShader->Delete();
 	delete quadShader;
 
-	particleSphereShader->Delete();
-	delete particleSphereShader;
+	particleDepthShader->Delete();
+	delete particleDepthShader;
 
 	SceneManager::GetInstance()->TerminateObjects();
+}
+
+void FluidRenderer::DrawFluids(const float& dist)
+{
+	fluidVAO.Bind();
+	glPointSize(15000 / (dist*dist));
+	glDrawArrays(GL_POINTS, 0, importer.particleNum);
 }

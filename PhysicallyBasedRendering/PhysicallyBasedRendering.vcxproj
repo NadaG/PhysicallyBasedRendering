@@ -173,6 +173,7 @@
   <ItemGroup>
     <None Include="Basic.fs" />
     <None Include="Basic.vs" />
+    <None Include="ParticleThickness.fs" />
     <None Include="Quad.fs" />
     <None Include="Quad.vs" />
     <None Include="Depth.fs" />
@@ -182,7 +183,7 @@
     <None Include="Light.vs" />
     <None Include="Surface.fs" />
     <None Include="packages.config" />
-    <None Include="ParticleSphere.fs" />
+    <None Include="ParticleDepth.fs" />
     <None Include="ParticleSphere.vs" />
     <None Include="PBR.fs" />
     <None Include="PBR.vs" />

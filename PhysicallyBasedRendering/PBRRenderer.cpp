@@ -1,11 +1,7 @@
 #include "PBRRenderer.h"
 
-void PBRRenderer::InitializeRender(GLenum cap, glm::vec4 color)
+void PBRRenderer::InitializeRender()
 {
-	glEnable(cap);
-	backgroundColor = color;
-	glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
-
 	pbrShader = new ShaderProgram("PBR.vs", "PBR.fs");
 	pbrShader->Use();
 	pbrShader->SetUniform1i("aoMap", 0);

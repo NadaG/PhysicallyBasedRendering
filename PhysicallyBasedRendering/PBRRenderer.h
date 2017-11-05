@@ -8,7 +8,7 @@ public:
 	PBRRenderer() {};
 	virtual ~PBRRenderer() {};
 
-	void InitializeRender(GLenum cap, glm::vec4 color);
+	void InitializeRender();
 	void Render();
 	void TerminateRender();
 

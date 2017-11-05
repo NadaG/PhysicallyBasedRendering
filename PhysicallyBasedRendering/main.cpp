@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 	else
 		SceneManager::GetInstance()->InitializeObjectsFluid();
 	
-	renderer->InitializeRender(GL_DEPTH_TEST, glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+	renderer->InitializeRender();
 
 	do
 	{

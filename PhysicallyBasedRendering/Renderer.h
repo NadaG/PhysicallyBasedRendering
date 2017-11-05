@@ -24,7 +24,7 @@ public:
 
 	void Initialize(GLFWwindow* window);
 	
-	virtual void InitializeRender(GLenum cap, glm::vec4 color) = 0;
+	virtual void InitializeRender() = 0;
 	virtual void Render() = 0;
 	virtual void TerminateRender() = 0;
 

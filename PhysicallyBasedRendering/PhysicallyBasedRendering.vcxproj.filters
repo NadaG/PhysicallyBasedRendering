@@ -126,12 +126,6 @@
     <None Include="Basic.fs">
       <Filter>Shader Files</Filter>
     </None>
-    <None Include="ParticleSphere.vs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="ParticleSphere.fs">
-      <Filter>Shader Files</Filter>
-    </None>
     <None Include="Light.fs">
       <Filter>Shader Files</Filter>
     </None>
@@ -148,6 +142,15 @@
       <Filter>Shader Files</Filter>
     </None>
     <None Include="Surface.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="ParticleDepth.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="ParticleThickness.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="ParticleSphere.vs">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>

@@ -42,12 +42,17 @@ void SceneManager::InitializeObjectsFluid()
 {
 	quadObj.LoadMesh(QUAD);
 
-	SceneObject trex;
-	trex.LoadMesh("Obj/Trex.obj");
-	sceneObjs.push_back(trex);
-	sceneObjs[0].Scale(glm::vec3(0.01f));
+	//SceneObject trex;
+	//trex.LoadMesh("Obj/Trex.obj");
+	//sceneObjs.push_back(trex);
+	//sceneObjs[0].Scale(glm::vec3(0.01f));
 
-	cameraObj.Translate(glm::vec3(0.0f, 0.0f, 15.0f));
+	sceneObjs.push_back(quadObj);
+	sceneObjs[0].Scale(glm::vec3(15.0));
+	sceneObjs[0].Rotate(glm::vec3(1.0f, 0.0f, 0.0f), glm::radians(90.0f));
+	sceneObjs[0].Translate(glm::vec3(0.0f, -5.0f, 0.0f));
+
+	cameraObj.Translate(glm::vec3(0.0f, 0.0f, 20.0f));
 }
 
 void SceneManager::Update()

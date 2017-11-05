@@ -11,8 +11,15 @@ uniform mat4 projection;
 
 uniform float near;
 uniform float far;
-// pixel 에서의 크기와 
-// view space에서의 크기를 구분할 것
+
+// 여기서 depth 값은 depth map에 있는 0~1 사이의 값이다.
+// 주의할 점은 여기 있는 값은 z-near와 z-far에 따라 선형적으로 계산된 값이 아니다.
+// 선형적으로 값을 저장하지 않은 이유는 거리가 가까울 곳에 큰 비중을 두어 가까운 곳에서 더욱 정밀하게 계산하기 위해서이다. 
+float LinearizeDepth(float depth)
+{
+	float z = depth * 2.0 - 1.0;
+	return (2.0 * near * far) / (far + near - z * (far - near));
+}
 
 void main()
 {
@@ -35,21 +42,8 @@ void main()
 	vec4 pixelPos = vec4(eyeSpacePos + n * radius, 1.0);
 	vec4 clipSpacePos = projection * pixelPos;
 	
-	//clipSpacePos.z = (clipSpacePos.z - near) / (far - near);
-	//clipSpacePos.z = clipSpacePos.z * 0.5;
-
-	// 비선형적인 0~1값
 	float tmpDepth = clipSpacePos.z / clipSpacePos.w;
-	// 0~1
-	depth = vec3(tmpDepth);
+	depth = vec3(LinearizeDepth(tmpDepth) / far);
+	// normal 값을 확인하기 위해
 	color = n;
-	
-	//depth = vec3(clipSpacePos);
-
-	//depth = vec3((clipSpacePos.w+2*n.z) / far);
-	
-	//	float diffuse = max(0.0, dot(n, lightPos));
-	//	color = vec3(0.3, 0.7, 1.0) * diffuse;
-
-	//color = worldSpacePos;
 }

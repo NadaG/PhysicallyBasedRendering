@@ -6,10 +6,7 @@ void FluidRenderer::InitializeRender()
 
 	pbrShader = new ShaderProgram("PBR.vs", "PBR.fs");
 	pbrShader->Use();
-
-	quadShader = new ShaderProgram("Quad.vs", "Quad.fs");
-	quadShader->Use();
-	quadShader->SetUniform1i("depthMap", 0);
+	pbrShader->SetUniform1i("albedoMap", 1);
 
 	particleDepthShader = new ShaderProgram("ParticleSphere.vs", "ParticleDepth.fs");
 	particleDepthShader->Use();
@@ -17,17 +14,21 @@ void FluidRenderer::InitializeRender()
 	particleThicknessShader = new ShaderProgram("ParticleSphere.vs", "particleThickness.fs");
 	particleThicknessShader->Use();
 
-	depthBlurShader = new ShaderProgram("Quad.vs", "DepthBlur.fs");
-	depthBlurShader->Use();
-	depthBlurShader->SetUniform1i("depthMap", 0);
+	blurShader = new ShaderProgram("Quad.vs", "Blur.fs");
+	blurShader->Use();
+	blurShader->SetUniform1i("map", 0);
 
 	surfaceShader = new ShaderProgram("Quad.vs", "Surface.fs");
 	surfaceShader->Use();
-	surfaceShader->SetUniform1i("bluredDepthMap", 0);
-	surfaceShader->SetUniform1i("worldMap", 1);
+	surfaceShader->SetUniform1i("worldMap", 0);
+	surfaceShader->SetUniform1i("bluredDepthMap", 1);
 	surfaceShader->SetUniform1i("thicknessMap", 2);
 	surfaceShader->SetUniform1f("near", depthNear);
 	surfaceShader->SetUniform1f("far", depthFar);
+
+	///////////////////
+	floorAlbedoTex.LoadTexture("Texture/Floor/albedo.png");
+	floorAlbedoTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER);
 
 	///////////////////
 	tmpDepthRBO.GenRenderBufferObject(depthWidth, depthHeight);
@@ -72,12 +73,16 @@ void FluidRenderer::InitializeRender()
 		depthBlurTex[i].LoadTexture(GL_RGBA32F, depthWidth, depthHeight, GL_RGBA, GL_FLOAT);
 		depthBlurTex[i].SetParameters(GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
-		depthBlurTmpDepthTex[i].LoadDepthTexture(depthWidth, depthHeight);
-		depthBlurTmpDepthTex[i].SetParameters(GL_NEAREST, GL_NEAREST, GL_REPEAT, GL_REPEAT);
-
 		depthBlurFBO[i].GenFrameBufferObject();
-		depthBlurFBO[i].BindTexture(GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthBlurTmpDepthTex[i]);
+		depthBlurFBO[i].BindDefaultDepthBuffer();
 		depthBlurFBO[i].BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, depthBlurTex[i]);
+
+		thicknessBlurTex[i].LoadTexture(GL_RGBA32F, depthWidth, depthHeight, GL_RGBA, GL_FLOAT);
+		thicknessBlurTex[i].SetParameters(GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+		thicknessBlurFBO[i].GenFrameBufferObject();
+		thicknessBlurFBO[i].BindDefaultDepthBuffer();
+		thicknessBlurFBO[i].BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, thicknessBlurTex[i]);
 	}
 
 	importer.Initialize();
@@ -104,8 +109,6 @@ void FluidRenderer::Render()
 	SceneObject& quad = SceneManager::GetInstance()->quadObj;
 	vector<SceneObject>& objs = SceneManager::GetInstance()->sceneObjs;
 
-	glm::mat4 model = objs[0].GetModelMatrix();
-
 	glm::mat4 projection = glm::perspective(
 		glm::radians(45.0f),
 		WindowManager::GetInstance()->width / WindowManager::GetInstance()->height,
@@ -118,22 +121,27 @@ void FluidRenderer::Render()
 		glm::vec3(0.0f, 1.0f, 0.0f)
 	);
 
-	// 공룡 그리기
+	// world 그리기
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 
 	pbrFBO.Use();
 	pbrShader->Use();
-
-	pbrShader->SetUniformMatrix4f("model", model);
+	
 	pbrShader->SetUniformMatrix4f("view", view);
 	pbrShader->SetUniformMatrix4f("projection", projection);
-	
+
 	pbrShader->SetUniformVector3f("lightPos", glm::vec3(10.0f, 0.0f, 0.0f));
 	pbrShader->SetUniformVector3f("eyePos", camera.GetWorldPosition());
 	pbrShader->SetUniformVector3f("lightColor", glm::vec3(0.8f, 0.8f, 0.8f));
+	floorAlbedoTex.Bind(GL_TEXTURE1);
 
-	objs[0].Draw();
-	// 공룡 그리기 끝
+	for (int i = 0; i < objs.size(); i++)
+	{
+		glm::mat4 model = objs[i].GetModelMatrix();
+		pbrShader->SetUniformMatrix4f("model", model);
+		objs[i].Draw();
+	}
+	// world 그리기 끝
 
 	// 파티클들 depth map 그리기
 	glViewport(0, 0, depthWidth, depthHeight);
@@ -153,6 +161,7 @@ void FluidRenderer::Render()
 	glEnable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 	glBlendFunc(GL_ONE, GL_ONE);
+
 	particleThicknessShader->Use();
 	particleThicknessShader->SetUniformMatrix4f("view", view);
 	particleThicknessShader->SetUniformMatrix4f("projection", projection);
@@ -162,28 +171,26 @@ void FluidRenderer::Render()
 	glEnable(GL_DEPTH_TEST);
 	// 파티클들 thickness map 그리기 끝
 
-	// blur 그리기
-	depthBlurFBO[0].Use();
+	// depth, thickness blur 시작
+	blurShader->Use();
 	glViewport(0, 0, depthWidth, depthHeight);
-	
-	quadShader->Use();
-	quadShader->SetUniform1f("near", depthNear);
-	quadShader->SetUniform1f("far", depthFar);
-
-	depthTex.Bind(GL_TEXTURE0);
-
-	quad.Draw();
-
 	for (int i = 0; i < blurNum * 2; i++)
 	{
 		depthBlurFBO[(i + 1) % 2].Use();
+		if (i)
+			depthBlurTex[i % 2].Bind(GL_TEXTURE0);
+		else
+			depthTex.Bind(GL_TEXTURE0);
+		quad.Draw();
 
-		depthBlurShader->Use();
-		depthBlurTex[i % 2].Bind(GL_TEXTURE0);
-		
+		thicknessBlurFBO[(i + 1) % 2].Use();
+		if (i)
+			thicknessBlurTex[i % 2].Bind(GL_TEXTURE0);
+		else
+			thicknessTex.Bind(GL_TEXTURE0);
 		quad.Draw();
 	}
-	// blur 끝
+	// depth, thickness blur 끝
 
 	// quad 그리기
 	UseDefaultFrameBufferObject();
@@ -195,9 +202,9 @@ void FluidRenderer::Render()
 	surfaceShader->SetUniformVector3f("eyePos", camera.GetWorldPosition());
 	surfaceShader->SetUniformVector3f("lightDir", glm::vec3(0.0f, -1.0f, 0.0f));
 
-	depthBlurTex[0].Bind(GL_TEXTURE0);
-	worldColorTex.Bind(GL_TEXTURE1);
-	thicknessTex.Bind(GL_TEXTURE2);
+	worldColorTex.Bind(GL_TEXTURE0);
+	depthBlurTex[0].Bind(GL_TEXTURE1);
+	thicknessBlurTex[0].Bind(GL_TEXTURE2);
 
 	quad.Draw();
 	// quad 그리기 끝
@@ -207,11 +214,20 @@ void FluidRenderer::Render()
 
 void FluidRenderer::TerminateRender()
 {
-	quadShader->Delete();
-	delete quadShader;
-
 	particleDepthShader->Delete();
 	delete particleDepthShader;
+
+	particleThicknessShader->Delete();
+	delete particleThicknessShader;
+
+	blurShader->Delete();
+	delete blurShader;
+
+	surfaceShader->Delete();
+	delete surfaceShader;
+
+	pbrShader->Delete();
+	delete pbrShader;
 
 	SceneManager::GetInstance()->TerminateObjects();
 }

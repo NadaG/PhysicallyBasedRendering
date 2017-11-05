@@ -17,5 +17,5 @@ uniform sampler2D roughnessMap;
 void main()
 {
 	color = outColor;
-	//color = texture(normalMap, outUV).rgb;
+	color = texture(albedoMap, outUV).rgb;
 }

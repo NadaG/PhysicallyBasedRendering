@@ -31,6 +31,16 @@ void FrameBufferObject::BindTexture(GLenum attachment, GLenum textarget, Texture
 	attachments.push_back(attachment);
 }
 
+void FrameBufferObject::BindDefaultDepthBuffer()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	glFramebufferRenderbuffer(
+		GL_FRAMEBUFFER,
+		GL_DEPTH_ATTACHMENT,
+		GL_RENDERBUFFER,
+		-1);
+}
+
 void FrameBufferObject::Use()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);

@@ -178,7 +178,7 @@
     <None Include="Quad.vs" />
     <None Include="Depth.fs" />
     <None Include="Depth.vs" />
-    <None Include="DepthBlur.fs" />
+    <None Include="Blur.fs" />
     <None Include="Light.fs" />
     <None Include="Light.vs" />
     <None Include="Surface.fs" />

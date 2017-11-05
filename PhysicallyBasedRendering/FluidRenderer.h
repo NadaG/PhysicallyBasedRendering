@@ -14,15 +14,16 @@ public:
 	void TerminateRender(); 
 
 private:
-	ShaderProgram* depthShader;
-	// TODO 이것은 debug용 나중에 지울것임
-	ShaderProgram* quadShader;
 	ShaderProgram* particleDepthShader;
 	ShaderProgram* particleThicknessShader;
 
-	ShaderProgram* depthBlurShader;
+	ShaderProgram* blurShader;
+
 	ShaderProgram* surfaceShader;
 	ShaderProgram* pbrShader;
+
+	// floor
+	Texture floorAlbedoTex;
 
 	// world
 	Texture worldColorTex;
@@ -38,15 +39,15 @@ private:
 	
 	// blur
 	Texture depthBlurTex[2];
-	Texture depthBlurTmpDepthTex[2];
-
+	Texture thicknessBlurTex[2];
+	
 	const int depthWidth = 1024;
 	const int depthHeight = 1024;
 
 	const int blurNum = 2;
 
 	const float depthNear = 1.0f;
-	const float depthFar = 40.0;
+	const float depthFar = 60.0;
 
 	FrameBufferObject pbrFBO;
 	FrameBufferObject depthThicknessFBO;

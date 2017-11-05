@@ -1,7 +1,7 @@
 #version 330 core
 
-uniform sampler2D bluredDepthMap;
 uniform sampler2D worldMap;
+uniform sampler2D bluredDepthMap;
 uniform sampler2D thicknessMap;
 
 uniform mat4 projection;
@@ -37,7 +37,7 @@ void main()
 {
 	vec3 depth = texture(bluredDepthMap, outUV).rgb;
 	vec3 worldColor = texture(worldMap, outUV).rgb;
-	// depth가 없는 곳에서는 배경 색이 보임
+	// depth가 없는 곳에서는, 즉 물이 없는 곳에서는 배경 색이 보임
 	if(depth.r == 0.0f)
 	{
 		color = worldColor;
@@ -45,12 +45,6 @@ void main()
 	}
 
 	vec3 posEye = getEyePos(bluredDepthMap, outUV);
-
-	color = posEye;
-
-	color = depth;
-	//return;
-
 	vec2 texelSize = 1.0 / textureSize(bluredDepthMap, 0);
 
 	vec3 ddx = getEyePos(bluredDepthMap, outUV + vec2(texelSize.x, 0)) - posEye;
@@ -68,25 +62,19 @@ void main()
 	}
 
 	vec3 n = normalize(cross(ddx, ddy));
-
-	// eye space normal
-	color = n * 0.5 + 0.5;
-
 	vec3 lightPosNorm = normalize(vec3(view*vec4(lightDir, 0.0)));
-	//vec3 lightPosNorm = normalize(lightPos);
 	
 	vec3 reflectDir = normalize(reflect(-lightPosNorm, n));
 
-	//vec3 eyeDir = normalize(vec3(view*vec4(normalize(texture(worldMap, outUV).rgb - eyePos), 0.0)));
 	vec3 eyeDir = normalize(posEye - vec3(view*vec4(eyePos, 1.0)));
 
-	vec3 ambient = vec3(0.1, 0.1, 0.3);
-	vec3 diffuse = vec3(0.0, 0.0, 0.8) * max(dot(-lightPosNorm, n), 0);
+	vec3 ambient = vec3(0.1, 0.1, 0.2);
+	vec3 diffuse = vec3(0.1, 0.1, 0.6) * max(dot(-lightPosNorm, n), 0);
 	vec3 specular = vec3(0.8, 0.8, 0.8) * pow(max(dot(reflectDir, eyeDir), 0), 16);
 	
-	//color = vec3(outUV.x);
-	//color = ambient + diffuse + specular + texture(worldMap, outUV).rgb;
-	color = ambient + diffuse + specular + worldColor;
-
-	color = texture(thicknessMap, outUV).rgb;
+	float thickness = texture(thicknessMap, outUV).r;
+	// 각 채널마다 thickness에 k를 곱해도 됨
+	float I = 1 / (exp(5 * thickness));
+	
+	color = ambient + diffuse + specular + worldColor * I;
 }

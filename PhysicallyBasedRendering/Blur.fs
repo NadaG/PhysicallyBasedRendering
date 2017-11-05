@@ -1,6 +1,6 @@
 #version 330 core
 
-uniform sampler2D depthMap;
+uniform sampler2D map;
 
 in vec2 outUV;
 
@@ -8,7 +8,7 @@ out vec3 color;
 
 void main()
 {
-	float depth = texture(depthMap, outUV).r;
+	float depth = texture(map, outUV).r;
 
 	if(depth == 0.0)
 		discard;
@@ -16,22 +16,17 @@ void main()
 	float sum = 0;
 	float wsum = 0;
 
-	// TODO filter 수정하기
-	// scale 값은 어떻게 정하는게 좋지?
 	// 거리에 대해서 스케일링
 	float blurScale = 0.01;
 	// 값 차이에 대해서 스케일링
 	float blurDepthFalloff = 0.01;
 
-	// TODO x, y에 대해서 하는 것이 맞나?
-	for(float x = -10; x <= 10; x++)
+	for(float x = -8; x <= 8; x++)
 	{
-		for(float y = -10; y <= 10; y++)
+		for(float y = -8; y <= 8; y++)
 		{
-			// (sampler, lod)
-			// textureSize width, height는??
-			vec2 blurDir = vec2(x, y) / textureSize(depthMap, 0);
-			float sample = texture(depthMap, outUV + blurDir).x;
+			vec2 blurDir = vec2(x, y) / textureSize(map, 0);
+			float sample = texture(map, outUV + blurDir).x;
 
 			if(sample == 0.0f)
 				continue;

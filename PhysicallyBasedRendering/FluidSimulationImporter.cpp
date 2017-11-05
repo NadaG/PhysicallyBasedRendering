@@ -91,9 +91,9 @@ void FluidSimulationImporter::Initialize()
 	sparam.yMaxValue = 10000.0f;
 
 	FluidCube* cubes = new FluidCube[sparam.objNum];
-	cubes[0].size.x = 20;
+	cubes[0].size.x = 15;
 	cubes[0].size.y = 20;
-	cubes[0].size.z = 20;
+	cubes[0].size.z = 15;
 	cubes[0].pos.x = 0.0f;
 	cubes[0].pos.y = 0.0f;
 	cubes[0].pos.z = 0.0f;

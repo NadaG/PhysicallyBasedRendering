@@ -19,6 +19,8 @@ public:
 	void BindRenderBuffer(GLenum attachment, RenderBufferObject rbo);
 	void BindTexture(GLenum attachment, GLenum texture, Texture textureobj);
 
+	void BindDefaultDepthBuffer();
+
 	void Use();
 
 	void DrawBuffers();

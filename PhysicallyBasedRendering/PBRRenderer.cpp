@@ -35,9 +35,13 @@ void PBRRenderer::InitializeRender()
 
 void PBRRenderer::Render()
 {
-	vector<SceneObject>& objs = SceneManager::GetInstance()->sceneObjs;
-	SceneObject& camera = SceneManager::GetInstance()->cameraObj;
-	vector<SceneObject>& lights = SceneManager::GetInstance()->lightObjs;
+	glEnable(GL_DEPTH_TEST);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	vector<SceneObject>& objs = sceneManager->sceneObjs;
+	SceneObject& camera = sceneManager->cameraObj;
+	vector<SceneObject>& lights = sceneManager->lightObjs;
 
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 	UseDefaultFrameBufferObject();
@@ -85,5 +89,5 @@ void PBRRenderer::TerminateRender()
 	pbrShader->Delete();
 	delete pbrShader;
 
-	SceneManager::GetInstance()->TerminateObjects();
+	sceneManager->TerminateObjects();
 }

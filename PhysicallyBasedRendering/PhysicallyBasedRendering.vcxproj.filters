@@ -105,6 +105,12 @@
     <ClCompile Include="VertexArrayObject.cpp">
       <Filter>Source Files\VertexArrayObject</Filter>
     </ClCompile>
+    <ClCompile Include="PBRSceneManager.cpp">
+      <Filter>Source Files\SceneManager</Filter>
+    </ClCompile>
+    <ClCompile Include="FluidSceneManager.cpp">
+      <Filter>Source Files\SceneManager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -199,6 +205,12 @@
     </ClInclude>
     <ClInclude Include="VertexArrayObject.h">
       <Filter>Source Files\VertexArrayObject</Filter>
+    </ClInclude>
+    <ClInclude Include="FluidSceneManager.h">
+      <Filter>Source Files\SceneManager</Filter>
+    </ClInclude>
+    <ClInclude Include="PBRSceneManager.h">
+      <Filter>Source Files\SceneManager</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

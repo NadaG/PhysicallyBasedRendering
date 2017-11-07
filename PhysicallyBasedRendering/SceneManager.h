@@ -14,23 +14,21 @@ using std::vector;
 class SceneManager
 {
 public:
-	static SceneManager* GetInstance();
 
-	void InitializeObjects();
-	void InitializeObjectsFluid();
+	SceneManager() {};
+	~SceneManager() {};
 
-	void Update();
+	virtual void InitializeObjects() = 0;
+
+	virtual void Update() = 0;
 	void TerminateObjects();
 
+	// TODO Observer pattern을 이용해서 이 매니저를 참조하고 있는 객체들을 업데이트하기??
 	vector<SceneObject> sceneObjs;
 	vector<SceneObject> lightObjs;
 	SceneObject cameraObj;
 	SceneObject quadObj;
 
 private:
-	SceneManager() {};
-	~SceneManager() {};
 
-	static SceneManager* instance;
-	GLFWwindow* window;
 };

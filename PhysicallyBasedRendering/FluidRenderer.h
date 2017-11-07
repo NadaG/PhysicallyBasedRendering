@@ -2,11 +2,14 @@
 
 #include "Renderer.h"
 #include "FluidSimulationImporter.h"
+#include "FluidSceneManager.h"
 
 class FluidRenderer : public Renderer
 {
 public:
-	FluidRenderer() {};
+	FluidRenderer(SceneManager* sceneManager)
+		:Renderer(sceneManager)
+	{}
 	virtual ~FluidRenderer() {};
 
 	void InitializeRender();

@@ -5,7 +5,7 @@
 
 using namespace std;
 
-bool isPBRScene = false;
+bool isPBRScene = true;
 
 int main(int argc, char **argv)
 {
@@ -18,23 +18,39 @@ int main(int argc, char **argv)
 
 	InputManager::GetInstance()->Initialize(window);
 
-	Renderer* renderer;
-	if (isPBRScene)
-		renderer = new PBRRenderer();
-	else
-		renderer = new FluidRenderer();
-	renderer->Initialize(window);
+	glewExperimental = true;
 
+	if (glewInit() != GLEW_OK)
+	{
+		fprintf(stderr, "Failed to initialize GLEW\n");
+		return 0;
+	}
+
+	// TODO render를 선택하는 것이 아닌 scenemanager를 선택하도록
+	// 선택된 scenemanager가 render를 셋팅하도록
+	Renderer* renderer;
+	SceneManager* sceneManager;
+
+	// Factory 패턴을 이용하면 생성을 분리할 수 있을 거 같음
 	if (isPBRScene)
-		SceneManager::GetInstance()->InitializeObjects();
+	{
+		sceneManager = new PBRSceneManager();
+		renderer = new PBRRenderer(sceneManager);
+	}
 	else
-		SceneManager::GetInstance()->InitializeObjectsFluid();
-	
+	{
+		sceneManager = new FluidSceneManager();
+		renderer = new FluidRenderer(sceneManager);
+	}
+
+	sceneManager->InitializeObjects();
+
+	renderer->Initialize(window);
 	renderer->InitializeRender();
 
 	do
 	{
-		SceneManager::GetInstance()->Update();
+		sceneManager->Update();
 		renderer->Render();
 		InputManager::GetInstance()->PollEvents();
 	}

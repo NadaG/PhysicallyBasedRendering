@@ -19,7 +19,10 @@ using std::vector;
 class Renderer
 {
 public:
-	Renderer() {};
+	Renderer(SceneManager* sceneManager) 
+	{
+		this->sceneManager = sceneManager;
+	}
 	virtual ~Renderer() {};
 
 	void Initialize(GLFWwindow* window);
@@ -34,4 +37,6 @@ protected:
 
 	glm::vec4 backgroundColor;
 	GLFWwindow* window;
+
+	SceneManager* sceneManager;
 };

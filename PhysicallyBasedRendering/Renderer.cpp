@@ -3,20 +3,12 @@
 void Renderer::Initialize(GLFWwindow* window)
 {
 	this->window = window;
-
-	glewExperimental = true;
-
-	if (glewInit() != GLEW_OK)
-	{
-		fprintf(stderr, "Failed to initialize GLEW\n");
-		return;
-	}
 }
 
 void Renderer::UseDefaultFrameBufferObject()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glClearColor(0.8, 0.8, 0.8, 0.0);
+	glClearColor(1.0, 1.0, 1.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 

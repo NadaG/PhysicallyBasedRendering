@@ -1,11 +1,14 @@
 #pragma once
 
 #include "Renderer.h"
+#include "PBRSceneManager.h"
 
 class PBRRenderer : public Renderer
 {
 public:
-	PBRRenderer() {};
+	PBRRenderer(SceneManager* sceneManager)
+		:Renderer(sceneManager)
+	{}
 	virtual ~PBRRenderer() {};
 
 	void InitializeRender();

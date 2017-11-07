@@ -105,9 +105,9 @@ void FluidRenderer::Render()
 
 	fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
 
-	SceneObject& camera = SceneManager::GetInstance()->cameraObj;
-	SceneObject& quad = SceneManager::GetInstance()->quadObj;
-	vector<SceneObject>& objs = SceneManager::GetInstance()->sceneObjs;
+	SceneObject& camera = sceneManager->cameraObj;
+	SceneObject& quad = sceneManager->quadObj;
+	vector<SceneObject>& objs = sceneManager->sceneObjs;
 
 	glm::mat4 projection = glm::perspective(
 		glm::radians(45.0f),
@@ -229,7 +229,7 @@ void FluidRenderer::TerminateRender()
 	pbrShader->Delete();
 	delete pbrShader;
 
-	SceneManager::GetInstance()->TerminateObjects();
+	sceneManager->TerminateObjects();
 }
 
 void FluidRenderer::DrawFluids(const float& dist)

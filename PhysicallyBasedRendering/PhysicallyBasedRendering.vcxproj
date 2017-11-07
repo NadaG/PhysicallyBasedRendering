@@ -153,11 +153,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="FluidSceneManager.cpp" />
     <ClCompile Include="FluidRenderer.cpp" />
     <ClCompile Include="FluidSimulationImporter.cpp" />
     <ClCompile Include="FrameBufferObject.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="PBRRenderer.cpp" />
+    <ClCompile Include="PBRSceneManager.cpp" />
     <ClCompile Include="RenderBufferObject.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="SceneObject.cpp" />
@@ -190,10 +192,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FluidRenderer.h" />
+    <ClInclude Include="FluidSceneManager.h" />
     <ClInclude Include="FluidSimulationImporter.h" />
     <ClInclude Include="FrameBufferObject.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="PBRRenderer.h" />
+    <ClInclude Include="PBRSceneManager.h" />
     <ClInclude Include="RenderBufferObject.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="SceneObject.h" />

@@ -18,16 +18,18 @@ int main(int argc, char **argv)
 
 	InputManager::GetInstance()->Initialize(window);
 
+	// TO Refacto 어딘가로 버려버릴것
 	glewExperimental = true;
-
 	if (glewInit() != GLEW_OK)
 	{
 		fprintf(stderr, "Failed to initialize GLEW\n");
 		return 0;
 	}
 
-	// TODO render를 선택하는 것이 아닌 scenemanager를 선택하도록
-	// 선택된 scenemanager가 render를 셋팅하도록
+	// TO Refacto 객체의 생성 삭제 씬 이동 등만 관리하는 SceneManager를 만들고
+	// SubJect로 둔다. InputManager와 RenderManager는 observer로 SceneManager의 objects 객체들을 레퍼런스로
+	// 가지고 있으며 SceneManager에서 변경될 때 마다 update된다.
+	// 객체들의 이동은 InputManager에서 관리하며 InputManager는 추상화로 바꿔야한다.
 	Renderer* renderer;
 	SceneManager* sceneManager;
 

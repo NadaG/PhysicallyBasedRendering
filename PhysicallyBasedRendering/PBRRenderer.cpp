@@ -63,9 +63,14 @@ void PBRRenderer::Render()
 	pbrShader->SetUniformMatrix4f("view", view);
 	pbrShader->SetUniformMatrix4f("projection", projection);
 
-	pbrShader->SetUniformVector3f("lightPos", glm::vec3(10.0f, 0.0f, 0.0f));
-	pbrShader->SetUniformVector3f("lightColor", glm::vec3(0.5f));
+	for (int i = 0; i < 4; i++)
+	{
+		pbrShader->SetUniformVector3f("lightPositions[" + std::to_string(i) + "]", glm::vec3(0.0f, 0.0f, 10.0f));
+		pbrShader->SetUniformVector3f("lightColors[" + std::to_string(i) + "]", glm::vec3(1.0f, 0.0f, 0.0f));
+	}
+
 	pbrShader->SetUniformVector3f("eyePos", camera.GetWorldPosition());
+
 
 	aoTex.Bind(GL_TEXTURE0);
 	albedoTex.Bind(GL_TEXTURE1);

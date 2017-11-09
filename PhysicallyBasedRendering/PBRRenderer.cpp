@@ -60,17 +60,16 @@ void PBRRenderer::Render()
 		glm::vec3(0.0f, 1.0f, 0.0f)
 	);
 
+	pbrShader->Use();
 	pbrShader->SetUniformMatrix4f("view", view);
 	pbrShader->SetUniformMatrix4f("projection", projection);
-
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < lights.size(); i++)
 	{
-		pbrShader->SetUniformVector3f("lightPositions[" + std::to_string(i) + "]", glm::vec3(0.0f, 0.0f, 10.0f));
-		pbrShader->SetUniformVector3f("lightColors[" + std::to_string(i) + "]", glm::vec3(1.0f, 0.0f, 0.0f));
+		pbrShader->SetUniformVector3f("lightPositions[" + std::to_string(i) + "]", lights[i].GetPosition());
+		pbrShader->SetUniformVector3f("lightColors[" + std::to_string(i) + "]", lights[i].GetColor());
 	}
 
 	pbrShader->SetUniformVector3f("eyePos", camera.GetWorldPosition());
-
 
 	aoTex.Bind(GL_TEXTURE0);
 	albedoTex.Bind(GL_TEXTURE1);
@@ -93,6 +92,9 @@ void PBRRenderer::TerminateRender()
 {
 	pbrShader->Delete();
 	delete pbrShader;
+
+	lightShader->Delete();
+	delete lightShader;
 
 	sceneManager->TerminateObjects();
 }

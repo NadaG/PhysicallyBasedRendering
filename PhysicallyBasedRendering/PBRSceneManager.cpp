@@ -2,6 +2,8 @@
 
 void PBRSceneManager::InitializeObjects()
 {
+	selectedLightId = 0;
+
 	float yDist = 3.0f;
 	float xDist = 5.0f;
 	for (int i = 0; i < 3; i++)
@@ -20,9 +22,22 @@ void PBRSceneManager::InitializeObjects()
 
 	SceneObject lightObj;
 	lightObj.LoadMesh("Obj/Sphere.obj");
+
 	lightObjs.push_back(lightObj);
 	lightObjs[0].Scale(glm::vec3(0.1f));
-	lightObjs[0].SetColor(glm::vec3(0.0f, 1.0f, 0.0f));
+	lightObjs[0].SetColor(glm::vec3(1.0f, 0.0f, 0.0f));
+
+	lightObjs.push_back(lightObj);
+	lightObjs[1].Scale(glm::vec3(0.1f));
+	lightObjs[1].SetColor(glm::vec3(0.0f, 1.0f, 0.0f));
+
+	lightObjs.push_back(lightObj);
+	lightObjs[2].Scale(glm::vec3(0.1f));
+	lightObjs[2].SetColor(glm::vec3(0.0f, 0.0f, 1.0f));
+
+	lightObjs.push_back(lightObj);
+	lightObjs[3].Scale(glm::vec3(0.1f));
+	lightObjs[3].SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
 }
 
 void PBRSceneManager::Update()
@@ -39,22 +54,22 @@ void PBRSceneManager::Update()
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_I))
 	{
-		cameraObj.Translate(glm::vec3(0.0f, 0.0f, -0.2f));
+		cameraObj.Translate(glm::vec3(0.0f, 0.0f, -cameraMoveSpeed));
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_K))
 	{
-		cameraObj.Translate(glm::vec3(0.0f, 0.0f, 0.2f));
+		cameraObj.Translate(glm::vec3(0.0f, 0.0f, cameraMoveSpeed));
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_U))
 	{
-		cameraObj.Translate(glm::vec3(0.0f, 0.2f, 0.0f));
+		cameraObj.Translate(glm::vec3(0.0f, cameraMoveSpeed, 0.0f));
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_O))
 	{
-		cameraObj.Translate(glm::vec3(0.0f, -0.2f, 0.0f));
+		cameraObj.Translate(glm::vec3(0.0f, -cameraMoveSpeed, 0.0f));
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_A))
@@ -65,8 +80,8 @@ void PBRSceneManager::Update()
 			glm::vec3(0.0f, 1.0f, 0.0f)
 		);
 
-		glm::vec4 v = glm::inverse(view) * glm::vec4(-0.2f, 0.0f, 0.0f, 0.0f);
-		sceneObjs[0].Translate(v);
+		glm::vec4 v = glm::inverse(view) * glm::vec4(-lightMoveSpeed, 0.0f, 0.0f, 0.0f);
+		lightObjs[selectedLightId].Translate(v);
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_D))
@@ -77,8 +92,8 @@ void PBRSceneManager::Update()
 			glm::vec3(0.0f, 1.0f, 0.0f)
 		);
 
-		glm::vec4 v = glm::inverse(view) * glm::vec4(0.2f, 0.0f, 0.0f, 0.0f);
-		sceneObjs[0].Translate(v);
+		glm::vec4 v = glm::inverse(view) * glm::vec4(lightMoveSpeed, 0.0f, 0.0f, 0.0f);
+		lightObjs[selectedLightId].Translate(v);
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_W))
@@ -89,8 +104,8 @@ void PBRSceneManager::Update()
 			glm::vec3(0.0f, 1.0f, 0.0f)
 		);
 
-		glm::vec4 v = glm::inverse(view) * glm::vec4(0.0f, 0.2f, 0.0f, 0.0f);
-		sceneObjs[0].Translate(v);
+		glm::vec4 v = glm::inverse(view) * glm::vec4(0.0f, 0.0f, -lightMoveSpeed, 0.0f);
+		lightObjs[selectedLightId].Translate(v);
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_S))
@@ -101,7 +116,37 @@ void PBRSceneManager::Update()
 			glm::vec3(0.0f, 1.0f, 0.0f)
 		);
 
-		glm::vec4 v = glm::inverse(view) * glm::vec4(0.0f, -0.2f, 0.0f, 0.0f);
-		sceneObjs[0].Translate(v);
+		glm::vec4 v = glm::inverse(view) * glm::vec4(0.0f, 0.0f, lightMoveSpeed, 0.0f);
+		lightObjs[selectedLightId].Translate(v);
+	}
+
+	if (InputManager::GetInstance()->IsKey(GLFW_KEY_Q))
+	{
+		glm::mat4 view = glm::lookAt(
+			cameraObj.GetWorldPosition(),
+			glm::vec3(0.0f, cameraObj.GetPosition().y, 0.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f)
+		);
+
+		glm::vec4 v = glm::inverse(view) * glm::vec4(0.0f, lightMoveSpeed, 0.0f, 0.0f);
+		lightObjs[selectedLightId].Translate(v);
+	}
+
+	if (InputManager::GetInstance()->IsKey(GLFW_KEY_E))
+	{
+		glm::mat4 view = glm::lookAt(
+			cameraObj.GetWorldPosition(),
+			glm::vec3(0.0f, cameraObj.GetPosition().y, 0.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f)
+		);
+
+		glm::vec4 v = glm::inverse(view) * glm::vec4(0.0f, -lightMoveSpeed, 0.0f, 0.0f);
+		lightObjs[selectedLightId].Translate(v);
+	}
+
+	for (int i = 0; i < lightObjs.size(); i++)
+	{
+		if (InputManager::GetInstance()->IsKey(GLFW_KEY_1 + i))
+			selectedLightId = i;
 	}
 }

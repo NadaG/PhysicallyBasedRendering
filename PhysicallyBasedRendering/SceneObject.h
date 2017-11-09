@@ -33,10 +33,15 @@ public:
 	void LoadMesh(const char* s);
 	void LoadMesh(const MeshType& meshType);
 
-	void SetColor(const glm::vec3 color) { mesh.SetAllColor(color); }
+	// TO Refacto 이거는 바꿔야함
+	void SetColor(const glm::vec3& color);
+	const glm::vec3& GetColor() { return this->color; }
 
 	void TerminateMesh();
 private:
+
+	// To Refacto 이거는 확실히 바꿔야 함
+	glm::vec3 color;
 	
 	glm::vec3 scaleVector;
 	glm::mat4 rotationMatrix;

@@ -42,6 +42,46 @@ vec3 getNormalFromMap()
 	return normalize(TBN * tangentNormal);
 }
 
+float DistributionGGX(vec3 N, vec3 H, float roughness)
+{
+	float a = roughness * roughness;
+	float a2 = a * a;
+	float NdotH = max(dot(N, H), 0.0);
+	float NdotH2 = NdotH * NdotH;
+
+	float nominator = a2;
+	float denominator = (NdotH2 * (a2 - 1.0) + 1.0);
+	denominator = PI * denominator * denominator;
+
+	return nominator / denominator;
+}
+
+float GeometrySchlickGGX(float NdotV, float roughness)
+{
+	float r = (roughness + 1.0);
+	float k = (r * r) / 8.0;
+
+	float nominator = NdotV;
+	float denominator = NdotV * (1.0 - k) + k;
+
+	return nominator / denominator;
+}
+
+// geometry shadowing 빛이 어떤 표면으로 갈 때 다른 표면에 막혀 가지 못하는 경우
+// geometry obstruction 빛이 어떤 표면에서 눈으로 갈 때 다른 표면에 막혀 가지 못하는 경우
+// 이 두가지를 모두 고려해야 해서 ggx1 * ggx2
+// 0.8이 안 막히고, 0.8이 안 막힌다면 결국은 0.8 * 0.8
+float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
+{
+	float NdotV = max(dot(N, V), 0.0);
+	float NdotL = max(dot(N, L), 0.0);
+
+	float ggx2 = GeometrySchlickGGX(NdotV, roughness);
+	float ggx1 = GeometrySchlickGGX(NdotL, roughness);
+
+	return ggx1 * ggx2;
+}
+
 // cosTheta가 작을 수록 큰 값이 들어간다
 // 즉 90도에 가까운 곳에서 볼 수록 빛이 쎄진다는 것이다.
 // 90이면 그냥 1임
@@ -84,9 +124,17 @@ void main()
 		// light color가 attenuate 된 후 radiance로 들어간다
 		vec3 radiance = lightColors[i] * attenuation;
 
+		// 아직 fresnel 현상이 생기는 이유에 대해서는 정확히 모르지만
+		// 빛이 90도로 꺾여 들어올 때 재질의 속성? 빛의 색이 많이 들어오는 현상이다.
+		// half vector와 view vector의 각도로 계산된다.
 		vec3 F = fresnelSchlick(max(dot(H,V), 0.0), F0);
+		// 단순히 N과 H, roughness에 대한 함수이다.
+		// 얼마나 많은 H(micro) 가 N(macro)에 가깝냐에 따라 값이 커진다.
+		float NDF = DistributionGGX(N, H, roughness);
+		// 
+		float G = GeometrySmith(N, V, L, roughness);
 
-		vec3 nominator = F;
+		vec3 nominator = F * NDF * G;
 
 		float denominator = 4 * max(dot(N,V), 0.0) * max(dot(N,L), 0.0) + 0.001;
 		vec3 specular = nominator / denominator;

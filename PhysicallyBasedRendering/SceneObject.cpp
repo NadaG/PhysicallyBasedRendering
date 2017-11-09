@@ -19,6 +19,12 @@ void SceneObject::LoadMesh(const MeshType& meshType)
 	mesh.GenerateAndSetVAO();
 }
 
+void SceneObject::SetColor(const glm::vec3& color)
+{
+	this->color = color;
+	mesh.SetAllColor(color);
+}
+
 void SceneObject::TerminateMesh()
 {
 	mesh.Terminate();

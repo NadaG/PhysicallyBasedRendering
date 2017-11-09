@@ -1,10 +1,10 @@
 #version 330 core
 
-in vec3 outColor;
+uniform vec3 uniColor;
 
 out vec3 color;
 
 void main()
 {
-	color = outColor;
+	color = uniColor;
 }

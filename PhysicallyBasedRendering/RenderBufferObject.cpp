@@ -2,7 +2,7 @@
 
 RenderBufferObject::RenderBufferObject(const unsigned int & width, const unsigned int & height)
 {
-	GenRenderBufferObject(width, height, GL_DEPTH_COMPONENT);
+	GenRenderBufferObject(GL_DEPTH_COMPONENT, width, height);
 }
 
 void RenderBufferObject::GenRenderBufferObject(const GLenum& internalformat, const unsigned int & width, const unsigned int & height)

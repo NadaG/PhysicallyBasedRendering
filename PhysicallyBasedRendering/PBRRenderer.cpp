@@ -15,6 +15,7 @@ void PBRRenderer::InitializeRender()
 	lightShader->Use();
 
 	equirectangularToCubemapShader = new ShaderProgram("Cubemap.vs", "equirectangularToCubemap.fs");
+	equirectangularToCubemapShader->Use();
 
 	aoTex.LoadTexture("Texture/Rock/ao.png");
 	aoTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
@@ -34,7 +35,7 @@ void PBRRenderer::InitializeRender()
 	roughnessTex.LoadTexture("Texture/RustedIron/roughness.png");
 	roughnessTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
-	captureRBO.GenRenderBufferObject(512, 512, GL_DEPTH_COMPONENT24);
+	captureRBO.GenRenderBufferObject(GL_DEPTH_COMPONENT24, 512, 512);
 
 	captureFBO.GenFrameBufferObject();
 	captureFBO.BindRenderBuffer(GL_DEPTH_ATTACHMENT, captureRBO);

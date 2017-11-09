@@ -186,8 +186,6 @@ void Mesh::LoadMesh(MeshType meshType)
 				tmpVertices[i * floatNum + 7]);
 			indices[i] = i;
 		}
-
-
 		break;
 	}
 	default:

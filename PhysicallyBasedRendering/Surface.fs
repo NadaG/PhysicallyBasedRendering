@@ -77,4 +77,6 @@ void main()
 	float I = 1 / (exp(5 * thickness));
 	
 	color = ambient + diffuse + specular + worldColor * I;
+
+	color = depth;
 }

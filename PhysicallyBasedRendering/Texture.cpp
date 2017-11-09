@@ -8,7 +8,7 @@ Texture::Texture(char const * path)
 void Texture::LoadTexture(const GLint& internalformat, const GLsizei& width, const GLsizei& height, const GLenum& format, const GLenum& type)
 {
 	glGenTextures(1, &texture);
-	Bind(this->texture); 
+	Bind(this->texture);
 	glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height, 0, format, type, 0);
 }
 

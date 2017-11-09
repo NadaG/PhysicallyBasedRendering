@@ -31,7 +31,7 @@ void FluidRenderer::InitializeRender()
 	floorAlbedoTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER);
 
 	///////////////////
-	tmpDepthRBO.GenRenderBufferObject(depthWidth, depthHeight, GL_DEPTH_COMPONENT);
+	tmpDepthRBO.GenRenderBufferObject(GL_DEPTH_COMPONENT, depthWidth, depthHeight);
 
 	colorTex.LoadTexture(GL_RGBA32F, depthWidth, depthHeight, GL_RGBA, GL_FLOAT);
 	colorTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
@@ -151,12 +151,31 @@ void FluidRenderer::Render()
 
 	particleDepthShader->SetUniformMatrix4f("view", view);
 	particleDepthShader->SetUniformMatrix4f("projection", projection);
-
 	particleDepthShader->SetUniform1f("near", depthNear);
 	particleDepthShader->SetUniform1f("far", depthFar);
+
 	DrawFluids(glm::distance(camera.GetPosition(), glm::vec3(0.0f, camera.GetPosition().y, 0.0f)));
 	// 파티클들 depth map 그리기 끝
-	
+
+	// rgba format이기 때문에 곱하기 4를 해야 함
+	/*GLfloat* a = new GLfloat[4 * 1024 * 1024];
+	glBindTexture(GL_TEXTURE_2D, depthTex.GetTexture());
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, a);
+	for (int i = 0; i < 1024; i++)
+	{
+		for (int j = 0; j < 1024; j++)
+		{
+			if (i >= 500 && i <= 550 && j >= 500 && j <= 550)
+			{
+				cout << a[(i * 1024 + j) * 4 + 0] << " ";
+				cout << a[(i * 1024 + j) * 4 + 1] << " ";
+				cout << a[(i * 1024 + j) * 4 + 2] << " ";
+				cout << a[(i * 1024 + j) * 4 + 3] << " ";
+				cout << endl;
+			}
+		}
+	}*/
+
 	// 파티클들 thickness map 그리기
 	glEnable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);

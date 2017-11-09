@@ -13,7 +13,7 @@ enum Scene
 
 int main(int argc, char **argv)
 {
-	Scene scene = PBR_SCENE;
+	Scene scene = FLUID_SCENE;
 
 	WindowManager::GetInstance()->WindowHint(GLFW_SAMPLES, 4);
 	WindowManager::GetInstance()->WindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);

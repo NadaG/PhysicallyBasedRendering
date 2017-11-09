@@ -100,7 +100,7 @@ void main()
 
 	float metallic = texture(metallicMap, outUV).r;
 	float roughness = texture(roughnessMap, outUV).r;
-	float ao = texture(aoMap, outUV).r;
+	//float ao = texture(aoMap, outUV).r;
 
 	vec3 N = getNormalFromMap();
 	vec3 V = normalize(eyePos - worldPos);
@@ -139,7 +139,9 @@ void main()
 		float denominator = 4 * max(dot(N,V), 0.0) * max(dot(N,L), 0.0) + 0.001;
 		vec3 specular = nominator / denominator;
 
-		// specular된 양은 F 함수가 리턴한 값과 같음
+		// specular된 양은 F 함수가 리턴한 값과 같음 왜지?? 아직 잘 모르겠음
+		// F 함수만을 이용해서 kS와 kD를 구함
+		// kD는 color와 곱해지고 PI로 나누어짐
 		vec3 kS = F;
 		vec3 kD = vec3(1.0) - kS;
 
@@ -150,7 +152,7 @@ void main()
 		Lo += (kD * albedo / PI + specular) * radiance * NdotL;
 	}
 
-	vec3 ambient = vec3(0.03) * albedo * ao;
+	vec3 ambient = vec3(0.03) * albedo;
 
 	color = ambient + Lo;
 

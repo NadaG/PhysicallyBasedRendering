@@ -159,6 +159,12 @@
     <None Include="Blur.fs">
       <Filter>Shader Files</Filter>
     </None>
+    <None Include="Cubemap.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="equirectangularToCubemap.fs">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ShaderProgram.h">

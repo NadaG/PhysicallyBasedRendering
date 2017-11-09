@@ -16,8 +16,14 @@ public:
 	void TerminateRender();
 
 private:
+	FrameBufferObject captureFBO;
+	RenderBufferObject captureRBO;
+
 	ShaderProgram* pbrShader;
 	ShaderProgram* lightShader;
+	ShaderProgram* equirectangularToCubemapShader;
+	ShaderProgram* irradianceShader;
+	ShaderProgram* backgroundShader;
 
 	Texture aoTex;
 	Texture albedoTex;

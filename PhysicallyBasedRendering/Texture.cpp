@@ -8,8 +8,27 @@ Texture::Texture(char const * path)
 void Texture::LoadTexture(const GLint& internalformat, const GLsizei& width, const GLsizei& height, const GLenum& format, const GLenum& type)
 {
 	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	Bind(this->texture); 
 	glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height, 0, format, type, 0);
+}
+
+void Texture::LoadTextureCubeMap(const GLint& internalformat, const GLsizei& width, const GLsizei& height, const GLenum& format, const GLenum& type)
+{
+	glGenTextures(1, &texture);
+	Bind(this->texture);
+	for (int i = 0; i < 6; i++)
+	{
+		glTexImage2D(
+			GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+			0,
+			internalformat,
+			width,
+			height,
+			0,
+			format,
+			type,
+			nullptr);
+	}
 }
 
 void Texture::LoadTexture(char const * path)
@@ -61,8 +80,23 @@ void Texture::SetParameters(const GLint& minFilter, const GLint& magFilter, cons
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT);
 }
 
+void Texture::SetParameters(const GLint & minFilter, const GLint & magFilter, const GLint & wrapS, const GLint & wrapT, const GLint & wrapR)
+{
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapS);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, wrapR);
+}
+
 void Texture::Bind(GLenum texture)
 {
 	glActiveTexture(texture);
 	glBindTexture(GL_TEXTURE_2D, this->texture);
+}
+
+void Texture::BindCubemap(GLenum texture)
+{
+	glActiveTexture(texture);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
 }

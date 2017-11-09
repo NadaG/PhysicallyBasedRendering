@@ -5,10 +5,16 @@
 
 using namespace std;
 
-bool isPBRScene = true;
+enum Scene
+{
+	PBR_SCENE = 0,
+	FLUID_SCENE = 1
+};
 
 int main(int argc, char **argv)
 {
+	Scene scene = PBR_SCENE;
+
 	WindowManager::GetInstance()->WindowHint(GLFW_SAMPLES, 4);
 	WindowManager::GetInstance()->WindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	WindowManager::GetInstance()->WindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -34,15 +40,23 @@ int main(int argc, char **argv)
 	SceneManager* sceneManager;
 
 	// Factory 패턴을 이용하면 생성을 분리할 수 있을 거 같음
-	if (isPBRScene)
+	switch (scene)
 	{
-		sceneManager = new PBRSceneManager();
-		renderer = new PBRRenderer(sceneManager);
-	}
-	else
-	{
-		sceneManager = new FluidSceneManager();
-		renderer = new FluidRenderer(sceneManager);
+		case PBR_SCENE:
+		{
+			sceneManager = new PBRSceneManager();
+			renderer = new PBRRenderer(sceneManager);
+			break;
+		}
+		case FLUID_SCENE:
+		{	sceneManager = new FluidSceneManager();
+			renderer = new FluidRenderer(sceneManager);
+			break;
+		}
+		default:
+			sceneManager = new PBRSceneManager();
+			renderer = new PBRRenderer(sceneManager);
+			break;
 	}
 
 	sceneManager->InitializeObjects();

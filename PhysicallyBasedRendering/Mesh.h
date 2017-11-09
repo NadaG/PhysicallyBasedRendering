@@ -15,7 +15,8 @@ using std::vector;
 
 enum MeshType
 {
-	QUAD = 0
+	QUAD = 0,
+	CUBE = 1
 };
 
 struct Vertex

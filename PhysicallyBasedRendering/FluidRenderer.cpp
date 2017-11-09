@@ -31,7 +31,7 @@ void FluidRenderer::InitializeRender()
 	floorAlbedoTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER);
 
 	///////////////////
-	tmpDepthRBO.GenRenderBufferObject(depthWidth, depthHeight);
+	tmpDepthRBO.GenRenderBufferObject(depthWidth, depthHeight, GL_DEPTH_COMPONENT);
 
 	colorTex.LoadTexture(GL_RGBA32F, depthWidth, depthHeight, GL_RGBA, GL_FLOAT);
 	colorTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);

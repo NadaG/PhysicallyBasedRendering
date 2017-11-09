@@ -26,12 +26,18 @@ public:
 
 	void LoadTexture(char const* path);
 	void LoadTexture(const GLint& internalformat, const GLsizei& width, const GLsizei& height, const GLenum& format, const GLenum& type);
+	void LoadTextureCubeMap(const GLint& internalformat, const GLsizei& width, const GLsizei& height, const GLenum& format, const GLenum& type);
+	
 	void LoadDepthTexture(const float& width, const float& height);
 	
 	void SetParameters(const GLint& minFilter, const GLint& magFilter, const GLint& wrapS, const GLint& wrapT);
+	void SetParameters(const GLint& minFilter, const GLint& magFilter, const GLint& wrapS, const GLint& wrapT, const GLint& wrapR);
+	
 	const GLuint& GetTexture() const { return texture; }
 
 	void Bind(GLenum texture);
+	// TO refacto
+	void BindCubemap(GLenum texture);
 
 private:
 	GLuint texture;

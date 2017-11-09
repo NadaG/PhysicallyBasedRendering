@@ -14,23 +14,30 @@ void PBRRenderer::InitializeRender()
 	lightShader = new ShaderProgram("light.vs", "light.fs");
 	lightShader->Use();
 
+	equirectangularToCubemapShader = new ShaderProgram("Cubemap.vs", "equirectangularToCubemap.fs");
+
 	aoTex.LoadTexture("Texture/Rock/ao.png");
 	aoTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
-	albedoTex.LoadTexture("Texture/Rock/albedo.png");
+	albedoTex.LoadTexture("Texture/RustedIron/albedo.png");
 	albedoTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
 	heightTex.LoadTexture("Texture/Rock/height.jpg");
 	heightTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
-	metallicTex.LoadTexture("Texture/Rock/metallic.png");
+	metallicTex.LoadTexture("Texture/RustedIron/metallic.png");
 	metallicTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
-	normalTex.LoadTexture("Texture/Rock/normal.png");
+	normalTex.LoadTexture("Texture/RustedIron/normal.png");
 	normalTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
-	roughnessTex.LoadTexture("Texture/Rock/roughness.png");
+	roughnessTex.LoadTexture("Texture/RustedIron/roughness.png");
 	roughnessTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
+
+	captureRBO.GenRenderBufferObject(512, 512, GL_DEPTH_COMPONENT24);
+
+	captureFBO.GenFrameBufferObject();
+	captureFBO.BindRenderBuffer(GL_DEPTH_ATTACHMENT, captureRBO);
 }
 
 void PBRRenderer::Render()

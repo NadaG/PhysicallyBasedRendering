@@ -177,6 +177,7 @@
     <None Include="Basic.vs" />
     <None Include="Cubemap.vs" />
     <None Include="equirectangularToCubemap.fs" />
+    <None Include="LTR.fs" />
     <None Include="ParticleThickness.fs" />
     <None Include="Quad.fs" />
     <None Include="Quad.vs" />

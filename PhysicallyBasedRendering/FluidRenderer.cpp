@@ -2,8 +2,6 @@
 
 void FluidRenderer::InitializeRender()
 {
-	UseDefaultFrameBufferObject();
-
 	pbrShader = new ShaderProgram("PBR.vs", "PBR.fs");
 	pbrShader->Use();
 	pbrShader->SetUniform1i("albedoMap", 1);
@@ -208,8 +206,6 @@ void FluidRenderer::Render()
 
 	quad.Draw();
 	// quad 그리기 끝
-
-	glfwSwapBuffers(window);
 }
 
 void FluidRenderer::TerminateRender()

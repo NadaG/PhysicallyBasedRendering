@@ -1,3 +1,4 @@
+#version 330 core
 // bind roughness   {label:"Roughness", default:0.25, min:0.01, max:1, step:0.001}
 // bind dcolor      {label:"Diffuse Color",  r:1.0, g:1.0, b:1.0}
 // bind scolor      {label:"Specular Color", r:1.0, g:1.0, b:1.0}
@@ -12,9 +13,11 @@ uniform float roughness;
 uniform vec3  dcolor;
 uniform vec3  scolor;
 
+uniform vec3 rectCenter;
 uniform float intensity;
 uniform float width;
 uniform float height;
+uniform float rotx;
 uniform float roty;
 uniform float rotz;
 
@@ -25,13 +28,16 @@ uniform sampler2D ltc_mag;
 
 uniform mat4  view;
 uniform vec2  resolution;
-uniform int   sampleCount;
 
 const float LUT_SIZE  = 64.0;
 const float LUT_SCALE = (LUT_SIZE - 1.0)/LUT_SIZE;
 const float LUT_BIAS  = 0.5/LUT_SIZE;
 
 const float pi = 3.14159265;
+
+in vec2 outUV;
+
+out vec3 color;
 
 // Tracing and intersection
 ///////////////////////////
@@ -103,6 +109,23 @@ Ray GenerateCameraRay()
     return ray;
 }
 
+Ray GenerateCameraRay2()
+{
+	vec3 cameraOrigin = (-view*vec4(vec3(0.0), 1)).xyz;
+
+	Ray ray;
+	// -1 ~ 1
+	vec2 xy = (outUV - vec2(0.5)) * 2.0;
+	ray.dir = normalize(vec3(xy, -1.0));
+
+	ray.origin = vec3(0.0);
+
+	ray.origin = cameraOrigin;
+    ray.dir    = (view*vec4(ray.dir, 0)).xyz;
+
+	return ray;
+}
+
 vec3 mul(mat3 m, vec3 v)
 {
     return m * v;
@@ -111,6 +134,12 @@ vec3 mul(mat3 m, vec3 v)
 mat3 mul(mat3 m1, mat3 m2)
 {
     return m1 * m2;
+}
+
+vec3 rotation_x(vec3 v, float a)
+{
+	vec3 r;
+    return r;
 }
 
 vec3 rotation_y(vec3 v, float a)
@@ -152,7 +181,10 @@ mat3 transpose(mat3 v)
 float IntegrateEdge(vec3 v1, vec3 v2)
 {
     float cosTheta = dot(v1, v2);
-    float theta = acos(cosTheta);    
+	// theta 값은 0~1일거야 아마
+    float theta = acos(cosTheta);
+	// a x b 를 할 경우 a와 b에 수직인 n|a||b|sin(세타) 인데 a와 b 모두 normalized 벡터일 경우
+	// 결국 a x b의 크기는 sin(세타)이다. 여기서는 그 식을 쓴것이다.
     float res = cross(v1, v2).z * ((theta > 0.001) ? theta/sin(theta) : 1.0);
 
     return res;
@@ -307,7 +339,8 @@ vec3 LTC_Evaluate(
     sum += IntegrateEdge(L[0], L[1]);
     sum += IntegrateEdge(L[1], L[2]);
     sum += IntegrateEdge(L[2], L[3]);
-    if (n >= 4)
+    // 여기서는 L[4]가 L[0]임
+	if (n >= 4)
         sum += IntegrateEdge(L[3], L[4]);
     if (n == 5)
         sum += IntegrateEdge(L[4], L[0]);
@@ -327,9 +360,9 @@ void InitRect(out Rect rect)
     rect.dirx = rotation_yz(vec3(1, 0, 0), roty*2.0*pi, rotz*2.0*pi);
     rect.diry = rotation_yz(vec3(0, 1, 0), roty*2.0*pi, rotz*2.0*pi);
 
-    rect.center = vec3(0, 6, 32);
-    rect.halfx  = 0.5*width;
-    rect.halfy  = 0.5*height;
+    rect.center = rectCenter;
+    rect.halfx  = 0.5 * width;
+    rect.halfy  = 0.5 * height;
 
     vec3 rectNormal = cross(rect.dirx, rect.diry);
 	// ax + by + cz + d = 0
@@ -382,11 +415,11 @@ void main()
 	// gamma correction
     vec3 dcol = ToLinear(dcolor);
     vec3 scol = ToLinear(scolor);
-    
-	// output color
-    vec3 col = vec3(0);
 
-    Ray ray = GenerateCameraRay();
+	// output color
+    vec3 col = vec3(0.1, 0.2, 0.4);
+
+    Ray ray = GenerateCameraRay2();
 
     float distToFloor;
     bool hitFloor = RayPlaneIntersect(ray, floorPlane, distToFloor);
@@ -410,13 +443,17 @@ void main()
             vec3(t.w,   0, t.x)
         );
 
+		Minv = inverse(mat3(
+			vec3(1.0,   0,  10.0),
+			vec3(0,   1.0,  0),
+			vec3(10.0, 0,  1.0)
+		));
+
 		// 1,  0,   t.w
 		// 0,  t.z, 0
 		// t.y 0    t.x
         
         vec3 spec = LTC_Evaluate(N, V, pos, Minv, points, twoSided);
-        spec *= texture2D(ltc_mag, uv).w;
-        
         vec3 diff = LTC_Evaluate(N, V, pos, mat3(1), points, twoSided); 
         
         col  = lcol*(scol*spec + dcol*diff);
@@ -430,5 +467,5 @@ void main()
         if ((distToRect < distToFloor) || !hitFloor)
             col = lcol;
 
-    gl_FragColor = vec4(col, 1.0);
+    color = col;
 }

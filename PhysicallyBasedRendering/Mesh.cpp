@@ -212,7 +212,6 @@ void Mesh::GenerateAndSetVAO()
 	vao.VertexAttribPointer(3, 14);
 }
 
-// TODO 중간에 color를 바꾸는 코드를 작성할 것
 // 이 코드를 이용해서 광원들의 색을 정해주자
 void Mesh::SetAllColor(const glm::vec3& color)
 {

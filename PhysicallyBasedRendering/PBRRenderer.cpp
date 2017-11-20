@@ -62,6 +62,7 @@ void PBRRenderer::Render()
 		0.1f,
 		30.0f);
 
+	// TODO 마우스 오른쪽 버튼을 누른 채로 카메라 회전을 조절하고 키보드로 움직이게 하자
 	glm::mat4 view = glm::lookAt(
 		camera.GetWorldPosition(),
 		glm::vec3(0.0f, camera.GetPosition().y, 0.0f),
@@ -92,8 +93,6 @@ void PBRRenderer::Render()
 	lightShader->SetUniformMatrix4f("view", view);
 	lightShader->SetUniformMatrix4f("projection", projection);
 	RenderObjects(lightShader, lights);
-
-	glfwSwapBuffers(window);
 }
 
 void PBRRenderer::TerminateRender()

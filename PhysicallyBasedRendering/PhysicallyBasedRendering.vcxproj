@@ -157,6 +157,8 @@
     <ClCompile Include="FluidRenderer.cpp" />
     <ClCompile Include="FluidSimulationImporter.cpp" />
     <ClCompile Include="FrameBufferObject.cpp" />
+    <ClCompile Include="LTCRenderer.cpp" />
+    <ClCompile Include="LTCSceneManager.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="PBRRenderer.cpp" />
     <ClCompile Include="PBRSceneManager.cpp" />
@@ -177,7 +179,7 @@
     <None Include="Basic.vs" />
     <None Include="Cubemap.vs" />
     <None Include="equirectangularToCubemap.fs" />
-    <None Include="LTR.fs" />
+    <None Include="LTC.fs" />
     <None Include="ParticleThickness.fs" />
     <None Include="Quad.fs" />
     <None Include="Quad.vs" />
@@ -198,6 +200,8 @@
     <ClInclude Include="FluidSceneManager.h" />
     <ClInclude Include="FluidSimulationImporter.h" />
     <ClInclude Include="FrameBufferObject.h" />
+    <ClInclude Include="LTCRenderer.h" />
+    <ClInclude Include="LTCSceneManager.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="PBRRenderer.h" />
     <ClInclude Include="PBRSceneManager.h" />

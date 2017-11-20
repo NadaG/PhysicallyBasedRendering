@@ -51,8 +51,14 @@ public:
 	void SetUniform1f(string name, float value);
 	void SetUniform1i(string name, int value);
 	void SetUniformMatrix4f(string name, glm::mat4 &mat);
+	
 	void SetUniformVector3f(string name, glm::vec3 vec);
 	void SetUniformVector3f(string name, float x, float y, float z);
+
+	void SetUniformVector2f(string name, glm::vec2 vec);
+	void SetUniformVector2f(string name, float x, float y);
+
+	void SetUniformBool(string name, bool b);
 
 	// TODO 텍스쳐를 어디다 두어야 할지 생각해봐야함
 

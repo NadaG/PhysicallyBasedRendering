@@ -111,6 +111,12 @@
     <ClCompile Include="FluidSceneManager.cpp">
       <Filter>Source Files\SceneManager</Filter>
     </ClCompile>
+    <ClCompile Include="LTCRenderer.cpp">
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="LTCSceneManager.cpp">
+      <Filter>Source Files\SceneManager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -165,7 +171,7 @@
     <None Include="equirectangularToCubemap.fs">
       <Filter>Shader Files</Filter>
     </None>
-    <None Include="LTR.fs">
+    <None Include="LTC.fs">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>
@@ -219,6 +225,12 @@
       <Filter>Source Files\SceneManager</Filter>
     </ClInclude>
     <ClInclude Include="PBRSceneManager.h">
+      <Filter>Source Files\SceneManager</Filter>
+    </ClInclude>
+    <ClInclude Include="LTCRenderer.h">
+      <Filter>Source Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="LTCSceneManager.h">
       <Filter>Source Files\SceneManager</Filter>
     </ClInclude>
   </ItemGroup>

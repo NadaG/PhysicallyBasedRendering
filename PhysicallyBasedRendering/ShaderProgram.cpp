@@ -111,6 +111,24 @@ void ShaderProgram::SetUniformVector3f(string name, float x, float y, float z)
 	glUniform3f(glGetUniformLocation(shaderProgramID, name.c_str()), x, y, z);
 }
 
+void ShaderProgram::SetUniformVector2f(string name, glm::vec2 vec)
+{
+	glUniform2f(glGetUniformLocation(shaderProgramID, name.c_str()), vec.x, vec.y);
+}
+
+void ShaderProgram::SetUniformVector2f(string name, float x, float y)
+{
+	glUniform2f(glGetUniformLocation(shaderProgramID, name.c_str()), x, y);
+}
+
+void ShaderProgram::SetUniformBool(string name, bool b)
+{
+	if (b)
+		glUniform1i(glGetUniformLocation(shaderProgramID, name.c_str()), 1);
+	else
+		glUniform1i(glGetUniformLocation(shaderProgramID, name.c_str()), 0);
+}
+
 void ShaderProgram::Delete()
 {
 	glDeleteShader(shaderProgramID);

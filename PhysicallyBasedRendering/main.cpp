@@ -1,5 +1,6 @@
 #include "FluidRenderer.h"
 #include "PBRRenderer.h"
+#include "LTCRenderer.h"
 #include "WindowManager.h"
 #include "Debug.h"
 
@@ -8,12 +9,13 @@ using namespace std;
 enum Scene
 {
 	PBR_SCENE = 0,
-	FLUID_SCENE = 1
+	FLUID_SCENE = 1,
+	LTC_SCENE = 2
 };
 
 int main(int argc, char **argv)
 {
-	Scene scene = FLUID_SCENE;
+	Scene scene = LTC_SCENE;
 
 	WindowManager::GetInstance()->WindowHint(GLFW_SAMPLES, 4);
 	WindowManager::GetInstance()->WindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -53,6 +55,12 @@ int main(int argc, char **argv)
 			renderer = new FluidRenderer(sceneManager);
 			break;
 		}
+		case LTC_SCENE:
+		{
+			sceneManager = new LTCSceneManager();
+			renderer = new LTCRenderer(sceneManager);
+			break;
+		}
 		default:
 			sceneManager = new PBRSceneManager();
 			renderer = new PBRRenderer(sceneManager);
@@ -69,6 +77,7 @@ int main(int argc, char **argv)
 		sceneManager->Update();
 		renderer->Render();
 		InputManager::GetInstance()->PollEvents();
+		glfwSwapBuffers(window);
 	}
 	while (InputManager::GetInstance()->IsKey(GLFW_KEY_ESCAPE) != GLFW_PRESS && 
 		!WindowManager::GetInstance()->WindowShouldClose());

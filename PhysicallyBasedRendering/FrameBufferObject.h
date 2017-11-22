@@ -22,6 +22,7 @@ public:
 	void BindDefaultDepthBuffer();
 
 	void Use();
+	void Clear(const float& r, const float& g, const float& b, const float& a);
 
 	void DrawBuffers();
 

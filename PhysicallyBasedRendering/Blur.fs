@@ -1,6 +1,7 @@
 #version 330 core
 
 uniform sampler2D map;
+uniform vec3 backgroundColor;
 
 in vec2 outUV;
 
@@ -10,7 +11,7 @@ void main()
 {
 	float depth = texture(map, outUV).r;
 
-	if(depth == 0.0)
+	if(texture(map, outUV).g == 1.0)
 		discard;
 
 	float sum = 0;

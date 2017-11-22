@@ -111,8 +111,6 @@ Ray GenerateCameraRay()
 
 Ray GenerateCameraRay2()
 {
-	vec3 cameraOrigin = (-view*vec4(vec3(0.0), 1)).xyz;
-
 	Ray ray;
 	// -1 ~ 1
 	vec2 xy = (outUV - vec2(0.5)) * 2.0;
@@ -120,8 +118,8 @@ Ray GenerateCameraRay2()
 
 	ray.origin = vec3(0.0);
 
-	ray.origin = cameraOrigin;
-    ray.dir    = (view*vec4(ray.dir, 0)).xyz;
+	ray.origin = (-view*vec4(vec3(0.0), 1)).xyz;
+    ray.dir    = normalize((view*vec4(ray.dir, 0)).xyz);
 
 	return ray;
 }
@@ -438,16 +436,12 @@ void main()
         
         vec4 t = texture2D(ltc_mat, uv);
         mat3 Minv = mat3(
-            vec3(  1,   0, t.y),
-            vec3(  0, t.z,   0),
-            vec3(t.w,   0, t.x)
+            vec3(  1,   0, 0.1),
+            vec3(  0, 0.1,   0),
+            vec3( 0.1,  0, 0.1)
         );
 
-		Minv = inverse(mat3(
-			vec3(1.0,   0,  10.0),
-			vec3(0,   1.0,  0),
-			vec3(10.0, 0,  1.0)
-		));
+		
 
 		// 1,  0,   t.w
 		// 0,  t.z, 0

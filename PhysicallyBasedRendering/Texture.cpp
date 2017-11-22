@@ -38,6 +38,37 @@ void Texture::LoadTextureCubeMap(const GLint& internalformat, const GLsizei& wid
 	}
 }
 
+void Texture::LoadTextureCubeMap(vector<string> faces, const GLint& internalformat, const GLenum& format, const GLenum& type)
+{
+	glGenTextures(1, &texture);
+	Bind(this->texture);
+
+	int width, height, nrChannels;
+	for (int i = 0; i < 6; i++)
+	{
+		unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+
+		if (data)
+		{
+			glTexImage2D(
+				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+				0,
+				internalformat,
+				width,
+				height,
+				0,
+				format,
+				type,
+				data);
+		}
+		else
+		{
+			cout << "Cubemap texture failed to load at path: " << faces[i] << endl;
+			stbi_image_free(data);
+		}
+	}
+}
+
 void Texture::LoadTexture(char const * path)
 {
 	glGenTextures(1, &texture);

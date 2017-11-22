@@ -2,6 +2,8 @@
 
 void FluidRenderer::InitializeRender()
 {
+	backgroundColor = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
+
 	pbrShader = new ShaderProgram("PBR.vs", "PBR.fs");
 	pbrShader->Use();
 	pbrShader->SetUniform1i("albedoMap", 1);
@@ -16,6 +18,9 @@ void FluidRenderer::InitializeRender()
 	blurShader->Use();
 	blurShader->SetUniform1i("map", 0);
 
+	skyboxShader = new ShaderProgram("SkyBox.vs", "SkyBox.fs");
+	skyboxShader->Use();
+
 	surfaceShader = new ShaderProgram("Quad.vs", "Surface.fs");
 	surfaceShader->Use();
 	surfaceShader->SetUniform1i("worldMap", 0);
@@ -23,6 +28,17 @@ void FluidRenderer::InitializeRender()
 	surfaceShader->SetUniform1i("thicknessMap", 2);
 	surfaceShader->SetUniform1f("near", depthNear);
 	surfaceShader->SetUniform1f("far", depthFar);
+	surfaceShader->SetUniformVector4f("backgroundColor", backgroundColor);
+
+	vector<string> faces;
+	faces.push_back("Texture/SkyBox/right.jpg");
+	faces.push_back("Texture/SkyBox/left.jpg");
+	faces.push_back("Texture/SkyBox/top.jpg");
+	faces.push_back("Texture/SkyBox/bottom.jpg");
+	faces.push_back("Texture/SkyBox/back.jpg");
+	faces.push_back("Texture/SkyBox/front.jpg");
+	cubeTex.LoadTextureCubeMap(faces, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE);
+	cubeTex.SetParameters(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
 	///////////////////
 	floorAlbedoTex.LoadTexture("Texture/Floor/albedo.png");
@@ -98,6 +114,8 @@ void FluidRenderer::InitializeRender()
 void FluidRenderer::Render()
 {
 	glEnable(GL_DEPTH_TEST);
+	glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	importer.Update(fluidVertices);
 
@@ -123,6 +141,7 @@ void FluidRenderer::Render()
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 
 	pbrFBO.Use();
+	pbrFBO.Clear(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
 	pbrShader->Use();
 	
 	pbrShader->SetUniformMatrix4f("view", view);
@@ -133,7 +152,7 @@ void FluidRenderer::Render()
 	pbrShader->SetUniformVector3f("lightColor", glm::vec3(0.8f, 0.8f, 0.8f));
 	floorAlbedoTex.Bind(GL_TEXTURE1);
 
-	for (int i = 0; i < objs.size(); i++)
+	for (int i = 0; i < 1; i++)
 	{
 		glm::mat4 model = objs[i].GetModelMatrix();
 		pbrShader->SetUniformMatrix4f("model", model);
@@ -141,10 +160,16 @@ void FluidRenderer::Render()
 	}
 	// world 그리기 끝
 
+	skyboxShader->Use();
+	skyboxShader->SetUniformMatrix4f("view", view);
+	skyboxShader->SetUniformMatrix4f("projection", projection);
+	objs[1].Draw();
+
 	// 파티클들 depth map 그리기
 	glViewport(0, 0, depthWidth, depthHeight);
 
 	depthThicknessFBO.Use();
+	depthThicknessFBO.Clear(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
 	particleDepthShader->Use();
 
 	particleDepthShader->SetUniformMatrix4f("view", view);
@@ -174,16 +199,20 @@ void FluidRenderer::Render()
 	glViewport(0, 0, depthWidth, depthHeight);
 	for (int i = 0; i < blurNum * 2; i++)
 	{
-		depthBlurFBO[(i + 1) % 2].Use();
+		int a = (i + 1) % 2, b = i % 2;
+
+		depthBlurFBO[a].Use();
+		depthBlurFBO[a].Clear(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
 		if (i)
-			depthBlurTex[i % 2].Bind(GL_TEXTURE0);
+			depthBlurTex[b].Bind(GL_TEXTURE0);
 		else
 			depthTex.Bind(GL_TEXTURE0);
 		quad.Draw();
 
-		thicknessBlurFBO[(i + 1) % 2].Use();
+		thicknessBlurFBO[a].Use();
+		thicknessBlurFBO[a].Clear(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
 		if (i)
-			thicknessBlurTex[i % 2].Bind(GL_TEXTURE0);
+			thicknessBlurTex[b].Bind(GL_TEXTURE0);
 		else
 			thicknessTex.Bind(GL_TEXTURE0);
 		quad.Draw();
@@ -198,7 +227,7 @@ void FluidRenderer::Render()
 	surfaceShader->SetUniformMatrix4f("projection", projection);
 	surfaceShader->SetUniformMatrix4f("view", view);
 	surfaceShader->SetUniformVector3f("eyePos", camera.GetWorldPosition());
-	surfaceShader->SetUniformVector3f("lightDir", glm::vec3(0.0f, -1.0f, 0.0f));
+	surfaceShader->SetUniformVector3f("lightDir", glm::normalize(glm::vec3(1.0f, -1.0f, 0.0f)));
 
 	worldColorTex.Bind(GL_TEXTURE0);
 	depthBlurTex[0].Bind(GL_TEXTURE1);

@@ -25,6 +25,8 @@ private:
 	ShaderProgram* surfaceShader;
 	ShaderProgram* pbrShader;
 
+	ShaderProgram* skyboxShader;
+
 	// floor
 	Texture floorAlbedoTex;
 
@@ -44,6 +46,8 @@ private:
 	Texture depthBlurTex[2];
 	Texture thicknessBlurTex[2];
 	
+	Texture cubeTex;
+
 	const int depthWidth = 1024;
 	const int depthHeight = 1024;
 

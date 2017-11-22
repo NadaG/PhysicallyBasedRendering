@@ -17,6 +17,14 @@ in vec2 outUV;
 
 out vec3 color;
 
+float fresnel(vec3 n, vec3 v)
+{
+	float F0 = 0.0;
+	float cosTheta = dot(normalize(n), normalize(v));
+
+	return F0 + (1 - F0)*pow(1 - cosTheta, 5);
+}
+
 vec3 getEyePos(sampler2D tex, vec2 uv)
 {
 	float depth = texture(tex, uv).x;
@@ -38,7 +46,7 @@ void main()
 	vec3 depth = texture(bluredDepthMap, outUV).rgb;
 	vec3 worldColor = texture(worldMap, outUV).rgb;
 	// depth가 없는 곳에서는, 즉 물이 없는 곳에서는 배경 색이 보임
-	if(depth.r == 0.0f)
+	if(depth.r == 1.0f || depth.r == 0.0f)
 	{
 		color = worldColor;
 		return;
@@ -68,13 +76,13 @@ void main()
 
 	vec3 eyeDir = normalize(posEye - vec3(view*vec4(eyePos, 1.0)));
 
-	vec3 ambient = vec3(0.1, 0.1, 0.2);
-	vec3 diffuse = vec3(0.1, 0.1, 0.6) * max(dot(-lightPosNorm, n), 0);
-	vec3 specular = vec3(0.8, 0.8, 0.8) * pow(max(dot(reflectDir, eyeDir), 0), 16);
+	vec3 ambient = vec3(0.1, 0.1, 0.5);
+	vec3 diffuse = vec3(0.3, 0.3, 0.7) * max(dot(-lightPosNorm, n), 0);
+	vec3 specular = vec3(0.1, 0.1, 0.1) * pow(max(dot(reflectDir, eyeDir), 0), 32);
 	
 	float thickness = texture(thicknessMap, outUV).r;
 	// 각 채널마다 thickness에 k를 곱해도 됨
-	float I = 1 / (exp(5 * thickness));
+	float I = 1 / (exp(1 * thickness));
 	
-	color = ambient + diffuse + specular + worldColor * I;
+	color = ambient + diffuse + specular * fresnel(n, eyeDir) + worldColor * I;
 }

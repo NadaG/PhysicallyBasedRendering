@@ -52,6 +52,9 @@ public:
 	void SetUniform1i(string name, int value);
 	void SetUniformMatrix4f(string name, glm::mat4 &mat);
 	
+	void SetUniformVector4f(string name, glm::vec4 vec);
+	void SetUniformVector4f(string name, float x, float y, float z, float w);
+
 	void SetUniformVector3f(string name, glm::vec3 vec);
 	void SetUniformVector3f(string name, float x, float y, float z);
 

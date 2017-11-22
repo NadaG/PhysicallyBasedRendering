@@ -28,6 +28,7 @@ public:
 	vector<SceneObject> lightObjs;
 	SceneObject cameraObj;
 	SceneObject quadObj;
+	SceneObject cubeObj;
 
 private:
 

@@ -44,8 +44,13 @@ void FrameBufferObject::BindDefaultDepthBuffer()
 void FrameBufferObject::Use()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+}
+
+void FrameBufferObject::Clear(const float & r, const float & g, const float & b, const float& a)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	// clear color 셋팅을 한 후
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClearColor(r, g, b, a);
 	// 셋팅된 값으로 color buffer를 클리어
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }

@@ -101,6 +101,16 @@ void ShaderProgram::SetUniformMatrix4f(string name, glm::mat4 &mat)
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgramID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 }
 
+void ShaderProgram::SetUniformVector4f(string name, glm::vec4 vec)
+{
+	glUniform4f(glGetUniformLocation(shaderProgramID, name.c_str()), vec.x, vec.y, vec.z, vec.w);
+}
+
+void ShaderProgram::SetUniformVector4f(string name, float x, float y, float z, float w)
+{
+	glUniform4f(glGetUniformLocation(shaderProgramID, name.c_str()), x, y, z, w);
+}
+
 void ShaderProgram::SetUniformVector3f(string name, glm::vec3 vec)
 {
 	glUniform3f(glGetUniformLocation(shaderProgramID, name.c_str()), vec.x, vec.y, vec.z);

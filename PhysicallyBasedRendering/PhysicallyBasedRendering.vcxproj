@@ -188,6 +188,8 @@
     <None Include="Blur.fs" />
     <None Include="Light.fs" />
     <None Include="Light.vs" />
+    <None Include="SkyBox.fs" />
+    <None Include="SkyBox.vs" />
     <None Include="Surface.fs" />
     <None Include="packages.config" />
     <None Include="ParticleDepth.fs" />

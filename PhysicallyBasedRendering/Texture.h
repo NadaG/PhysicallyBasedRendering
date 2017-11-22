@@ -2,11 +2,16 @@
 
 #include <GL/glew.h>
 #include <iostream>
+#include <string>
+#include <vector>
 
 #include "stb_image.h"
 
 using std::cout;
 using std::endl;
+
+using std::vector;
+using std::string;
 
 enum TextureType
 {
@@ -27,7 +32,8 @@ public:
 	void LoadTexture(char const* path);
 	void LoadTexture(const GLint& internalformat, const GLsizei& width, const GLsizei& height, const GLenum& format, const GLenum& type);
 	void LoadTextureCubeMap(const GLint& internalformat, const GLsizei& width, const GLsizei& height, const GLenum& format, const GLenum& type);
-	
+	void LoadTextureCubeMap(vector<string> faces, const GLint& internalformat, const GLenum& format, const GLenum& type);
+
 	// depth를 받는 texture, 포맷이 depth로 고정되어 있고, 타입은 float이다.
 	void LoadDepthTexture(const float& width, const float& height);
 	

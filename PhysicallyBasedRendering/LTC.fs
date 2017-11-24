@@ -436,12 +436,10 @@ void main()
         
         vec4 t = texture2D(ltc_mat, uv);
         mat3 Minv = mat3(
-            vec3(  1,   0, 0.1),
-            vec3(  0, 0.1,   0),
-            vec3( 0.1,  0, 0.1)
+            vec3(  1.0,   0, 0.0),
+            vec3(  0,   1.0,   0),
+            vec3( 0.0,    0, 1.0)
         );
-
-		
 
 		// 1,  0,   t.w
 		// 0,  t.z, 0
@@ -458,7 +456,7 @@ void main()
 	// 면광원과 hit하고
     if (RayRectIntersect(ray, rect, distToRect))
 	// 땅에 부딪히지 않거나 면광원에 먼저 닿은거면 빛의 색
-        if ((distToRect < distToFloor) || !hitFloor)
+        if ((distToRect <= distToFloor) || !hitFloor)
             col = lcol;
 
     color = col;

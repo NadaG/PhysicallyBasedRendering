@@ -55,6 +55,9 @@
     <Filter Include="Source Files\VertexArrayObject">
       <UniqueIdentifier>{8e9898b3-7e8b-4d81-8c35-54959ea7382c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\SmokeSimulationImporter">
+      <UniqueIdentifier>{beb5f74d-9186-4879-bfdc-bace7e2ea705}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -116,6 +119,15 @@
     </ClCompile>
     <ClCompile Include="LTCSceneManager.cpp">
       <Filter>Source Files\SceneManager</Filter>
+    </ClCompile>
+    <ClCompile Include="VolumeRenderer.cpp">
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="SmokeSceneManager.cpp">
+      <Filter>Source Files\SceneManager</Filter>
+    </ClCompile>
+    <ClCompile Include="SmokeSimulationImporter.cpp">
+      <Filter>Source Files\SmokeSimulationImporter</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -238,6 +250,15 @@
     </ClInclude>
     <ClInclude Include="LTCSceneManager.h">
       <Filter>Source Files\SceneManager</Filter>
+    </ClInclude>
+    <ClInclude Include="VolumeRenderer.h">
+      <Filter>Source Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="SmokeSceneManager.h">
+      <Filter>Source Files\SceneManager</Filter>
+    </ClInclude>
+    <ClInclude Include="SmokeSimulationImporter.h">
+      <Filter>Source Files\SmokeSimulationImporter</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

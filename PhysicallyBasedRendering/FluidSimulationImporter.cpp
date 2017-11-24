@@ -69,10 +69,10 @@ void FluidSimulationImporter::Initialize()
 	update = (void(*)(float*, float*, int*, ObstacleSphere *, int))GetProcAddress(handle, "update");
 
 	sparam.boundaryPos.x = 0.0f;
-	sparam.boundaryPos.y = 0.0f;
+	sparam.boundaryPos.y = 2.5f;
 	sparam.boundaryPos.z = 0.0f;
 	sparam.boundarySize.x = 10.0f;
-	sparam.boundarySize.y = 10.0f;
+	sparam.boundarySize.y = 15.0f;
 	sparam.boundarySize.z = 10.0f;
 	sparam.objNum = 1;
 	sparam.obsobjNum = 0;
@@ -92,10 +92,10 @@ void FluidSimulationImporter::Initialize()
 
 	FluidCube* cubes = new FluidCube[sparam.objNum];
 	cubes[0].size.x = 15;
-	cubes[0].size.y = 20;
+	cubes[0].size.y = 15;
 	cubes[0].size.z = 15;
 	cubes[0].pos.x = 0.0f;
-	cubes[0].pos.y = 0.0f;
+	cubes[0].pos.y = 5.0f;
 	cubes[0].pos.z = 0.0f;
 
 	particleNum = initialize(sparam, cubes, nullptr);

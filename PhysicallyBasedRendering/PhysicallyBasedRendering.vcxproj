@@ -170,8 +170,11 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
+    <ClCompile Include="SmokeSceneManager.cpp" />
+    <ClCompile Include="SmokeSimulationImporter.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="VertexArrayObject.cpp" />
+    <ClCompile Include="VolumeRenderer.cpp" />
     <ClCompile Include="WindowManager.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -214,8 +217,11 @@
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="ShaderProgram.h" />
+    <ClInclude Include="SmokeSimulationImporter.h" />
+    <ClInclude Include="SmokeSceneManager.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="VertexArrayObject.h" />
+    <ClInclude Include="VolumeRenderer.h" />
     <ClInclude Include="WindowManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

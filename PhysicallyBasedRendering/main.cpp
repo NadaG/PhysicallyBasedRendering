@@ -1,6 +1,7 @@
 #include "FluidRenderer.h"
 #include "PBRRenderer.h"
 #include "LTCRenderer.h"
+#include "VolumeRenderer.h"
 #include "WindowManager.h"
 #include "Debug.h"
 
@@ -10,12 +11,13 @@ enum Scene
 {
 	PBR_SCENE = 0,
 	FLUID_SCENE = 1,
-	LTC_SCENE = 2
+	LTC_SCENE = 2,
+	SMOKE_SCENE = 3
 };
 
 int main(int argc, char **argv)
 {
-	Scene scene = FLUID_SCENE;
+	Scene scene = SMOKE_SCENE;
 
 	WindowManager::GetInstance()->WindowHint(GLFW_SAMPLES, 4);
 	WindowManager::GetInstance()->WindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -61,6 +63,12 @@ int main(int argc, char **argv)
 			renderer = new LTCRenderer(sceneManager);
 			break;
 		}
+		case SMOKE_SCENE:
+		{
+			sceneManager = new SmokeSceneManager();
+			renderer = new VolumeRenderer(sceneManager);
+			break;
+		}
 		default:
 			sceneManager = new PBRSceneManager();
 			renderer = new PBRRenderer(sceneManager);
@@ -85,8 +93,10 @@ int main(int argc, char **argv)
 	renderer->TerminateRender();
 
 	delete renderer;
+	delete sceneManager;
 
-	WindowManager::GetInstance()->Terminate();
+	// TODO runtime error
+	// WindowManager::GetInstance()->Terminate();
 
 	return 0;
 }

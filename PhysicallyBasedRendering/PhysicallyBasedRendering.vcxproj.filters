@@ -192,6 +192,15 @@
     <None Include="SkyBox.fs">
       <Filter>Shader Files</Filter>
     </None>
+    <None Include="Reflect.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Reflect.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="irradianceConvolution.fs">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ShaderProgram.h">

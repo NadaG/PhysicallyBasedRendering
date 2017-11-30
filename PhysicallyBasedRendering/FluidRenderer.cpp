@@ -18,34 +18,27 @@ void FluidRenderer::InitializeRender()
 	blurShader->Use();
 	blurShader->SetUniform1i("map", 0);
 
-	skyboxShader = new ShaderProgram("SkyBox.vs", "SkyBox.fs");
-	skyboxShader->Use();
-
 	surfaceShader = new ShaderProgram("Quad.vs", "Surface.fs");
 	surfaceShader->Use();
 	surfaceShader->SetUniform1i("worldMap", 0);
 	surfaceShader->SetUniform1i("bluredDepthMap", 1);
 	surfaceShader->SetUniform1i("thicknessMap", 2);
+	surfaceShader->SetUniform1i("normalMap", 3);
+	surfaceShader->SetUniform1i("worldDepthMap", 4);
 	surfaceShader->SetUniform1f("near", depthNear);
 	surfaceShader->SetUniform1f("far", depthFar);
 	surfaceShader->SetUniformVector4f("backgroundColor", backgroundColor);
 
-	vector<string> faces;
-	faces.push_back("Texture/SkyBox/right.jpg");
-	faces.push_back("Texture/SkyBox/left.jpg");
-	faces.push_back("Texture/SkyBox/top.jpg");
-	faces.push_back("Texture/SkyBox/bottom.jpg");
-	faces.push_back("Texture/SkyBox/back.jpg");
-	faces.push_back("Texture/SkyBox/front.jpg");
-	cubeTex.LoadTextureCubeMap(faces, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE);
-	cubeTex.SetParameters(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+	debugQuadShader->Use();
+	debugQuadShader->SetUniform1i("depthMap", 0);
 
 	///////////////////
 	floorAlbedoTex.LoadTexture("Texture/Floor/albedo.png");
 	floorAlbedoTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER);
 
 	///////////////////
-	tmpDepthRBO.GenRenderBufferObject(GL_DEPTH_COMPONENT, depthWidth, depthHeight);
+	tmpDepthRBO.GenRenderBufferObject();
+	tmpDepthRBO.RenderBufferStorage(GL_DEPTH_COMPONENT, depthWidth, depthHeight);
 
 	colorTex.LoadTexture(GL_RGBA32F, depthWidth, depthHeight, GL_RGBA, GL_FLOAT);
 	colorTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
@@ -123,6 +116,7 @@ void FluidRenderer::Render()
 
 	SceneObject& camera = sceneManager->cameraObj;
 	SceneObject& quad = sceneManager->quadObj;
+	SceneObject& cube = sceneManager->skyboxObj;
 	vector<SceneObject>& objs = sceneManager->sceneObjs;
 
 	glm::mat4 projection = glm::perspective(
@@ -160,11 +154,6 @@ void FluidRenderer::Render()
 	}
 	// world 그리기 끝
 
-	skyboxShader->Use();
-	skyboxShader->SetUniformMatrix4f("view", view);
-	skyboxShader->SetUniformMatrix4f("projection", projection);
-	objs[1].Draw();
-
 	// 파티클들 depth map 그리기
 	glViewport(0, 0, depthWidth, depthHeight);
 
@@ -176,6 +165,7 @@ void FluidRenderer::Render()
 	particleDepthShader->SetUniformMatrix4f("projection", projection);
 	particleDepthShader->SetUniform1f("near", depthNear);
 	particleDepthShader->SetUniform1f("far", depthFar);
+
 
 	DrawFluids(glm::distance(camera.GetPosition(), glm::vec3(0.0f, camera.GetPosition().y, 0.0f)));
 	// 파티클들 depth map 그리기 끝
@@ -232,9 +222,10 @@ void FluidRenderer::Render()
 	worldColorTex.Bind(GL_TEXTURE0);
 	depthBlurTex[0].Bind(GL_TEXTURE1);
 	thicknessBlurTex[0].Bind(GL_TEXTURE2);
+	colorTex.Bind(GL_TEXTURE3);
+	worldDepthTex.Bind(GL_TEXTURE4);
 
 	quad.Draw();
-	// quad 그리기 끝
 }
 
 void FluidRenderer::TerminateRender()
@@ -255,6 +246,7 @@ void FluidRenderer::TerminateRender()
 	delete pbrShader;
 
 	sceneManager->TerminateObjects();
+	importer.Quit();
 }
 
 void FluidRenderer::DrawFluids(const float& dist)

@@ -16,14 +16,14 @@ public:
 	void TerminateRender();
 
 private:
-	FrameBufferObject captureFBO;
-	RenderBufferObject captureRBO;
+	const int skyboxResolution = 512;
 
 	ShaderProgram* pbrShader;
 	ShaderProgram* lightShader;
 	ShaderProgram* equirectangularToCubemapShader;
 	ShaderProgram* irradianceShader;
-	ShaderProgram* backgroundShader;
+	ShaderProgram* skyboxShader;
+	ShaderProgram* cubeReflectShader;
 
 	Texture aoTex;
 	Texture albedoTex;
@@ -31,4 +31,15 @@ private:
 	Texture metallicTex;
 	Texture normalTex;
 	Texture roughnessTex;
+
+	Texture hdrSkyboxTex;
+	Texture irradianceSkyboxTex;
+
+	Texture hdrTex;
+
+	FrameBufferObject captureFBO;
+	RenderBufferObject captureRBO;
+
+	glm::mat4 captureProjection;
+	glm::mat4 captureViews[6];
 };

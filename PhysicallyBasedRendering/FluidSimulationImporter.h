@@ -16,6 +16,7 @@ public:
 
 	void Initialize();
 	void Update(GLfloat* v);
+	void Quit();
 
 	int particleNum;
 

@@ -59,6 +59,7 @@ struct ObstacleSphere
 
 int(*initialize)(SimulationParam param, FluidCube* cubes, ObstacleCube* obsobjs);
 void(*update)(float* pos, float* vel, int* issur, ObstacleSphere *spheres, int n_spheres);
+void(*quit)();
 
 void FluidSimulationImporter::Initialize()
 {
@@ -67,6 +68,7 @@ void FluidSimulationImporter::Initialize()
 
 	initialize = (int(*)(SimulationParam, FluidCube*, ObstacleCube*))GetProcAddress(handle, "initialize");
 	update = (void(*)(float*, float*, int*, ObstacleSphere *, int))GetProcAddress(handle, "update");
+	quit = (void(*)())GetProcAddress(handle, "quit");
 
 	sparam.boundaryPos.x = 0.0f;
 	sparam.boundaryPos.y = 2.5f;
@@ -118,4 +120,13 @@ void FluidSimulationImporter::Update(GLfloat* v)
 		v[i * 6 + 5] = vel[i * 3 + 1];
 		v[i * 6 + 6] = vel[i * 3 + 2];
 	}
+}
+
+void FluidSimulationImporter::Quit()
+{
+	delete pos;
+	delete vel;
+	delete issur;
+	quit();
+	
 }

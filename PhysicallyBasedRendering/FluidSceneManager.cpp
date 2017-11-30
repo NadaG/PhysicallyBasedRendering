@@ -3,15 +3,15 @@
 void FluidSceneManager::InitializeObjects()
 {
 	quadObj.LoadMesh(QUAD);
-	cubeObj.LoadMesh(CUBE);
+	skyboxObj.LoadMesh(CUBE);
 
 	sceneObjs.push_back(quadObj);
 	sceneObjs[0].Scale(glm::vec3(15.0));
 	sceneObjs[0].Rotate(glm::vec3(1.0f, 0.0f, 0.0f), glm::radians(90.0f));
-	sceneObjs[0].Translate(glm::vec3(0.0f, -5.0f, 0.0f));
+	sceneObjs[0].Translate(glm::vec3(0.0f, -5.7f, 0.0f));
 
-	sceneObjs.push_back(cubeObj);
-	sceneObjs[1].Scale(glm::vec3(30.0f));
+	sceneObjs.push_back(skyboxObj);
+	sceneObjs[1].Scale(glm::vec3(10.0f));
 
 	cameraObj.Translate(glm::vec3(0.0f, 0.0f, 20.0f));
 }

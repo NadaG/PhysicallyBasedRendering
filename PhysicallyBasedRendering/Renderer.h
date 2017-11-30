@@ -22,8 +22,9 @@ public:
 	Renderer(SceneManager* sceneManager) 
 	{
 		this->sceneManager = sceneManager;
+		debugQuadShader = new ShaderProgram("Quad.vs", "Quad.fs");
 	}
-	virtual ~Renderer() {};
+	virtual ~Renderer() { debugQuadShader->Delete(); delete debugQuadShader; };
 
 	void Initialize(GLFWwindow* window);
 	
@@ -34,9 +35,12 @@ public:
 protected:
 	void UseDefaultFrameBufferObject();
 	void RenderObjects(ShaderProgram* shader, vector<SceneObject> objs);
+	void RenderObject(ShaderProgram* shader, SceneObject obj);
 
 	glm::vec4 backgroundColor;
 	GLFWwindow* window;
 
 	SceneManager* sceneManager;
+
+	ShaderProgram* debugQuadShader;
 };

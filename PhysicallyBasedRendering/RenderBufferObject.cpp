@@ -1,13 +1,13 @@
 #include "RenderBufferObject.h"
 
-RenderBufferObject::RenderBufferObject(const unsigned int & width, const unsigned int & height)
-{
-	GenRenderBufferObject(GL_DEPTH_COMPONENT, width, height);
-}
-
-void RenderBufferObject::GenRenderBufferObject(const GLenum& internalformat, const unsigned int & width, const unsigned int & height)
+void RenderBufferObject::GenRenderBufferObject()
 {
 	glGenRenderbuffers(1, &rbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+}
+
+void RenderBufferObject::RenderBufferStorage(const GLenum & internalformat, const unsigned int & width, const unsigned int & height)
+{
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
 	glRenderbufferStorage(GL_RENDERBUFFER, internalformat, width, height);
 }

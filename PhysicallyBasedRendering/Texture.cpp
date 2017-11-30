@@ -21,8 +21,9 @@ void Texture::LoadTexture(const GLint& internalformat, const GLsizei& width, con
 
 void Texture::LoadTextureCubeMap(const GLint& internalformat, const GLsizei& width, const GLsizei& height, const GLenum& format, const GLenum& type)
 {
-	glGenTextures(1, &texture);
-	Bind(this->texture);
+	glGenTextures(1, &texture); 
+	glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
+
 	for (int i = 0; i < 6; i++)
 	{
 		glTexImage2D(
@@ -40,11 +41,11 @@ void Texture::LoadTextureCubeMap(const GLint& internalformat, const GLsizei& wid
 
 void Texture::LoadTextureCubeMap(vector<string> faces, const GLint& internalformat, const GLenum& format, const GLenum& type)
 {
-	glGenTextures(1, &texture);
-	Bind(this->texture);
+	glGenTextures(1, &texture); 
+	glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
 
 	int width, height, nrChannels;
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < faces.size(); i++)
 	{
 		unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
 
@@ -60,6 +61,9 @@ void Texture::LoadTextureCubeMap(vector<string> faces, const GLint& internalform
 				format,
 				type,
 				data);
+
+			this->width = width;
+			this->height = height;
 		}
 		else
 		{
@@ -90,6 +94,9 @@ void Texture::LoadTexture(char const * path)
 		// 보통 이미지의 경우 unsigned byte로 저장하고
 		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
+
+		this->width = width;
+		this->height = height;
 
 		stbi_image_free(data);
 	}
@@ -125,15 +132,19 @@ void Texture::SetParameters(const GLint& minFilter, const GLint& magFilter, cons
 
 void Texture::SetParameters(const GLint & minFilter, const GLint & magFilter, const GLint & wrapS, const GLint & wrapT, const GLint & wrapR)
 {
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapS);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, wrapR);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, minFilter);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, magFilter);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, wrapS);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, wrapT);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, wrapR);
 }
 
 void Texture::Bind(GLenum texture)
 {
+	// 주의할 것!
+	// 인자로 들어온 텍스쳐는 shader에 보낼 텍스쳐 GL_TEXTURE0 등 이고
+	// this->texture의 텍스쳐는 glBindTexture할 때 사용할 아이디이다
 	glActiveTexture(texture);
 	glBindTexture(GL_TEXTURE_2D, this->texture);
 }
@@ -141,5 +152,5 @@ void Texture::Bind(GLenum texture)
 void Texture::BindCubemap(GLenum texture)
 {
 	glActiveTexture(texture);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, this->texture);
 }

@@ -13,6 +13,8 @@ uniform sampler2D metallicMap;
 uniform sampler2D normalMap;
 uniform sampler2D roughnessMap;
 
+uniform samplerCube irradianceMap;
+
 uniform vec3 lightPositions[4];
 uniform vec3 lightColors[4];
 
@@ -100,7 +102,7 @@ void main()
 
 	float metallic = texture(metallicMap, outUV).r;
 	float roughness = texture(roughnessMap, outUV).r;
-	//float ao = texture(aoMap, outUV).r;
+	float ao = texture(aoMap, outUV).r;
 
 	vec3 N = getNormalFromMap();
 	vec3 V = normalize(eyePos - worldPos);
@@ -149,12 +151,24 @@ void main()
 
 		float NdotL = max(dot(N,L), 0.0);
 
+		// fresnel 자체가 kS이기 때문에 또 다시 kS를 곱할 필요가 없다
 		Lo += (kD * albedo / PI + specular) * radiance * NdotL;
 	}
 
-	vec3 ambient = vec3(0.03) * albedo;
+	// 기존 pbr
+	// vec3 ambient = vec3(0.1) * albedo * ao;
+	// color = ambient + Lo;
 
+
+	vec3 kS = fresnelSchlick(max(dot(N, V), 0.0), F0);
+    vec3 kD = 1.0 - kS;
+    kD *= 1.0 - metallic;	  
+    vec3 irradiance = texture(irradianceMap, N).rgb;
+    vec3 diffuse      = irradiance * albedo;
+    vec3 ambient = (kD * diffuse) * ao;
+    
 	color = ambient + Lo;
+
 
 	color = color / (color + vec3(1.0));
 	color = pow(color, vec3(1.0/2.2));

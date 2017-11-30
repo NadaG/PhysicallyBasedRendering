@@ -182,6 +182,7 @@
     <None Include="Basic.vs" />
     <None Include="Cubemap.vs" />
     <None Include="equirectangularToCubemap.fs" />
+    <None Include="irradianceConvolution.fs" />
     <None Include="LTC.fs" />
     <None Include="ParticleThickness.fs" />
     <None Include="Quad.fs" />
@@ -191,6 +192,8 @@
     <None Include="Blur.fs" />
     <None Include="Light.fs" />
     <None Include="Light.vs" />
+    <None Include="Reflect.fs" />
+    <None Include="Reflect.vs" />
     <None Include="SkyBox.fs" />
     <None Include="SkyBox.vs" />
     <None Include="Surface.fs" />

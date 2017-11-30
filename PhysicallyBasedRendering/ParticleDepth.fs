@@ -39,8 +39,12 @@ void main()
 	// clipSpace pos z는 linear 한거 같지만
 	// clipSpace pos w로 나누면 non linear가 되는거 같다
 	// 범위는 모두 near~far
-	float tmpDepth = clipSpacePos.z / clipSpacePos.w;
-	depth = vec3(LinearizeDepth(tmpDepth) / far);
+	//float tmpDepth = clipSpacePos.z / clipSpacePos.w;
+	float tmpDepth = clipSpacePos.z;
+
+	//depth = vec3(LinearizeDepth(tmpDepth) / far);
+	depth = vec3(tmpDepth / far);
+	
 	// normal 값을 확인하기 위해
 	color = n;
 }

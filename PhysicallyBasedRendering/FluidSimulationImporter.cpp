@@ -124,9 +124,9 @@ void FluidSimulationImporter::Update(GLfloat* v)
 
 void FluidSimulationImporter::Quit()
 {
-	delete pos;
-	delete vel;
-	delete issur;
+	delete[] pos;
+	delete[] vel;
+	delete[] issur;
 	quit();
 	
 }

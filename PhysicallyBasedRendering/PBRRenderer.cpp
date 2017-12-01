@@ -33,19 +33,19 @@ void PBRRenderer::InitializeRender()
 	aoTex.LoadTexture("Texture/Rock/ao.png");
 	aoTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
-	albedoTex.LoadTexture("Texture/Rock/albedo.png");
+	albedoTex.LoadTexture("Texture/RustedIron/albedo.png");
 	albedoTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
 	heightTex.LoadTexture("Texture/Rock/height.jpg");
 	heightTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
-	metallicTex.LoadTexture("Texture/Rock/metallic.png");
+	metallicTex.LoadTexture("Texture/RustedIron/metallic.png");
 	metallicTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
-	normalTex.LoadTexture("Texture/Rock/normal.png");
+	normalTex.LoadTexture("Texture/RustedIron/normal.png");
 	normalTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
-	roughnessTex.LoadTexture("Texture/Rock/roughness.png");
+	roughnessTex.LoadTexture("Texture/RustedIron/roughness.png");
 	roughnessTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
 	captureFBO.GenFrameBufferObject();
@@ -79,7 +79,7 @@ void PBRRenderer::InitializeRender()
 	for (int i = 0; i < 6; i++)
 	{
 		equirectangularToCubemapShader->SetUniformMatrix4f("view", captureViews[i]);
-		captureFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, hdrSkyboxTex);
+		captureFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, &hdrSkyboxTex);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		sceneManager->skyboxObj.Draw();
@@ -96,19 +96,24 @@ void PBRRenderer::InitializeRender()
 	irradianceShader->Use();
 	irradianceShader->SetUniform1i("skybox", 0);
 	irradianceShader->SetUniformMatrix4f("projection", captureProjection);
-	hdrSkyboxTex.BindCubemap(GL_TEXTURE0);
+	hdrSkyboxTex.Bind(GL_TEXTURE0);
 
 	glViewport(0, 0, 32, 32);
 	captureFBO.Use();
 	for (int i = 0; i < 6; i++)
 	{
 		irradianceShader->SetUniformMatrix4f("view", captureViews[i]);
-		captureFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, irradianceSkyboxTex);
+		captureFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, &irradianceSkyboxTex);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		sceneManager->skyboxObj.Draw();
 	}
 	UseDefaultFrameBufferObject();
+	////////////////////////////////////////////////////
+	prefilterSkyboxTex.LoadTextureCubeMap(GL_RGB16F, 128, 128, GL_RGB, GL_FLOAT);
+	prefilterSkyboxTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+
 }
 
 void PBRRenderer::Render()
@@ -159,7 +164,7 @@ void PBRRenderer::Render()
 	metallicTex.Bind(GL_TEXTURE3);
 	normalTex.Bind(GL_TEXTURE4);
 	roughnessTex.Bind(GL_TEXTURE5);
-	irradianceSkyboxTex.BindCubemap(GL_TEXTURE6);
+	irradianceSkyboxTex.Bind(GL_TEXTURE6);
 
 	RenderObjects(pbrShader, objs);
 
@@ -168,12 +173,12 @@ void PBRRenderer::Render()
 	lightShader->SetUniformMatrix4f("projection", projection);
 	RenderObjects(lightShader, lights);
 
-	cubeReflectShader->Use();
+	/*cubeReflectShader->Use();
 	cubeReflectShader->SetUniformVector3f("eyePos", camera.GetWorldPosition());
 	cubeReflectShader->SetUniformMatrix4f("view", view);
 	cubeReflectShader->SetUniformMatrix4f("projection", projection);
 	hdrSkyboxTex.BindCubemap(GL_TEXTURE0);
-	RenderObject(cubeReflectShader, cube);
+	RenderObject(cubeReflectShader, cube);*/
 
 	// 들어오는 픽셀이 작거나 같으면 통과
 	glDepthFunc(GL_LEQUAL);
@@ -181,7 +186,7 @@ void PBRRenderer::Render()
 	skyboxShader->SetUniformMatrix4f("view", glm::mat4(glm::mat3(view)));
 	skyboxShader->SetUniformMatrix4f("projection", projection);
 	skyboxShader->SetUniformBool("isHDR", false);
-	hdrSkyboxTex.BindCubemap(GL_TEXTURE0);
+	hdrSkyboxTex.Bind(GL_TEXTURE0);
 	RenderObject(skyboxShader, skybox);
 	// 들어오는 픽셀이 작으면 통과(디폴트)
 	glDepthFunc(GL_LESS);

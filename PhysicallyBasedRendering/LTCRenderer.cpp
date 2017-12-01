@@ -5,6 +5,10 @@ void LTCRenderer::InitializeRender()
 	UseDefaultFrameBufferObject();
 	ltcShader = new ShaderProgram("Quad.vs", "LTC.fs");
 	ltcShader->Use();
+	ltcShader->SetUniform1i("ltc_mat", 0);
+
+	ltcTex.LoadTexture("Texture/brdf/ibl_brdf_lut.png");
+	ltcTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 }
 
 void LTCRenderer::Render()
@@ -29,11 +33,11 @@ void LTCRenderer::Render()
 	// world ±×¸®±â
 	ltcShader->Use();
 
-	ltcShader->SetUniform1f("roughness", 0.1);
+	ltcShader->SetUniform1f("roughness", 0.25);
 	ltcShader->SetUniformVector3f("dcolor", glm::vec3(1.0));
 	ltcShader->SetUniformVector3f("scolor", glm::vec3(1.0));
 
-	ltcShader->SetUniformVector3f("rectCenter", glm::vec3(0.0f, 2.0f, 0.0f));
+	ltcShader->SetUniformVector3f("rectCenter", glm::vec3(0.0f, 5.0f, 0.0f));
 	ltcShader->SetUniform1f("intensity", 1.0);
 	ltcShader->SetUniform1f("width", 8.0);
 	ltcShader->SetUniform1f("height", 8.0);
@@ -41,9 +45,9 @@ void LTCRenderer::Render()
 	ltcShader->SetUniform1f("roty", 0.0);
 	ltcShader->SetUniform1f("rotz", 0.0);
 
-	ltcShader->SetUniformBool("twoSided", false);
-
-	//uniform sampler2D ltc_mat;
+	ltcShader->SetUniformBool("twoSided", true);
+	
+	ltcTex.Bind(GL_TEXTURE0);
 	//uniform sampler2D ltc_mag;
 
 	ltcShader->SetUniformMatrix4f("view", view);

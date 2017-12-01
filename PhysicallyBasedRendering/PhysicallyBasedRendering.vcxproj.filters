@@ -129,6 +129,12 @@
     <ClCompile Include="SmokeSimulationImporter.cpp">
       <Filter>Source Files\SmokeSimulationImporter</Filter>
     </ClCompile>
+    <ClCompile Include="Texture2D.cpp">
+      <Filter>Source Files\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureCube.cpp">
+      <Filter>Source Files\Texture</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -268,6 +274,12 @@
     </ClInclude>
     <ClInclude Include="SmokeSimulationImporter.h">
       <Filter>Source Files\SmokeSimulationImporter</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture2D.h">
+      <Filter>Source Files\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureCube.h">
+      <Filter>Source Files\Texture</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

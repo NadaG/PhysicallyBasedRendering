@@ -17,7 +17,7 @@ public:
 	const GLuint& GetFBO() { return fbo; }
 	void GenFrameBufferObject();
 	void BindRenderBuffer(GLenum attachment, RenderBufferObject rbo);
-	void BindTexture(GLenum attachment, GLenum texture, Texture textureobj);
+	void BindTexture(GLenum attachment, GLenum texture, Texture* textureobj);
 
 	void BindDefaultDepthBuffer();
 

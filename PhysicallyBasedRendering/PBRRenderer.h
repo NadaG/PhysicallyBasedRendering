@@ -25,17 +25,18 @@ private:
 	ShaderProgram* skyboxShader;
 	ShaderProgram* cubeReflectShader;
 
-	Texture aoTex;
-	Texture albedoTex;
-	Texture heightTex;
-	Texture metallicTex;
-	Texture normalTex;
-	Texture roughnessTex;
+	Texture2D aoTex;
+	Texture2D albedoTex;
+	Texture2D heightTex;
+	Texture2D metallicTex;
+	Texture2D normalTex;
+	Texture2D roughnessTex;
 
-	Texture hdrSkyboxTex;
-	Texture irradianceSkyboxTex;
+	TextureCube hdrSkyboxTex;
+	TextureCube irradianceSkyboxTex;
+	TextureCube prefilterSkyboxTex;
 
-	Texture hdrTex;
+	Texture2D hdrTex;
 
 	FrameBufferObject captureFBO;
 	RenderBufferObject captureRBO;

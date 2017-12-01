@@ -24,7 +24,7 @@ uniform float rotz;
 uniform bool twoSided;
 
 uniform sampler2D ltc_mat;
-uniform sampler2D ltc_mag;
+//uniform sampler2D ltc_mag;
 
 uniform mat4  view;
 uniform vec2  resolution;
@@ -441,11 +441,18 @@ void main()
             vec3( 0.0,    0, 1.0)
         );
 
-		// 1,  0,   t.w
+		Minv = mat3(
+			vec3(1,   0,   t.y),
+			vec3(0,   t.z, 0),
+			vec3(t.w, 0,   t.x)
+		);
+
+		// 1,  0,   t.y
 		// 0,  t.z, 0
-		// t.y 0    t.x
+		// t.w 0    t.x
         
         vec3 spec = LTC_Evaluate(N, V, pos, Minv, points, twoSided);
+		
         vec3 diff = LTC_Evaluate(N, V, pos, mat3(1), points, twoSided); 
         
         col  = lcol*(scol*spec + dcol*diff);
@@ -460,4 +467,5 @@ void main()
             col = lcol;
 
     color = col;
+	//color = texture2D(ltc_mat, outUV).rgb;
 }

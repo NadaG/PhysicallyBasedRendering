@@ -26,23 +26,23 @@ private:
 	ShaderProgram* pbrShader;
 
 	// floor
-	Texture floorAlbedoTex;
+	Texture2D floorAlbedoTex;
 
 	// world
-	Texture worldColorTex;
-	Texture worldDepthTex;
+	Texture2D worldColorTex;
+	Texture2D worldDepthTex;
 
 	// debug용임 normal 값 저장
-	Texture colorTex;
+	Texture2D colorTex;
 
-	Texture depthTex;
-	Texture thicknessTex;
+	Texture2D depthTex;
+	Texture2D thicknessTex;
 	
 	RenderBufferObject tmpDepthRBO;
 	
 	// blur
-	Texture depthBlurTex[2];
-	Texture thicknessBlurTex[2];
+	Texture2D depthBlurTex[2];
+	Texture2D thicknessBlurTex[2];
 
 	const int depthWidth = 1024;
 	const int depthHeight = 1024;

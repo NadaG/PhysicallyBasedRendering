@@ -18,5 +18,5 @@ public:
 private:
 	ShaderProgram* ltcShader;
 
-private:
+	Texture2D ltcTex;
 };

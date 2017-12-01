@@ -140,17 +140,17 @@ void Texture::SetParameters(const GLint & minFilter, const GLint & magFilter, co
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, wrapR);
 }
 
-void Texture::Bind(GLenum texture)
-{
-	// 주의할 것!
-	// 인자로 들어온 텍스쳐는 shader에 보낼 텍스쳐 GL_TEXTURE0 등 이고
-	// this->texture의 텍스쳐는 glBindTexture할 때 사용할 아이디이다
-	glActiveTexture(texture);
-	glBindTexture(GL_TEXTURE_2D, this->texture);
-}
+//void Texture::Bind(GLenum texture)
+//{
+//	// 주의할 것!
+//	// 인자로 들어온 텍스쳐는 shader에 보낼 텍스쳐 GL_TEXTURE0 등 이고
+//	// this->texture의 텍스쳐는 glBindTexture할 때 사용할 아이디이다
+//	glActiveTexture(texture);
+//	glBindTexture(GL_TEXTURE_2D, this->texture);
+//}
 
-void Texture::BindCubemap(GLenum texture)
+void Texture::GenerateMipmap()
 {
-	glActiveTexture(texture);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, this->texture);
+	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 }

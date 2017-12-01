@@ -173,6 +173,8 @@
     <ClCompile Include="SmokeSceneManager.cpp" />
     <ClCompile Include="SmokeSimulationImporter.cpp" />
     <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="Texture2D.cpp" />
+    <ClCompile Include="TextureCube.cpp" />
     <ClCompile Include="VertexArrayObject.cpp" />
     <ClCompile Include="VolumeRenderer.cpp" />
     <ClCompile Include="WindowManager.cpp" />
@@ -223,6 +225,8 @@
     <ClInclude Include="SmokeSimulationImporter.h" />
     <ClInclude Include="SmokeSceneManager.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="Texture2D.h" />
+    <ClInclude Include="TextureCube.h" />
     <ClInclude Include="VertexArrayObject.h" />
     <ClInclude Include="VolumeRenderer.h" />
     <ClInclude Include="WindowManager.h" />

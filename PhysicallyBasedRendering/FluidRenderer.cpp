@@ -60,9 +60,9 @@ void FluidRenderer::InitializeRender()
 	// rbo는 texture로 쓰이지 않을 것이라는 것을 뜻함
 	// 이 힌트를 미리 줌으로써 가속화를 할 수 있음
 	depthThicknessFBO.BindRenderBuffer(GL_DEPTH_ATTACHMENT, tmpDepthRBO);
-	depthThicknessFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTex);
-	depthThicknessFBO.BindTexture(GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, depthTex);
-	depthThicknessFBO.BindTexture(GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, thicknessTex);
+	depthThicknessFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &colorTex);
+	depthThicknessFBO.BindTexture(GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, &depthTex);
+	depthThicknessFBO.BindTexture(GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, &thicknessTex);
 	depthThicknessFBO.DrawBuffers();
 
 	if (depthThicknessFBO.CheckStatus() == GL_FRAMEBUFFER_COMPLETE)
@@ -71,8 +71,8 @@ void FluidRenderer::InitializeRender()
 	}
 
 	pbrFBO.GenFrameBufferObject();
-	pbrFBO.BindTexture(GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, worldDepthTex);
-	pbrFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, worldColorTex);
+	pbrFBO.BindTexture(GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, &worldDepthTex);
+	pbrFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &worldColorTex);
 	pbrFBO.DrawBuffers();
 
 	for (int i = 0; i < 2; i++)
@@ -82,14 +82,14 @@ void FluidRenderer::InitializeRender()
 
 		depthBlurFBO[i].GenFrameBufferObject();
 		depthBlurFBO[i].BindDefaultDepthBuffer();
-		depthBlurFBO[i].BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, depthBlurTex[i]);
+		depthBlurFBO[i].BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &depthBlurTex[i]);
 
 		thicknessBlurTex[i].LoadTexture(GL_RGBA32F, depthWidth, depthHeight, GL_RGBA, GL_FLOAT);
 		thicknessBlurTex[i].SetParameters(GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
 		thicknessBlurFBO[i].GenFrameBufferObject();
 		thicknessBlurFBO[i].BindDefaultDepthBuffer();
-		thicknessBlurFBO[i].BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, thicknessBlurTex[i]);
+		thicknessBlurFBO[i].BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &thicknessBlurTex[i]);
 	}
 
 	importer.Initialize();

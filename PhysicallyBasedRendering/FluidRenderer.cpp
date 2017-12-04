@@ -25,6 +25,7 @@ void FluidRenderer::InitializeRender()
 	surfaceShader->SetUniform1i("thicknessMap", 2);
 	surfaceShader->SetUniform1i("normalMap", 3);
 	surfaceShader->SetUniform1i("worldDepthMap", 4);
+	surfaceShader->SetUniform1i("debugMap", 5);
 	surfaceShader->SetUniform1f("near", depthNear);
 	surfaceShader->SetUniform1f("far", depthFar);
 	surfaceShader->SetUniformVector4f("backgroundColor", backgroundColor);
@@ -166,7 +167,6 @@ void FluidRenderer::Render()
 	particleDepthShader->SetUniform1f("near", depthNear);
 	particleDepthShader->SetUniform1f("far", depthFar);
 
-
 	DrawFluids(glm::distance(camera.GetPosition(), glm::vec3(0.0f, camera.GetPosition().y, 0.0f)));
 	// 파티클들 depth map 그리기 끝
 
@@ -224,6 +224,8 @@ void FluidRenderer::Render()
 	thicknessBlurTex[0].Bind(GL_TEXTURE2);
 	colorTex.Bind(GL_TEXTURE3);
 	worldDepthTex.Bind(GL_TEXTURE4);
+
+	thicknessBlurTex[0].Bind(GL_TEXTURE5);
 
 	quad.Draw();
 }

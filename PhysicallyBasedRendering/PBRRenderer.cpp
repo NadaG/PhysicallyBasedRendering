@@ -9,6 +9,7 @@ void PBRRenderer::InitializeRender()
 	pbrShader->SetUniform1i("metallicMap", 3);
 	pbrShader->SetUniform1i("normalMap", 4);
 	pbrShader->SetUniform1i("roughnessMap", 5);
+
 	pbrShader->SetUniform1i("irradianceMap", 6);
 	pbrShader->SetUniform1i("prefilterMap", 7);
 	pbrShader->SetUniform1i("brdfLUT", 8);
@@ -29,6 +30,7 @@ void PBRRenderer::InitializeRender()
 
 	prefilterShader = new ShaderProgram("Cubemap.vs", "Prefilter.fs");
 	prefilterShader->Use();
+	prefilterShader->SetUniform1i("environmentMap", 0);
 
 	//cubeReflectShader = new ShaderProgram("Reflect.vs", "Reflect.fs");
 	//cubeReflectShader->Use();
@@ -37,19 +39,19 @@ void PBRRenderer::InitializeRender()
 	brdfShader = new ShaderProgram("Brdf.vs", "Brdf.fs");
 	brdfShader->Use();
 
-	aoTex.LoadTexture("Texture/Rock/ao.png");
+	aoTex.LoadTexture("Texture/RustedIron/ao.png");
 	aoTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
-	albedoTex.LoadTexture("Texture/Gold/albedo.png");
+	albedoTex.LoadTexture("Texture/RustedIron/albedo.png");
 	albedoTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
-	metallicTex.LoadTexture("Texture/Gold/metallic.png");
+	metallicTex.LoadTexture("Texture/RustedIron/metallic.png");
 	metallicTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
-	normalTex.LoadTexture("Texture/Gold/normal.png");
+	normalTex.LoadTexture("Texture/RustedIron/normal.png");
 	normalTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
-	roughnessTex.LoadTexture("Texture/Gold/roughness.png");
+	roughnessTex.LoadTexture("Texture/RustedIron/roughness.png");
 	roughnessTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
 	captureFBO.GenFrameBufferObject();
@@ -91,6 +93,9 @@ void PBRRenderer::InitializeRender()
 	}
 
 	UseDefaultFrameBufferObject();
+
+	hdrSkyboxTex.GenerateMipmap();
+
 	////////////////////////////////////////////////////
 	irradianceSkyboxTex.LoadTextureCubeMap(GL_RGB16F, 32, 32, GL_RGB, GL_FLOAT);
 	irradianceSkyboxTex.SetParameters(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
@@ -114,6 +119,7 @@ void PBRRenderer::InitializeRender()
 		sceneManager->skyboxObj.Draw();
 	}
 	UseDefaultFrameBufferObject();
+
 	////////////////////////////////////////////////////
 	prefilterSkyboxTex.LoadTextureCubeMap(GL_RGB16F, 128, 128, GL_RGB, GL_FLOAT);
 	prefilterSkyboxTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
@@ -145,7 +151,7 @@ void PBRRenderer::InitializeRender()
 		for (int i = 0; i < 6; ++i)
 		{
 			prefilterShader->SetUniformMatrix4f("view", captureViews[i]);
-			captureFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, &hdrSkyboxTex);
+			captureFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, &prefilterSkyboxTex);
 
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			sceneManager->skyboxObj.Draw();
@@ -217,6 +223,7 @@ void PBRRenderer::Render()
 	metallicTex.Bind(GL_TEXTURE3);
 	normalTex.Bind(GL_TEXTURE4);
 	roughnessTex.Bind(GL_TEXTURE5);
+
 	irradianceSkyboxTex.Bind(GL_TEXTURE6);
 	prefilterSkyboxTex.Bind(GL_TEXTURE7);
 	brdfTex.Bind(GL_TEXTURE8);

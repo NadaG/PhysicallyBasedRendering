@@ -188,4 +188,7 @@ void main()
 
 	color = color / (color + vec3(1.0));
 	color = pow(color, vec3(1.0/2.2));
+
+	//color = texture(brdfLUT, outUV).ggg;
+	//color = texture(prefilterMap, outNormal).rgb;
 }

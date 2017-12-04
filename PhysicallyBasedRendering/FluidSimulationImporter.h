@@ -24,6 +24,11 @@ public:
 	float* vel;
 	int* issur;
 
+	float* stopFramePos;
+
+	const int toStopFrame = 170;
+	int nowFrame = 0;
+
 private:
 
 };

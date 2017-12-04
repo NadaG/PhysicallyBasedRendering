@@ -6,6 +6,8 @@ uniform sampler2D thicknessMap;
 uniform sampler2D normalMap;
 uniform sampler2D worldDepthMap;
 
+uniform sampler2D debugMap;
+
 uniform mat4 projection;
 uniform mat4 view;
 
@@ -100,5 +102,5 @@ void main()
 	color = ambient + diffuse + specular * fresnel(n, eyeDir) + worldColor * I;
 	//color = ambient + diffuse + specular;
 	//color = n;
-	
+	//color = texture(debugMap, outUV).rgb;
 }

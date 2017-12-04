@@ -4,6 +4,7 @@ void PBRSceneManager::InitializeObjects()
 {
 	skyboxObj.LoadMesh(CUBE);
 	cubeObj.LoadMesh(CUBE);
+	quadObj.LoadMesh(QUAD);
 
 	selectedLightId = 0;
 

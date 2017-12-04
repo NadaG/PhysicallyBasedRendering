@@ -11,3 +11,8 @@ void RenderBufferObject::RenderBufferStorage(const GLenum & internalformat, cons
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
 	glRenderbufferStorage(GL_RENDERBUFFER, internalformat, width, height);
 }
+
+void RenderBufferObject::Bind() const
+{
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+}

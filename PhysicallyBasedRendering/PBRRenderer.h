@@ -23,11 +23,12 @@ private:
 	ShaderProgram* equirectangularToCubemapShader;
 	ShaderProgram* irradianceShader;
 	ShaderProgram* skyboxShader;
-	ShaderProgram* cubeReflectShader;
+	//ShaderProgram* cubeReflectShader;
+	ShaderProgram* prefilterShader;
+	ShaderProgram* brdfShader;
 
 	Texture2D aoTex;
 	Texture2D albedoTex;
-	Texture2D heightTex;
 	Texture2D metallicTex;
 	Texture2D normalTex;
 	Texture2D roughnessTex;
@@ -36,6 +37,7 @@ private:
 	TextureCube irradianceSkyboxTex;
 	TextureCube prefilterSkyboxTex;
 
+	Texture2D brdfTex;
 	Texture2D hdrTex;
 
 	FrameBufferObject captureFBO;

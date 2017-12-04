@@ -8,12 +8,13 @@ out vec3 color;
 
 uniform sampler2D aoMap;
 uniform sampler2D albedoMap;
-uniform sampler2D heightMap;
 uniform sampler2D metallicMap;
 uniform sampler2D normalMap;
 uniform sampler2D roughnessMap;
 
 uniform samplerCube irradianceMap;
+uniform samplerCube prefilterMap;
+uniform sampler2D brdfLUT;
 
 uniform vec3 lightPositions[4];
 uniform vec3 lightColors[4];
@@ -89,11 +90,15 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 // 즉 90도에 가까운 곳에서 볼 수록 빛이 쎄진다는 것이다.
 // 90이면 그냥 1임
 // 각도가 높아지면 점점 약해지고 F0값에 가까워짐
-vec3 fresnelSchlick(float cosTheta, vec3 F0, float roughness)
+vec3 fresnelSchlick(float cosTheta, vec3 F0)
 {
-	//return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
-	return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
+
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+{
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+} 
 
 void main()
 {
@@ -108,6 +113,7 @@ void main()
 
 	vec3 N = getNormalFromMap();
 	vec3 V = normalize(eyePos - worldPos);
+	vec3 R = reflect(-V, N);
 
 	// 금속이 아닐경우 0.04이고 금속일 경우 albedo에 가까워 지도록 lerp
 	vec3 F0 = vec3(0.04);
@@ -132,7 +138,7 @@ void main()
 		// 아직 fresnel 현상이 생기는 이유에 대해서는 정확히 모르지만
 		// 빛이 90도로 꺾여 들어올 때 재질의 속성? 빛의 색이 많이 들어오는 현상이다. 정반사 때문이 아닐 까 싶다
 		// half vector와 view vector의 각도로 계산된다.
-		vec3 F = fresnelSchlick(max(dot(H,V), 0.0), F0, roughness);
+		vec3 F = fresnelSchlick(max(dot(H,V), 0.0), F0);
 		// 단순히 N과 H, roughness에 대한 함수이다.
 		// 얼마나 많은 H(micro) 가 N(macro)에 가깝냐에 따라 값이 커진다.
 		float NDF = DistributionGGX(N, H, roughness);
@@ -162,14 +168,21 @@ void main()
 	// vec3 ambient = vec3(0.1) * albedo * ao;
 	// color = ambient + Lo;
 
-	vec3 kS = fresnelSchlick(max(dot(N, V), 0.0), F0, roughness);
+	vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+	vec3 kS = F;
     vec3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;	  
 	// 단순히 normal을 이용해서 irradiance를 구한것이기 때문에 오차가 있을 수 있음
 	// 오차를 줄이기 위해 light probe라는 것을 사용한다고 함
     vec3 irradiance = texture(irradianceMap, N).rgb;
     vec3 diffuse = irradiance * albedo;
-    vec3 ambient = (kD * diffuse) * 1.0;
+
+	const float MAX_REFLECTION_LOD = 4.0;
+	vec3 prefilterdColor = textureLod(prefilterMap, R, roughness * MAX_REFLECTION_LOD).rgb;
+	vec2 brdf = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
+	vec3 specular = prefilterdColor * (F * brdf.x + brdf.y);
+
+    vec3 ambient = (kD * diffuse + specular) * 1.0;
     
 	color = ambient + Lo;
 

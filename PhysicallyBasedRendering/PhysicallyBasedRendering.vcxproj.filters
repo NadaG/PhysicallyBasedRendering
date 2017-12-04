@@ -207,6 +207,15 @@
     <None Include="irradianceConvolution.fs">
       <Filter>Shader Files</Filter>
     </None>
+    <None Include="Prefilter.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Brdf.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Brdf.vs">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ShaderProgram.h">

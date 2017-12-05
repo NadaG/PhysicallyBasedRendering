@@ -8,11 +8,15 @@ const float PI = 3.14159265359;
 
 float RadicalInverse_VdC(uint bits)
 {
+	// 16u라고 표현한 것은 16이라는 수의 타입이 unsigned int type이라는 것이다.
 	bits = (bits << 16u) | (bits >> 16u);
+	// 0x55555555u는 16진수로 55555555라는 수를 unsigned int type으로 표현한다는 것이다.
+	// 16진수로 8자리는 1자리당 4비트를 뜻하고 결국 32비트가 되는데 32비트는 4byte이다.
 	bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
     bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
     bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
     bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
+	// unsigned int type은 float으로 형변환한 후에 계산하여야 한다.
     return float(bits) * 2.3283064365386963e-10; // / 0x100000000
 }
 
@@ -83,7 +87,9 @@ vec2 IntegrateBRDF(float NdotV, float roughness)
     {
         // generates a sample vector that's biased towards the
         // preferred alignment direction (importance sampling).
+		// Xi의 x값은 i/n 값이고, Xi의 y값은 RadicalInverse_VdC(i)가 리턴한 값이다.
         vec2 Xi = Hammersley(i, SAMPLE_COUNT);
+		// Xi는 2차원 데이터이고 N은 (0, 0, 1)인 3차원 데이터이다.
         vec3 H = ImportanceSampleGGX(Xi, N, roughness);
         vec3 L = normalize(2.0 * dot(V, H) * H - V);
 

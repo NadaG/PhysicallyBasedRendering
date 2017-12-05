@@ -39,19 +39,19 @@ void PBRRenderer::InitializeRender()
 	brdfShader = new ShaderProgram("Brdf.vs", "Brdf.fs");
 	brdfShader->Use();
 
-	aoTex.LoadTexture("Texture/RustedIron/ao.png");
-	aoTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
+	/*aoTex.LoadTexture("Texture/RustedIron/ao.png");
+	aoTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);*/
 
-	albedoTex.LoadTexture("Texture/RustedIron/albedo.png");
+	albedoTex.LoadTexture("Texture/Gold/albedo.png");
 	albedoTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
-	metallicTex.LoadTexture("Texture/RustedIron/metallic.png");
+	metallicTex.LoadTexture("Texture/Gold/metallic.png");
 	metallicTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
-	normalTex.LoadTexture("Texture/RustedIron/normal.png");
+	normalTex.LoadTexture("Texture/Gold/normal.png");
 	normalTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
-	roughnessTex.LoadTexture("Texture/RustedIron/roughness.png");
+	roughnessTex.LoadTexture("Texture/Gold/roughness.png");
 	roughnessTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
 	captureFBO.GenFrameBufferObject();
@@ -59,7 +59,7 @@ void PBRRenderer::InitializeRender()
 	captureRBO.RenderBufferStorage(GL_DEPTH_COMPONENT24, skyboxResolution, skyboxResolution);
 	captureFBO.BindRenderBuffer(GL_DEPTH_ATTACHMENT, captureRBO);
 
-	hdrTex.LoadTexture("Texture/Factory/Factory_Catwalk_Bg.jpg");
+	hdrTex.LoadTexture("Texture/Factory/BG.jpg");
 	hdrTex.SetParameters(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
 
 	hdrSkyboxTex.LoadTextureCubeMap(GL_RGB16F, skyboxResolution, skyboxResolution, GL_RGB, GL_FLOAT);
@@ -179,6 +179,7 @@ void PBRRenderer::InitializeRender()
 void PBRRenderer::Render()
 {
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

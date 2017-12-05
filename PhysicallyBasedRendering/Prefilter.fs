@@ -64,6 +64,7 @@ void main()
     vec3 N = normalize(worldPos);
     
     // make the simplyfying assumption that V equals R equals the normal 
+	// 결국 모든것이 normal이 되는 것이다.
     vec3 R = N;
     vec3 V = R;
 

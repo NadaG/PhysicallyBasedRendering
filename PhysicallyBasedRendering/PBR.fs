@@ -178,16 +178,28 @@ void main()
     vec3 diffuse = irradiance * albedo;
 
 	const float MAX_REFLECTION_LOD = 4.0;
+	// 0에 가까울 수록 base에 가깝다는 것, 즉 roughness가 낮을수록 해상도가 큰 map을 사용한다는 것이다.
+	// 왜냐하면 mipmap은 더 작은 texture를 만드는 것이므로
 	vec3 prefilterdColor = textureLod(prefilterMap, R, roughness * MAX_REFLECTION_LOD).rgb;
+	// 여기서는 N V를 그냥 N L로 생각해도 될거 같음
 	vec2 brdf = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
 	vec3 specular = prefilterdColor * (F * brdf.x + brdf.y);
 
+	// 배경에서 오는 빛이 ambient로 작용한다
     vec3 ambient = (kD * diffuse + specular) * 1.0;
+	// if(hasAo)
+	// vec3 ambient = (kD * diffuse + specular) * ao;
     
 	color = ambient + Lo;
 
+	// hdr
 	color = color / (color + vec3(1.0));
+	// gamma correction
 	color = pow(color, vec3(1.0/2.2));
+
+	//ambient = ambient / (ambient + vec3(1.0));
+	//ambient = pow(ambient, vec3(1.0/2.2));
+	//color = ambient + Lo;
 
 	//color = texture(brdfLUT, outUV).ggg;
 	//color = texture(prefilterMap, outNormal).rgb;

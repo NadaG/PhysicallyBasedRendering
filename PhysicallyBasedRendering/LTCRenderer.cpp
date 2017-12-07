@@ -9,6 +9,18 @@ void LTCRenderer::InitializeRender()
 
 	ltcTex.LoadTexture("Texture/brdf/ibl_brdf_lut.png");
 	ltcTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
+
+	glm::mat3 debugMat = glm::mat3();
+	debugMat[0][0] = 10.0f;
+	debugMat[1][1] = 12.0f;
+	debugMat[2][0] = 44.0f;
+	debugMat[0][2] = 51.0f;
+
+	Debug::GetInstance()->Log(debugMat);
+
+	debugMat = glm::inverse(debugMat);
+
+	Debug::GetInstance()->Log(debugMat);
 }
 
 void LTCRenderer::Render()

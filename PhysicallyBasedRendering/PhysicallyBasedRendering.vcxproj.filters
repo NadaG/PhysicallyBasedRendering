@@ -216,6 +216,9 @@
     <None Include="Brdf.vs">
       <Filter>Shader Files</Filter>
     </None>
+    <None Include="PBR_uniform.fs">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ShaderProgram.h">

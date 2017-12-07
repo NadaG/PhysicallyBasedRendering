@@ -309,6 +309,7 @@ vec3 LTC_Evaluate(
     T2 = cross(N, T1);
 
     // rotate area light in (T1, T2, N) basis
+	// matrix도 셰이딩할 점을 기준으로 N이 z좌표축인 좌표계로 바꾼다.
     Minv = mul(Minv, transpose(mat3(T1, T2, N)));
 
     // polygon (allocate 5 vertices for clipping)
@@ -452,7 +453,6 @@ void main()
 		// t.w 0    t.x
         
         vec3 spec = LTC_Evaluate(N, V, pos, Minv, points, twoSided);
-		
         vec3 diff = LTC_Evaluate(N, V, pos, mat3(1), points, twoSided); 
         
         col  = lcol*(scol*spec + dcol*diff);

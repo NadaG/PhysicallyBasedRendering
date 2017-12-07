@@ -29,7 +29,7 @@ public:
 	Texture() {};
 	Texture(char const* path);
 
-	void LoadTexture(char const* path);
+	void LoadTexture(const string& s);
 	void LoadTexture(const GLint& internalformat, const GLsizei& width, const GLsizei& height, const GLenum& format, const GLenum& type);
 	
 	void LoadTextureCubeMap(const GLint& internalformat, const GLsizei& width, const GLsizei& height, const GLenum& format, const GLenum& type);

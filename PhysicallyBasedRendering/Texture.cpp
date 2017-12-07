@@ -73,13 +73,13 @@ void Texture::LoadTextureCubeMap(vector<string> faces, const GLint& internalform
 	}
 }
 
-void Texture::LoadTexture(char const * path)
+void Texture::LoadTexture(const string& s)
 {
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 
 	int width, height, nrComponents;
-	unsigned char* data = stbi_load(path, &width, &height, &nrComponents, 0);
+	unsigned char* data = stbi_load(s.c_str(), &width, &height, &nrComponents, 0);
 
 	if (data)
 	{
@@ -102,7 +102,7 @@ void Texture::LoadTexture(char const * path)
 	}
 	else
 	{
-		cout << "Texture failed to load at path: " << path << endl;
+		cout << "Texture failed to load at path: " << s << endl;
 		cout << stbi_failure_reason();
 		stbi_image_free(data);
 	}

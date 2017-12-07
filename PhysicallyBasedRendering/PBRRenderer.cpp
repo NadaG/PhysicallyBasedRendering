@@ -2,13 +2,18 @@
 
 void PBRRenderer::InitializeRender()
 {
-	pbrShader = new ShaderProgram("PBR.vs", "PBR.fs");
+	pbrShader = new ShaderProgram("PBR.vs", "PBR_uniform.fs");
 	pbrShader->Use();
 	pbrShader->SetUniform1i("aoMap", 0);
 	pbrShader->SetUniform1i("albedoMap", 1);
 	pbrShader->SetUniform1i("metallicMap", 3);
 	pbrShader->SetUniform1i("normalMap", 4);
 	pbrShader->SetUniform1i("roughnessMap", 5);
+
+	pbrShader->SetUniformVector3f("albedo", glm::vec3(0.0f, 1.0f, 0.0f));
+	pbrShader->SetUniform1f("roughness", 0.1f);
+	pbrShader->SetUniform1f("metallic", 0.8f);
+	pbrShader->SetUniform1f("ao", 0.2f);
 
 	pbrShader->SetUniform1i("irradianceMap", 6);
 	pbrShader->SetUniform1i("prefilterMap", 7);
@@ -32,27 +37,10 @@ void PBRRenderer::InitializeRender()
 	prefilterShader->Use();
 	prefilterShader->SetUniform1i("environmentMap", 0);
 
-	//cubeReflectShader = new ShaderProgram("Reflect.vs", "Reflect.fs");
-	//cubeReflectShader->Use();
-	//cubeReflectShader->SetUniform1i("skybox", 0);
-
 	brdfShader = new ShaderProgram("Brdf.vs", "Brdf.fs");
 	brdfShader->Use();
 
-	/*aoTex.LoadTexture("Texture/RustedIron/ao.png");
-	aoTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);*/
-
-	albedoTex.LoadTexture("Texture/Gold/albedo.png");
-	albedoTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
-
-	metallicTex.LoadTexture("Texture/Gold/metallic.png");
-	metallicTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
-
-	normalTex.LoadTexture("Texture/Gold/normal.png");
-	normalTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
-
-	roughnessTex.LoadTexture("Texture/Gold/roughness.png");
-	roughnessTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
+	SelectMaterialImage("Rock");
 
 	captureFBO.GenFrameBufferObject();
 	captureRBO.GenRenderBufferObject();
@@ -267,4 +255,22 @@ void PBRRenderer::TerminateRender()
 	delete skyboxShader;
 
 	sceneManager->TerminateObjects();
+}
+
+void PBRRenderer::SelectMaterialImage(const string& folder)
+{
+	aoTex.LoadTexture("Texture/" + folder + "/ao.png");
+	aoTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
+
+	albedoTex.LoadTexture("Texture/" + folder + "/albedo.png");
+	albedoTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
+
+	metallicTex.LoadTexture("Texture/" + folder + "/metallic.png");
+	metallicTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
+
+	normalTex.LoadTexture("Texture/" + folder + "/normal.png");
+	normalTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
+
+	roughnessTex.LoadTexture("Texture/" + folder + "/roughness.png");
+	roughnessTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 }

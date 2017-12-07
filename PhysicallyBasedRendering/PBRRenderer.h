@@ -16,6 +16,9 @@ public:
 	void TerminateRender();
 
 private:
+
+	void SelectMaterialImage(const string& folder);
+
 	const int skyboxResolution = 512;
 
 	ShaderProgram* pbrShader;

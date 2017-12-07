@@ -189,6 +189,7 @@
     <None Include="irradianceConvolution.fs" />
     <None Include="LTC.fs" />
     <None Include="ParticleThickness.fs" />
+    <None Include="PBR_uniform.fs" />
     <None Include="Prefilter.fs" />
     <None Include="Quad.fs" />
     <None Include="Quad.vs" />

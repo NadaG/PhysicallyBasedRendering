@@ -1,7 +1,6 @@
 #ifndef _EXPORT_
 #define _EXPORT_
 
-#include <png.h>
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_STATIC
 #include "stb_image_write.h"

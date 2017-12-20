@@ -58,6 +58,9 @@
     <Filter Include="Source Files\SmokeSimulationImporter">
       <UniqueIdentifier>{beb5f74d-9186-4879-bfdc-bace7e2ea705}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\LTCfitting">
+      <UniqueIdentifier>{6b7ee98d-806b-438a-bcff-bb1cbfb0163d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -134,6 +137,12 @@
     </ClCompile>
     <ClCompile Include="TextureCube.cpp">
       <Filter>Source Files\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="dds.cpp">
+      <Filter>Source Files\LTCfitting</Filter>
+    </ClCompile>
+    <ClCompile Include="fitLTC.cpp">
+      <Filter>Source Files\LTCfitting</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -292,6 +301,33 @@
     </ClInclude>
     <ClInclude Include="TextureCube.h">
       <Filter>Source Files\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="nelder_mead.h">
+      <Filter>Source Files\LTCfitting</Filter>
+    </ClInclude>
+    <ClInclude Include="plot.h">
+      <Filter>Source Files\LTCfitting</Filter>
+    </ClInclude>
+    <ClInclude Include="brdf.h">
+      <Filter>Source Files\LTCfitting</Filter>
+    </ClInclude>
+    <ClInclude Include="brdf_beckmann.h">
+      <Filter>Source Files\LTCfitting</Filter>
+    </ClInclude>
+    <ClInclude Include="brdf_disneyDiffuse.h">
+      <Filter>Source Files\LTCfitting</Filter>
+    </ClInclude>
+    <ClInclude Include="brdf_ggx.h">
+      <Filter>Source Files\LTCfitting</Filter>
+    </ClInclude>
+    <ClInclude Include="CImg.h">
+      <Filter>Source Files\LTCfitting</Filter>
+    </ClInclude>
+    <ClInclude Include="dds.h">
+      <Filter>Source Files\LTCfitting</Filter>
+    </ClInclude>
+    <ClInclude Include="export.h">
+      <Filter>Source Files\LTCfitting</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

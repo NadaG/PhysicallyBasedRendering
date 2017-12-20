@@ -139,7 +139,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;SOLUTION_DIR=LR"($(SolutionDir))";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;SOLUTION_DIR=LR"($(SolutionDir))";_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>C:\Users\RENDER4\Desktop\Files\OpenGL\GL64;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -153,6 +153,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="dds.cpp" />
+    <ClCompile Include="fitLTC.cpp" />
     <ClCompile Include="FluidSceneManager.cpp" />
     <ClCompile Include="FluidRenderer.cpp" />
     <ClCompile Include="FluidSimulationImporter.cpp" />
@@ -210,6 +212,13 @@
     <None Include="PBR.vs" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="brdf.h" />
+    <ClInclude Include="brdf_beckmann.h" />
+    <ClInclude Include="brdf_disneyDiffuse.h" />
+    <ClInclude Include="brdf_ggx.h" />
+    <ClInclude Include="CImg.h" />
+    <ClInclude Include="dds.h" />
+    <ClInclude Include="export.h" />
     <ClInclude Include="FluidRenderer.h" />
     <ClInclude Include="FluidSceneManager.h" />
     <ClInclude Include="FluidSimulationImporter.h" />
@@ -217,8 +226,10 @@
     <ClInclude Include="LTCRenderer.h" />
     <ClInclude Include="LTCSceneManager.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="nelder_mead.h" />
     <ClInclude Include="PBRRenderer.h" />
     <ClInclude Include="PBRSceneManager.h" />
+    <ClInclude Include="plot.h" />
     <ClInclude Include="RenderBufferObject.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="SceneObject.h" />

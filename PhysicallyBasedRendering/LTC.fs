@@ -179,10 +179,7 @@ mat3 transpose(mat3 v)
 float IntegrateEdge(vec3 v1, vec3 v2)
 {
     float cosTheta = dot(v1, v2);
-	// theta 값은 0~1일거야 아마
     float theta = acos(cosTheta);
-	// a x b 를 할 경우 a와 b에 수직인 n|a||b|sin(세타) 인데 a와 b 모두 normalized 벡터일 경우
-	// 결국 a x b의 크기는 sin(세타)이다. 여기서는 그 식을 쓴것이다.
     float res = cross(v1, v2).z * ((theta > 0.001) ? theta/sin(theta) : 1.0);
 
     return res;
@@ -300,19 +297,15 @@ void ClipQuadToHorizon(inout vec3 L[5], out int n)
 }
 
 // P가 땅의 pos(눈으로 봤을 때 접점)
-vec3 LTC_Evaluate(
-    vec3 N, vec3 V, vec3 P, mat3 Minv, vec3 points[4], bool twoSided)
+
+vec3 LTC_Evaluate(vec3 N, vec3 V, vec3 P, mat3 Minv, vec3 points[4], bool twoSided)
 {
-    // construct orthonormal basis around N
     vec3 T1, T2;
     T1 = normalize(V - N*dot(V, N));
     T2 = cross(N, T1);
 
-    // rotate area light in (T1, T2, N) basis
-	// matrix도 셰이딩할 점을 기준으로 N이 z좌표축인 좌표계로 바꾼다.
     Minv = mul(Minv, transpose(mat3(T1, T2, N)));
 
-    // polygon (allocate 5 vertices for clipping)
     vec3 L[5];
     L[0] = mul(Minv, points[0] - P);
     L[1] = mul(Minv, points[1] - P);
@@ -325,7 +318,6 @@ vec3 LTC_Evaluate(
     if (n == 0)
         return vec3(0, 0, 0);
 
-    // project onto sphere
     L[0] = normalize(L[0]);
     L[1] = normalize(L[1]);
     L[2] = normalize(L[2]);
@@ -333,12 +325,12 @@ vec3 LTC_Evaluate(
     L[4] = normalize(L[4]);
 
     // integrate
+
     float sum = 0.0;
 
     sum += IntegrateEdge(L[0], L[1]);
     sum += IntegrateEdge(L[1], L[2]);
     sum += IntegrateEdge(L[2], L[3]);
-    // 여기서는 L[4]가 L[0]임
 	if (n >= 4)
         sum += IntegrateEdge(L[3], L[4]);
     if (n == 5)
@@ -425,7 +417,6 @@ void main()
 	// floor의 색을 칠해야 함
     if (hitFloor)
     {
-		// 땅과의 접점
         vec3 pos = ray.origin + ray.dir*distToFloor;
 
         vec3 N = floorPlane.xyz;
@@ -437,20 +428,10 @@ void main()
         
         vec4 t = texture2D(ltc_mat, uv);
         mat3 Minv = mat3(
-            vec3(  1.0,   0, 0.0),
-            vec3(  0,   1.0,   0),
-            vec3( 0.0,    0, 1.0)
-        );
-
-		Minv = mat3(
 			vec3(1,   0,   t.y),
 			vec3(0,   t.z, 0),
 			vec3(t.w, 0,   t.x)
 		);
-
-		// 1,  0,   t.y
-		// 0,  t.z, 0
-		// t.w 0    t.x
         
         vec3 spec = LTC_Evaluate(N, V, pos, Minv, points, twoSided);
         vec3 diff = LTC_Evaluate(N, V, pos, mat3(1), points, twoSided); 

@@ -7,7 +7,8 @@ void LTCRenderer::InitializeRender()
 	ltcShader->Use();
 	ltcShader->SetUniform1i("ltc_mat", 0);
 
-	ltcTex.LoadTexture("Texture/brdf/ibl_brdf_lut.png");
+	ltcTex.LoadTextureDDS("Texture/brdf/ltc_mat.dds");
+	
 	ltcTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
 	glm::mat3 debugMat = glm::mat3();
@@ -23,6 +24,7 @@ void LTCRenderer::InitializeRender()
 	Debug::GetInstance()->Log(debugMat);
 }
 
+float tmp = 0.0f;
 void LTCRenderer::Render()
 {
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
@@ -54,8 +56,9 @@ void LTCRenderer::Render()
 	ltcShader->SetUniform1f("width", 8.0);
 	ltcShader->SetUniform1f("height", 8.0);
 	ltcShader->SetUniform1f("rotx", 0.0);
-	ltcShader->SetUniform1f("roty", 0.0);
+	ltcShader->SetUniform1f("roty", tmp);
 	ltcShader->SetUniform1f("rotz", 0.0);
+	tmp += 0.01f;
 
 	ltcShader->SetUniformBool("twoSided", true);
 	

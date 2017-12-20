@@ -17,7 +17,7 @@ enum Scene
 
 int main(int argc, char **argv)
 {
-	Scene scene = PBR_SCENE;
+	Scene scene = LTC_SCENE;
 
 	WindowManager::GetInstance()->Initialize();
 

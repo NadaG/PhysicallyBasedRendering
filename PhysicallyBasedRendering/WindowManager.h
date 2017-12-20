@@ -12,6 +12,7 @@ public:
 	GLFWwindow* CreateMyWindow(int width, int height, const char* name);
 	bool WindowShouldClose();
 	
+	void Initialize();
 	void Terminate();
 	float width, height;
 

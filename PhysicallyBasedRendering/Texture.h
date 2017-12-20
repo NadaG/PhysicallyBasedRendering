@@ -29,8 +29,9 @@ public:
 	Texture() {};
 	Texture(char const* path);
 
-	void LoadTexture(char const* path);
+	void LoadTexture(const string& s);
 	void LoadTexture(const GLint& internalformat, const GLsizei& width, const GLsizei& height, const GLenum& format, const GLenum& type);
+	
 	void LoadTextureCubeMap(const GLint& internalformat, const GLsizei& width, const GLsizei& height, const GLenum& format, const GLenum& type);
 	void LoadTextureCubeMap(vector<string> faces, const GLint& internalformat, const GLenum& format, const GLenum& type);
 
@@ -46,11 +47,11 @@ public:
 
 	const GLuint& GetTexture() const { return texture; }
 
-	void Bind(GLenum texture);
-	// TO refacto
-	void BindCubemap(GLenum texture);
+	virtual void Bind(GLenum texture) = 0;
+	
+	void GenerateMipmap();
 
-private:
+protected:
 	GLuint texture;
 
 	GLsizei width, height;

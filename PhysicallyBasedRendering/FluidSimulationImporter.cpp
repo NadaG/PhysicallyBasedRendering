@@ -59,6 +59,7 @@ struct ObstacleSphere
 
 int(*initialize)(SimulationParam param, FluidCube* cubes, ObstacleCube* obsobjs);
 void(*update)(float* pos, float* vel, int* issur, ObstacleSphere *spheres, int n_spheres);
+void(*quit)();
 
 void FluidSimulationImporter::Initialize()
 {
@@ -67,6 +68,7 @@ void FluidSimulationImporter::Initialize()
 
 	initialize = (int(*)(SimulationParam, FluidCube*, ObstacleCube*))GetProcAddress(handle, "initialize");
 	update = (void(*)(float*, float*, int*, ObstacleSphere *, int))GetProcAddress(handle, "update");
+	quit = (void(*)())GetProcAddress(handle, "quit");
 
 	sparam.boundaryPos.x = 0.0f;
 	sparam.boundaryPos.y = 2.5f;
@@ -101,21 +103,56 @@ void FluidSimulationImporter::Initialize()
 	particleNum = initialize(sparam, cubes, nullptr);
 	
 	pos = new float[particleNum * 3];
+	stopFramePos = new float[particleNum * 3];
 	vel = new float[particleNum * 3];
 	issur = new int[particleNum];
 }
 
 void FluidSimulationImporter::Update(GLfloat* v)
 {
+	nowFrame++;
 	update(pos, vel, issur, nullptr, 0);
 
-	for (int i = 0; i < particleNum; i++)
+	if (nowFrame == toStopFrame)
 	{
-		v[i * 6 + 0] = pos[i * 3 + 0];
-		v[i * 6 + 1] = pos[i * 3 + 1];
-		v[i * 6 + 2] = pos[i * 3 + 2];
-		v[i * 6 + 4] = vel[i * 3 + 0];
-		v[i * 6 + 5] = vel[i * 3 + 1];
-		v[i * 6 + 6] = vel[i * 3 + 2];
+		for (int i = 0; i < particleNum; i++)
+		{
+			stopFramePos[i * 3 + 0] = pos[i * 3 + 0];
+			stopFramePos[i * 3 + 1] = pos[i * 3 + 1];
+			stopFramePos[i * 3 + 2] = pos[i * 3 + 2];
+		}
 	}
+	else if(nowFrame > toStopFrame)
+	{
+		for (int i = 0; i < particleNum; i++)
+		{
+			v[i * 6 + 0] = stopFramePos[i * 3 + 0];
+			v[i * 6 + 1] = stopFramePos[i * 3 + 1];
+			v[i * 6 + 2] = stopFramePos[i * 3 + 2];
+			v[i * 6 + 4] = vel[i * 3 + 0];
+			v[i * 6 + 5] = vel[i * 3 + 1];
+			v[i * 6 + 6] = vel[i * 3 + 2];
+		}
+	}
+	else
+	{
+		for (int i = 0; i < particleNum; i++)
+		{
+			v[i * 6 + 0] = pos[i * 3 + 0];
+			v[i * 6 + 1] = pos[i * 3 + 1];
+			v[i * 6 + 2] = pos[i * 3 + 2];
+			v[i * 6 + 4] = vel[i * 3 + 0];
+			v[i * 6 + 5] = vel[i * 3 + 1];
+			v[i * 6 + 6] = vel[i * 3 + 2];
+		}
+	}
+}
+
+void FluidSimulationImporter::Quit()
+{
+	delete[] pos;
+	delete[] vel;
+	delete[] issur;
+	quit();
+	
 }

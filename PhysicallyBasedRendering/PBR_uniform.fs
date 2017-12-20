@@ -6,11 +6,10 @@ in vec3 outNormal;
 
 out vec3 color;
 
-uniform sampler2D aoMap;
-uniform sampler2D albedoMap;
-uniform sampler2D metallicMap;
-uniform sampler2D normalMap;
-uniform sampler2D roughnessMap;
+uniform vec3 albedo;
+uniform float ao;
+uniform float metallic;
+uniform float roughness;
 
 uniform samplerCube irradianceMap;
 uniform samplerCube prefilterMap;
@@ -25,26 +24,6 @@ const float PI = 3.14159265359;
 
 // mix function lerp와 비슷하다
 // mix(x, y, a)이면 x*(1-a) + y*a를 리턴한다
-
-// tangent space에서의 normal을 이용해 world space의 normal을 구함
-vec3 getNormalFromMap()
-{
-	// tangent space에서의 normal, 값은 -1에서 1
-	vec3 tangentNormal = texture(normalMap, outUV).xyz * 2.0 - 1.0;
-
-	vec3 Q1 = dFdx(worldPos);
-	vec3 Q2 = dFdy(worldPos);
-	vec2 st1 = dFdx(outUV);
-	vec2 st2 = dFdy(outUV);
-
-	// (e1, e2) = (u1, v1, u2, v2) * (T, B)로 두고 역행렬로 풀어서 T 구하면 됨
-	vec3 N = normalize(outNormal);
-	vec3 T = normalize(Q1*st2.t - Q2*st1.t);
-	vec3 B = -normalize(cross(N, T));
-	mat3 TBN = mat3(T, B, N);
-
-	return normalize(TBN * tangentNormal);
-}
 
 // ggx distribution이라고 외우자
 float DistributionGGX(vec3 N, vec3 H, float roughness)
@@ -104,16 +83,7 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
 
 void main()
 {
-	// gamma correction
-	// 사람의 눈은 더 밝게 인식하므로 
-	// 살짝 어둡게 만드는 것임
-	vec3 albedo = pow(texture(albedoMap, outUV).rgb, vec3(2.2));
-
-	float metallic = texture(metallicMap, outUV).r;
-	float roughness = texture(roughnessMap, outUV).r;
-	float ao = texture(aoMap, outUV).r;
-
-	vec3 N = getNormalFromMap();
+	vec3 N = outNormal;
 	vec3 V = normalize(eyePos - worldPos);
 	vec3 R = reflect(-V, N);
 
@@ -188,9 +158,7 @@ void main()
 	vec3 specular = prefilterdColor * (F * brdf.x + brdf.y);
 
 	// 배경에서 오는 빛이 ambient로 작용한다
-    vec3 ambient = (kD * diffuse + specular) * 1.0;
-	// if(hasAo)
-	// vec3 ambient = (kD * diffuse + specular) * ao;
+    vec3 ambient = (kD * diffuse + specular) * ao;
     
 	color = ambient + Lo;
 

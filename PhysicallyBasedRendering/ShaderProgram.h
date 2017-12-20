@@ -9,7 +9,8 @@
 #include <fstream>
 #include <iostream>
 
-#include "Texture.h"
+#include "Texture2D.h"
+#include "TextureCube.h"
 
 using std::string;
 using std::ifstream;

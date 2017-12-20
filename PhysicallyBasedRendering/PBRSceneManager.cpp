@@ -2,6 +2,10 @@
 
 void PBRSceneManager::InitializeObjects()
 {
+	skyboxObj.LoadMesh(CUBE);
+	cubeObj.LoadMesh(CUBE);
+	quadObj.LoadMesh(QUAD);
+
 	selectedLightId = 0;
 
 	float yDist = 3.0f;
@@ -17,6 +21,9 @@ void PBRSceneManager::InitializeObjects()
 			sceneObjs[i * 3 + j].Translate(pos);
 		}
 	}
+
+	skyboxObj.Scale(glm::vec3(1.0f));
+	cubeObj.Scale(glm::vec3(4.0f, 1.0f, 1.0f));
 
 	cameraObj.Translate(glm::vec3(0.0f, 0.0f, 15.0f));
 

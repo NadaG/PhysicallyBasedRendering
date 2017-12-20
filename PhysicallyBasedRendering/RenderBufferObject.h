@@ -7,10 +7,11 @@ class RenderBufferObject
 public:
 	
 	RenderBufferObject() {};
-	RenderBufferObject(const unsigned int& width, const unsigned int& height);
 
 	const GLuint& GetRBO() const { return rbo; }
-	void GenRenderBufferObject(const GLenum& internalformat, const unsigned int& width, const unsigned int& height);
+	void GenRenderBufferObject();
+	void RenderBufferStorage(const GLenum& internalformat, const unsigned int& width, const unsigned int& height);
+	void Bind() const;
 
 private:
 

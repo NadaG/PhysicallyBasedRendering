@@ -3,6 +3,10 @@
 uniform sampler2D worldMap;
 uniform sampler2D bluredDepthMap;
 uniform sampler2D thicknessMap;
+uniform sampler2D normalMap;
+uniform sampler2D worldDepthMap;
+
+uniform sampler2D debugMap;
 
 uniform mat4 projection;
 uniform mat4 view;
@@ -14,6 +18,7 @@ uniform float near;
 uniform float far;
 
 in vec2 outUV;
+in vec3 normal;
 
 out vec3 color;
 
@@ -41,12 +46,20 @@ vec3 getEyePos(sampler2D tex, vec2 uv)
 	return posEye.xyz;
 }
 
+float LinearizeDepth(float depth)
+{
+	float z = depth * 2.0 - 1.0;
+	return (2.0 * near * far) / (far + near - z * (far - near));
+}
+
 void main()
 {
 	vec3 depth = texture(bluredDepthMap, outUV).rgb;
 	vec3 worldColor = texture(worldMap, outUV).rgb;
+	float worldDepth = texture(worldDepthMap, outUV).r;
+	
 	// depth가 없는 곳에서는, 즉 물이 없는 곳에서는 배경 색이 보임
-	if(depth.r == 1.0f || depth.r == 0.0f)
+	if(depth.r == 1.0f || depth.r == 0.0f || LinearizeDepth(worldDepth) / far < depth.r)
 	{
 		color = worldColor;
 		return;
@@ -70,6 +83,8 @@ void main()
 	}
 
 	vec3 n = normalize(cross(ddx, ddy));
+	//n = normalize(texture(normalMap, outUV).rgb);
+
 	vec3 lightPosNorm = normalize(vec3(view*vec4(lightDir, 0.0)));
 	
 	vec3 reflectDir = normalize(reflect(-lightPosNorm, n));
@@ -85,4 +100,7 @@ void main()
 	float I = 1 / (exp(1 * thickness));
 	
 	color = ambient + diffuse + specular * fresnel(n, eyeDir) + worldColor * I;
+	//color = ambient + diffuse + specular;
+	//color = n;
+	//color = texture(debugMap, outUV).rgb;
 }

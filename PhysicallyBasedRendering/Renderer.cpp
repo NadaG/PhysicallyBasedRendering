@@ -25,6 +25,14 @@ void Renderer::RenderObjects(ShaderProgram * shader, vector<SceneObject> objs)
 	}
 }
 
+void Renderer::RenderObject(ShaderProgram * shader, SceneObject obj)
+{
+	shader->Use();
+	glm::mat4 model = obj.GetModelMatrix();
+	shader->SetUniformMatrix4f("model", model);
+	obj.Draw();
+}
+
 // VAO(vertex array object), VBO(vertex buffer object), IBO(index buffer object) 정리
 // 생성
 // glGenVertexArrays(1, &vao);

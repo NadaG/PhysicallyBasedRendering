@@ -25,35 +25,31 @@ private:
 	ShaderProgram* surfaceShader;
 	ShaderProgram* pbrShader;
 
-	ShaderProgram* skyboxShader;
-
 	// floor
-	Texture floorAlbedoTex;
+	Texture2D floorAlbedoTex;
 
 	// world
-	Texture worldColorTex;
-	Texture worldDepthTex;
+	Texture2D worldColorTex;
+	Texture2D worldDepthTex;
 
-	// debug용임 
-	Texture colorTex;
+	// debug용임 normal 값 저장
+	Texture2D colorTex;
 
-	Texture depthTex;
-	Texture thicknessTex;
+	Texture2D depthTex;
+	Texture2D thicknessTex;
 	
 	RenderBufferObject tmpDepthRBO;
 	
 	// blur
-	Texture depthBlurTex[2];
-	Texture thicknessBlurTex[2];
-	
-	Texture cubeTex;
+	Texture2D depthBlurTex[2];
+	Texture2D thicknessBlurTex[2];
 
 	const int depthWidth = 1024;
 	const int depthHeight = 1024;
 
 	const int blurNum = 2;
 
-	const float depthNear = 1.0f;
+	const float depthNear = 0.01f;
 	const float depthFar = 60.0;
 
 	FrameBufferObject pbrFBO;

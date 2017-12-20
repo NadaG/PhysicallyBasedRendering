@@ -129,6 +129,12 @@
     <ClCompile Include="SmokeSimulationImporter.cpp">
       <Filter>Source Files\SmokeSimulationImporter</Filter>
     </ClCompile>
+    <ClCompile Include="Texture2D.cpp">
+      <Filter>Source Files\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureCube.cpp">
+      <Filter>Source Files\Texture</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -190,6 +196,27 @@
       <Filter>Shader Files</Filter>
     </None>
     <None Include="SkyBox.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Reflect.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Reflect.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="irradianceConvolution.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Prefilter.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Brdf.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Brdf.vs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="PBR_uniform.fs">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>
@@ -259,6 +286,12 @@
     </ClInclude>
     <ClInclude Include="SmokeSimulationImporter.h">
       <Filter>Source Files\SmokeSimulationImporter</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture2D.h">
+      <Filter>Source Files\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureCube.h">
+      <Filter>Source Files\Texture</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

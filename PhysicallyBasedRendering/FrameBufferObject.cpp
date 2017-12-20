@@ -19,14 +19,14 @@ void FrameBufferObject::BindRenderBuffer(GLenum attachment, RenderBufferObject r
 }
 
 // depth map을 그리기 위한 texture binding 이었음
-void FrameBufferObject::BindTexture(GLenum attachment, GLenum textarget, Texture texture)
+void FrameBufferObject::BindTexture(GLenum attachment, GLenum textarget, Texture* texture)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	glFramebufferTexture2D(
 		GL_FRAMEBUFFER, 
 		attachment, 
 		textarget, 
-		texture.GetTexture(), 
+		texture->GetTexture(), 
 		0);
 	attachments.push_back(attachment);
 }

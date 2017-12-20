@@ -17,7 +17,9 @@ enum Scene
 
 int main(int argc, char **argv)
 {
-	Scene scene = SMOKE_SCENE;
+	Scene scene = PBR_SCENE;
+
+	WindowManager::GetInstance()->Initialize();
 
 	WindowManager::GetInstance()->WindowHint(GLFW_SAMPLES, 4);
 	WindowManager::GetInstance()->WindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -46,33 +48,33 @@ int main(int argc, char **argv)
 	// Factory 패턴을 이용하면 생성을 분리할 수 있을 거 같음
 	switch (scene)
 	{
-		case PBR_SCENE:
-		{
-			sceneManager = new PBRSceneManager();
-			renderer = new PBRRenderer(sceneManager);
-			break;
-		}
-		case FLUID_SCENE:
-		{	sceneManager = new FluidSceneManager();
-			renderer = new FluidRenderer(sceneManager);
-			break;
-		}
-		case LTC_SCENE:
-		{
-			sceneManager = new LTCSceneManager();
-			renderer = new LTCRenderer(sceneManager);
-			break;
-		}
-		case SMOKE_SCENE:
-		{
-			sceneManager = new SmokeSceneManager();
-			renderer = new VolumeRenderer(sceneManager);
-			break;
-		}
-		default:
-			sceneManager = new PBRSceneManager();
-			renderer = new PBRRenderer(sceneManager);
-			break;
+	case PBR_SCENE:
+	{
+		sceneManager = new PBRSceneManager();
+		renderer = new PBRRenderer(sceneManager);
+		break;
+	}
+	case FLUID_SCENE:
+	{	sceneManager = new FluidSceneManager();
+	renderer = new FluidRenderer(sceneManager);
+	break;
+	}
+	case LTC_SCENE:
+	{
+		sceneManager = new LTCSceneManager();
+		renderer = new LTCRenderer(sceneManager);
+		break;
+	}
+	case SMOKE_SCENE:
+	{
+		sceneManager = new SmokeSceneManager();
+		renderer = new VolumeRenderer(sceneManager);
+		break;
+	}
+	default:
+		sceneManager = new PBRSceneManager();
+		renderer = new PBRRenderer(sceneManager);
+		break;
 	}
 
 	sceneManager->InitializeObjects();
@@ -86,8 +88,8 @@ int main(int argc, char **argv)
 		renderer->Render();
 		InputManager::GetInstance()->PollEvents();
 		glfwSwapBuffers(window);
-	}
-	while (InputManager::GetInstance()->IsKey(GLFW_KEY_ESCAPE) != GLFW_PRESS && 
+	} 
+	while (InputManager::GetInstance()->IsKey(GLFW_KEY_ESCAPE) != GLFW_PRESS &&
 		!WindowManager::GetInstance()->WindowShouldClose());
 
 	renderer->TerminateRender();
@@ -96,7 +98,7 @@ int main(int argc, char **argv)
 	delete sceneManager;
 
 	// TODO runtime error
-	// WindowManager::GetInstance()->Terminate();
+	WindowManager::GetInstance()->Terminate();
 
 	return 0;
 }

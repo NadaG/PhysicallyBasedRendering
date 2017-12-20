@@ -24,7 +24,7 @@ uniform float rotz;
 uniform bool twoSided;
 
 uniform sampler2D ltc_mat;
-uniform sampler2D ltc_mag;
+//uniform sampler2D ltc_mag;
 
 uniform mat4  view;
 uniform vec2  resolution;
@@ -309,6 +309,7 @@ vec3 LTC_Evaluate(
     T2 = cross(N, T1);
 
     // rotate area light in (T1, T2, N) basis
+	// matrix도 셰이딩할 점을 기준으로 N이 z좌표축인 좌표계로 바꾼다.
     Minv = mul(Minv, transpose(mat3(T1, T2, N)));
 
     // polygon (allocate 5 vertices for clipping)
@@ -441,9 +442,15 @@ void main()
             vec3( 0.0,    0, 1.0)
         );
 
-		// 1,  0,   t.w
+		Minv = mat3(
+			vec3(1,   0,   t.y),
+			vec3(0,   t.z, 0),
+			vec3(t.w, 0,   t.x)
+		);
+
+		// 1,  0,   t.y
 		// 0,  t.z, 0
-		// t.y 0    t.x
+		// t.w 0    t.x
         
         vec3 spec = LTC_Evaluate(N, V, pos, Minv, points, twoSided);
         vec3 diff = LTC_Evaluate(N, V, pos, mat3(1), points, twoSided); 
@@ -460,4 +467,5 @@ void main()
             col = lcol;
 
     color = col;
+	//color = texture2D(ltc_mat, outUV).rgb;
 }

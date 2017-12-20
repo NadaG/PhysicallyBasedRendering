@@ -173,6 +173,8 @@
     <ClCompile Include="SmokeSceneManager.cpp" />
     <ClCompile Include="SmokeSimulationImporter.cpp" />
     <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="Texture2D.cpp" />
+    <ClCompile Include="TextureCube.cpp" />
     <ClCompile Include="VertexArrayObject.cpp" />
     <ClCompile Include="VolumeRenderer.cpp" />
     <ClCompile Include="WindowManager.cpp" />
@@ -180,10 +182,15 @@
   <ItemGroup>
     <None Include="Basic.fs" />
     <None Include="Basic.vs" />
+    <None Include="Brdf.fs" />
+    <None Include="Brdf.vs" />
     <None Include="Cubemap.vs" />
     <None Include="equirectangularToCubemap.fs" />
+    <None Include="irradianceConvolution.fs" />
     <None Include="LTC.fs" />
     <None Include="ParticleThickness.fs" />
+    <None Include="PBR_uniform.fs" />
+    <None Include="Prefilter.fs" />
     <None Include="Quad.fs" />
     <None Include="Quad.vs" />
     <None Include="Depth.fs" />
@@ -191,6 +198,8 @@
     <None Include="Blur.fs" />
     <None Include="Light.fs" />
     <None Include="Light.vs" />
+    <None Include="Reflect.fs" />
+    <None Include="Reflect.vs" />
     <None Include="SkyBox.fs" />
     <None Include="SkyBox.vs" />
     <None Include="Surface.fs" />
@@ -220,6 +229,8 @@
     <ClInclude Include="SmokeSimulationImporter.h" />
     <ClInclude Include="SmokeSceneManager.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="Texture2D.h" />
+    <ClInclude Include="TextureCube.h" />
     <ClInclude Include="VertexArrayObject.h" />
     <ClInclude Include="VolumeRenderer.h" />
     <ClInclude Include="WindowManager.h" />

@@ -16,8 +16,14 @@ public:
 	void Render();
 	void TerminateRender();
 
+	void DrawSmoke();
+
 private:
 
-	ShaderProgram* basicShader;
-	SmokeSimulationImporter* importer;
+	ShaderProgram* pointShader;
+
+	VertexArrayObject smokeVAO;
+	GLfloat* vertices;
+
+	const int pointNum = 5;
 };

@@ -6,19 +6,36 @@ ShaderProgram::ShaderProgram(const char * vertex_file_path, const char * fragmen
 	LoadShaders(vertex_file_path, fragment_file_path);
 }
 
+ShaderProgram::ShaderProgram(const char * vertex_file_path, const char * fragment_file_path, const char * geometry_file_path)
+{
+	shaderProgramID = glCreateProgram();
+	LoadShaders(vertex_file_path, fragment_file_path, geometry_file_path);
+}
+
 ShaderProgram::~ShaderProgram()
 {
 	glDetachShader(shaderProgramID, vertexShaderID);
 	glDetachShader(shaderProgramID, fragmentShaderID);
+	if (geometryShaderID)
+		glDetachShader(shaderProgramID, geometryShaderID);
 
 	glDeleteShader(vertexShaderID);
 	glDeleteShader(fragmentShaderID);
+	if (geometryShaderID)
+		glDeleteShader(geometryShaderID);
 }
 
-void ShaderProgram::LoadShaders(const char * vertex_file_path, const char * fragment_file_path)
+void ShaderProgram::LoadShaders(const char* vertex_file_path, const char* fragment_file_path)
 {
 	vertexShaderID = LoadShader(vertex_file_path, GL_VERTEX_SHADER);
 	fragmentShaderID = LoadShader(fragment_file_path, GL_FRAGMENT_SHADER);
+}
+
+void ShaderProgram::LoadShaders(const char * vertex_file_path, const char * fragment_file_path, const char * geometry_file_path)
+{
+	vertexShaderID = LoadShader(vertex_file_path, GL_VERTEX_SHADER);
+	fragmentShaderID = LoadShader(fragment_file_path, GL_FRAGMENT_SHADER);
+	geometryShaderID = LoadShader(geometry_file_path, GL_GEOMETRY_SHADER);
 }
 
 GLuint ShaderProgram::LoadShader(const char* shaderFilePath, int shaderType)

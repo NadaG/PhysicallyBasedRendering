@@ -26,13 +26,7 @@ private:
 
 	GLuint vertexShaderID;
 	GLuint fragmentShaderID;
-
-	Texture* albedo;
-	Texture* metallic;
-	Texture* normal;
-	Texture* roughness;
-	Texture* height;
-	Texture* ao;
+	GLuint geometryShaderID;
 
 private:
 	ShaderProgram();
@@ -41,12 +35,14 @@ private:
 public:
 
 	ShaderProgram(const char * vertex_file_path, const char * fragment_file_path);
+	ShaderProgram(const char* vertex_file_path, const char* fragment_file_path, const char* geometry_file_path);
 	virtual ~ShaderProgram();
 
 	GLuint GetShaderProgramID() { return shaderProgramID; }
 
 	void LoadShaders(const char * vertex_file_path, const char * fragment_file_path);
-	
+	void LoadShaders(const char * vertex_file_path, const char * fragment_file_path, const char* geometry_file_path);
+
 	void Use();
 
 	void SetUniform1f(string name, float value);

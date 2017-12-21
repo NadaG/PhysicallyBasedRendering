@@ -4,11 +4,32 @@ void VolumeRenderer::InitializeRender()
 {
 	backgroundColor = glm::vec4(1.0f, 0.0f, 1.0f, 0.0f);
 
-	basicShader = new ShaderProgram("Basic.vs", "Basic.fs");
-	basicShader->Use();
+	pointShader = new ShaderProgram("ParticleSphere.vs", "Phong.fs", "PointToCube.gs");
+	pointShader->Use();
 
-	importer = new SmokeSimulationImporter(100, 100, 100);
+	vertices = new GLfloat[pointNum * 6];
+
+	for (int i = 0; i < pointNum; i++)
+	{
+		// pos
+		vertices[i * 6 + 0] = i * 3.0f;
+		vertices[i * 6 + 1] = 0.0f;
+		vertices[i * 6 + 2] = 0.0f;
+		// color
+		vertices[i * 6 + 3] = 1.0f;
+		vertices[i * 6 + 4] = 0.0f;
+		vertices[i * 6 + 5] = 0.0f;
+	}
+
+	smokeVAO.GenVAOVBOIBO();
+	smokeVAO.VertexBufferData(sizeof(GLfloat) * pointNum * 6, vertices);
+
+	// position 
+	smokeVAO.VertexAttribPointer(3, 6);
+	smokeVAO.VertexAttribPointer(3, 6);
 }
+
+const float cubeLength = 1.0f;
 
 void VolumeRenderer::Render()
 {
@@ -35,22 +56,46 @@ void VolumeRenderer::Render()
 		glm::vec3(0.0f, 1.0f, 0.0f)
 	);
 
-	basicShader->Use();
+	pointShader->Use();
 
-	basicShader->SetUniformMatrix4f("view", view);
-	basicShader->SetUniformMatrix4f("projection", projection);
+	pointShader->SetUniformMatrix4f("view", view);
+	pointShader->SetUniformMatrix4f("projection", projection);
 
-	for (int i = 0; i < objs.size(); i++)
-	{
-		glm::mat4 model = objs[i].GetModelMatrix();
-		basicShader->SetUniformMatrix4f("model", model);
-		basicShader->SetUniformVector3f("inColor", glm::vec3(importer->density[i]+1.0f)*0.1f);
-		objs[i].Draw();
-	}
+	pointShader->SetUniformMatrix4f("model[0]", glm::translate(glm::vec3(0.0f, 0.0f, cubeLength)));
+	pointShader->SetUniformMatrix4f("model[1]", glm::translate(glm::vec3(0.0f, 0.0f, -cubeLength)));
+	
+	pointShader->SetUniformMatrix4f("model[2]", 
+		glm::rotate(glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::translate(glm::vec3(0.0f, 0.0f, cubeLength)));
+	pointShader->SetUniformMatrix4f("model[3]", 
+		glm::rotate(glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::translate(glm::vec3(0.0f, 0.0f, cubeLength)));
+	pointShader->SetUniformMatrix4f("model[4]", 
+		glm::rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::translate(glm::vec3(0.0f, 0.0f, cubeLength)));
+	pointShader->SetUniformMatrix4f("model[5]", 
+		glm::rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::translate(glm::vec3(0.0f, 0.0f, -cubeLength)));
+	
+	/*pointShader->SetUniformMatrix4f("model[2]", 
+		glm::rotate(glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::translate(glm::vec3(0.0f, 0.0f, cubeLength)));
+	pointShader->SetUniformMatrix4f("model[3]", 
+		glm::rotate(glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::translate(glm::vec3(0.0f, 0.0f, -cubeLength)));
+	pointShader->SetUniformMatrix4f("model[4]", 
+		glm::rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::translate(glm::vec3(0.0f, 0.0f, cubeLength)));
+	pointShader->SetUniformMatrix4f("model[5]", 
+		glm::rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::translate(glm::vec3(0.0f, 0.0f, -cubeLength)));*/
+	//pointShader->SetUniformMatrix4f("model", glm::mat4());
+	//Debug::GetInstance()->Log(glm::translate(glm::vec3(0.0f, 1.5f, 0.0f)));
+
+	DrawSmoke();
 }
 
 void VolumeRenderer::TerminateRender()
 {
-	basicShader->Delete();
-	delete basicShader;
+	pointShader->Delete();
+	delete pointShader;
+}
+
+void VolumeRenderer::DrawSmoke()
+{
+	smokeVAO.Bind();
+	glPointSize(10);
+	glDrawArrays(GL_POINTS, 0, pointNum);
 }

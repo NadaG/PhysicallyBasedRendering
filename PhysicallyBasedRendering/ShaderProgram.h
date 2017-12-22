@@ -25,8 +25,10 @@ private:
 	GLuint shaderProgramID;
 
 	GLuint vertexShaderID;
-	GLuint fragmentShaderID;
+	GLuint tessellationControlShaderID;
+	GLuint tessellationEvaluationShaderID;
 	GLuint geometryShaderID;
+	GLuint fragmentShaderID;
 
 private:
 	ShaderProgram();
@@ -34,21 +36,35 @@ private:
 
 public:
 
-	ShaderProgram(const char * vertex_file_path, const char * fragment_file_path);
-	ShaderProgram(const char* vertex_file_path, const char* fragment_file_path, const char* geometry_file_path);
+	ShaderProgram(const char* vertex_file_path, const char* fragment_file_path);
+	ShaderProgram(const char* vertex_file_path, const char* geometry_file_path, const char* fragment_file_path);
+	ShaderProgram(
+		const char* vertex_file_path, 
+		const char* tessellation_control_file_path, 
+		const char* tessellation_evaluation_file_path, 
+		const char* geometry_file_path, 
+		const char* fragment_file_path);
 	virtual ~ShaderProgram();
 
 	GLuint GetShaderProgramID() { return shaderProgramID; }
 
-	void LoadShaders(const char * vertex_file_path, const char * fragment_file_path);
-	void LoadShaders(const char * vertex_file_path, const char * fragment_file_path, const char* geometry_file_path);
-
+	void LoadShaders(const char* vertex_file_path, const char* fragment_file_path);
+	void LoadShaders(const char* vertex_file_path, const char* geometry_file_path, const char* fragment_file_path);
+	void LoadShaders(
+		const char* vertex_file_path,
+		const char* tessellation_control_file_path,
+		const char* tessellation_evaluation_file_path,
+		const char* geometry_file_path,
+		const char* fragment_file_path);
+	
 	void Use();
 
 	void SetUniform1f(string name, float value);
 	void SetUniform1i(string name, int value);
+
 	void SetUniformMatrix4f(string name, glm::mat4 &mat);
-	
+	void SetUniformMatrix3f(string name, glm::mat3 &mat);
+
 	void SetUniformVector4f(string name, glm::vec4 vec);
 	void SetUniformVector4f(string name, float x, float y, float z, float w);
 

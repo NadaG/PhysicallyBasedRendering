@@ -188,6 +188,8 @@
     <None Include="Brdf.vs" />
     <None Include="Cubemap.vs" />
     <None Include="equirectangularToCubemap.fs" />
+    <None Include="fragment.fs" />
+    <None Include="geometry.gs" />
     <None Include="irradianceConvolution.fs" />
     <None Include="LTC.fs" />
     <None Include="ParticleThickness.fs" />
@@ -212,6 +214,9 @@
     <None Include="ParticleSphere.vs" />
     <None Include="PBR.fs" />
     <None Include="PBR.vs" />
+    <None Include="tessellationControl.tcs" />
+    <None Include="tessellationEvaluation.tes" />
+    <None Include="vertex.vs" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="brdf.h" />

@@ -17,12 +17,16 @@ public:
 	void TerminateRender();
 
 	void DrawSmoke();
+	void DrawIco();
 
 private:
 
 	ShaderProgram* pointShader;
+	ShaderProgram* tessShader;
 
 	VertexArrayObject smokeVAO;
+	VertexArrayObject tessVAO;
+
 	GLfloat* vertices;
 
 	const int pointNum = 5;

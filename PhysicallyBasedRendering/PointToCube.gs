@@ -25,9 +25,11 @@ layout(triangle_strip, max_vertices = 36) out;
 //   float gl_ClipDistance[]; 
 // } gl_in[]
 
-in vec3 vColor[];
+in vec3 vWorldPos[];
+in vec3 vNormal[];
 
-out vec3 fColor;
+out vec3 worldPos;
+out vec3 normal;
 
 uniform mat4 model[6];
 uniform mat4 view;
@@ -35,22 +37,33 @@ uniform mat4 projection;
 
 void main()
 {
-	fColor = vColor[0];
-
+	// EmitVertex를 하지 않을 경우 vertex를 그리지 않음
 	for(int i = 0; i < 6; i++)
 	{
+		normal = normalize(cross(
+		vec3(gl_in[0].gl_Position + model[i] * vec4(1.0, -1.0, 0.0, 1.0)) - 
+		vec3(gl_in[0].gl_Position + model[i] * vec4(-1.0, -1.0, 0.0, 1.0)), 
+		vec3(gl_in[0].gl_Position + model[i] * vec4(1.0, 1.0, 0.0, 1.0)) - 
+		vec3(gl_in[0].gl_Position + model[i] * vec4(-1.0, -1.0, 0.0, 1.0))));
+
+		// normal = vec3(1.0, 0.0, 0.0);
+
 		gl_Position = projection * view * (gl_in[0].gl_Position + model[i] * vec4(1.0, -1.0, 0.0, 1.0));
+		worldPos = vec3(gl_in[0].gl_Position + model[i] * vec4(1.0, -1.0, 0.0, 1.0));
 		EmitVertex();
 
 		gl_Position = projection * view * (gl_in[0].gl_Position + model[i] * vec4(-1.0, -1.0, 0.0, 1.0));
+		worldPos = vec3(gl_in[0].gl_Position + model[i] * vec4(-1.0, -1.0, 0.0, 1.0));
 		EmitVertex();
 
 		gl_Position = projection * view * (gl_in[0].gl_Position + model[i] * vec4(1.0, 1.0, 0.0, 1.0));
+		worldPos = vec3(gl_in[0].gl_Position + model[i] * vec4(1.0, 1.0, 0.0, 1.0));
 		EmitVertex();
 
 		gl_Position = projection * view * (gl_in[0].gl_Position + model[i] * vec4(-1.0, 1.0, 0.0, 1.0));
+		worldPos = vec3(gl_in[0].gl_Position + model[i] * vec4(-1.0, 1.0, 0.0, 1.0));
 		EmitVertex();
-
+		
 		EndPrimitive();
 	}
 }

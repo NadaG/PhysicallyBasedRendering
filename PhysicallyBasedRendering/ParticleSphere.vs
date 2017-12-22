@@ -3,16 +3,10 @@
 layout(location = 0) in vec3 vertexPos;
 layout(location = 1) in vec3 vertexColor;
 
-
-
-out vec3 eyeSpacePos;
-
-out vec3 vColor;
+out vec3 vWorldPos;
+out vec3 vNormal;
 
 void main()
 {
-	//eyeSpacePos = vec3(view * vec4(vertexPos, 1.0));
-	//gl_Position = projection * view * vec4(vertexPos, 1.0);
 	gl_Position = vec4(vertexPos, 1.0);
-	vColor = vertexColor;
 }

@@ -30,6 +30,8 @@ void VertexArrayObject::IndexBufferData(const GLsizeiptr& size, const GLvoid* da
 
 void VertexArrayObject::VertexAttribPointer(const GLuint& size, const GLuint& stride)
 {
+	// 이게 어쩌면 오류를 만들고 있을 수도
+	glBindVertexArray(vao);
 	glEnableVertexAttribArray(vertexAttribPointerId);
 	glVertexAttribPointer(
 		vertexAttribPointerId, 

@@ -1,28 +1,53 @@
 #include "ShaderProgram.h"
 
-ShaderProgram::ShaderProgram(const char * vertex_file_path, const char * fragment_file_path)
+ShaderProgram::ShaderProgram(const char* vertex_file_path, const char* fragment_file_path)
 {
 	shaderProgramID = glCreateProgram();
 	LoadShaders(vertex_file_path, fragment_file_path);
 }
 
-ShaderProgram::ShaderProgram(const char * vertex_file_path, const char * fragment_file_path, const char * geometry_file_path)
+ShaderProgram::ShaderProgram(const char* vertex_file_path, const char* geometry_file_path, const char* fragment_file_path)
 {
 	shaderProgramID = glCreateProgram();
-	LoadShaders(vertex_file_path, fragment_file_path, geometry_file_path);
+	LoadShaders(vertex_file_path, geometry_file_path, fragment_file_path);
+}
+
+ShaderProgram::ShaderProgram(const char* vertex_file_path, const char* tessellation_control_file_path, const char* tessellation_evaluation_file_path, const char* geometry_file_path, const char* fragment_file_path)
+{
+	shaderProgramID = glCreateProgram();
+	LoadShaders(
+		vertex_file_path,
+		tessellation_control_file_path,
+		tessellation_evaluation_file_path,
+		geometry_file_path,
+		fragment_file_path);
 }
 
 ShaderProgram::~ShaderProgram()
 {
 	glDetachShader(shaderProgramID, vertexShaderID);
 	glDetachShader(shaderProgramID, fragmentShaderID);
-	if (geometryShaderID)
-		glDetachShader(shaderProgramID, geometryShaderID);
 
 	glDeleteShader(vertexShaderID);
 	glDeleteShader(fragmentShaderID);
+
 	if (geometryShaderID)
+	{
+		glDetachShader(shaderProgramID, geometryShaderID);
 		glDeleteShader(geometryShaderID);
+	}
+
+	if (tessellationControlShaderID)
+	{
+		glDetachShader(shaderProgramID, tessellationControlShaderID);
+		glDeleteShader(tessellationControlShaderID);
+	}
+
+	if (tessellationEvaluationShaderID)
+	{
+		glDetachShader(shaderProgramID, tessellationEvaluationShaderID);
+		glDeleteShader(tessellationEvaluationShaderID);
+	}
 }
 
 void ShaderProgram::LoadShaders(const char* vertex_file_path, const char* fragment_file_path)
@@ -31,11 +56,20 @@ void ShaderProgram::LoadShaders(const char* vertex_file_path, const char* fragme
 	fragmentShaderID = LoadShader(fragment_file_path, GL_FRAGMENT_SHADER);
 }
 
-void ShaderProgram::LoadShaders(const char * vertex_file_path, const char * fragment_file_path, const char * geometry_file_path)
+void ShaderProgram::LoadShaders(const char* vertex_file_path, const char* geometry_file_path, const char* fragment_file_path)
 {
 	vertexShaderID = LoadShader(vertex_file_path, GL_VERTEX_SHADER);
-	fragmentShaderID = LoadShader(fragment_file_path, GL_FRAGMENT_SHADER);
 	geometryShaderID = LoadShader(geometry_file_path, GL_GEOMETRY_SHADER);
+	fragmentShaderID = LoadShader(fragment_file_path, GL_FRAGMENT_SHADER);
+}
+
+void ShaderProgram::LoadShaders(const char * vertex_file_path, const char * tessellation_control_file_path, const char * tessellation_evaluation_file_path, const char * geometry_file_path, const char * fragment_file_path)
+{
+	vertexShaderID = LoadShader(vertex_file_path, GL_VERTEX_SHADER);
+	vertexShaderID = LoadShader(tessellation_control_file_path, GL_TESS_CONTROL_SHADER);
+	vertexShaderID = LoadShader(tessellation_evaluation_file_path, GL_TESS_EVALUATION_SHADER);
+	vertexShaderID = LoadShader(geometry_file_path, GL_GEOMETRY_SHADER);
+	vertexShaderID = LoadShader(fragment_file_path, GL_FRAGMENT_SHADER);
 }
 
 GLuint ShaderProgram::LoadShader(const char* shaderFilePath, int shaderType)
@@ -116,6 +150,11 @@ void ShaderProgram::SetUniform1i(string name, int value)
 void ShaderProgram::SetUniformMatrix4f(string name, glm::mat4 &mat)
 {
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgramID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+}
+
+void ShaderProgram::SetUniformMatrix3f(string name, glm::mat3 &mat)
+{
+	glUniformMatrix3fv(glGetUniformLocation(shaderProgramID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 }
 
 void ShaderProgram::SetUniformVector4f(string name, glm::vec4 vec)

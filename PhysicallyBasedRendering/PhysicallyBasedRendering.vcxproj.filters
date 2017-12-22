@@ -61,6 +61,9 @@
     <Filter Include="Source Files\LTCfitting">
       <UniqueIdentifier>{6b7ee98d-806b-438a-bcff-bb1cbfb0163d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader Files\tessTest">
+      <UniqueIdentifier>{d35235c1-b9b6-4e50-83e0-3bbec95c6301}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -233,6 +236,21 @@
     </None>
     <None Include="Phong.fs">
       <Filter>Shader Files</Filter>
+    </None>
+    <None Include="vertex.vs">
+      <Filter>Shader Files\tessTest</Filter>
+    </None>
+    <None Include="fragment.fs">
+      <Filter>Shader Files\tessTest</Filter>
+    </None>
+    <None Include="tessellationEvaluation.tes">
+      <Filter>Shader Files\tessTest</Filter>
+    </None>
+    <None Include="geometry.gs">
+      <Filter>Shader Files\tessTest</Filter>
+    </None>
+    <None Include="tessellationControl.tcs">
+      <Filter>Shader Files\tessTest</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

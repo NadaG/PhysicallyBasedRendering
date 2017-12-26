@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ShaderProgram.h"
-#include "Mesh.h"
+#include "Model.h"
 
 class PhongShaderProgram : public ShaderProgram
 {
@@ -12,9 +12,11 @@ public:
 		LoadShaders("Basic.vs", "Phong.fs");
 	}
 
-	void LoadPhongMesh();
-	void DrawPhongMesh();
+	void LoadPhongModel();
+	void DrawPhongModel();
 
 private:
-	vector<Mesh> phongMeshes;
+	Assimp::Importer importer;
+	vector<Mesh> meshes;
+	const aiScene *scene;
 };

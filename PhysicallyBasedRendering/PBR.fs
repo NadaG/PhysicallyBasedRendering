@@ -8,6 +8,7 @@ out vec3 color;
 
 uniform sampler2D aoMap;
 uniform sampler2D albedoMap;
+uniform sampler2D emissionMap;
 uniform sampler2D metallicMap;
 uniform sampler2D normalMap;
 uniform sampler2D roughnessMap;
@@ -108,6 +109,7 @@ void main()
 	// 사람의 눈은 더 밝게 인식하므로 
 	// 살짝 어둡게 만드는 것임
 	vec3 albedo = pow(texture(albedoMap, outUV).rgb, vec3(2.2));
+	vec3 emission = pow(texture(emissionMap, outUV).rgb, vec3(2.2));
 
 	float metallic = texture(metallicMap, outUV).r;
 	float roughness = texture(roughnessMap, outUV).r;
@@ -167,8 +169,9 @@ void main()
 	}
 
 	// 기존 pbr
-	// vec3 ambient = vec3(0.1) * albedo * ao;
-	// color = ambient + Lo;
+	vec3 ambient2 = vec3(0.1) * albedo * ao;
+	color = ambient2 + Lo + emission;
+	return;
 
 	vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
 	vec3 kS = F;

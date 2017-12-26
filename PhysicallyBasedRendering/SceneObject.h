@@ -29,6 +29,7 @@ public:
 
 	const glm::mat4 GetModelMatrix();
 	void Draw();
+	void DrawModel();
 
 	void LoadMesh(const char* s);
 	void LoadMesh(const MeshType& meshType);

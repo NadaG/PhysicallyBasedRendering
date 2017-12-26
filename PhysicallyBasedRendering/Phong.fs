@@ -25,7 +25,7 @@ void main()
 
 	vec3 eyeDir = normalize(eyePos);
 
-	vec3 specular = specularColor * max(0, pow(dot(normalize(reflect(lightDir, normal)), eyeDir), specularExpo));
+	vec3 specular = specularColor * max(0, pow(dot(normalize(reflect(lightDir, normalize(normal))), eyeDir), specularExpo));
 
 	color = ambient + diffuse + specular;
 

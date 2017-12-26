@@ -10,4 +10,5 @@ public:
 
 private:
 	vector<Mesh> meshes;
+	const aiScene *scene;
 };

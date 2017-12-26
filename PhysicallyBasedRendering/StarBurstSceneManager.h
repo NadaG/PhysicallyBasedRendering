@@ -15,7 +15,9 @@ public:
 private:
 
 	SceneObject streetLight;
-	const float cameraMoveSpeed = 0.2f;
 
-	SceneObject streetLightModel;
+	int selectedLightId;
+
+	const float cameraMoveSpeed = 0.2f;
+	const float lightMoveSpeed = 0.1f;
 };

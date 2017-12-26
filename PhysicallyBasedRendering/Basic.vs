@@ -16,5 +16,5 @@ void main()
 {
 	gl_Position = projection * view * model * vec4(vertexPos, 1.0);
 	normal = vertexNormal;
-	worldPos = vec3(model*vec4(vertexPos, 1.0));
+	worldPos = vec3(model * vec4(vertexPos, 1.0));
 }

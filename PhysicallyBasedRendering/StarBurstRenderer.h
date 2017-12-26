@@ -19,5 +19,14 @@ public:
 
 private:
 
-	PhongShaderProgram phongShader;
+	//PhongShaderProgram phongShader;
+	ShaderProgram* pbrShader;
+	ShaderProgram* lightShader;
+
+	Texture2D aoTex;
+	Texture2D albedoTex;
+	Texture2D metallicTex;
+	Texture2D normalTex;
+	Texture2D roughnessTex;
+	Texture2D emissionTex;
 };

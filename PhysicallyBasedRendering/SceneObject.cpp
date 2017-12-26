@@ -54,7 +54,11 @@ const glm::mat4 SceneObject::GetModelMatrix()
 void SceneObject::Draw()
 {
 	mesh.Draw();
-	//model.DrawModel();
+}
+
+void SceneObject::DrawModel()
+{
+	model.DrawModel();
 }
 
 void SceneObject::Translate(const glm::vec3& vec)

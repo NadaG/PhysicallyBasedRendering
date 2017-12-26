@@ -2,18 +2,48 @@
 
 void StarBurstRenderer::InitializeRender()
 {
-	phongShader.Use();
-	phongShader.LoadPhongMesh();
+	lightShader = new ShaderProgram("light.vs", "light.fs");
+	lightShader->Use();
+
+	pbrShader = new ShaderProgram("PBR.vs", "PBR.fs");
+	pbrShader->Use();
+	pbrShader->SetUniform1i("aoMap", 0);
+	pbrShader->SetUniform1i("albedoMap", 1);
+	pbrShader->SetUniform1i("emissionMap", 2);
+	pbrShader->SetUniform1i("metallicMap", 3);
+	pbrShader->SetUniform1i("normalMap", 4);
+	pbrShader->SetUniform1i("roughnessMap", 5);
+
+	string folder = "StreetLight";
+	aoTex.LoadTexture("Texture/" + folder + "/ao.png");
+	aoTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
+
+	albedoTex.LoadTexture("Texture/" + folder + "/albedo.png");
+	albedoTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
+
+	emissionTex.LoadTexture("Texture/" + folder + "/emission.jpg");
+	emissionTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
+	
+	metallicTex.LoadTexture("Texture/" + folder + "/metallic.png");
+	metallicTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
+
+	normalTex.LoadTexture("Texture/" + folder + "/normal.png");
+	normalTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
+
+	roughnessTex.LoadTexture("Texture/" + folder + "/roughness.png");
+	roughnessTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
+
+	backgroundColor = glm::vec4(0.5f, 0.15f, 0.15f, 0.0f);
 }
 
 void StarBurstRenderer::Render()
 {
 	glEnable(GL_DEPTH_TEST);
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	vector<SceneObject>& sceneObj = sceneManager->sceneObjs;
+	vector<SceneObject>& sceneObjs = sceneManager->sceneObjs;
 	SceneObject& camera = sceneManager->cameraObj;
+	vector<SceneObject>& lights = sceneManager->lightObjs;
 
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 	UseDefaultFrameBufferObject();
@@ -31,30 +61,37 @@ void StarBurstRenderer::Render()
 		glm::vec3(0.0f, 1.0f, 0.0f)
 	);
 
-	phongShader.Use();
+	pbrShader->Use();
 
-	phongShader.SetUniformMatrix4f("model", glm::mat4());
-	phongShader.SetUniformMatrix4f("view", view);
-	phongShader.SetUniformMatrix4f("projection", projection);
+	pbrShader->SetUniformMatrix4f("view", view);
+	pbrShader->SetUniformMatrix4f("projection", projection);
+	pbrShader->SetUniformVector3f("eyePos", camera.GetWorldPosition());
 
-	phongShader.SetUniformVector3f("lightDir", glm::vec3(1.0f, 0.0f, 0.0f));
-	phongShader.SetUniformVector3f("eyePos", camera.GetWorldPosition());
+	for (int i = 0; i < lights.size(); i++)
+	{
+		pbrShader->SetUniformVector3f("lightPositions[" + std::to_string(i) + "]", lights[i].GetPosition());
+		pbrShader->SetUniformVector3f("lightColors[" + std::to_string(i) + "]", lights[i].GetColor());
+	}
 
-	phongShader.SetUniformVector3f("ambientColor", glm::vec3(0.2, 0.2, 0.2));
-	phongShader.SetUniformVector3f("diffuseColor", glm::vec3(0.2, 0.2, 0.2));
-	phongShader.SetUniformVector3f("specularColor", glm::vec3(0.2, 0.2, 0.2));
-	phongShader.SetUniform1f("specularExpo", 12);
-	phongShader.SetUniformVector3f("transmission", glm::vec3(0.2, 0.2, 0.2));
+	aoTex.Bind(GL_TEXTURE0);
+	albedoTex.Bind(GL_TEXTURE1);
+	emissionTex.Bind(GL_TEXTURE2);
+	metallicTex.Bind(GL_TEXTURE3);
+	normalTex.Bind(GL_TEXTURE4);
+	roughnessTex.Bind(GL_TEXTURE5);
 
-	/*for (int i = 0; i < sceneObj.size(); i++)
-		sceneObj[i].Draw();
-*/
-	sceneObj[1].Draw();
+	RenderObjects(pbrShader, sceneObjs);
 
-	//phongShader.DrawPhongMesh();
+	lightShader->Use();
+	lightShader->SetUniformMatrix4f("view", view);
+	lightShader->SetUniformMatrix4f("projection", projection);
+	RenderObjects(lightShader, lights);
 }
 
 void StarBurstRenderer::TerminateRender()
 {
-	phongShader.Delete();
+	//phongShader.Delete();
+	
+	pbrShader->Delete();
+	delete pbrShader;
 }

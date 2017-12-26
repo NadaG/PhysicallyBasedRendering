@@ -162,8 +162,10 @@
     <ClCompile Include="LTCRenderer.cpp" />
     <ClCompile Include="LTCSceneManager.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Model.cpp" />
     <ClCompile Include="PBRRenderer.cpp" />
     <ClCompile Include="PBRSceneManager.cpp" />
+    <ClCompile Include="PhongShaderProgram.cpp" />
     <ClCompile Include="RenderBufferObject.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="SceneObject.cpp" />
@@ -174,6 +176,8 @@
     <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="SmokeSceneManager.cpp" />
     <ClCompile Include="SmokeSimulationImporter.cpp" />
+    <ClCompile Include="StarBurstRenderer.cpp" />
+    <ClCompile Include="StarBurstSceneManager.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Texture2D.cpp" />
     <ClCompile Include="TextureCube.cpp" />
@@ -192,6 +196,7 @@
     <None Include="geometry.gs" />
     <None Include="irradianceConvolution.fs" />
     <None Include="LTC.fs" />
+    <None Include="ParticleBasic.vs" />
     <None Include="ParticleThickness.fs" />
     <None Include="PBR_uniform.fs" />
     <None Include="Phong.fs" />
@@ -233,9 +238,11 @@
     <ClInclude Include="LTCRenderer.h" />
     <ClInclude Include="LTCSceneManager.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="nelder_mead.h" />
     <ClInclude Include="PBRRenderer.h" />
     <ClInclude Include="PBRSceneManager.h" />
+    <ClInclude Include="PhongShaderProgram.h" />
     <ClInclude Include="plot.h" />
     <ClInclude Include="RenderBufferObject.h" />
     <ClInclude Include="SceneManager.h" />
@@ -246,6 +253,8 @@
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="SmokeSimulationImporter.h" />
     <ClInclude Include="SmokeSceneManager.h" />
+    <ClInclude Include="StarBurstRenderer.h" />
+    <ClInclude Include="StarBurstSceneManager.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Texture2D.h" />
     <ClInclude Include="TextureCube.h" />

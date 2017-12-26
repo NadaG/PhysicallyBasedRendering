@@ -1,7 +1,7 @@
 #pragma once
 #include<glm/glm.hpp>
 #include<glm/gtx/transform.hpp>
-#include "Mesh.h"
+#include "Model.h"
 
 class SceneObject
 {
@@ -28,10 +28,12 @@ public:
 	glm::vec3 GetWorldPosition();
 
 	const glm::mat4 GetModelMatrix();
-	void Draw() { mesh.Draw(); }
+	void Draw();
 
 	void LoadMesh(const char* s);
 	void LoadMesh(const MeshType& meshType);
+
+	void LoadModel(const char* s);
 
 	// TO Refacto 이거는 바꿔야함
 	void SetColor(const glm::vec3& color);
@@ -48,4 +50,5 @@ private:
 	glm::vec3 positionVector;
 
 	Mesh mesh;
+	Model model;
 };

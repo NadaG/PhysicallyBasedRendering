@@ -19,6 +19,11 @@ void SceneObject::LoadMesh(const MeshType& meshType)
 	mesh.GenerateAndSetVAO();
 }
 
+void SceneObject::LoadModel(const char * s)
+{
+	model.LoadModel(s);
+}
+
 void SceneObject::SetColor(const glm::vec3& color)
 {
 	this->color = color;
@@ -44,6 +49,12 @@ glm::vec3 SceneObject::GetWorldPosition()
 const glm::mat4 SceneObject::GetModelMatrix()
 {
 	return glm::translate(positionVector) * rotationMatrix * glm::scale(scaleVector);
+}
+
+void SceneObject::Draw()
+{
+	mesh.Draw();
+	//model.DrawModel();
 }
 
 void SceneObject::Translate(const glm::vec3& vec)

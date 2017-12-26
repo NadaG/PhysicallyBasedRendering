@@ -3,6 +3,7 @@
 #include<assimp\Importer.hpp>
 #include<assimp\scene.h>
 #include<assimp\postprocess.h>
+#include<assimp\material.h>
 #include<glm\glm.hpp>
 #include<string>
 #include<cstdio>
@@ -45,6 +46,8 @@ private:
 public:
 	Mesh();
 	virtual ~Mesh();
+
+	void SetMesh(aiMesh* mesh);
 
 	// file name을 통해 mesh를 생성
 	void LoadMesh(const string& fileName);

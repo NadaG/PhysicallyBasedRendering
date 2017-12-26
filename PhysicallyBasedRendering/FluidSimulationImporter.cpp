@@ -154,5 +154,4 @@ void FluidSimulationImporter::Quit()
 	delete[] vel;
 	delete[] issur;
 	quit();
-	
 }

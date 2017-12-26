@@ -2,6 +2,8 @@
 
 #include<GL/glew.h>
 
+#include "Debug.h"
+
 class VertexArrayObject
 {
 public:

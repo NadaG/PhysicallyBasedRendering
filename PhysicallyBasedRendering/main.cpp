@@ -2,6 +2,7 @@
 #include "PBRRenderer.h"
 #include "LTCRenderer.h"
 #include "VolumeRenderer.h"
+#include "StarBurstRenderer.h"
 #include "WindowManager.h"
 #include "Debug.h"
 
@@ -12,12 +13,13 @@ enum Scene
 	PBR_SCENE = 0,
 	FLUID_SCENE = 1,
 	LTC_SCENE = 2,
-	SMOKE_SCENE = 3
+	SMOKE_SCENE = 3,
+	STARBURST_SCENE = 4
 };
 
 int main(int argc, char **argv)
 {
-	Scene scene = SMOKE_SCENE;
+	Scene scene = STARBURST_SCENE;
 
 	WindowManager::GetInstance()->Initialize();
 
@@ -69,6 +71,12 @@ int main(int argc, char **argv)
 	{
 		sceneManager = new SmokeSceneManager();
 		renderer = new VolumeRenderer(sceneManager);
+		break;
+	}
+	case STARBURST_SCENE:
+	{
+		sceneManager = new StarBurstSceneManager();
+		renderer = new StarBurstRenderer(sceneManager);
 		break;
 	}
 	default:

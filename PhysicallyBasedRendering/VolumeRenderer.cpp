@@ -4,7 +4,7 @@ void VolumeRenderer::InitializeRender()
 {
 	backgroundColor = glm::vec4(1.0f, 0.0f, 1.0f, 0.0f);
 
-	pointShader = new ShaderProgram("ParticleSphere.vs", "PointToCube.gs", "Phong.fs");
+	pointShader = new ShaderProgram("ParticleBasic.vs", "PointToCube.gs", "Phong.fs");
 	pointShader->Use();
 
 	// tc는 draw할 때 vertex 갯수 만큼 호출된다.

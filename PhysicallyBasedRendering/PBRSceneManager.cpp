@@ -47,6 +47,7 @@ void PBRSceneManager::InitializeObjects()
 	lightObjs[3].SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
 }
 
+// TODO Camera는 따로 Object를 상속받아서 둘 것
 void PBRSceneManager::Update()
 {
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_J))

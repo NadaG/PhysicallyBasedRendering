@@ -64,6 +64,9 @@
     <Filter Include="Shader Files\tessTest">
       <UniqueIdentifier>{d35235c1-b9b6-4e50-83e0-3bbec95c6301}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Model">
+      <UniqueIdentifier>{9542e2e1-ab0d-4294-b183-45c8fa7d257a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -146,6 +149,18 @@
     </ClCompile>
     <ClCompile Include="fitLTC.cpp">
       <Filter>Source Files\LTCfitting</Filter>
+    </ClCompile>
+    <ClCompile Include="StarBurstSceneManager.cpp">
+      <Filter>Source Files\SceneManager</Filter>
+    </ClCompile>
+    <ClCompile Include="StarBurstRenderer.cpp">
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="PhongShaderProgram.cpp">
+      <Filter>Source Files\ShaderProgram</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Source Files\Model</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -252,6 +267,9 @@
     <None Include="tessellationControl.tcs">
       <Filter>Shader Files\tessTest</Filter>
     </None>
+    <None Include="ParticleBasic.vs">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ShaderProgram.h">
@@ -352,6 +370,18 @@
     </ClInclude>
     <ClInclude Include="export.h">
       <Filter>Source Files\LTCfitting</Filter>
+    </ClInclude>
+    <ClInclude Include="StarBurstRenderer.h">
+      <Filter>Source Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="StarBurstSceneManager.h">
+      <Filter>Source Files\SceneManager</Filter>
+    </ClInclude>
+    <ClInclude Include="PhongShaderProgram.h">
+      <Filter>Source Files\ShaderProgram</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Source Files\Model</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

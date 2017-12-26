@@ -26,7 +26,7 @@ public:
 
 	float* stopFramePos;
 
-	const int toStopFrame = 170;
+	const int toStopFrame = 500;
 	int nowFrame = 0;
 
 private:

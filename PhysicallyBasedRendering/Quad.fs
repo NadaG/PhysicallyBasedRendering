@@ -4,14 +4,10 @@ in vec2 outUV;
 
 out vec3 color;
 
-uniform sampler2D depthMap;
+// TODO depth map이 아니라 단순히 일반적인 map임....
+uniform sampler2D map;
 
 void main()
 {
-	float depthValue = texture(depthMap, outUV).r;
-
-	if(depthValue == 0.0f)
-		discard;
-
-	color = vec3(depthValue);
+	color = texture(map, outUV).rgb;
 }

@@ -4,12 +4,14 @@
 #include "PhongShaderProgram.h"
 #include "StarBurstSceneManager.h"
 
+#include <memory>
+
 // TODO path tracing and bloom here
 class StarBurstRenderer : public Renderer
 {
 public:
 	StarBurstRenderer(SceneManager* sceneManager)
-		:Renderer(sceneManager)
+		:Renderer(sceneManager), blurStep(3)
 	{}
 	virtual ~StarBurstRenderer() {};
 
@@ -19,9 +21,21 @@ public:
 
 private:
 
-	//PhongShaderProgram phongShader;
+	const int blurStep;
+
+	FrameBufferObject brightFBO;
+	FrameBufferObject pingpongBlurFBO[2];
+
+	Texture2D worldMap;
+	Texture2D brightMap;
+	Texture2D pingpongBlurMap[2];
+
 	ShaderProgram* pbrShader;
 	ShaderProgram* lightShader;
+	ShaderProgram* blurShader;
+	ShaderProgram* bloomShader;
+
+	shared_ptr<ShaderProgram> skyboxShader;
 
 	Texture2D aoTex;
 	Texture2D albedoTex;
@@ -29,4 +43,6 @@ private:
 	Texture2D normalTex;
 	Texture2D roughnessTex;
 	Texture2D emissionTex;
+
+	TextureCube skyboxTex;
 };

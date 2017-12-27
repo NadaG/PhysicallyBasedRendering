@@ -67,6 +67,9 @@
     <Filter Include="Source Files\Model">
       <UniqueIdentifier>{9542e2e1-ab0d-4294-b183-45c8fa7d257a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader Files\Bloom">
+      <UniqueIdentifier>{bc53664a-c52a-4b3f-b9f8-bdfe9433880a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -269,6 +272,18 @@
     </None>
     <None Include="ParticleBasic.vs">
       <Filter>Shader Files</Filter>
+    </None>
+    <None Include="GaussianBlur.fs">
+      <Filter>Shader Files\Bloom</Filter>
+    </None>
+    <None Include="PBRBrightness.fs">
+      <Filter>Shader Files\Bloom</Filter>
+    </None>
+    <None Include="BloomBlend.fs">
+      <Filter>Shader Files\Bloom</Filter>
+    </None>
+    <None Include="lensflare.fs">
+      <Filter>Shader Files\Bloom</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

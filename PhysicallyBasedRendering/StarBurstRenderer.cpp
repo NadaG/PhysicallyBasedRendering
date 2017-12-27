@@ -2,10 +2,13 @@
 
 void StarBurstRenderer::InitializeRender()
 {
+	debugQuadShader->Use();
+	debugQuadShader->SetUniform1i("map", 0);
+
 	lightShader = new ShaderProgram("light.vs", "light.fs");
 	lightShader->Use();
 
-	pbrShader = new ShaderProgram("PBR.vs", "PBR.fs");
+	pbrShader = new ShaderProgram("PBR.vs", "PBRBrightness.fs");
 	pbrShader->Use();
 	pbrShader->SetUniform1i("aoMap", 0);
 	pbrShader->SetUniform1i("albedoMap", 1);
@@ -13,6 +16,20 @@ void StarBurstRenderer::InitializeRender()
 	pbrShader->SetUniform1i("metallicMap", 3);
 	pbrShader->SetUniform1i("normalMap", 4);
 	pbrShader->SetUniform1i("roughnessMap", 5);
+
+	blurShader = new ShaderProgram("Quad.vs", "GaussianBlur.fs");
+	blurShader->Use();
+	blurShader->SetUniform1i("map", 0);
+
+	bloomShader = new ShaderProgram("Quad.vs", "BloomBlend.fs");
+	bloomShader->Use();
+	bloomShader->SetUniform1i("worldMap", 0);
+	bloomShader->SetUniform1i("blurredBrightMap", 1);
+	bloomShader->SetUniform1f("exposure", 1.0);
+
+	skyboxShader = make_shared<ShaderProgram>("SkyBox.vs", "SkyBox.fs");
+	skyboxShader->Use();
+	skyboxShader->SetUniform1i("skybox", 0);
 
 	string folder = "StreetLight";
 	aoTex.LoadTexture("Texture/" + folder + "/ao.png");
@@ -33,20 +50,63 @@ void StarBurstRenderer::InitializeRender()
 	roughnessTex.LoadTexture("Texture/" + folder + "/roughness.png");
 	roughnessTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
-	backgroundColor = glm::vec4(0.5f, 0.15f, 0.15f, 0.0f);
+	brightFBO.GenFrameBufferObject();
+	brightFBO.BindDefaultDepthBuffer(WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
+
+	worldMap.LoadTexture(
+		GL_RGB16F, 
+		WindowManager::GetInstance()->width, 
+		WindowManager::GetInstance()->height, 
+		GL_RGB, 
+		GL_FLOAT);
+	worldMap.SetParameters(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+	brightMap.LoadTexture(
+		GL_RGB16F,
+		WindowManager::GetInstance()->width,
+		WindowManager::GetInstance()->height,
+		GL_RGB,
+		GL_FLOAT);
+	brightMap.SetParameters(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+	brightFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &worldMap);
+	brightFBO.BindTexture(GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, &brightMap);
+
+	// fbo를 bind하고 clear(gl_color_buffer_bit)를 하면
+	// glDrawBuffers로 셋팅된 모든 buffer가 clear 된다.
+	// glDrawBuffers를 이용해 잠깐 바꿈으로써 특정한 buffer만 clear할 수 있다.
+	brightFBO.DrawBuffers();
+
+	for (int i = 0; i < 2; i++)
+	{
+		pingpongBlurFBO[i].GenFrameBufferObject();
+		pingpongBlurFBO[i].BindDefaultDepthBuffer(WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
+		pingpongBlurMap[i].LoadTexture(
+			GL_RGB16F, 
+			WindowManager::GetInstance()->width, 
+			WindowManager::GetInstance()->height, 
+			GL_RGB, 
+			GL_FLOAT);
+		pingpongBlurMap[i].SetParameters(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+		pingpongBlurFBO[i].BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &pingpongBlurMap[i]);
+		pingpongBlurFBO[i].DrawBuffers();
+	}
+
+	backgroundColor = glm::vec4(0.2f, 0.2f, 0.2f, 0.0f);
 }
 
 void StarBurstRenderer::Render()
 {
-	glEnable(GL_DEPTH_TEST);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	vector<SceneObject>& sceneObjs = sceneManager->sceneObjs;
 	SceneObject& camera = sceneManager->cameraObj;
 	vector<SceneObject>& lights = sceneManager->lightObjs;
+	SceneObject& quad = sceneManager->quadObj;
 
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
-	UseDefaultFrameBufferObject();
+	brightFBO.Use();
+	glEnable(GL_DEPTH_TEST);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glm::mat4 projection = glm::perspective(
 		glm::radians(45.0f),
@@ -86,6 +146,34 @@ void StarBurstRenderer::Render()
 	lightShader->SetUniformMatrix4f("view", view);
 	lightShader->SetUniformMatrix4f("projection", projection);
 	RenderObjects(lightShader, lights);
+
+	for (int i = 0; i < blurStep * 2; ++i)
+	{
+		pingpongBlurFBO[i % 2].Use();
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		blurShader->Use();
+		blurShader->SetUniformBool("horizontal", i % 2);
+		if (i == 0)
+		{
+			brightMap.Bind(GL_TEXTURE0);
+		}
+		else
+		{
+			pingpongBlurMap[(i - 1) % 2].Bind(GL_TEXTURE0);
+		}
+
+		quad.Draw();
+	}
+
+	UseDefaultFrameBufferObject();
+	bloomShader->Use();
+	worldMap.Bind(GL_TEXTURE0);
+	pingpongBlurMap[1].Bind(GL_TEXTURE1);
+	quad.Draw();
+
+
 }
 
 void StarBurstRenderer::TerminateRender()
@@ -94,4 +182,12 @@ void StarBurstRenderer::TerminateRender()
 	
 	pbrShader->Delete();
 	delete pbrShader;
+
+	lightShader->Delete();
+	delete lightShader;
+
+	blurShader->Delete();
+	delete blurShader;
+
+	skyboxShader->Delete();
 }

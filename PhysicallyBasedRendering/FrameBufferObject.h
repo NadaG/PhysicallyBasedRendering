@@ -19,7 +19,7 @@ public:
 	void BindRenderBuffer(GLenum attachment, RenderBufferObject rbo);
 	void BindTexture(GLenum attachment, GLenum texture, Texture* textureobj);
 
-	void BindDefaultDepthBuffer();
+	void BindDefaultDepthBuffer(const int width, const int height);
 
 	void Use();
 	void Clear(const float& r, const float& g, const float& b, const float& a);

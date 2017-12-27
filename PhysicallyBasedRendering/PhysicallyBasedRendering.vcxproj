@@ -188,16 +188,20 @@
   <ItemGroup>
     <None Include="Basic.fs" />
     <None Include="Basic.vs" />
+    <None Include="BloomBlend.fs" />
     <None Include="Brdf.fs" />
     <None Include="Brdf.vs" />
     <None Include="Cubemap.vs" />
     <None Include="equirectangularToCubemap.fs" />
     <None Include="fragment.fs" />
+    <None Include="GaussianBlur.fs" />
     <None Include="geometry.gs" />
     <None Include="irradianceConvolution.fs" />
+    <None Include="lensflare.fs" />
     <None Include="LTC.fs" />
     <None Include="ParticleBasic.vs" />
     <None Include="ParticleThickness.fs" />
+    <None Include="PBRBrightness.fs" />
     <None Include="PBR_uniform.fs" />
     <None Include="Phong.fs" />
     <None Include="PointToCube.gs" />

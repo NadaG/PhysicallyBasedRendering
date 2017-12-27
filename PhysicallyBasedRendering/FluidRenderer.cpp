@@ -30,9 +30,6 @@ void FluidRenderer::InitializeRender()
 	surfaceShader->SetUniform1f("far", depthFar);
 	surfaceShader->SetUniformVector4f("backgroundColor", backgroundColor);
 
-	debugQuadShader->Use();
-	debugQuadShader->SetUniform1i("depthMap", 0);
-
 	///////////////////
 	floorAlbedoTex.LoadTexture("Texture/Floor/albedo.png");
 	floorAlbedoTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER);
@@ -82,14 +79,14 @@ void FluidRenderer::InitializeRender()
 		depthBlurTex[i].SetParameters(GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
 		depthBlurFBO[i].GenFrameBufferObject();
-		depthBlurFBO[i].BindDefaultDepthBuffer();
+		depthBlurFBO[i].BindDefaultDepthBuffer(depthWidth, depthHeight);
 		depthBlurFBO[i].BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &depthBlurTex[i]);
 
 		thicknessBlurTex[i].LoadTexture(GL_RGBA32F, depthWidth, depthHeight, GL_RGBA, GL_FLOAT);
 		thicknessBlurTex[i].SetParameters(GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
 		thicknessBlurFBO[i].GenFrameBufferObject();
-		thicknessBlurFBO[i].BindDefaultDepthBuffer();
+		thicknessBlurFBO[i].BindDefaultDepthBuffer(depthWidth, depthHeight);
 		thicknessBlurFBO[i].BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &thicknessBlurTex[i]);
 	}
 

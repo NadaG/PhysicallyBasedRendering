@@ -31,14 +31,18 @@ void FrameBufferObject::BindTexture(GLenum attachment, GLenum textarget, Texture
 	attachments.push_back(attachment);
 }
 
-void FrameBufferObject::BindDefaultDepthBuffer()
+void FrameBufferObject::BindDefaultDepthBuffer(const int width, const int height)
 {
+	GLuint rbo;
+	glGenRenderbuffers(1, &rbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	glFramebufferRenderbuffer(
 		GL_FRAMEBUFFER,
 		GL_DEPTH_ATTACHMENT,
 		GL_RENDERBUFFER,
-		-1);
+		rbo);
 }
 
 void FrameBufferObject::Use()

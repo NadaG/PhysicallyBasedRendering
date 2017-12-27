@@ -2,7 +2,7 @@
 
 void PBRRenderer::InitializeRender()
 {
-	pbrShader = new ShaderProgram("PBR.vs", "PBR_uniform.fs");
+	pbrShader = new ShaderProgram("PBR.vs", "PBR.fs");
 	pbrShader->Use();
 	pbrShader->SetUniform1i("aoMap", 0);
 	pbrShader->SetUniform1i("albedoMap", 1);
@@ -56,24 +56,24 @@ void PBRRenderer::InitializeRender()
 	// 큐브의 한 면을 바라 볼 수 있도록 perpective matrix setting
 	captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
 	// 상하좌우앞뒤
-	captureViews[0] = glm::lookAt(glm::vec3(0.0f), glm::vec3(1.0f, 0.0f, 0.0f),  glm::vec3(0.0f, -1.0f, 0.0f));
-	captureViews[1] = glm::lookAt(glm::vec3(0.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+	captureViews[0] = glm::lookAt(glm::vec3(0.0f), glm::vec3(1.0f, 0.0f, 0.0f),  glm::vec3(0.0f, 1.0f, 0.0f));
+	captureViews[1] = glm::lookAt(glm::vec3(0.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	captureViews[2] = glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f),  glm::vec3(0.0f, 0.0f, 1.0f));
 	captureViews[3] = glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f));
-	captureViews[4] = glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 1.0f),  glm::vec3(0.0f, -1.0f, 0.0f));
-	captureViews[5] = glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+	captureViews[4] = glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, -1.0f),  glm::vec3(0.0f, 1.0f, 0.0f));
+	captureViews[5] = glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
 	////////////////////////////////////////////////////
 	equirectangularToCubemapShader->Use();
 	equirectangularToCubemapShader->SetUniform1i("equirectangularMap", 0);
 	equirectangularToCubemapShader->SetUniformMatrix4f("projection", captureProjection);
+	hdrTex.Bind(GL_TEXTURE0);
 
 	glViewport(0, 0, skyboxResolution, skyboxResolution);
 	captureFBO.Use();
 	for (int i = 0; i < 6; i++)
 	{
 		equirectangularToCubemapShader->SetUniformMatrix4f("view", captureViews[i]);
-		hdrSkyboxTex.Bind(GL_TEXTURE0);
 		captureFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, &hdrSkyboxTex);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -128,7 +128,7 @@ void PBRRenderer::InitializeRender()
 		// 128 -> 64 -> 32 -> 16
 		int mipWidth = 128 * pow(0.5, mip);
 		int mipHeight = 128 * pow(0.5, mip);
-
+		
 		captureRBO.Bind();
 		captureRBO.RenderBufferStorage(GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
 		glViewport(0, 0, mipWidth, mipHeight);

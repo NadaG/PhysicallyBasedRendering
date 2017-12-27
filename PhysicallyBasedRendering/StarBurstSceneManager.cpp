@@ -3,11 +3,11 @@
 void StarBurstSceneManager::InitializeObjects()
 {
 	quadObj.LoadMesh(QUAD);
-	cubeObj.LoadMesh(CUBE);
+	skyboxObj.LoadMesh(CUBE);
 
 	streetLight.LoadMesh("Obj/StreetLight.obj");
 
-	cameraObj.Translate(glm::vec3(0.0f, 0.0f, 10.0f));
+	cameraObj.Translate(glm::vec3(0.0f, 2.0f, 10.0f));
 	streetLight.Scale(glm::vec3(0.1f));
 
 	sceneObjs.push_back(streetLight);

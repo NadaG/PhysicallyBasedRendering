@@ -19,14 +19,13 @@ private:
 
 	void SelectMaterialImage(const string& folder);
 
-	const int skyboxResolution = 512;
+	const int skyboxResolution = 4096;
 
 	ShaderProgram* pbrShader;
 	ShaderProgram* lightShader;
 	ShaderProgram* equirectangularToCubemapShader;
 	ShaderProgram* irradianceShader;
 	ShaderProgram* skyboxShader;
-	//ShaderProgram* cubeReflectShader;
 	ShaderProgram* prefilterShader;
 	ShaderProgram* brdfShader;
 

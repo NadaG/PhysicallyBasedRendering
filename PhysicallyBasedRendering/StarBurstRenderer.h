@@ -44,5 +44,6 @@ private:
 	Texture2D roughnessTex;
 	Texture2D emissionTex;
 
-	TextureCube skyboxTex;
+	TextureCube* hdrSkyBoxTex;
+	Texture2D hdrTex;
 };

@@ -77,6 +77,14 @@ void StarBurstRenderer::InitializeRender()
 	// glDrawBuffers를 이용해 잠깐 바꿈으로써 특정한 buffer만 clear할 수 있다.
 	brightFBO.DrawBuffers();
 
+	hdrTex.LoadTexture("Texture/Factory/BG.jpg");
+	hdrTex.SetParameters(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
+
+	hdrSkyBoxTex = new TextureCube();
+	hdrSkyBoxTex->LoadTextureCubeMap(GL_RGB16F, 2048, 2048, GL_RGB, GL_FLOAT);
+	hdrSkyBoxTex->SetParameters(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+	//GenCubemapFromEquirectangular(hdrSkyBoxTex, hdrTex);
+
 	for (int i = 0; i < 2; i++)
 	{
 		pingpongBlurFBO[i].GenFrameBufferObject();
@@ -101,6 +109,7 @@ void StarBurstRenderer::Render()
 	SceneObject& camera = sceneManager->cameraObj;
 	vector<SceneObject>& lights = sceneManager->lightObjs;
 	SceneObject& quad = sceneManager->quadObj;
+	SceneObject& skyboxObj = sceneManager->skyboxObj;
 
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 	brightFBO.Use();
@@ -173,7 +182,14 @@ void StarBurstRenderer::Render()
 	pingpongBlurMap[1].Bind(GL_TEXTURE1);
 	quad.Draw();
 
-
+	glDepthFunc(GL_LEQUAL);
+	skyboxShader->Use();
+	skyboxShader->SetUniformMatrix4f("view", view);
+	skyboxShader->SetUniformMatrix4f("projection", projection);
+	skyboxShader->SetUniformBool("isHDR", false);
+	//hdrSkyBoxTex.Bind(GL_TEXTURE0);
+	skyboxObj.Draw();
+	glDepthFunc(GL_LESS);
 }
 
 void StarBurstRenderer::TerminateRender()

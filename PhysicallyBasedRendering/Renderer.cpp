@@ -33,6 +33,31 @@ void Renderer::RenderObject(ShaderProgram * shader, SceneObject obj)
 	obj.Draw();
 }
 
+void Renderer::GenCubemapFromEquirectangular(TextureCube* texCube, Texture2D tex)
+{
+	texCube = new TextureCube();
+
+	equirectangularToCubemapShader->Use();
+	equirectangularToCubemapShader->SetUniform1i("equirectangularMap", 0);
+	equirectangularToCubemapShader->SetUniformMatrix4f("projection", captureProjection);
+	tex.Bind(GL_TEXTURE0);
+
+	glViewport(0, 0, 2048, 2048);
+	captureFBO.Use();
+	for (int i = 0; i < 6; i++)
+	{
+		equirectangularToCubemapShader->SetUniformMatrix4f("view", captureViews[i]);
+		captureFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, texCube);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		sceneManager->skyboxObj.Draw();
+	}
+
+	UseDefaultFrameBufferObject();
+
+	texCube->GenerateMipmap();
+}
+
 // VAO(vertex array object), VBO(vertex buffer object), IBO(index buffer object) 정리
 // 생성
 // glGenVertexArrays(1, &vao);

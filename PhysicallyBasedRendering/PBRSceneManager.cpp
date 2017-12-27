@@ -32,19 +32,19 @@ void PBRSceneManager::InitializeObjects()
 
 	lightObjs.push_back(lightObj);
 	lightObjs[0].Scale(glm::vec3(0.1f));
-	lightObjs[0].SetColor(glm::vec3(1.0f, 0.0f, 0.0f));
+	lightObjs[0].SetColor(glm::vec3(10.0f, 0.0f, 0.0f));
 
 	lightObjs.push_back(lightObj);
 	lightObjs[1].Scale(glm::vec3(0.1f));
-	lightObjs[1].SetColor(glm::vec3(0.0f, 1.0f, 0.0f));
+	lightObjs[1].SetColor(glm::vec3(0.0f, 10.0f, 0.0f));
 
 	lightObjs.push_back(lightObj);
 	lightObjs[2].Scale(glm::vec3(0.1f));
-	lightObjs[2].SetColor(glm::vec3(0.0f, 0.0f, 1.0f));
+	lightObjs[2].SetColor(glm::vec3(0.0f, 0.0f, 10.0f));
 
 	lightObjs.push_back(lightObj);
 	lightObjs[3].Scale(glm::vec3(0.1f));
-	lightObjs[3].SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
+	lightObjs[3].SetColor(glm::vec3(10.0f, 10.0f, 10.0f));
 }
 
 // TODO Camera는 따로 Object를 상속받아서 둘 것

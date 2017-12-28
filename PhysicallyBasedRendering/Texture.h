@@ -40,9 +40,6 @@ public:
 	// float 메모리 할당은 생성하는 쪽에서 해주어야함
 	void TexImage(float* a);
 
-	void SetParameters(const GLint& minFilter, const GLint& magFilter, const GLint& wrapS, const GLint& wrapT);
-	void SetParameters(const GLint& minFilter, const GLint& magFilter, const GLint& wrapS, const GLint& wrapT, const GLint& wrapR);
-
 	const GLuint& GetTexture() const { return texture; }
 
 	virtual void Bind(GLenum texture) = 0;

@@ -285,6 +285,9 @@
     <None Include="lensflare.fs">
       <Filter>Shader Files\Bloom</Filter>
     </None>
+    <None Include="Brightness.fs">
+      <Filter>Shader Files\Bloom</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ShaderProgram.h">

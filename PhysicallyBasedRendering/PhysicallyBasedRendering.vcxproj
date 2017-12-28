@@ -191,6 +191,7 @@
     <None Include="BloomBlend.fs" />
     <None Include="Brdf.fs" />
     <None Include="Brdf.vs" />
+    <None Include="Brightness.fs" />
     <None Include="Cubemap.vs" />
     <None Include="equirectangularToCubemap.fs" />
     <None Include="fragment.fs" />

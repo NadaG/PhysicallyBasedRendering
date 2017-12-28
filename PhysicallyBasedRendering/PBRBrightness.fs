@@ -5,7 +5,6 @@ in vec3 worldPos;
 in vec3 outNormal;
 
 layout (location = 0) out vec3 color;
-layout (location = 1) out vec3 brightColor;
 
 uniform sampler2D aoMap;
 uniform sampler2D albedoMap;
@@ -172,12 +171,6 @@ void main()
 	// 기존 pbr
 	vec3 ambient2 = vec3(0.1) * albedo * ao;
 	color = ambient2 + Lo + emission;
-
-	float brightness = dot(color, vec3(0.2126, 0.7152, 0.0722));
-	if(brightness > 1.0)
-		brightColor = color;
-	else
-		brightColor = vec3(0.0, 0.0, 0.0);
 
 	return;
 	// 기존 pbr

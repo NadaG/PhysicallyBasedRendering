@@ -6,6 +6,7 @@ in vec2 outUV;
 
 uniform sampler2D worldMap;
 uniform sampler2D blurredBrightMap;
+uniform sampler2D debugMap;
 uniform float exposure;
 
 void main()
@@ -20,4 +21,6 @@ void main()
 
 	result = pow(result, vec3(1.0 / gamma));
 	color = result;
+
+	//color = texture(debugMap, outUV).rgb;
 }

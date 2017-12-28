@@ -35,12 +35,11 @@ void Renderer::RenderObject(ShaderProgram * shader, SceneObject obj)
 
 void Renderer::GenCubemapFromEquirectangular(TextureCube* texCube, Texture2D tex)
 {
-	texCube = new TextureCube();
-
 	equirectangularToCubemapShader->Use();
 	equirectangularToCubemapShader->SetUniform1i("equirectangularMap", 0);
 	equirectangularToCubemapShader->SetUniformMatrix4f("projection", captureProjection);
 	tex.Bind(GL_TEXTURE0);
+	cout << tex.GetTexture();
 
 	glViewport(0, 0, 2048, 2048);
 	captureFBO.Use();
@@ -52,10 +51,6 @@ void Renderer::GenCubemapFromEquirectangular(TextureCube* texCube, Texture2D tex
 
 		sceneManager->skyboxObj.Draw();
 	}
-
-	UseDefaultFrameBufferObject();
-
-	texCube->GenerateMipmap();
 }
 
 // VAO(vertex array object), VBO(vertex buffer object), IBO(index buffer object) Á¤¸®

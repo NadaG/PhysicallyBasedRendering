@@ -25,6 +25,9 @@ public:
 		debugQuadShader = new ShaderProgram("Quad.vs", "Quad.fs");
 		equirectangularToCubemapShader = new ShaderProgram("Cubemap.vs", "equirectangularToCubemap.fs");
 
+		captureFBO.GenFrameBufferObject();
+		captureFBO.BindDefaultDepthBuffer(2048, 2048);
+
 		// 큐브의 한 면을 바라 볼 수 있도록 perpective matrix setting
 		captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
 		// 상하좌우앞뒤

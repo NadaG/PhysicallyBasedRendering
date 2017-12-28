@@ -23,6 +23,7 @@ private:
 
 	const int blurStep;
 
+	FrameBufferObject worldFBO;
 	FrameBufferObject brightFBO;
 	FrameBufferObject pingpongBlurFBO[2];
 
@@ -34,6 +35,7 @@ private:
 	ShaderProgram* lightShader;
 	ShaderProgram* blurShader;
 	ShaderProgram* bloomShader;
+	ShaderProgram* brightShader;
 
 	shared_ptr<ShaderProgram> skyboxShader;
 

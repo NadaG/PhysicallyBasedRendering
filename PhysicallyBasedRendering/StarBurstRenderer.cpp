@@ -17,6 +17,10 @@ void StarBurstRenderer::InitializeRender()
 	pbrShader->SetUniform1i("normalMap", 4);
 	pbrShader->SetUniform1i("roughnessMap", 5);
 
+	brightShader = new ShaderProgram("Quad.vs", "Brightness.fs");
+	brightShader->Use();
+	brightShader->SetUniform1i("map", 0);
+
 	blurShader = new ShaderProgram("Quad.vs", "GaussianBlur.fs");
 	blurShader->Use();
 	blurShader->SetUniform1i("map", 0);
@@ -25,6 +29,7 @@ void StarBurstRenderer::InitializeRender()
 	bloomShader->Use();
 	bloomShader->SetUniform1i("worldMap", 0);
 	bloomShader->SetUniform1i("blurredBrightMap", 1);
+	bloomShader->SetUniform1i("debugMap", 2);
 	bloomShader->SetUniform1f("exposure", 1.0);
 
 	skyboxShader = make_shared<ShaderProgram>("SkyBox.vs", "SkyBox.fs");
@@ -53,6 +58,9 @@ void StarBurstRenderer::InitializeRender()
 	brightFBO.GenFrameBufferObject();
 	brightFBO.BindDefaultDepthBuffer(WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 
+	worldFBO.GenFrameBufferObject();
+	worldFBO.BindDefaultDepthBuffer(WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
+
 	worldMap.LoadTexture(
 		GL_RGB16F, 
 		WindowManager::GetInstance()->width, 
@@ -69,12 +77,13 @@ void StarBurstRenderer::InitializeRender()
 		GL_FLOAT);
 	brightMap.SetParameters(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
-	brightFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &worldMap);
-	brightFBO.BindTexture(GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, &brightMap);
+	worldFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &worldMap);
+	brightFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &brightMap);
 
 	// fbo를 bind하고 clear(gl_color_buffer_bit)를 하면
 	// glDrawBuffers로 셋팅된 모든 buffer가 clear 된다.
 	// glDrawBuffers를 이용해 잠깐 바꿈으로써 특정한 buffer만 clear할 수 있다.
+	worldFBO.DrawBuffers();
 	brightFBO.DrawBuffers();
 
 	hdrTex.LoadTexture("Texture/Factory/BG.jpg");
@@ -83,7 +92,8 @@ void StarBurstRenderer::InitializeRender()
 	hdrSkyBoxTex = new TextureCube();
 	hdrSkyBoxTex->LoadTextureCubeMap(GL_RGB16F, 2048, 2048, GL_RGB, GL_FLOAT);
 	hdrSkyBoxTex->SetParameters(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-	//GenCubemapFromEquirectangular(hdrSkyBoxTex, hdrTex);
+
+	GenCubemapFromEquirectangular(hdrSkyBoxTex, hdrTex);
 
 	for (int i = 0; i < 2; i++)
 	{
@@ -112,7 +122,7 @@ void StarBurstRenderer::Render()
 	SceneObject& skyboxObj = sceneManager->skyboxObj;
 
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
-	brightFBO.Use();
+	worldFBO.Use();
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -151,10 +161,30 @@ void StarBurstRenderer::Render()
 
 	RenderObjects(pbrShader, sceneObjs);
 
+	// light는 어차피 bright 하므로...
 	lightShader->Use();
 	lightShader->SetUniformMatrix4f("view", view);
 	lightShader->SetUniformMatrix4f("projection", projection);
 	RenderObjects(lightShader, lights);
+
+	// skybox 그리는 부분
+	/*glDepthFunc(GL_LEQUAL);
+	skyboxShader->Use();
+	skyboxShader->SetUniformMatrix4f("view", view);
+	skyboxShader->SetUniformMatrix4f("projection", projection);
+	skyboxShader->SetUniformBool("isHDR", false);
+	hdrSkyBoxTex->Bind(GL_TEXTURE0);
+	skyboxObj.Draw();
+	glDepthFunc(GL_LESS);*/
+
+	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
+	brightFBO.Use();
+	glEnable(GL_DEPTH_TEST);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	brightShader->Use();
+	worldMap.Bind(GL_TEXTURE0);
+	quad.Draw();
 
 	for (int i = 0; i < blurStep * 2; ++i)
 	{
@@ -180,16 +210,9 @@ void StarBurstRenderer::Render()
 	bloomShader->Use();
 	worldMap.Bind(GL_TEXTURE0);
 	pingpongBlurMap[1].Bind(GL_TEXTURE1);
+	// debug용 맵
+	worldMap.Bind(GL_TEXTURE2);
 	quad.Draw();
-
-	glDepthFunc(GL_LEQUAL);
-	skyboxShader->Use();
-	skyboxShader->SetUniformMatrix4f("view", view);
-	skyboxShader->SetUniformMatrix4f("projection", projection);
-	skyboxShader->SetUniformBool("isHDR", false);
-	//hdrSkyBoxTex.Bind(GL_TEXTURE0);
-	skyboxObj.Draw();
-	glDepthFunc(GL_LESS);
 }
 
 void StarBurstRenderer::TerminateRender()

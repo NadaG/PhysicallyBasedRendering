@@ -16,13 +16,26 @@ void Model::LoadModel(const string& fileName)
 	}
 	else
 	{
+		meshTextureIndex = new unsigned int[scene->mNumMeshes];
 		for (int i = 0; i < scene->mNumMeshes; i++)
 		{
+			/*aiString a;
+			aiColor4D diffuse;
+			aiGetMaterialColor(scene->mMaterials[meshTextureIndex[i]], AI_MATKEY_COLOR_DIFFUSE, &diffuse);
+			scene->mMaterials[scene->mMeshes[i]->mMaterialIndex]->GetTexture(aiTextureType_DIFFUSE, 0, &a);*/
+
 			Mesh tmpMesh;
+			meshTextureIndex[i] = scene->mMeshes[i]->mMaterialIndex;
 			tmpMesh.SetMesh(scene->mMeshes[i]);
 			tmpMesh.GenerateAndSetVAO();
 			meshes.push_back(tmpMesh);
 		}
+
+		/*for (int i = 0; i < scene->mNumMaterials; i++)
+		{
+			aiString textureStr;
+			scene->mMaterials[i]->GetTexture(aiTextureType_DIFFUSE, 0, &textureStr);
+		}*/
 	}
 }
 

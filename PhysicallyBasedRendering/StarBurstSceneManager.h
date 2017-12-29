@@ -15,6 +15,7 @@ public:
 private:
 
 	SceneObject streetLight;
+	SceneObject road;
 
 	int selectedLightId;
 

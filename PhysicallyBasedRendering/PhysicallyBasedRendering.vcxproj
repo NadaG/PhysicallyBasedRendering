@@ -161,6 +161,7 @@
     <ClCompile Include="FrameBufferObject.cpp" />
     <ClCompile Include="LTCRenderer.cpp" />
     <ClCompile Include="LTCSceneManager.cpp" />
+    <ClCompile Include="Material.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="PBRRenderer.cpp" />
@@ -242,6 +243,7 @@
     <ClInclude Include="FrameBufferObject.h" />
     <ClInclude Include="LTCRenderer.h" />
     <ClInclude Include="LTCSceneManager.h" />
+    <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="nelder_mead.h" />

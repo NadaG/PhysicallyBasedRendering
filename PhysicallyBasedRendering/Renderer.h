@@ -64,6 +64,9 @@ protected:
 
 	ShaderProgram* debugQuadShader;
 
+	float zNear = 0.01f;
+	float zFar = 30.0f;
+
 private:
 
 	ShaderProgram* equirectangularToCubemapShader;

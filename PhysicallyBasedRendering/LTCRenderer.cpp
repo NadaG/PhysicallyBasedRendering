@@ -17,11 +17,7 @@ void LTCRenderer::InitializeRender()
 	debugMat[2][0] = 44.0f;
 	debugMat[0][2] = 51.0f;
 
-	Debug::GetInstance()->Log(debugMat);
-
 	debugMat = glm::inverse(debugMat);
-
-	Debug::GetInstance()->Log(debugMat);
 }
 
 float tmp = 0.0f;

@@ -130,8 +130,8 @@ void StarBurstRenderer::Render()
 	glm::mat4 projection = glm::perspective(
 		glm::radians(45.0f),
 		WindowManager::GetInstance()->width / WindowManager::GetInstance()->height,
-		0.1f,
-		30.0f);
+		zNear,
+		zFar);
 
 	// TODO 마우스 오른쪽 버튼을 누른 채로 카메라 회전을 조절하고 키보드로 움직이게 하자
 	glm::mat4 view = glm::lookAt(

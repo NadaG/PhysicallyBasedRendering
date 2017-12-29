@@ -70,6 +70,9 @@
     <Filter Include="Shader Files\Bloom">
       <UniqueIdentifier>{bc53664a-c52a-4b3f-b9f8-bdfe9433880a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Material">
+      <UniqueIdentifier>{88725c2d-f062-47c4-b1f3-43c3e9c4360a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -164,6 +167,9 @@
     </ClCompile>
     <ClCompile Include="Model.cpp">
       <Filter>Source Files\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>Source Files\Material</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -400,6 +406,9 @@
     </ClInclude>
     <ClInclude Include="Model.h">
       <Filter>Source Files\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>Source Files\Material</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

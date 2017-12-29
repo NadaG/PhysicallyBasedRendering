@@ -21,7 +21,9 @@ void Renderer::RenderObjects(ShaderProgram * shader, vector<SceneObject> objs)
 		shader->SetUniformMatrix4f("model", model);
 		// decorator pattern 인정??
 		shader->SetUniformVector3f("uniColor", objs[i].GetColor());
+		// TODO 무조건 하나는 지워야 함
 		objs[i].Draw();
+		objs[i].DrawModel();
 	}
 }
 
@@ -39,7 +41,6 @@ void Renderer::GenCubemapFromEquirectangular(TextureCube* texCube, Texture2D tex
 	equirectangularToCubemapShader->SetUniform1i("equirectangularMap", 0);
 	equirectangularToCubemapShader->SetUniformMatrix4f("projection", captureProjection);
 	tex.Bind(GL_TEXTURE0);
-	cout << tex.GetTexture();
 
 	glViewport(0, 0, 2048, 2048);
 	captureFBO.Use();

@@ -73,6 +73,9 @@
     <Filter Include="Source Files\Material">
       <UniqueIdentifier>{88725c2d-f062-47c4-b1f3-43c3e9c4360a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Cuda">
+      <UniqueIdentifier>{f8ed83a0-8c59-455e-8d72-4678316f81f6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -410,5 +413,13 @@
     <ClInclude Include="Material.h">
       <Filter>Source Files\Material</Filter>
     </ClInclude>
+    <ClInclude Include="Test.cuh">
+      <Filter>Source Files\Cuda</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="Test.cu">
+      <Filter>Source Files\Cuda</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

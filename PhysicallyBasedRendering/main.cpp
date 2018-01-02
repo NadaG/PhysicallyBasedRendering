@@ -5,6 +5,7 @@
 #include "StarBurstRenderer.h"
 #include "WindowManager.h"
 #include "Debug.h"
+#include "Test.cuh"
 
 using namespace std;
 
@@ -31,6 +32,8 @@ int main(int argc, char **argv)
 	GLFWwindow* window = WindowManager::GetInstance()->CreateMyWindow(1024, 1024, "OpenGL");
 
 	InputManager::GetInstance()->Initialize(window);
+
+	hello();
 
 	// TO Refacto 어딘가로 버려버릴것
 	glewExperimental = true;

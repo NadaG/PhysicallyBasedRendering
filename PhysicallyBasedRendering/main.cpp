@@ -19,7 +19,7 @@ enum Scene
 
 int main(int argc, char **argv)
 {
-	Scene scene = STARBURST_SCENE;
+	Scene scene = LTC_SCENE;
 
 	WindowManager::GetInstance()->Initialize();
 

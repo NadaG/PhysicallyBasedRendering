@@ -20,7 +20,7 @@ enum Scene
 
 int main(int argc, char **argv)
 {
-	Scene scene = LTC_SCENE;
+	Scene scene = STARBURST_SCENE;
 
 	WindowManager::GetInstance()->Initialize();
 
@@ -33,7 +33,7 @@ int main(int argc, char **argv)
 
 	InputManager::GetInstance()->Initialize(window);
 
-	hello();
+	//hello();
 
 	// TO Refacto 어딘가로 버려버릴것
 	glewExperimental = true;
@@ -61,8 +61,8 @@ int main(int argc, char **argv)
 	}
 	case FLUID_SCENE:
 	{	sceneManager = new FluidSceneManager();
-	renderer = new FluidRenderer(sceneManager);
-	break;
+		renderer = new FluidRenderer(sceneManager);
+		break;
 	}
 	case LTC_SCENE:
 	{
@@ -108,7 +108,6 @@ int main(int argc, char **argv)
 	delete renderer;
 	delete sceneManager;
 
-	// TODO runtime error
 	WindowManager::GetInstance()->Terminate();
 
 	return 0;

@@ -1,8 +1,7 @@
 #pragma once
 
 #include "Mesh.h"
-#include "Texture2D.h"
-#include "TextureCube.h"
+#include "Material.h"
 
 class Model
 {
@@ -13,8 +12,10 @@ public:
 private:
 
 	unsigned int* meshTextureIndex;
+	
+	// 각 mesh 마다 하나의 material이 주어짐
 	vector<Mesh> meshes;
-	vector<Texture2D> textures;
+	vector<Material> material;
 
 	const aiScene *scene;
 };

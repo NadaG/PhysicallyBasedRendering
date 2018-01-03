@@ -35,6 +35,10 @@ protected:
 	GLuint geometryShaderID;
 	GLuint fragmentShaderID;
 
+	vector<Texture*> inputTextures;
+
+	
+
 public:
 
 	ShaderProgram(const char* vertex_file_path, const char* fragment_file_path);
@@ -78,6 +82,7 @@ public:
 	void SetUniformBool(string name, bool b);
 
 	// TODO 텍스쳐를 어디다 두어야 할지 생각해봐야함
+	void BindTexture(Texture* texture, string name);
 
 	void Delete();
 };

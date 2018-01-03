@@ -29,6 +29,7 @@ void Model::LoadModel(const string& fileName)
 			tmpMesh.SetMesh(scene->mMeshes[i]);
 			tmpMesh.GenerateAndSetVAO();
 			meshes.push_back(tmpMesh);
+
 		}
 
 		/*for (int i = 0; i < scene->mNumMaterials; i++)

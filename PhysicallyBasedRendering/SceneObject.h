@@ -2,6 +2,7 @@
 #include<glm/glm.hpp>
 #include<glm/gtx/transform.hpp>
 #include "Model.h"
+#include "Material.h"
 
 class SceneObject
 {

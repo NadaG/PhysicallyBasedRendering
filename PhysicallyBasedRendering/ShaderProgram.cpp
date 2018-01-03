@@ -195,6 +195,12 @@ void ShaderProgram::SetUniformBool(string name, bool b)
 		glUniform1i(glGetUniformLocation(shaderProgramID, name.c_str()), 0);
 }
 
+void ShaderProgram::BindTexture(Texture* texture, string name)
+{
+	SetUniform1i(name, inputTextures.size());
+	inputTextures.push_back(texture);
+}
+
 void ShaderProgram::Delete()
 {
 	glDeleteShader(shaderProgramID);

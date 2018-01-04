@@ -3,32 +3,27 @@
 #include<glm/gtx/transform.hpp>
 #include "Model.h"
 #include "Material.h"
+#include "Object.h"
 
-class SceneObject
+class SceneObject : public Object
 {
 public:
 	SceneObject();
 	virtual ~SceneObject() {}
 
 	void Translate(const glm::vec3& vec);
-	void WorldTranslate(const glm::vec3 vec);
-
 	void Rotate(const glm::vec3& vec, float angle);
-	void WorldRotate(const glm::vec3 vec);
-
 	void Scale(const glm::vec3& vec);
 
-	void SetPosition(const glm::vec3 position) { positionVector = position; }
-	void SetRotate(const glm::mat4 mat) { rotationMatrix = mat; }
-	void SetScale(const glm::vec3 scale) { scaleVector = scale; }
+	glm::vec3 GetPosition() const { return positionVector; }
+	glm::vec3 GetScale() const { return scaleVector; }
+	glm::mat4 GetRotate() const { return rotationMatrix; }
 
-	glm::vec3 GetPosition() { return positionVector; }
-	glm::vec3 GetScale() { return scaleVector; }
-	glm::mat4 GetRotate() { return rotationMatrix; }
+	glm::vec3 GetWorldPosition() const;
 
-	glm::vec3 GetWorldPosition();
+	const glm::mat4 GetModelMatrix() const;
 
-	const glm::mat4 GetModelMatrix();
+
 	void DrawModel();
 
 	void LoadModel(const char* s);
@@ -39,6 +34,10 @@ public:
 	const glm::vec3& GetColor() { return this->color; }
 
 	void TerminateModel();
+
+	// override
+	void Update(){}
+
 private:
 
 	// To Refacto 이거는 확실히 바꿔야 함

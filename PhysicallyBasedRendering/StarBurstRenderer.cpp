@@ -20,7 +20,7 @@ void StarBurstRenderer::InitializeRender()
 
 	brightShader = new ShaderProgram("Quad.vs", "Brightness.fs");
 	brightShader->Use();
-	brightShader->SetUniform1i("map", 0);
+	brightShader->BindTexture(&worldMap, "map");
 
 	blurShader = new ShaderProgram("Quad.vs", "GaussianBlur.fs");
 	blurShader->Use();
@@ -179,7 +179,6 @@ void StarBurstRenderer::Render()
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	brightShader->Use();
-	worldMap.Bind(GL_TEXTURE0);
 	quad.DrawModel();
 
 	for (int i = 0; i < blurStep * 2; ++i)
@@ -192,6 +191,7 @@ void StarBurstRenderer::Render()
 		blurShader->SetUniformBool("horizontal", i % 2);
 		if (i == 0)
 		{
+			// 아.. 셰이더에 붙은 texture를 바꿀 때도 있구나..
 			brightMap.Bind(GL_TEXTURE0);
 		}
 		else

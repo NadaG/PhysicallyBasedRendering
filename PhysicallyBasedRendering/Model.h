@@ -6,16 +6,16 @@
 class Model
 {
 public:
-	void LoadModel(const string& model);
-	void DrawModel();
+	void Load(const string& model);
+	void Draw();
 
 	void AddMesh(const MeshType& meshType);
 
-	void DeleteModel();
+	void Delete();
 
 private:
 
-	unsigned int* meshTextureIndex;
+	unsigned int* meshMaterialIndex;
 	
 	// 각 mesh 마다 하나의 material이 주어짐
 	vector<Mesh> meshes;

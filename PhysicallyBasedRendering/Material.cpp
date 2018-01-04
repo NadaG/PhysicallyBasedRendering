@@ -13,3 +13,4 @@ void Material::BindShader(ShaderProgram* const shader)
 {
 	this->shader = shader;
 }
+

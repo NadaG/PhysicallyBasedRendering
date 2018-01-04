@@ -9,7 +9,7 @@ SceneObject::SceneObject()
 
 void SceneObject::LoadModel(const char * s)
 {
-	model.LoadModel(s);
+	model.Load(s);
 }
 
 void SceneObject::LoadModel(const MeshType& meshType)
@@ -24,10 +24,10 @@ void SceneObject::SetColor(const glm::vec3& color)
 
 void SceneObject::TerminateModel()
 {
-	model.DeleteModel();
+	model.Delete();
 }
 
-glm::vec3 SceneObject::GetWorldPosition()
+glm::vec3 SceneObject::GetWorldPosition() const
 {
 	glm::vec3 rotatedPosition = rotationMatrix * glm::vec4(positionVector, 1.0f);
 
@@ -38,14 +38,14 @@ glm::vec3 SceneObject::GetWorldPosition()
 	return worldPosition;
 }
 
-const glm::mat4 SceneObject::GetModelMatrix()
+const glm::mat4 SceneObject::GetModelMatrix() const
 {
 	return glm::translate(positionVector) * rotationMatrix * glm::scale(scaleVector);
 }
 
 void SceneObject::DrawModel()
 {
-	model.DrawModel();
+	model.Draw();
 }
 
 void SceneObject::Translate(const glm::vec3& vec)
@@ -53,17 +53,9 @@ void SceneObject::Translate(const glm::vec3& vec)
 	this->positionVector += vec;
 }
 
-void SceneObject::WorldTranslate(const glm::vec3 vec)
-{
-}
-
 void SceneObject::Rotate(const glm::vec3& vec, float angle)
 {
 	this->rotationMatrix = glm::rotate(rotationMatrix, angle, vec);
-}
-
-void SceneObject::WorldRotate(const glm::vec3 vec)
-{
 }
 
 void SceneObject::Scale(const glm::vec3& vec)

@@ -154,6 +154,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CameraMovingScript.cpp" />
     <ClCompile Include="dds.cpp" />
     <ClCompile Include="fitLTC.cpp" />
     <ClCompile Include="FluidSceneManager.cpp" />
@@ -235,6 +236,7 @@
     <ClInclude Include="brdf_beckmann.h" />
     <ClInclude Include="brdf_disneyDiffuse.h" />
     <ClInclude Include="brdf_ggx.h" />
+    <ClInclude Include="CameraMovingScript.h" />
     <ClInclude Include="CImg.h" />
     <ClInclude Include="dds.h" />
     <ClInclude Include="export.h" />
@@ -248,6 +250,7 @@
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="nelder_mead.h" />
+    <ClInclude Include="Object.h" />
     <ClInclude Include="PBRRenderer.h" />
     <ClInclude Include="PBRSceneManager.h" />
     <ClInclude Include="PhongShaderProgram.h" />
@@ -258,6 +261,7 @@
     <ClInclude Include="Debug.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="Script.h" />
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="SmokeSimulationImporter.h" />
     <ClInclude Include="SmokeSceneManager.h" />

@@ -37,6 +37,9 @@ void StarBurstSceneManager::InitializeObjects()
 
 void StarBurstSceneManager::Update()
 {
+	// 이 안에서 update가 돌아가야 함
+	cameraObj.Update();
+
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_J))
 	{
 		cameraObj.Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 0.01f);

@@ -2,19 +2,19 @@
 
 void StarBurstSceneManager::InitializeObjects()
 {
-	quadObj.LoadMesh(QUAD);
-	skyboxObj.LoadMesh(CUBE);
+	quadObj.LoadModel(QUAD);
+	skyboxObj.LoadModel(CUBE);
 
 	road.LoadModel("Texture/Road/road.obj");
 
-	streetLight.LoadMesh("Obj/StreetLight.obj");
+	streetLight.LoadModel("Obj/StreetLight.obj");
 	streetLight.Scale(glm::vec3(0.1f));
 
 	sceneObjs.push_back(road);
 	sceneObjs.push_back(streetLight);
 
 	SceneObject lightObj;
-	lightObj.LoadMesh("Obj/Sphere.obj");
+	lightObj.LoadModel("Obj/Sphere.obj");
 
 	lightObjs.push_back(lightObj);
 	lightObjs[0].Scale(glm::vec3(0.1f));

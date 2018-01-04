@@ -148,7 +148,7 @@ void FluidRenderer::Render()
 	{
 		glm::mat4 model = objs[i].GetModelMatrix();
 		pbrShader->SetUniformMatrix4f("model", model);
-		objs[i].Draw();
+		objs[i].DrawModel();
 	}
 	// world 그리기 끝
 
@@ -194,7 +194,7 @@ void FluidRenderer::Render()
 			depthBlurTex[b].Bind(GL_TEXTURE0);
 		else
 			depthTex.Bind(GL_TEXTURE0);
-		quad.Draw();
+		quad.DrawModel();
 
 		thicknessBlurFBO[a].Use();
 		thicknessBlurFBO[a].Clear(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
@@ -202,7 +202,7 @@ void FluidRenderer::Render()
 			thicknessBlurTex[b].Bind(GL_TEXTURE0);
 		else
 			thicknessTex.Bind(GL_TEXTURE0);
-		quad.Draw();
+		quad.DrawModel();
 	}
 	// depth, thickness blur 끝
 
@@ -224,7 +224,7 @@ void FluidRenderer::Render()
 
 	thicknessBlurTex[0].Bind(GL_TEXTURE5);
 
-	quad.Draw();
+	quad.DrawModel();
 }
 
 void FluidRenderer::TerminateRender()

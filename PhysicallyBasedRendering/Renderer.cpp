@@ -21,8 +21,6 @@ void Renderer::RenderObjects(ShaderProgram * shader, vector<SceneObject> objs)
 		shader->SetUniformMatrix4f("model", model);
 		// decorator pattern 인정??
 		shader->SetUniformVector3f("uniColor", objs[i].GetColor());
-		// TODO 무조건 하나는 지워야 함
-		objs[i].Draw();
 		objs[i].DrawModel();
 	}
 }
@@ -32,7 +30,7 @@ void Renderer::RenderObject(ShaderProgram * shader, SceneObject obj)
 	shader->Use();
 	glm::mat4 model = obj.GetModelMatrix();
 	shader->SetUniformMatrix4f("model", model);
-	obj.Draw();
+	obj.DrawModel();
 }
 
 void Renderer::GenCubemapFromEquirectangular(TextureCube* texCube, Texture2D tex)
@@ -50,7 +48,7 @@ void Renderer::GenCubemapFromEquirectangular(TextureCube* texCube, Texture2D tex
 		captureFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, texCube);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		sceneManager->skyboxObj.Draw();
+		sceneManager->skyboxObj.DrawModel();
 	}
 }
 

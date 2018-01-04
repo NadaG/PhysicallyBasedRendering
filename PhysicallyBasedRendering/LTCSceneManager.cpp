@@ -2,7 +2,7 @@
 
 void LTCSceneManager::InitializeObjects()
 {
-	quadObj.LoadMesh(QUAD);
+	quadObj.LoadModel(QUAD);
 
 	sceneObjs.push_back(quadObj);
 	sceneObjs[0].Scale(glm::vec3(15.0));

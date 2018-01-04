@@ -11,6 +11,8 @@ public:
 
 	void AddMesh(const MeshType& meshType);
 
+	void DeleteModel();
+
 private:
 
 	unsigned int* meshTextureIndex;

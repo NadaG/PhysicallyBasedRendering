@@ -42,9 +42,7 @@ void Model::LoadModel(const string& fileName)
 void Model::DrawModel()
 {
 	for (int i = 0; i < meshes.size(); i++)
-	{
 		meshes[i].Draw();
-	}
 }
 
 void Model::AddMesh(const MeshType & meshType)
@@ -53,4 +51,10 @@ void Model::AddMesh(const MeshType & meshType)
 	mesh.LoadMesh(meshType);
 	mesh.GenerateAndSetVAO();
 	meshes.push_back(mesh);
+}
+
+void Model::DeleteModel()
+{
+	for (int i = 0; i < meshes.size(); i++)
+		meshes[i].Delete();
 }

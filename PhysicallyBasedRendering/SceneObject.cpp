@@ -7,18 +7,6 @@ SceneObject::SceneObject()
 	this->rotationMatrix = glm::mat4(1.0);
 }
 
-void SceneObject::LoadMesh(const char* s)
-{
-	mesh.LoadMesh(s);
-	mesh.GenerateAndSetVAO();
-}
-
-void SceneObject::LoadMesh(const MeshType& meshType)
-{
-	mesh.LoadMesh(meshType);
-	mesh.GenerateAndSetVAO();
-}
-
 void SceneObject::LoadModel(const char * s)
 {
 	model.LoadModel(s);
@@ -32,12 +20,11 @@ void SceneObject::LoadModel(const MeshType& meshType)
 void SceneObject::SetColor(const glm::vec3& color)
 {
 	this->color = color;
-	mesh.SetAllColor(color);
 }
 
-void SceneObject::TerminateMesh()
+void SceneObject::TerminateModel()
 {
-	mesh.Terminate();
+	model.DeleteModel();
 }
 
 glm::vec3 SceneObject::GetWorldPosition()
@@ -54,11 +41,6 @@ glm::vec3 SceneObject::GetWorldPosition()
 const glm::mat4 SceneObject::GetModelMatrix()
 {
 	return glm::translate(positionVector) * rotationMatrix * glm::scale(scaleVector);
-}
-
-void SceneObject::Draw()
-{
-	mesh.Draw();
 }
 
 void SceneObject::DrawModel()

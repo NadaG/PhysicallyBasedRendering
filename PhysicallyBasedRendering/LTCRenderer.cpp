@@ -66,7 +66,7 @@ void LTCRenderer::Render()
 		WindowManager::GetInstance()->width,
 		WindowManager::GetInstance()->height));
 
-	quad.Draw();
+	quad.DrawModel();
 }
 
 void LTCRenderer::TerminateRender()

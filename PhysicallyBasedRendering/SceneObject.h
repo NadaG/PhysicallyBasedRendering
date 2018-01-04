@@ -29,11 +29,7 @@ public:
 	glm::vec3 GetWorldPosition();
 
 	const glm::mat4 GetModelMatrix();
-	void Draw();
 	void DrawModel();
-
-	void LoadMesh(const char* s);
-	void LoadMesh(const MeshType& meshType);
 
 	void LoadModel(const char* s);
 	void LoadModel(const MeshType& meshType);
@@ -42,7 +38,7 @@ public:
 	void SetColor(const glm::vec3& color);
 	const glm::vec3& GetColor() { return this->color; }
 
-	void TerminateMesh();
+	void TerminateModel();
 private:
 
 	// To Refacto 이거는 확실히 바꿔야 함
@@ -52,6 +48,5 @@ private:
 	glm::mat4 rotationMatrix;
 	glm::vec3 positionVector;
 
-	Mesh mesh;
 	Model model;
 };

@@ -3,6 +3,6 @@
 void SceneManager::TerminateObjects()
 {
 	for (int i = 0; i < sceneObjs.size(); i++)
-		sceneObjs[i].TerminateMesh();
-	cameraObj.TerminateMesh();
+		sceneObjs[i].TerminateModel();
+	cameraObj.TerminateModel();
 }

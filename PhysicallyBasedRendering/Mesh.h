@@ -57,8 +57,7 @@ public:
 	void SetAllColor(const glm::vec3& color);
 
 	void Draw();
-
-	void Terminate();
+	void Delete();
 
 	const glm::vec3& GetAlbedo() { return albedo; }
 

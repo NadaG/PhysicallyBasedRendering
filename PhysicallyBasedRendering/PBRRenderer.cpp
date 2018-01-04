@@ -77,7 +77,7 @@ void PBRRenderer::InitializeRender()
 		captureFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, &hdrSkyboxTex);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		sceneManager->skyboxObj.Draw();
+		sceneManager->skyboxObj.DrawModel();
 	}
 
 	UseDefaultFrameBufferObject();
@@ -104,7 +104,7 @@ void PBRRenderer::InitializeRender()
 		captureFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, &irradianceSkyboxTex);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		sceneManager->skyboxObj.Draw();
+		sceneManager->skyboxObj.DrawModel();
 	}
 	UseDefaultFrameBufferObject();
 
@@ -142,7 +142,7 @@ void PBRRenderer::InitializeRender()
 			captureFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, &prefilterSkyboxTex);
 
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			sceneManager->skyboxObj.Draw();
+			sceneManager->skyboxObj.DrawModel();
 		}
 	}
 	UseDefaultFrameBufferObject();
@@ -158,7 +158,7 @@ void PBRRenderer::InitializeRender()
 	glViewport(0, 0, 512, 512);
 	brdfShader->Use();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	sceneManager->quadObj.Draw();
+	sceneManager->quadObj.DrawModel();
 
 	UseDefaultFrameBufferObject();
 	////////////////////////////////////////////////////

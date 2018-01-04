@@ -274,7 +274,7 @@ void Mesh::Draw()
 	glDrawElements(GL_TRIANGLES, indexNum, GL_UNSIGNED_INT, 0);
 }
 
-void Mesh::Terminate()
+void Mesh::Delete()
 {
 	delete[] vertices;
 	delete[] indices;

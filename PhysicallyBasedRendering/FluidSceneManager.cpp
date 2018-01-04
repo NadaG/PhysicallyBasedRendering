@@ -2,8 +2,8 @@
 
 void FluidSceneManager::InitializeObjects()
 {
-	quadObj.LoadMesh(QUAD);
-	skyboxObj.LoadMesh(CUBE);
+	quadObj.LoadModel(QUAD);
+	skyboxObj.LoadModel(CUBE);
 
 	sceneObjs.push_back(quadObj);
 	sceneObjs[0].Scale(glm::vec3(15.0));

@@ -180,7 +180,7 @@ void StarBurstRenderer::Render()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	brightShader->Use();
 	worldMap.Bind(GL_TEXTURE0);
-	quad.Draw();
+	quad.DrawModel();
 
 	for (int i = 0; i < blurStep * 2; ++i)
 	{
@@ -199,12 +199,12 @@ void StarBurstRenderer::Render()
 			pingpongBlurMap[(i - 1) % 2].Bind(GL_TEXTURE0);
 		}
 
-		quad.Draw();
+		quad.DrawModel();
 	}
 
 	UseDefaultFrameBufferObject();
 	bloomShader->Use();
-	quad.Draw();
+	quad.DrawModel();
 }
 
 void StarBurstRenderer::TerminateRender()

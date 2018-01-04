@@ -7,7 +7,7 @@ void SmokeSceneManager::InitializeObjects()
 		for (int j = 0; j < 100; j++)
 		{
 			SceneObject cube;
-			cube.LoadMesh(CUBE);
+			cube.LoadModel(CUBE);
 			sceneObjs.push_back(cube);
 			sceneObjs[i * 100 + j].Translate(glm::vec3(i * 0.3f, j * 0.3f, 0));
 			sceneObjs[i * 100 + j].Scale(glm::vec3(0.1f));

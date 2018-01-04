@@ -174,8 +174,11 @@
     <ClCompile Include="Material.cpp">
       <Filter>Source Files\Material</Filter>
     </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>Source Files\SceneObject</Filter>
+    </ClCompile>
     <ClCompile Include="CameraMovingScript.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\SceneObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

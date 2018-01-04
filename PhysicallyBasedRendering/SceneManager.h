@@ -8,6 +8,7 @@
 
 #include "InputManager.h"
 #include "SceneObject.h"
+#include "CameraMovingScript.h"
 
 using std::vector;
 

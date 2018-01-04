@@ -33,12 +33,17 @@ void StarBurstSceneManager::InitializeObjects()
 	lightObjs[3].SetColor(glm::vec3(10.0f, 10.0f, 10.0f));
 	
 	cameraObj.Translate(glm::vec3(0.0f, 2.0f, 10.0f));
+
+	Object* tmpObj = new SceneObject();
+	movingCamera = new CameraMovingScript(tmpObj);
 }
 
 void StarBurstSceneManager::Update()
 {
+	movingCamera->Update();
+
 	// 이 안에서 update가 돌아가야 함
-	cameraObj.Update();
+	/*cameraObj.Update();
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_J))
 	{
@@ -146,5 +151,5 @@ void StarBurstSceneManager::Update()
 	{
 		if (InputManager::GetInstance()->IsKey(GLFW_KEY_1 + i))
 			selectedLightId = i;
-	}
+	}*/
 }

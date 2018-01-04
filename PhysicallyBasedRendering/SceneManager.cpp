@@ -1,8 +1,10 @@
 #include "SceneManager.h"
 
+
 SceneManager::SceneManager()
 {
 	Object* camera = new SceneObject();
+	Object* movingCamera = new CameraMovingScript(camera);
 }
 
 void SceneManager::TerminateObjects()

@@ -1,15 +1,16 @@
 #pragma once
 
 #include "Object.h"
+#include "InputManager.h"
 
 class Script : public Object
 {
 public:
-	void Update();
+	virtual void Update() = 0;
 
 	Script(Object* const object) { this->object = object; }
 	virtual ~Script() {}
 
-private:
+protected:
 	Object* object;
 };

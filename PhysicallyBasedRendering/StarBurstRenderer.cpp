@@ -10,12 +10,13 @@ void StarBurstRenderer::InitializeRender()
 
 	pbrShader = new ShaderProgram("PBR.vs", "PBRBrightness.fs");
 	pbrShader->Use();
-	pbrShader->SetUniform1i("aoMap", 0);
-	pbrShader->SetUniform1i("albedoMap", 1);
-	pbrShader->SetUniform1i("emissionMap", 2);
-	pbrShader->SetUniform1i("metallicMap", 3);
-	pbrShader->SetUniform1i("normalMap", 4);
-	pbrShader->SetUniform1i("roughnessMap", 5);
+	// bind의 순서와 shader 내에서의 sampler2D 정의 순서는 연관되어 있다.
+	pbrShader->BindTexture(&aoTex, "aoMap");
+	pbrShader->BindTexture(&albedoTex, "albedoMap");
+	pbrShader->BindTexture(&emissionTex, "emissionMap");
+	pbrShader->BindTexture(&metallicTex, "metallicMap");
+	pbrShader->BindTexture(&normalTex, "normalMap");
+	pbrShader->BindTexture(&roughnessTex, "roughnessMap");
 
 	brightShader = new ShaderProgram("Quad.vs", "Brightness.fs");
 	brightShader->Use();
@@ -27,15 +28,17 @@ void StarBurstRenderer::InitializeRender()
 
 	bloomShader = new ShaderProgram("Quad.vs", "BloomBlend.fs");
 	bloomShader->Use();
-	bloomShader->SetUniform1i("worldMap", 0);
-	bloomShader->SetUniform1i("blurredBrightMap", 1);
-	bloomShader->SetUniform1i("debugMap", 2);
+	bloomShader->BindTexture(&worldMap, "worldMap");
+	bloomShader->BindTexture(&pingpongBlurMap[1], "blurredBrightMap");
+	bloomShader->BindTexture(&worldMap, "debugMap");
 	bloomShader->SetUniform1f("exposure", 1.0);
 
+	// shader ptr한 번 사용해봄
 	skyboxShader = make_shared<ShaderProgram>("SkyBox.vs", "SkyBox.fs");
 	skyboxShader->Use();
 	skyboxShader->SetUniform1i("skybox", 0);
 
+	// TODO 지금은 texture를 불러오는 과정을 각 랜더러에서 하고 있지만 나중에는 VertexShader등의 class에서 해주어야한다.
 	string folder = "StreetLight";
 	aoTex.LoadTexture("Texture/" + folder + "/ao.png");
 	aoTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
@@ -152,13 +155,6 @@ void StarBurstRenderer::Render()
 		pbrShader->SetUniformVector3f("lightColors[" + std::to_string(i) + "]", lights[i].GetColor());
 	}
 
-	aoTex.Bind(GL_TEXTURE0);
-	albedoTex.Bind(GL_TEXTURE1);
-	emissionTex.Bind(GL_TEXTURE2);
-	metallicTex.Bind(GL_TEXTURE3);
-	normalTex.Bind(GL_TEXTURE4);
-	roughnessTex.Bind(GL_TEXTURE5);
-
 	RenderObjects(pbrShader, sceneObjs);
 
 	// light는 어차피 bright 하므로...
@@ -208,10 +204,6 @@ void StarBurstRenderer::Render()
 
 	UseDefaultFrameBufferObject();
 	bloomShader->Use();
-	worldMap.Bind(GL_TEXTURE0);
-	pingpongBlurMap[1].Bind(GL_TEXTURE1);
-	// debug용 맵
-	worldMap.Bind(GL_TEXTURE2);
 	quad.Draw();
 }
 

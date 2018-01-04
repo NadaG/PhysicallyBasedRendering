@@ -36,6 +36,7 @@ public:
 	void LoadMesh(const MeshType& meshType);
 
 	void LoadModel(const char* s);
+	void LoadModel(const MeshType& meshType);
 
 	// TO Refacto 이거는 바꿔야함
 	void SetColor(const glm::vec3& color);

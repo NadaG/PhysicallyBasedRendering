@@ -135,6 +135,10 @@ GLuint ShaderProgram::LoadShader(const char* shaderFilePath, int shaderType)
 void ShaderProgram::Use()
 {
 	glUseProgram(shaderProgramID);
+	for (int i = 0; i < inputTextures.size(); i++)
+	{
+		inputTextures[i]->Bind(GL_TEXTURE0 + i);
+	}
 }
 
 void ShaderProgram::SetUniform1f(string name, float value)

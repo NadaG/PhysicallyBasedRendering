@@ -24,12 +24,11 @@ void Model::LoadModel(const string& fileName)
 			aiGetMaterialColor(scene->mMaterials[meshTextureIndex[i]], AI_MATKEY_COLOR_DIFFUSE, &diffuse);
 			scene->mMaterials[scene->mMeshes[i]->mMaterialIndex]->GetTexture(aiTextureType_DIFFUSE, 0, &a);*/
 
-			Mesh tmpMesh;
+			Mesh mesh;
 			meshTextureIndex[i] = scene->mMeshes[i]->mMaterialIndex;
-			tmpMesh.SetMesh(scene->mMeshes[i]);
-			tmpMesh.GenerateAndSetVAO();
-			meshes.push_back(tmpMesh);
-
+			mesh.SetMesh(scene->mMeshes[i]);
+			mesh.GenerateAndSetVAO();
+			meshes.push_back(mesh);
 		}
 
 		/*for (int i = 0; i < scene->mNumMaterials; i++)
@@ -46,4 +45,12 @@ void Model::DrawModel()
 	{
 		meshes[i].Draw();
 	}
+}
+
+void Model::AddMesh(const MeshType & meshType)
+{
+	Mesh mesh;
+	mesh.LoadMesh(meshType);
+	mesh.GenerateAndSetVAO();
+	meshes.push_back(mesh);
 }

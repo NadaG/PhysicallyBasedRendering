@@ -9,6 +9,8 @@ public:
 	void LoadModel(const string& model);
 	void DrawModel();
 
+	void AddMesh(const MeshType& meshType);
+
 private:
 
 	unsigned int* meshTextureIndex;

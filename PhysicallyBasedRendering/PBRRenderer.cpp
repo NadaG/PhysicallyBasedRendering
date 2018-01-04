@@ -172,7 +172,7 @@ void PBRRenderer::Render()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	vector<SceneObject>& objs = sceneManager->sceneObjs;
-	SceneObject& camera = sceneManager->cameraObj;
+	Object* camera = sceneManager->movingCamera;
 	vector<SceneObject>& lights = sceneManager->lightObjs;
 	SceneObject& cube = sceneManager->cubeObj;
 	SceneObject& skybox = sceneManager->skyboxObj;
@@ -191,8 +191,8 @@ void PBRRenderer::Render()
 
 	// TODO 마우스 오른쪽 버튼을 누른 채로 카메라 회전을 조절하고 키보드로 움직이게 하자
 	glm::mat4 view = glm::lookAt(
-		camera.GetWorldPosition(),
-		glm::vec3(0.0f, camera.GetPosition().y, 0.0f),
+		camera->GetWorldPosition(),
+		glm::vec3(0.0f, camera->GetPosition().y, 0.0f),
 		glm::vec3(0.0f, 1.0f, 0.0f)
 	);
 
@@ -205,7 +205,7 @@ void PBRRenderer::Render()
 		pbrShader->SetUniformVector3f("lightColors[" + std::to_string(i) + "]", lights[i].GetColor());
 	}
 
-	pbrShader->SetUniformVector3f("eyePos", camera.GetWorldPosition());
+	pbrShader->SetUniformVector3f("eyePos", camera->GetWorldPosition());
 
 	aoTex.Bind(GL_TEXTURE0);
 	albedoTex.Bind(GL_TEXTURE1);

@@ -1,7 +1,5 @@
 #include "CameraMovingScript.h"
 
-#include "Debug.h"
-
 void CameraMovingScript::Update()
 {
 	object->Update();

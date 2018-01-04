@@ -90,7 +90,7 @@ void VolumeRenderer::Render()
 	glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	SceneObject& camera = sceneManager->cameraObj;
+	Object* camera = sceneManager->movingCamera;
 	SceneObject& quad = sceneManager->quadObj;
 	vector<SceneObject>& objs = sceneManager->sceneObjs;
 
@@ -101,8 +101,8 @@ void VolumeRenderer::Render()
 		100.0f);
 
 	glm::mat4 view = glm::lookAt(
-		camera.GetWorldPosition(),
-		glm::vec3(0.0f, camera.GetPosition().y, 0.0f),
+		camera->GetWorldPosition(),
+		glm::vec3(0.0f, camera->GetPosition().y, 0.0f),
 		glm::vec3(0.0f, 1.0f, 0.0f)
 	);
 
@@ -124,7 +124,7 @@ void VolumeRenderer::Render()
 	pointShader->SetUniformMatrix4f("model[5]", 
 		glm::rotate(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::translate(glm::vec3(0.0f, 0.0f, cubeLength)));
 	
-	pointShader->SetUniformVector3f("eyePos", camera.GetWorldPosition());
+	pointShader->SetUniformVector3f("eyePos", camera->GetWorldPosition());
 	pointShader->SetUniformVector3f("lightDir", glm::vec3(1.0f, 0.0f, 0.0f));
 
 	DrawSmoke();
@@ -145,7 +145,7 @@ void VolumeRenderer::DrawSmoke()
 
 void VolumeRenderer::DrawIco()
 {
-	SceneObject& camera = sceneManager->cameraObj;
+	Object* camera = sceneManager->movingCamera;
 
 	glm::mat4 projection = glm::perspective(
 		glm::radians(45.0f),
@@ -154,8 +154,8 @@ void VolumeRenderer::DrawIco()
 		100.0f);
 
 	glm::mat4 view = glm::lookAt(
-		camera.GetWorldPosition(),
-		glm::vec3(0.0f, camera.GetPosition().y, 0.0f),
+		camera->GetWorldPosition(),
+		glm::vec3(0.0f, camera->GetPosition().y, 0.0f),
 		glm::vec3(0.0f, 1.0f, 0.0f)
 	);
 

@@ -21,6 +21,4 @@ private:
 
 	const float cameraMoveSpeed = 0.2f;
 	const float lightMoveSpeed = 0.1f;
-
-	Object* movingCamera;
 };

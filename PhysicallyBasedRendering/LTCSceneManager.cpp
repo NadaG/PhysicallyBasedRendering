@@ -9,18 +9,18 @@ void LTCSceneManager::InitializeObjects()
 	sceneObjs[0].Rotate(glm::vec3(1.0f, 0.0f, 0.0f), glm::radians(90.0f));
 	sceneObjs[0].Translate(glm::vec3(0.0f, 0.0f, 0.0f));
 
-	cameraObj.Translate(glm::vec3(0.0f, 5.0f, 20.0f));
+	movingCamera->Translate(glm::vec3(0.0f, 5.0f, 20.0f));
 }
 
 void LTCSceneManager::Update()
 {
 	glm::mat4 view = glm::lookAt(
-		cameraObj.GetWorldPosition(),
-		cameraObj.GetWorldPosition() + glm::vec3(glm::vec4(0.0f, 0.0f, -5.0f, 0.0f) * cameraObj.GetRotate()),
+		movingCamera->GetWorldPosition(),
+		movingCamera->GetWorldPosition() + glm::vec3(glm::vec4(0.0f, 0.0f, -5.0f, 0.0f) * movingCamera->GetRotate()),
 		glm::vec3(0.0f, 1.0f, 0.0f)
 	);
 
-	if (InputManager::GetInstance()->IsKey(GLFW_KEY_J))
+	/*if (InputManager::GetInstance()->IsKey(GLFW_KEY_J))
 	{
 		glm::vec4 dir = glm::vec4(-0.2f, 0.0f, 0.0f, 0.0f) * view;
 		cameraObj.Translate(glm::vec3(dir));
@@ -60,5 +60,5 @@ void LTCSceneManager::Update()
 		cameraObj.Rotate(glm::vec3(0.0, 1.0, 0.0), 0.01f);
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_D))
-		cameraObj.Rotate(glm::vec3(0.0, 1.0, 0.0), -0.01f);
+		cameraObj.Rotate(glm::vec3(0.0, 1.0, 0.0), -0.01f);*/
 }

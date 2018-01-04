@@ -10,6 +10,7 @@ public:
 	virtual ~Object() {}
 
 	virtual void Update() = 0;
+	virtual void Delete() = 0;
 
 	void Translate(const glm::vec3& vec);
 	void Rotate(const glm::vec3& vec, float angle);
@@ -22,7 +23,7 @@ public:
 	glm::vec3 GetWorldPosition() const;
 
 	const glm::mat4 GetModelMatrix() const;
-
+	
 private:
 
 	glm::vec3 scaleVector;

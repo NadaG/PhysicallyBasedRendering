@@ -112,7 +112,7 @@ void FluidRenderer::Render()
 
 	fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
 
-	SceneObject& camera = sceneManager->cameraObj;
+	Object* camera = sceneManager->movingCamera;
 	SceneObject& quad = sceneManager->quadObj;
 	SceneObject& cube = sceneManager->skyboxObj;
 	vector<SceneObject>& objs = sceneManager->sceneObjs;
@@ -124,8 +124,8 @@ void FluidRenderer::Render()
 		depthFar);
 
 	glm::mat4 view = glm::lookAt(
-		camera.GetWorldPosition(),
-		glm::vec3(0.0f, camera.GetPosition().y, 0.0f),
+		camera->GetWorldPosition(),
+		glm::vec3(0.0f, camera->GetPosition().y, 0.0f),
 		glm::vec3(0.0f, 1.0f, 0.0f)
 	);
 
@@ -140,7 +140,7 @@ void FluidRenderer::Render()
 	pbrShader->SetUniformMatrix4f("projection", projection);
 
 	pbrShader->SetUniformVector3f("lightPos", glm::vec3(10.0f, 0.0f, 0.0f));
-	pbrShader->SetUniformVector3f("eyePos", camera.GetWorldPosition());
+	pbrShader->SetUniformVector3f("eyePos", camera->GetWorldPosition());
 	pbrShader->SetUniformVector3f("lightColor", glm::vec3(0.8f, 0.8f, 0.8f));
 	floorAlbedoTex.Bind(GL_TEXTURE1);
 
@@ -164,7 +164,7 @@ void FluidRenderer::Render()
 	particleDepthShader->SetUniform1f("near", depthNear);
 	particleDepthShader->SetUniform1f("far", depthFar);
 
-	DrawFluids(glm::distance(camera.GetPosition(), glm::vec3(0.0f, camera.GetPosition().y, 0.0f)));
+	DrawFluids(glm::distance(camera->GetPosition(), glm::vec3(0.0f, camera->GetPosition().y, 0.0f)));
 	// 파티클들 depth map 그리기 끝
 
 	// 파티클들 thickness map 그리기
@@ -176,7 +176,7 @@ void FluidRenderer::Render()
 	particleThicknessShader->SetUniformMatrix4f("view", view);
 	particleThicknessShader->SetUniformMatrix4f("projection", projection);
 	
-	DrawFluids(glm::distance(camera.GetPosition(), glm::vec3(0.0f, camera.GetPosition().y, 0.0f)));
+	DrawFluids(glm::distance(camera->GetPosition(), glm::vec3(0.0f, camera->GetPosition().y, 0.0f)));
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 	// 파티클들 thickness map 그리기 끝
@@ -213,7 +213,7 @@ void FluidRenderer::Render()
 	surfaceShader->Use();
 	surfaceShader->SetUniformMatrix4f("projection", projection);
 	surfaceShader->SetUniformMatrix4f("view", view);
-	surfaceShader->SetUniformVector3f("eyePos", camera.GetWorldPosition());
+	surfaceShader->SetUniformVector3f("eyePos", camera->GetWorldPosition());
 	surfaceShader->SetUniformVector3f("lightDir", glm::normalize(glm::vec3(1.0f, -1.0f, 0.0f)));
 
 	worldColorTex.Bind(GL_TEXTURE0);

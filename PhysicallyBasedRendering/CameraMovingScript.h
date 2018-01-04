@@ -10,8 +10,9 @@ public:
 	{}
 
 	void Update();
+	void Delete(){}
+
 private:
 
 	const float moveSpeed = 0.2f;
-	const float lightMoveSpeed = 0.1f;
 };

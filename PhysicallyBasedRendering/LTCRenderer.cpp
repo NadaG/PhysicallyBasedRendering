@@ -25,7 +25,7 @@ void LTCRenderer::Render()
 {
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 
-	SceneObject& camera = sceneManager->cameraObj;
+	Object* camera = sceneManager->movingCamera;
 	SceneObject& quad = sceneManager->quadObj;
 
 	glm::mat4 projection = glm::perspective(
@@ -35,8 +35,8 @@ void LTCRenderer::Render()
 		100.0f);
 
 	glm::mat4 view = glm::lookAt(
-		camera.GetWorldPosition(),
-		camera.GetWorldPosition() + glm::vec3(glm::vec4(0.0f, 0.0f,-5.0f, 0.0f) * camera.GetRotate()),
+		camera->GetWorldPosition(),
+		camera->GetWorldPosition() + glm::vec3(glm::vec4(0.0f, 0.0f,-5.0f, 0.0f) * camera->GetRotate()),
 		glm::vec3(0.0f, 1.0f, 0.0f)
 	);
 

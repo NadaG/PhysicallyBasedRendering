@@ -19,11 +19,6 @@ void SceneObject::SetColor(const glm::vec3& color)
 	this->color = color;
 }
 
-void SceneObject::TerminateModel()
-{
-	model.Delete();
-}
-
 void SceneObject::DrawModel()
 {
 	model.Draw();

@@ -119,7 +119,7 @@ void StarBurstRenderer::InitializeRender()
 void StarBurstRenderer::Render()
 {
 	vector<SceneObject>& sceneObjs = sceneManager->sceneObjs;
-	SceneObject& camera = sceneManager->cameraObj;
+	Object* camera = sceneManager->movingCamera;
 	vector<SceneObject>& lights = sceneManager->lightObjs;
 	SceneObject& quad = sceneManager->quadObj;
 	SceneObject& skyboxObj = sceneManager->skyboxObj;
@@ -138,8 +138,8 @@ void StarBurstRenderer::Render()
 
 	// TODO 마우스 오른쪽 버튼을 누른 채로 카메라 회전을 조절하고 키보드로 움직이게 하자
 	glm::mat4 view = glm::lookAt(
-		camera.GetWorldPosition(),
-		glm::vec3(0.0f, camera.GetPosition().y, 0.0f),
+		camera->GetWorldPosition(),
+		glm::vec3(0.0f, camera->GetPosition().y, 0.0f),
 		glm::vec3(0.0f, 1.0f, 0.0f)
 	);
 
@@ -147,7 +147,7 @@ void StarBurstRenderer::Render()
 
 	pbrShader->SetUniformMatrix4f("view", view);
 	pbrShader->SetUniformMatrix4f("projection", projection);
-	pbrShader->SetUniformVector3f("eyePos", camera.GetWorldPosition());
+	pbrShader->SetUniformVector3f("eyePos", camera->GetWorldPosition());
 
 	for (int i = 0; i < lights.size(); i++)
 	{

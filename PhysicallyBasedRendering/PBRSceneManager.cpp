@@ -25,7 +25,7 @@ void PBRSceneManager::InitializeObjects()
 	skyboxObj.Scale(glm::vec3(1.0f));
 	cubeObj.Scale(glm::vec3(4.0f, 1.0f, 1.0f));
 
-	cameraObj.Translate(glm::vec3(0.0f, 0.0f, 15.0f));
+	movingCamera->Translate(glm::vec3(0.0f, 0.0f, 15.0f));
 
 	SceneObject lightObj;
 	lightObj.LoadModel("Obj/Sphere.obj");
@@ -47,44 +47,15 @@ void PBRSceneManager::InitializeObjects()
 	lightObjs[3].SetColor(glm::vec3(10.0f, 10.0f, 10.0f));
 }
 
-// TODO Camera는 따로 Object를 상속받아서 둘 것
 void PBRSceneManager::Update()
 {
-	if (InputManager::GetInstance()->IsKey(GLFW_KEY_J))
-	{
-		cameraObj.Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 0.01f);
-	}
-
-	if (InputManager::GetInstance()->IsKey(GLFW_KEY_L))
-	{
-		cameraObj.Rotate(glm::vec3(0.0f, 1.0f, 0.0f), -0.01f);
-	}
-
-	if (InputManager::GetInstance()->IsKey(GLFW_KEY_I))
-	{
-		cameraObj.Translate(glm::vec3(0.0f, 0.0f, -cameraMoveSpeed));
-	}
-
-	if (InputManager::GetInstance()->IsKey(GLFW_KEY_K))
-	{
-		cameraObj.Translate(glm::vec3(0.0f, 0.0f, cameraMoveSpeed));
-	}
-
-	if (InputManager::GetInstance()->IsKey(GLFW_KEY_U))
-	{
-		cameraObj.Translate(glm::vec3(0.0f, cameraMoveSpeed, 0.0f));
-	}
-
-	if (InputManager::GetInstance()->IsKey(GLFW_KEY_O))
-	{
-		cameraObj.Translate(glm::vec3(0.0f, -cameraMoveSpeed, 0.0f));
-	}
+	movingCamera->Update();
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_A))
 	{
 		glm::mat4 view = glm::lookAt(
-			cameraObj.GetWorldPosition(),
-			glm::vec3(0.0f, cameraObj.GetPosition().y, 0.0f),
+			movingCamera->GetWorldPosition(),
+			glm::vec3(0.0f, movingCamera->GetPosition().y, 0.0f),
 			glm::vec3(0.0f, 1.0f, 0.0f)
 		);
 
@@ -95,8 +66,8 @@ void PBRSceneManager::Update()
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_D))
 	{
 		glm::mat4 view = glm::lookAt(
-			cameraObj.GetWorldPosition(),
-			glm::vec3(0.0f, cameraObj.GetPosition().y, 0.0f),
+			movingCamera->GetWorldPosition(),
+			glm::vec3(0.0f, movingCamera->GetPosition().y, 0.0f),
 			glm::vec3(0.0f, 1.0f, 0.0f)
 		);
 
@@ -107,8 +78,8 @@ void PBRSceneManager::Update()
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_W))
 	{
 		glm::mat4 view = glm::lookAt(
-			cameraObj.GetWorldPosition(),
-			glm::vec3(0.0f, cameraObj.GetPosition().y, 0.0f),
+			movingCamera->GetWorldPosition(),
+			glm::vec3(0.0f, movingCamera->GetPosition().y, 0.0f),
 			glm::vec3(0.0f, 1.0f, 0.0f)
 		);
 
@@ -119,8 +90,8 @@ void PBRSceneManager::Update()
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_S))
 	{
 		glm::mat4 view = glm::lookAt(
-			cameraObj.GetWorldPosition(),
-			glm::vec3(0.0f, cameraObj.GetPosition().y, 0.0f),
+			movingCamera->GetWorldPosition(),
+			glm::vec3(0.0f, movingCamera->GetPosition().y, 0.0f),
 			glm::vec3(0.0f, 1.0f, 0.0f)
 		);
 
@@ -131,8 +102,8 @@ void PBRSceneManager::Update()
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_Q))
 	{
 		glm::mat4 view = glm::lookAt(
-			cameraObj.GetWorldPosition(),
-			glm::vec3(0.0f, cameraObj.GetPosition().y, 0.0f),
+			movingCamera->GetWorldPosition(),
+			glm::vec3(0.0f, movingCamera->GetPosition().y, 0.0f),
 			glm::vec3(0.0f, 1.0f, 0.0f)
 		);
 
@@ -143,8 +114,8 @@ void PBRSceneManager::Update()
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_E))
 	{
 		glm::mat4 view = glm::lookAt(
-			cameraObj.GetWorldPosition(),
-			glm::vec3(0.0f, cameraObj.GetPosition().y, 0.0f),
+			movingCamera->GetWorldPosition(),
+			glm::vec3(0.0f, movingCamera->GetPosition().y, 0.0f),
 			glm::vec3(0.0f, 1.0f, 0.0f)
 		);
 

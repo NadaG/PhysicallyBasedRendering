@@ -161,6 +161,7 @@
     <ClCompile Include="FluidRenderer.cpp" />
     <ClCompile Include="FluidSimulationImporter.cpp" />
     <ClCompile Include="FrameBufferObject.cpp" />
+    <ClCompile Include="LightMovingScript.cpp" />
     <ClCompile Include="LTCRenderer.cpp" />
     <ClCompile Include="LTCSceneManager.cpp" />
     <ClCompile Include="Material.cpp" />
@@ -245,6 +246,7 @@
     <ClInclude Include="FluidSceneManager.h" />
     <ClInclude Include="FluidSimulationImporter.h" />
     <ClInclude Include="FrameBufferObject.h" />
+    <ClInclude Include="LightMovingScript.h" />
     <ClInclude Include="LTCRenderer.h" />
     <ClInclude Include="LTCSceneManager.h" />
     <ClInclude Include="Material.h" />

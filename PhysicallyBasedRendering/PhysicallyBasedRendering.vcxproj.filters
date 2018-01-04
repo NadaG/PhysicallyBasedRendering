@@ -180,6 +180,9 @@
     <ClCompile Include="CameraMovingScript.cpp">
       <Filter>Source Files\SceneObject</Filter>
     </ClCompile>
+    <ClCompile Include="LightMovingScript.cpp">
+      <Filter>Source Files\SceneObject</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -429,6 +432,9 @@
       <Filter>Source Files\SceneObject</Filter>
     </ClInclude>
     <ClInclude Include="CameraMovingScript.h">
+      <Filter>Source Files\SceneObject</Filter>
+    </ClInclude>
+    <ClInclude Include="LightMovingScript.h">
       <Filter>Source Files\SceneObject</Filter>
     </ClInclude>
   </ItemGroup>

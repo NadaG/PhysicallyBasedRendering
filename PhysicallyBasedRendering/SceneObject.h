@@ -18,10 +18,9 @@ public:
 	void SetColor(const glm::vec3& color);
 	const glm::vec3& GetColor() { return this->color; }
 
-	void TerminateModel();
-
 	// override
 	void Update(){}
+	void Delete() { model.Delete(); }
 
 private:
 

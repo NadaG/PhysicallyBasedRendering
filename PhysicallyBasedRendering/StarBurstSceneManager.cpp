@@ -13,6 +13,14 @@ void StarBurstSceneManager::InitializeObjects()
 	sceneObjs.push_back(road);
 	sceneObjs.push_back(streetLight);
 
+	SceneObject* light = new SceneObject();
+	light->LoadModel("Obj/Sphere.obj");
+	light->Scale(glm::vec3(0.5f));
+	light->SetColor(glm::vec3(10.0f, 0.0f, 0.0f));
+	Object* movingLight = new LightMovingScript(light, movingCamera);
+	movingLights.push_back(movingLight);
+
+
 	SceneObject lightObj;
 	lightObj.LoadModel("Obj/Sphere.obj");
 
@@ -32,49 +40,16 @@ void StarBurstSceneManager::InitializeObjects()
 	lightObjs[3].Scale(glm::vec3(0.1f));
 	lightObjs[3].SetColor(glm::vec3(10.0f, 10.0f, 10.0f));
 	
-	cameraObj.Translate(glm::vec3(0.0f, 2.0f, 10.0f));
-
-	Object* tmpObj = new SceneObject();
-	movingCamera = new CameraMovingScript(tmpObj);
+	movingCamera->Translate(glm::vec3(0.0f, 2.0f, 10.0f));
 }
 
 void StarBurstSceneManager::Update()
 {
-	movingCamera->Update();
-
 	// 이 안에서 update가 돌아가야 함
-	/*cameraObj.Update();
+	movingCamera->Update();
+	movingLights[0]->Update();
 
-	if (InputManager::GetInstance()->IsKey(GLFW_KEY_J))
-	{
-		cameraObj.Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 0.01f);
-	}
-
-	if (InputManager::GetInstance()->IsKey(GLFW_KEY_L))
-	{
-		cameraObj.Rotate(glm::vec3(0.0f, 1.0f, 0.0f), -0.01f);
-	}
-
-	if (InputManager::GetInstance()->IsKey(GLFW_KEY_I))
-	{
-		cameraObj.Translate(glm::vec3(0.0f, 0.0f, -cameraMoveSpeed));
-	}
-
-	if (InputManager::GetInstance()->IsKey(GLFW_KEY_K))
-	{
-		cameraObj.Translate(glm::vec3(0.0f, 0.0f, cameraMoveSpeed));
-	}
-
-	if (InputManager::GetInstance()->IsKey(GLFW_KEY_U))
-	{
-		cameraObj.Translate(glm::vec3(0.0f, cameraMoveSpeed, 0.0f));
-	}
-
-	if (InputManager::GetInstance()->IsKey(GLFW_KEY_O))
-	{
-		cameraObj.Translate(glm::vec3(0.0f, -cameraMoveSpeed, 0.0f));
-	}
-
+	/*
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_A))
 	{
 		glm::mat4 view = glm::lookAt(

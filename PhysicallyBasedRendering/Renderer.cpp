@@ -33,6 +33,15 @@ void Renderer::RenderObject(ShaderProgram * shader, SceneObject obj)
 	obj.DrawModel();
 }
 
+void Renderer::RenderObject(ShaderProgram * shader, SceneObject* obj)
+{
+	shader->Use();
+	glm::mat4 model = obj->GetModelMatrix();
+	shader->SetUniformMatrix4f("model", model);
+	shader->SetUniformVector3f("uniColor", obj->GetColor());
+	obj->DrawModel();
+}
+
 void Renderer::GenCubemapFromEquirectangular(TextureCube* texCube, Texture2D tex)
 {
 	equirectangularToCubemapShader->Use();

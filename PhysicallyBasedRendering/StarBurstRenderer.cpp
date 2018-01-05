@@ -123,6 +123,7 @@ void StarBurstRenderer::Render()
 	vector<SceneObject>& lights = sceneManager->lightObjs;
 	SceneObject& quad = sceneManager->quadObj;
 	SceneObject& skyboxObj = sceneManager->skyboxObj;
+	Object* light = sceneManager->movingLight;
 
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 	worldFBO.Use();
@@ -162,7 +163,8 @@ void StarBurstRenderer::Render()
 	lightShader->SetUniformMatrix4f("view", view);
 	lightShader->SetUniformMatrix4f("projection", projection);
 	RenderObjects(lightShader, lights);
-
+	//RenderObject(lightShader, light);
+	
 	// skybox 그리는 부분
 	/*glDepthFunc(GL_LEQUAL);
 	skyboxShader->Use();

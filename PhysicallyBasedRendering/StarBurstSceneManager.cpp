@@ -13,18 +13,22 @@ void StarBurstSceneManager::InitializeObjects()
 	sceneObjs.push_back(road);
 	sceneObjs.push_back(streetLight);
 
-	SceneObject* light = new SceneObject();
-	light->LoadModel("Obj/Sphere.obj");
-	light->Scale(glm::vec3(0.5f));
-	light->SetColor(glm::vec3(10.0f, 0.0f, 0.0f));
-	Object* movingLight = new LightMovingScript(light, movingCamera);
-	movingLights.push_back(movingLight);
+	/*Object* light = new SceneObject();
+	SceneObject* movingLight = new LightMovingScript(light, movingCamera);
+	movingLight->LoadModel("Obj/Sphere.obj");
+	movingLight->Scale(glm::vec3(0.5f));
+	movingLight->SetColor(glm::vec3(10.0f, 0.0f, 0.0f));
+	movingLights.push_back(movingLight);*/
 
+	lightMovement = new LightMovement(movingCamera);
+	movingLight = new SceneObject(lightMovement);
+	lightMovement->BindObject(movingLight);
+	
+	//movingLight->LoadModel("Obj/Sphere.obj");
+	movingLight->Scale(glm::vec3(0.1f));
+	//movingLight->SetColor(glm::vec3(10.0, 0.0, 0.0));
 
-	SceneObject lightObj;
-	lightObj.LoadModel("Obj/Sphere.obj");
-
-	lightObjs.push_back(lightObj);
+	/*lightObjs.push_back(lightObj);
 	lightObjs[0].Scale(glm::vec3(0.1f));
 	lightObjs[0].SetColor(glm::vec3(10.0f, 0.0f, 0.0f));
 
@@ -38,7 +42,7 @@ void StarBurstSceneManager::InitializeObjects()
 
 	lightObjs.push_back(lightObj);
 	lightObjs[3].Scale(glm::vec3(0.1f));
-	lightObjs[3].SetColor(glm::vec3(10.0f, 10.0f, 10.0f));
+	lightObjs[3].SetColor(glm::vec3(10.0f, 10.0f, 10.0f));*/
 	
 	movingCamera->Translate(glm::vec3(0.0f, 2.0f, 10.0f));
 }
@@ -47,7 +51,7 @@ void StarBurstSceneManager::Update()
 {
 	// 이 안에서 update가 돌아가야 함
 	movingCamera->Update();
-	movingLights[0]->Update();
+	movingLight->Update();
 
 	/*
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_A))

@@ -6,7 +6,8 @@
 class SceneObject : public Object
 {
 public:
-	SceneObject();
+	SceneObject() : Object(new DefaultMovement()){}
+	SceneObject(Movement* const movement) : Object(movement){}
 	virtual ~SceneObject() {}
 
 	void DrawModel();
@@ -18,9 +19,9 @@ public:
 	void SetColor(const glm::vec3& color);
 	const glm::vec3& GetColor() { return this->color; }
 
-	// override
-	void Update(){}
-	void Delete() { model.Delete(); }
+	// base의 delete함수를 부르는 것
+	void Delete() override { Object::Delete(); model.Delete(); }
+	// 딱히 Update를 override할 필요가 없었음
 
 private:
 

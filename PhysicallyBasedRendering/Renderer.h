@@ -54,6 +54,7 @@ protected:
 	void UseDefaultFrameBufferObject();
 	void RenderObjects(ShaderProgram* shader, vector<SceneObject> objs);
 	void RenderObject(ShaderProgram* shader, SceneObject obj);
+	void RenderObject(ShaderProgram* shader, SceneObject* obj);
 	
 	void GenCubemapFromEquirectangular(TextureCube* texCube, Texture2D tex);
 

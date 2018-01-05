@@ -1,9 +1,5 @@
 #include "SceneObject.h"
 
-SceneObject::SceneObject()
-{
-}
-
 void SceneObject::LoadModel(const char * s)
 {
 	model.Load(s);

@@ -1,10 +1,12 @@
 #include "Object.h"
 
-Object::Object()
+Object::Object(Movement* const movement)
 {
 	this->positionVector = glm::vec3(0, 0, 0);
 	this->scaleVector = glm::vec3(1, 1, 1);
 	this->rotationMatrix = glm::mat4(1.0);
+
+	this->movement = movement;
 }
 
 glm::vec3 Object::GetWorldPosition() const

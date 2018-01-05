@@ -28,9 +28,6 @@
     <Filter Include="Source Files\WindowManager">
       <UniqueIdentifier>{d0486940-34b2-4ddb-b9e1-463b1a4d94bd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\SceneObject">
-      <UniqueIdentifier>{65341de4-8367-44df-b29b-9883047ec312}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Mesh">
       <UniqueIdentifier>{0451c2ab-f7ae-4638-9c54-ab91d656db54}</UniqueIdentifier>
     </Filter>
@@ -76,6 +73,9 @@
     <Filter Include="Source Files\Cuda">
       <UniqueIdentifier>{f8ed83a0-8c59-455e-8d72-4678316f81f6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Object">
+      <UniqueIdentifier>{65341de4-8367-44df-b29b-9883047ec312}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -94,7 +94,7 @@
       <Filter>Source Files\WindowManager</Filter>
     </ClCompile>
     <ClCompile Include="SceneObject.cpp">
-      <Filter>Source Files\SceneObject</Filter>
+      <Filter>Source Files\Object</Filter>
     </ClCompile>
     <ClCompile Include="Mesh.cpp">
       <Filter>Source Files\Mesh</Filter>
@@ -175,13 +175,13 @@
       <Filter>Source Files\Material</Filter>
     </ClCompile>
     <ClCompile Include="Object.cpp">
-      <Filter>Source Files\SceneObject</Filter>
+      <Filter>Source Files\Object</Filter>
     </ClCompile>
-    <ClCompile Include="CameraMovingScript.cpp">
-      <Filter>Source Files\SceneObject</Filter>
+    <ClCompile Include="CameraMovement.cpp">
+      <Filter>Source Files\Object</Filter>
     </ClCompile>
-    <ClCompile Include="LightMovingScript.cpp">
-      <Filter>Source Files\SceneObject</Filter>
+    <ClCompile Include="LightMovement.cpp">
+      <Filter>Source Files\Object</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -321,7 +321,7 @@
       <Filter>Source Files\WindowManager</Filter>
     </ClInclude>
     <ClInclude Include="SceneObject.h">
-      <Filter>Source Files\SceneObject</Filter>
+      <Filter>Source Files\Object</Filter>
     </ClInclude>
     <ClInclude Include="Mesh.h">
       <Filter>Source Files\Mesh</Filter>
@@ -426,16 +426,19 @@
       <Filter>Source Files\Cuda</Filter>
     </ClInclude>
     <ClInclude Include="Object.h">
-      <Filter>Source Files\SceneObject</Filter>
+      <Filter>Source Files\Object</Filter>
     </ClInclude>
-    <ClInclude Include="Script.h">
-      <Filter>Source Files\SceneObject</Filter>
+    <ClInclude Include="Movement.h">
+      <Filter>Source Files\Object</Filter>
     </ClInclude>
-    <ClInclude Include="CameraMovingScript.h">
-      <Filter>Source Files\SceneObject</Filter>
+    <ClInclude Include="LightMovement.h">
+      <Filter>Source Files\Object</Filter>
     </ClInclude>
-    <ClInclude Include="LightMovingScript.h">
-      <Filter>Source Files\SceneObject</Filter>
+    <ClInclude Include="CameraMovement.h">
+      <Filter>Source Files\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="DefaultMovement.h">
+      <Filter>Source Files\Object</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

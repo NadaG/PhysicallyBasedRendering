@@ -8,8 +8,6 @@
 
 #include "InputManager.h"
 #include "SceneObject.h"
-#include "CameraMovingScript.h"
-#include "LightMovingScript.h"
 
 using std::vector;
 
@@ -29,8 +27,15 @@ public:
 	// TODO 일단 decorator 패턴을 이용해서 cameraObj, 이런거 다 지우고 Obj로 통일할 거임
 	vector<SceneObject> sceneObjs;
 	vector<SceneObject> lightObjs;
-	vector<Object*> movingLights;
+	
+	// sceneobject는 render가 필요한 object
+	Object* movingLight;
+	Movement* lightMovement;
+
+	// render가 안되는 object
 	Object* movingCamera;
+	Movement* cameraMovement;
+
 	SceneObject quadObj;
 	SceneObject skyboxObj;
 	SceneObject cubeObj;

@@ -16,7 +16,6 @@ private:
 
 	SceneObject streetLight;
 	SceneObject road;
-
 	int selectedLightId;
 
 	const float cameraMoveSpeed = 0.2f;

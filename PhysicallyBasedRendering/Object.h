@@ -3,14 +3,18 @@
 #include<glm/glm.hpp>
 #include<glm/gtx/transform.hpp>
 
+#include "CameraMovement.h"
+#include "LightMovement.h"
+#include "DefaultMovement.h"
+
 class Object
 {
 public:
-	Object();
+	Object(Movement* const movement);
 	virtual ~Object() {}
 
-	virtual void Update() = 0;
-	virtual void Delete() = 0;
+	virtual void Update() { movement->Update(); }
+	virtual void Delete() { delete movement; }
 
 	void Translate(const glm::vec3& vec);
 	void Rotate(const glm::vec3& vec, float angle);
@@ -25,6 +29,9 @@ public:
 	const glm::mat4 GetModelMatrix() const;
 	
 private:
+
+	// 여차하면 vector로 바꿀 것
+	Movement* movement;
 
 	glm::vec3 scaleVector;
 	glm::mat4 rotationMatrix;

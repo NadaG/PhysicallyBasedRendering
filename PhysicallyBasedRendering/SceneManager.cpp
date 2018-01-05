@@ -1,11 +1,14 @@
 #include "SceneManager.h"
 
+#include "DefaultMovement.h"
+#include "LightMovement.h"
+#include "CameraMovement.h"
+
 SceneManager::SceneManager()
 {
-	Object* tmpObj = new SceneObject();
-	movingCamera = new CameraMovingScript(tmpObj);
-
-	// TODO Light moving code ³ÖÀ» °Í
+	cameraMovement = new CameraMovement();
+	movingCamera = new Object(cameraMovement);
+	cameraMovement->BindObject(movingCamera);
 }
 
 void SceneManager::TerminateObjects()
@@ -13,4 +16,7 @@ void SceneManager::TerminateObjects()
 	for (int i = 0; i < sceneObjs.size(); i++)
 		sceneObjs[i].Delete();
 	movingCamera->Delete();
+
+	delete movingCamera;
+	delete cameraMovement;
 }

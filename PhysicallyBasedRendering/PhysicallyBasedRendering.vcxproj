@@ -103,7 +103,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;SOLUTION_DIR=LR"($(SolutionDir))";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;SOLUTION_DIR=LR"($(SolutionDir))";_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>C:\Users\RENDER4\Desktop\Files\OpenGL\GL64;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -111,7 +111,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Users\RENDER4\Desktop\Files\OpenGL\GL64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>freeglut.lib;freeglutd.lib;glew32.lib;glfw3.lib;glfw3dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>freeglut.lib;freeglutd.lib;glew32.lib;glfw3.lib;glfw3dll.lib;cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -154,14 +154,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CameraMovingScript.cpp" />
+    <ClCompile Include="CameraMovement.cpp" />
     <ClCompile Include="dds.cpp" />
     <ClCompile Include="fitLTC.cpp" />
     <ClCompile Include="FluidSceneManager.cpp" />
     <ClCompile Include="FluidRenderer.cpp" />
     <ClCompile Include="FluidSimulationImporter.cpp" />
     <ClCompile Include="FrameBufferObject.cpp" />
-    <ClCompile Include="LightMovingScript.cpp" />
+    <ClCompile Include="LightMovement.cpp" />
     <ClCompile Include="LTCRenderer.cpp" />
     <ClCompile Include="LTCSceneManager.cpp" />
     <ClCompile Include="Material.cpp" />
@@ -238,15 +238,16 @@
     <ClInclude Include="brdf_beckmann.h" />
     <ClInclude Include="brdf_disneyDiffuse.h" />
     <ClInclude Include="brdf_ggx.h" />
-    <ClInclude Include="CameraMovingScript.h" />
+    <ClInclude Include="CameraMovement.h" />
     <ClInclude Include="CImg.h" />
     <ClInclude Include="dds.h" />
+    <ClInclude Include="DefaultMovement.h" />
     <ClInclude Include="export.h" />
     <ClInclude Include="FluidRenderer.h" />
     <ClInclude Include="FluidSceneManager.h" />
     <ClInclude Include="FluidSimulationImporter.h" />
     <ClInclude Include="FrameBufferObject.h" />
-    <ClInclude Include="LightMovingScript.h" />
+    <ClInclude Include="LightMovement.h" />
     <ClInclude Include="LTCRenderer.h" />
     <ClInclude Include="LTCSceneManager.h" />
     <ClInclude Include="Material.h" />
@@ -264,7 +265,7 @@
     <ClInclude Include="Debug.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Renderer.h" />
-    <ClInclude Include="Script.h" />
+    <ClInclude Include="Movement.h" />
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="SmokeSimulationImporter.h" />
     <ClInclude Include="SmokeSceneManager.h" />

@@ -120,10 +120,9 @@ void StarBurstRenderer::Render()
 {
 	vector<SceneObject>& sceneObjs = sceneManager->sceneObjs;
 	Object* camera = sceneManager->movingCamera;
-	vector<SceneObject>& lights = sceneManager->lightObjs;
+	vector<SceneObject*>& lightTmps = sceneManager->lightObjs;
 	SceneObject& quad = sceneManager->quadObj;
 	SceneObject& skyboxObj = sceneManager->skyboxObj;
-	Object* light = sceneManager->movingLight;
 
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 	worldFBO.Use();
@@ -150,10 +149,10 @@ void StarBurstRenderer::Render()
 	pbrShader->SetUniformMatrix4f("projection", projection);
 	pbrShader->SetUniformVector3f("eyePos", camera->GetWorldPosition());
 
-	for (int i = 0; i < lights.size(); i++)
+	for (int i = 0; i < lightTmps.size(); i++)
 	{
-		pbrShader->SetUniformVector3f("lightPositions[" + std::to_string(i) + "]", lights[i].GetPosition());
-		pbrShader->SetUniformVector3f("lightColors[" + std::to_string(i) + "]", lights[i].GetColor());
+		pbrShader->SetUniformVector3f("lightPositions[" + std::to_string(i) + "]", lightTmps[i]->GetPosition());
+		pbrShader->SetUniformVector3f("lightColors[" + std::to_string(i) + "]", lightTmps[i]->GetColor());
 	}
 
 	RenderObjects(pbrShader, sceneObjs);
@@ -162,7 +161,7 @@ void StarBurstRenderer::Render()
 	lightShader->Use();
 	lightShader->SetUniformMatrix4f("view", view);
 	lightShader->SetUniformMatrix4f("projection", projection);
-	RenderObjects(lightShader, lights);
+	RenderObjects(lightShader, lightTmps);
 	//RenderObject(lightShader, light);
 	
 	// skybox 그리는 부분
@@ -211,8 +210,6 @@ void StarBurstRenderer::Render()
 
 void StarBurstRenderer::TerminateRender()
 {
-	//phongShader.Delete();
-	
 	pbrShader->Delete();
 	delete pbrShader;
 
@@ -223,4 +220,6 @@ void StarBurstRenderer::TerminateRender()
 	delete blurShader;
 
 	skyboxShader->Delete();
+
+	sceneManager->TerminateObjects();
 }

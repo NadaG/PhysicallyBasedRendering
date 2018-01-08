@@ -173,7 +173,7 @@ void PBRRenderer::Render()
 
 	vector<SceneObject>& objs = sceneManager->sceneObjs;
 	Object* camera = sceneManager->movingCamera;
-	vector<SceneObject>& lights = sceneManager->lightObjs;
+	vector<SceneObject*>& lights = sceneManager->lightObjs;
 	SceneObject& cube = sceneManager->cubeObj;
 	SceneObject& skybox = sceneManager->skyboxObj;
 
@@ -201,8 +201,8 @@ void PBRRenderer::Render()
 	pbrShader->SetUniformMatrix4f("projection", projection);
 	for (int i = 0; i < lights.size(); i++)
 	{
-		pbrShader->SetUniformVector3f("lightPositions[" + std::to_string(i) + "]", lights[i].GetPosition());
-		pbrShader->SetUniformVector3f("lightColors[" + std::to_string(i) + "]", lights[i].GetColor());
+		pbrShader->SetUniformVector3f("lightPositions[" + std::to_string(i) + "]", lights[i]->GetPosition());
+		pbrShader->SetUniformVector3f("lightColors[" + std::to_string(i) + "]", lights[i]->GetColor());
 	}
 
 	pbrShader->SetUniformVector3f("eyePos", camera->GetWorldPosition());

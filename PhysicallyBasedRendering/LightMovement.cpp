@@ -11,15 +11,11 @@ void LightMovement::Update()
 		glm::vec3(0.0f, 1.0f, 0.0f)
 	);
 
-	Debug::GetInstance()->Log(object->GetWorldPosition());
-
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_A))
 	{
 		glm::vec4 v = glm::inverse(view) * glm::vec4(-moveSpeed, 0.0f, 0.0f, 0.0f);
 		object->Translate(v);
 	}
-
-	Debug::GetInstance()->Log(object->GetWorldPosition());
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_D))
 	{

@@ -14,7 +14,8 @@ public:
 	virtual ~Object() {}
 
 	virtual void Update() { movement->Update(); }
-	virtual void Delete() { delete movement; }
+	// 여기서 delete를 하는게 맞는지 저쪽에서 해주는게 맞는지 잘 모르겠음
+	virtual void Delete() { /*delete movement;*/ }
 
 	void Translate(const glm::vec3& vec);
 	void Rotate(const glm::vec3& vec, float angle);

@@ -20,7 +20,7 @@ enum Scene
 
 int main(int argc, char **argv)
 {
-	Scene scene = STARBURST_SCENE;
+	Scene scene = PBR_SCENE;
 
 	WindowManager::GetInstance()->Initialize();
 
@@ -32,8 +32,6 @@ int main(int argc, char **argv)
 	GLFWwindow* window = WindowManager::GetInstance()->CreateMyWindow(1024, 1024, "OpenGL");
 
 	InputManager::GetInstance()->Initialize(window);
-
-	//hello();
 
 	// TO Refacto 어딘가로 버려버릴것
 	glewExperimental = true;

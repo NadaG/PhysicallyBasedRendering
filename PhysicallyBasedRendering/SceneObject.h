@@ -6,8 +6,8 @@
 class SceneObject : public Object
 {
 public:
-	SceneObject() : Object(new DefaultMovement()){}
-	SceneObject(Movement* const movement) : Object(movement){}
+	//SceneObject() : Object(new DefaultMovement()){}
+	SceneObject(Movement* const movement = new DefaultMovement()) : Object(movement){}
 	virtual ~SceneObject() {}
 
 	void DrawModel();

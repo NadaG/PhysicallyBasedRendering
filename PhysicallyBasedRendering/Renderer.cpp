@@ -25,6 +25,19 @@ void Renderer::RenderObjects(ShaderProgram * shader, vector<SceneObject> objs)
 	}
 }
 
+void Renderer::RenderObjects(ShaderProgram * shader, vector<SceneObject*> objs)
+{
+	shader->Use();
+	for (int i = 0; i < objs.size(); i++)
+	{
+		glm::mat4 model = objs[i]->GetModelMatrix();
+		shader->SetUniformMatrix4f("model", model);
+		// decorator pattern ÀÎÁ¤??
+		shader->SetUniformVector3f("uniColor", objs[i]->GetColor());
+		objs[i]->DrawModel();
+	}
+}
+
 void Renderer::RenderObject(ShaderProgram * shader, SceneObject obj)
 {
 	shader->Use();

@@ -44,6 +44,7 @@ private:
 	ShaderProgram* blurShader;
 	ShaderProgram* bloomShader;
 	ShaderProgram* brightShader;
+	ShaderProgram* glareShader;
 
 	shared_ptr<ShaderProgram> skyboxShader;
 

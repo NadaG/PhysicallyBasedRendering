@@ -33,7 +33,10 @@ void StarBurstRenderer::InitializeRender()
 	bloomShader->BindTexture(&worldMap, "debugMap");
 	bloomShader->SetUniform1f("exposure", 1.0);
 
-	// shader ptr한 번 사용해봄
+	glareShader = new ShaderProgram("Basic.vs", "Billboard.fs");
+	glareShader->Use();
+
+	// smart pointer 한 번 사용해봄
 	skyboxShader = make_shared<ShaderProgram>("SkyBox.vs", "SkyBox.fs");
 	skyboxShader->Use();
 	skyboxShader->SetUniform1i("skybox", 0);
@@ -120,7 +123,8 @@ void StarBurstRenderer::Render()
 {
 	vector<SceneObject>& sceneObjs = sceneManager->sceneObjs;
 	Object* camera = sceneManager->movingCamera;
-	vector<SceneObject*>& lightTmps = sceneManager->lightObjs;
+	vector<SceneObject*>& lights = sceneManager->lightObjs;
+	SceneObject* billboard = sceneManager->billboard;
 	SceneObject& quad = sceneManager->quadObj;
 	SceneObject& skyboxObj = sceneManager->skyboxObj;
 
@@ -149,20 +153,26 @@ void StarBurstRenderer::Render()
 	pbrShader->SetUniformMatrix4f("projection", projection);
 	pbrShader->SetUniformVector3f("eyePos", camera->GetWorldPosition());
 
-	for (int i = 0; i < lightTmps.size(); i++)
+	for (int i = 0; i < lights.size(); i++)
 	{
-		pbrShader->SetUniformVector3f("lightPositions[" + std::to_string(i) + "]", lightTmps[i]->GetPosition());
-		pbrShader->SetUniformVector3f("lightColors[" + std::to_string(i) + "]", lightTmps[i]->GetColor());
+		pbrShader->SetUniformVector3f("lightPositions[" + std::to_string(i) + "]", lights[i]->GetPosition());
+		pbrShader->SetUniformVector3f("lightColors[" + std::to_string(i) + "]", lights[i]->GetColor());
 	}
 
 	RenderObjects(pbrShader, sceneObjs);
+
+	glareShader->Use();
+
+	glareShader->SetUniformMatrix4f("view", view);
+	glareShader->SetUniformMatrix4f("projection", projection);
+
+	RenderObject(glareShader, billboard);
 
 	// light는 어차피 bright 하므로...
 	lightShader->Use();
 	lightShader->SetUniformMatrix4f("view", view);
 	lightShader->SetUniformMatrix4f("projection", projection);
-	RenderObjects(lightShader, lightTmps);
-	//RenderObject(lightShader, light);
+	RenderObjects(lightShader, lights);
 	
 	// skybox 그리는 부분
 	/*glDepthFunc(GL_LEQUAL);

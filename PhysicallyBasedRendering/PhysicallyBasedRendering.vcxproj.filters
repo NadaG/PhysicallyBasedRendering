@@ -76,6 +76,9 @@
     <Filter Include="Source Files\Object">
       <UniqueIdentifier>{65341de4-8367-44df-b29b-9883047ec312}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Movement">
+      <UniqueIdentifier>{8e4eb587-93e4-498a-8832-bc761068e40d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -178,10 +181,13 @@
       <Filter>Source Files\Object</Filter>
     </ClCompile>
     <ClCompile Include="CameraMovement.cpp">
-      <Filter>Source Files\Object</Filter>
+      <Filter>Source Files\Movement</Filter>
     </ClCompile>
     <ClCompile Include="LightMovement.cpp">
-      <Filter>Source Files\Object</Filter>
+      <Filter>Source Files\Movement</Filter>
+    </ClCompile>
+    <ClCompile Include="BillBoardMovement.cpp">
+      <Filter>Source Files\Movement</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -306,6 +312,9 @@
     <None Include="Brightness.fs">
       <Filter>Shader Files\Bloom</Filter>
     </None>
+    <None Include="Billboard.fs">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ShaderProgram.h">
@@ -428,17 +437,20 @@
     <ClInclude Include="Object.h">
       <Filter>Source Files\Object</Filter>
     </ClInclude>
-    <ClInclude Include="Movement.h">
-      <Filter>Source Files\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="LightMovement.h">
-      <Filter>Source Files\Object</Filter>
-    </ClInclude>
     <ClInclude Include="CameraMovement.h">
-      <Filter>Source Files\Object</Filter>
+      <Filter>Source Files\Movement</Filter>
     </ClInclude>
     <ClInclude Include="DefaultMovement.h">
-      <Filter>Source Files\Object</Filter>
+      <Filter>Source Files\Movement</Filter>
+    </ClInclude>
+    <ClInclude Include="LightMovement.h">
+      <Filter>Source Files\Movement</Filter>
+    </ClInclude>
+    <ClInclude Include="Movement.h">
+      <Filter>Source Files\Movement</Filter>
+    </ClInclude>
+    <ClInclude Include="BillBoardMovement.h">
+      <Filter>Source Files\Movement</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

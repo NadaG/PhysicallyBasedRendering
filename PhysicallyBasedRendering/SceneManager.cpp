@@ -6,6 +6,7 @@
 
 SceneManager::SceneManager()
 {
+	CameraMovement* cameraMovement;
 	cameraMovement = new CameraMovement();
 	movingCamera = new Object(cameraMovement);
 	cameraMovement->BindObject(movingCamera);
@@ -24,7 +25,6 @@ void SceneManager::TerminateObjects()
 	}
 
 	delete movingCamera;
-	delete cameraMovement;
 }
 
 void SceneManager::GenerateLight(glm::vec3 color, glm::vec3 size)

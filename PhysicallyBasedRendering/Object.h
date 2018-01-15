@@ -15,11 +15,13 @@ public:
 
 	virtual void Update() { movement->Update(); }
 	// 여기서 delete를 하는게 맞는지 저쪽에서 해주는게 맞는지 잘 모르겠음
-	virtual void Delete() { /*delete movement;*/ }
+	virtual void Delete() { delete movement; }
 
 	void Translate(const glm::vec3& vec);
 	void Rotate(const glm::vec3& vec, float angle);
 	void Scale(const glm::vec3& vec);
+
+	void SetRotation(const glm::mat4& rotMat) { rotationMatrix = rotMat; }
 
 	glm::vec3 GetPosition() const { return positionVector; }
 	glm::vec3 GetScale() const { return scaleVector; }

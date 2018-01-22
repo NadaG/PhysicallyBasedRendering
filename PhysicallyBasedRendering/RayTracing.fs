@@ -27,6 +27,12 @@ struct Rect
     vec4  plane;
 };
 
+struct Sphere
+{
+	vec3 origin;
+	float radius;
+};
+
 bool RayPlaneIntersect(Ray ray, vec4 plane, out float t)
 {
     t = -dot(plane, vec4(ray.origin, 1.0))/dot(plane.xyz, ray.dir);
@@ -51,9 +57,24 @@ bool RayRectIntersect(Ray ray, Rect rect, out float t)
     return intersect;
 }
 
-bool RaySphereIntersect(Ray ray, Rect rect, out float t)
+bool RaySphereIntersect(Ray ray, Sphere sphere, out float t)
 {
+	vec3 s = ray.origin - sphere.origin;
 
+	float a = dot(ray.dir, ray.dir);
+	float bPrime = dot(s, ray.dir);
+	float c = dot(s, s) - sphere.radius * sphere.radius;
+
+	float D = bPrime * bPrime - a * c;
+	if(D >= 0 && bPrime <= 0)
+	{
+		float t1 = (-bPrime + sqrt(D)) / a;
+		float t2 = (-bPrime + sqrt(D)) / a;
+		t = t1 > t2 ? t2 : t1;
+		return true;
+	}
+	else 
+		return false;
 }
 
 // Camera functions
@@ -136,6 +157,9 @@ vec3 ToSRGB(vec3 v)   { return PowVec3(v, 1.0/gamma); }
 void main()
 {
     vec4 floorPlane = vec4(0, 1, 0, 0);
+	Sphere sphere;
+	sphere.origin = vec3(0.0, 0.0, 0.0);
+	sphere.radius = 10.0f;
 
 	// output color
     vec3 col = vec3(0.1, 0.2, 0.4);
@@ -147,10 +171,11 @@ void main()
 	else
 		color = vec3(0.0, 1.0, 0.0);
 
-    float distToFloor;
+    float distToFloor, distToSphere;
     bool hitFloor = RayPlaneIntersect(ray, floorPlane, distToFloor);
+	bool hitSphere = RaySphereIntersect(ray, sphere, distToSphere);
 	// floor의 색을 칠해야 함
-    if (hitFloor)
+    if(hitFloor)
     {
         vec3 pos = ray.origin + ray.dir*distToFloor;
 
@@ -162,8 +187,11 @@ void main()
 		col = vec3(0.2, 0.1, 0.1);
     }
 
-	if (hitFloor)
+	if(hitFloor)
 		col = vec3(1.0, 1.0, 0.5);
+
+	if(hitSphere)
+		col = vec3(distToSphere / 100, 0.0, 0.0);
 
     color = col;
 }

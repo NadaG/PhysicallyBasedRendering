@@ -1,6 +1,6 @@
-#include "LTCSceneManager.h"
+#include "RayTracingSceneManager.h"
 
-void LTCSceneManager::InitializeObjects()
+void RayTracingSceneManager::InitializeObjects()
 {
 	quadObj.LoadModel(QUAD);
 
@@ -12,7 +12,7 @@ void LTCSceneManager::InitializeObjects()
 	movingCamera->Translate(glm::vec3(0.0f, 5.0f, 20.0f));
 }
 
-void LTCSceneManager::Update()
+void RayTracingSceneManager::Update()
 {
 	glm::mat4 view = glm::lookAt(
 		movingCamera->GetWorldPosition(),

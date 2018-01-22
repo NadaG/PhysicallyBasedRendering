@@ -3,6 +3,7 @@
 #include "LTCRenderer.h"
 #include "VolumeRenderer.h"
 #include "StarBurstRenderer.h"
+#include "RayTracingRenderer.h"
 #include "WindowManager.h"
 #include "Debug.h"
 #include "Test.cuh"
@@ -15,7 +16,8 @@ enum Scene
 	FLUID_SCENE = 1,
 	LTC_SCENE = 2,
 	SMOKE_SCENE = 3,
-	STARBURST_SCENE = 4
+	STARBURST_SCENE = 4,
+	RAYTRACING_SCENE = 5
 };
 
 // TODO movement 셋팅하고 사용하는 부분 너무 복잡함, 함수로 빼내던가 해야함
@@ -23,7 +25,7 @@ enum Scene
 // TODO shader 불러오고 사용하고 그리는 부분 중복되는 부분이 너무 많은데 그 부분들 수정하기
 int main(int argc, char **argv)
 {
-	Scene scene = STARBURST_SCENE;
+	Scene scene = RAYTRACING_SCENE;
 
 	WindowManager::GetInstance()->Initialize();
 
@@ -81,6 +83,12 @@ int main(int argc, char **argv)
 	{
 		sceneManager = new StarBurstSceneManager();
 		renderer = new StarBurstRenderer(sceneManager);
+		break;
+	}
+	case RAYTRACING_SCENE:
+	{
+		sceneManager = new RayTracingSceneManager();
+		renderer = new RayTracingRenderer(sceneManager);
 		break;
 	}
 	default:

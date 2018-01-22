@@ -79,6 +79,9 @@
     <Filter Include="Source Files\Movement">
       <UniqueIdentifier>{8e4eb587-93e4-498a-8832-bc761068e40d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader Files\RayTracing">
+      <UniqueIdentifier>{b114e266-7bcb-4bab-9019-1b5159c65eb2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -188,6 +191,12 @@
     </ClCompile>
     <ClCompile Include="BillBoardMovement.cpp">
       <Filter>Source Files\Movement</Filter>
+    </ClCompile>
+    <ClCompile Include="RayTracingSceneManager.cpp">
+      <Filter>Source Files\SceneManager</Filter>
+    </ClCompile>
+    <ClCompile Include="RayTracingRenderer.cpp">
+      <Filter>Source Files\Renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -314,6 +323,9 @@
     </None>
     <None Include="Billboard.fs">
       <Filter>Shader Files</Filter>
+    </None>
+    <None Include="RayTracing.fs">
+      <Filter>Shader Files\RayTracing</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -451,6 +463,12 @@
     </ClInclude>
     <ClInclude Include="BillBoardMovement.h">
       <Filter>Source Files\Movement</Filter>
+    </ClInclude>
+    <ClInclude Include="RayTracingSceneManager.h">
+      <Filter>Source Files\SceneManager</Filter>
+    </ClInclude>
+    <ClInclude Include="RayTracingRenderer.h">
+      <Filter>Source Files\Renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -14,7 +14,7 @@ class StarBurstRenderer : public Renderer
 {
 public:
 	StarBurstRenderer(SceneManager* sceneManager)
-		:Renderer(sceneManager), blurStep(3)
+		:Renderer(sceneManager), blurStep(0)
 	{
 		zNear = 0.01f;
 		zFar = 100.0f;

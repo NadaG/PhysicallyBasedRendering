@@ -172,6 +172,8 @@
     <ClCompile Include="PBRRenderer.cpp" />
     <ClCompile Include="PBRSceneManager.cpp" />
     <ClCompile Include="PhongShaderProgram.cpp" />
+    <ClCompile Include="RayTracingRenderer.cpp" />
+    <ClCompile Include="RayTracingSceneManager.cpp" />
     <ClCompile Include="RenderBufferObject.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="SceneObject.cpp" />
@@ -221,6 +223,7 @@
     <None Include="Blur.fs" />
     <None Include="Light.fs" />
     <None Include="Light.vs" />
+    <None Include="RayTracing.fs" />
     <None Include="Reflect.fs" />
     <None Include="Reflect.vs" />
     <None Include="SkyBox.fs" />
@@ -262,6 +265,8 @@
     <ClInclude Include="PBRSceneManager.h" />
     <ClInclude Include="PhongShaderProgram.h" />
     <ClInclude Include="plot.h" />
+    <ClInclude Include="RayTracingRenderer.h" />
+    <ClInclude Include="RayTracingSceneManager.h" />
     <ClInclude Include="RenderBufferObject.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="SceneObject.h" />

@@ -55,6 +55,12 @@ void Renderer::RenderObject(ShaderProgram * shader, SceneObject* obj)
 	obj->DrawModel();
 }
 
+void Renderer::DrawWithVAO(VertexArrayObject vao, const int vertexNum) const
+{
+	vao.Bind();
+	glDrawArrays(vao.GetDrawMode(), 0, vertexNum);
+}
+
 void Renderer::GenCubemapFromEquirectangular(TextureCube* texCube, Texture2D tex)
 {
 	equirectangularToCubemapShader->Use();

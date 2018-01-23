@@ -29,6 +29,8 @@ void RayTracingRenderer::Render()
 	// world 그리기
 	rayTracingShader->Use();
 	rayTracingShader->SetUniformMatrix4f("view", view);
+	// 왜 반대로 되는 걸까??
+	rayTracingShader->SetUniformVector3f("lightPos", glm::vec3(5.0f, 0.0f, -10.0f));
 	quad.DrawModel();
 }
 

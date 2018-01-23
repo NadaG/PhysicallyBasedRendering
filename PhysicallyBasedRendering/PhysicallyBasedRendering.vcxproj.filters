@@ -82,6 +82,12 @@
     <Filter Include="Shader Files\RayTracing">
       <UniqueIdentifier>{b114e266-7bcb-4bab-9019-1b5159c65eb2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader Files\TemporalGlare">
+      <UniqueIdentifier>{6513c0cc-b86e-4aa8-9939-a5e6a3cd9e67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader Files\Basic">
+      <UniqueIdentifier>{231df6eb-7552-409d-9552-bc7c0f8a47fa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -213,12 +219,6 @@
     <None Include="PBR.vs">
       <Filter>Shader Files</Filter>
     </None>
-    <None Include="Basic.vs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Basic.fs">
-      <Filter>Shader Files</Filter>
-    </None>
     <None Include="Light.fs">
       <Filter>Shader Files</Filter>
     </None>
@@ -315,17 +315,29 @@
     <None Include="BloomBlend.fs">
       <Filter>Shader Files\Bloom</Filter>
     </None>
-    <None Include="lensflare.fs">
-      <Filter>Shader Files\Bloom</Filter>
-    </None>
     <None Include="Brightness.fs">
       <Filter>Shader Files\Bloom</Filter>
     </None>
-    <None Include="Billboard.fs">
-      <Filter>Shader Files</Filter>
-    </None>
     <None Include="RayTracing.fs">
       <Filter>Shader Files\RayTracing</Filter>
+    </None>
+    <None Include="Lensflare.fs">
+      <Filter>Shader Files\Bloom</Filter>
+    </None>
+    <None Include="Pupil.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Basic.fs">
+      <Filter>Shader Files\Basic</Filter>
+    </None>
+    <None Include="Basic.vs">
+      <Filter>Shader Files\Basic</Filter>
+    </None>
+    <None Include="Primitive.vs">
+      <Filter>Shader Files\Basic</Filter>
+    </None>
+    <None Include="Primitive.fs">
+      <Filter>Shader Files\Basic</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

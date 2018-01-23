@@ -6,6 +6,8 @@ const float pi = 3.141592653;
 
 in vec2 outUV;
 
+uniform vec3 lightPos;
+
 out vec3 color;
 
 // Tracing and intersection
@@ -83,8 +85,9 @@ Ray GenerateCameraRay()
 {
 	Ray ray;
 	// -1 ~ 1
-	vec2 xy = (outUV - vec2(0.5)) * 2.0;
-	ray.dir = normalize(vec3(xy, -1.0));
+	float x = (outUV.x - 0.5) * 2.0;
+	float y = (outUV.y - 0.5) * 2.0;
+	ray.dir = normalize(vec3(x, y, -1.0));
 
 	ray.origin = vec3(0.0);
 
@@ -158,18 +161,13 @@ void main()
 {
     vec4 floorPlane = vec4(0, 1, 0, 0);
 	Sphere sphere;
-	sphere.origin = vec3(0.0, 0.0, 0.0);
-	sphere.radius = 10.0f;
+	sphere.origin = vec3(0.0, 0.0, -10.0);
+	sphere.radius = 1.0f;
 
 	// output color
     vec3 col = vec3(0.1, 0.2, 0.4);
 
     Ray ray = GenerateCameraRay();
-
-	if(ray.dir.x > 0.0)
-		color = vec3(1.0, 0.0, 0.0);
-	else
-		color = vec3(0.0, 1.0, 0.0);
 
     float distToFloor, distToSphere;
     bool hitFloor = RayPlaneIntersect(ray, floorPlane, distToFloor);
@@ -177,7 +175,7 @@ void main()
 	// floor의 색을 칠해야 함
     if(hitFloor)
     {
-        vec3 pos = ray.origin + ray.dir*distToFloor;
+        vec3 hitPoint = ray.origin + ray.dir*distToFloor;
 
         vec3 N = floorPlane.xyz;
         vec3 V = -ray.dir;
@@ -185,13 +183,38 @@ void main()
         float theta = acos(dot(N, V));
         
 		col = vec3(0.2, 0.1, 0.1);
+
+		vec3 S = normalize(lightPos - hitPoint);
+		Ray SRay;
+		SRay.origin = hitPoint;
+		SRay.dir = S;
+		float tmpDist;
+		// TODO
+		if(RaySphereIntersect(SRay, sphere, tmpDist))
+			col = vec3(0.0, 0.0, 0.0);
+		else
+			col = vec3(1.0, 0.0, 0.0);
     }
 
 	if(hitFloor)
 		col = vec3(1.0, 1.0, 0.5);
 
 	if(hitSphere)
-		col = vec3(distToSphere / 100, 0.0, 0.0);
+	{
+		vec3 hitPoint = ray.origin + ray.dir * distToSphere;
+		vec3 L = normalize(lightPos - hitPoint);
+		vec3 N = normalize(hitPoint - sphere.origin);
+
+		vec3 ambient = vec3(0.2, 0.2, 0.2);
+
+		vec3 diffuse = vec3(0.1, 0.4, 0.2) * max(0, dot(N, L));
+
+		vec3 V = -ray.dir;
+
+		vec3 specular = vec3(0.1, 0.4, 0.2) * max(0, pow(dot(normalize(reflect(L, N)), V), 16));
+
+		col = ambient + diffuse + specular;
+	}
 
     color = col;
 }

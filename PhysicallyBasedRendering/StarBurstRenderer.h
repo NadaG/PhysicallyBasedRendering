@@ -45,6 +45,11 @@ private:
 	ShaderProgram* bloomShader;
 	ShaderProgram* brightShader;
 	ShaderProgram* glareShader;
+	ShaderProgram* primitiveShader;
+
+	FrameBufferObject apertureFBO;
+
+	Texture2D apertureTex;
 
 	shared_ptr<ShaderProgram> skyboxShader;
 
@@ -57,4 +62,9 @@ private:
 
 	TextureCube* hdrSkyBoxTex;
 	Texture2D hdrTex;
+
+	VertexArrayObject lensParticlesVAO;
+
+	const int lensParticlesNum = 36;
+	const int lensFibersNum = 100;
 };

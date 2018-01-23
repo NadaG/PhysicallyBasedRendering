@@ -22,5 +22,5 @@ void main()
 	result = pow(result, vec3(1.0 / gamma));
 	color = result;
 
-	//color = texture(debugMap, outUV).rgb;
+	color = texture(debugMap, outUV).rgb;
 }

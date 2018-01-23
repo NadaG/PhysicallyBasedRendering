@@ -7,7 +7,8 @@
 class VertexArrayObject
 {
 public:
-	VertexArrayObject(){}
+	VertexArrayObject()
+		:drawMode(GL_POINTS){}
 	virtual ~VertexArrayObject();
 
 	void GenVAOVBOIBO();
@@ -17,7 +18,12 @@ public:
 
 	void Bind() { glBindVertexArray(vao); }
 
+	// VertexBufferDate 전에 불려야 함
 	void VertexAttribPointer(const GLuint& size, const GLuint& stride);
+
+	void SetDrawMode(const GLenum drawMode) { this->drawMode = drawMode; }
+
+	const GLenum GetDrawMode() const { return drawMode; }
 
 private:
 	GLuint vertexAttribPointerId = 0;
@@ -26,4 +32,6 @@ private:
 	GLuint vao;
 	GLuint ibo;
 	GLuint vbo;
+
+	GLenum drawMode;
 };

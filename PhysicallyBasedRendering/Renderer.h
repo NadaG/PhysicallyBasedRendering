@@ -57,6 +57,8 @@ protected:
 	void RenderObject(ShaderProgram* shader, SceneObject obj);
 	void RenderObject(ShaderProgram* shader, SceneObject* obj);
 	
+	void DrawWithVAO(VertexArrayObject vao, const int vertexNum) const;
+
 	void GenCubemapFromEquirectangular(TextureCube* texCube, Texture2D tex);
 
 	glm::vec4 backgroundColor;

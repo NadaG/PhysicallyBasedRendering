@@ -30,10 +30,10 @@ void StarBurstRenderer::InitializeRender()
 	bloomShader->Use();
 	bloomShader->BindTexture(&worldMap, "worldMap");
 	bloomShader->BindTexture(&pingpongBlurMap[1], "blurredBrightMap");
-	bloomShader->BindTexture(&worldMap, "debugMap");
+	bloomShader->BindTexture(&apertureTex, "debugMap");
 	bloomShader->SetUniform1f("exposure", 1.0);
 
-	glareShader = new ShaderProgram("Basic.vs", "Billboard.fs");
+	glareShader = new ShaderProgram("Quad.vs", "Pupil.fs");
 	glareShader->Use();
 
 	// smart pointer 한 번 사용해봄
@@ -41,8 +41,11 @@ void StarBurstRenderer::InitializeRender()
 	skyboxShader->Use();
 	skyboxShader->SetUniform1i("skybox", 0);
 
+	primitiveShader = new ShaderProgram("Primitive.vs", "Primitive.fs");
+	primitiveShader->Use();
+
 	// TODO 지금은 texture를 불러오는 과정을 각 랜더러에서 하고 있지만 나중에는 VertexShader등의 class에서 해주어야한다.
-	string folder = "StreetLight";
+	/*string folder = "StreetLight";
 	aoTex.LoadTexture("Texture/" + folder + "/ao.png");
 	aoTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
@@ -59,7 +62,7 @@ void StarBurstRenderer::InitializeRender()
 	normalTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
 	roughnessTex.LoadTexture("Texture/" + folder + "/roughness.png");
-	roughnessTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
+	roughnessTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);*/
 
 	brightFBO.GenFrameBufferObject();
 	brightFBO.BindDefaultDepthBuffer(WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
@@ -92,6 +95,21 @@ void StarBurstRenderer::InitializeRender()
 	worldFBO.DrawBuffers();
 	brightFBO.DrawBuffers();
 
+	apertureFBO.GenFrameBufferObject();
+	apertureFBO.BindDefaultDepthBuffer(WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
+
+	apertureTex.LoadTexture(
+		GL_RGB16F,
+		WindowManager::GetInstance()->width,
+		WindowManager::GetInstance()->height,
+		GL_RGB,
+		GL_FLOAT);
+	apertureTex.SetParameters(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+	apertureFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &apertureTex);
+
+	apertureFBO.DrawBuffers();
+
 	hdrTex.LoadTexture("Texture/Factory/BG.jpg");
 	hdrTex.SetParameters(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
 
@@ -117,6 +135,38 @@ void StarBurstRenderer::InitializeRender()
 	}
 
 	backgroundColor = glm::vec4(0.2f, 0.2f, 0.2f, 0.0f);
+
+	GLfloat* lensParticles = new GLfloat[lensFibersNum * 12];
+	const float perTheta = 2 * 3.141592653 / lensFibersNum;
+	float nowTheta = 0.0f;
+	for (int i = 0; i < lensFibersNum; ++i)
+	{
+		lensParticles[i * 12 + 0] = 0.3f * glm::cos(nowTheta);
+		lensParticles[i * 12 + 1] = 0.3f * glm::sin(nowTheta);
+		lensParticles[i * 12 + 2] = 0.0f;
+		lensParticles[i * 12 + 3] = 0.0f;
+		lensParticles[i * 12 + 4] = 1.0f;
+		lensParticles[i * 12 + 5] = 0.0f;
+
+		lensParticles[i * 12 + 6] = 5.0f * glm::cos(nowTheta);
+		lensParticles[i * 12 + 7] = 5.0f * glm::sin(nowTheta);
+		lensParticles[i * 12 + 8] = 0.0f;
+		lensParticles[i * 12 + 9] = 0.0f;
+		lensParticles[i * 12 + 10] = 1.0f;
+		lensParticles[i * 12 + 11] = 0.0f;
+		nowTheta += perTheta;
+	}
+
+	// TODO 미리 vertex의 float 갯수(stride)를 설정할 수 있으면 좋을 거 같음
+	lensParticlesVAO.GenVAOVBOIBO();
+	lensParticlesVAO.SetDrawMode(GL_LINES);
+
+	lensParticlesVAO.VertexBufferData(lensFibersNum * sizeof(GLfloat) * 12, lensParticles);
+
+	// position
+	lensParticlesVAO.VertexAttribPointer(3, 6);
+	// color
+	lensParticlesVAO.VertexAttribPointer(3, 6);
 }
 
 void StarBurstRenderer::Render()
@@ -212,6 +262,15 @@ void StarBurstRenderer::Render()
 
 		quad.DrawModel();
 	}
+
+	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
+	apertureFBO.Use();
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	primitiveShader->Use();
+	//quad.DrawModel();
+
+	DrawWithVAO(lensParticlesVAO, lensFibersNum * 2);
 
 	UseDefaultFrameBufferObject();
 	bloomShader->Use();

@@ -196,7 +196,9 @@
   <ItemGroup>
     <None Include="Basic.fs" />
     <None Include="Basic.vs" />
-    <None Include="Billboard.fs" />
+    <None Include="Primitive.fs" />
+    <None Include="Primitive.vs" />
+    <None Include="Pupil.fs" />
     <None Include="BloomBlend.fs" />
     <None Include="Brdf.fs" />
     <None Include="Brdf.vs" />
@@ -207,7 +209,7 @@
     <None Include="GaussianBlur.fs" />
     <None Include="geometry.gs" />
     <None Include="irradianceConvolution.fs" />
-    <None Include="lensflare.fs" />
+    <None Include="Lensflare.fs" />
     <None Include="LTC.fs" />
     <None Include="ParticleBasic.vs" />
     <None Include="ParticleThickness.fs" />

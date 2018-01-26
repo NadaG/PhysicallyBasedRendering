@@ -38,13 +38,18 @@ public:
 	
 	// 깔끔하게 void*로 할까?
 	// float 메모리 할당은 생성하는 쪽에서 해주어야함
-	void TexImage(float* a);
+	float* TexImage();
 
 	const GLuint& GetTexture() const { return texture; }
 
 	virtual void Bind(GLenum texture) = 0;
 	
 	void GenerateMipmap();
+
+	const GLsizei GetWidth() const { return width; }
+	const GLsizei GetHeight() const { return height; }
+	const GLenum GetType() const { return type; }
+	const GLenum GetFormat() const { return format; }
 
 protected:
 	GLuint texture;

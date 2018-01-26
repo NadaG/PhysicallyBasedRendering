@@ -66,5 +66,5 @@ private:
 	VertexArrayObject lensParticlesVAO;
 
 	const int lensParticlesNum = 36;
-	const int lensFibersNum = 100;
+	const int lensFibersNum = 300;
 };

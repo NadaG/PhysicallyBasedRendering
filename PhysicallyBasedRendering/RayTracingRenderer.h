@@ -17,5 +17,11 @@ public:
 
 private:
 
+	int writeFileNum = 0;
+
+	FrameBufferObject rayTracingFBO;
+	Texture2D rayTracingTex;
+
 	ShaderProgram* rayTracingShader;
+	PNGExporter pngExporter;
 };

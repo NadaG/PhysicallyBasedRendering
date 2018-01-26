@@ -88,6 +88,9 @@
     <Filter Include="Shader Files\Basic">
       <UniqueIdentifier>{231df6eb-7552-409d-9552-bc7c0f8a47fa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Exporter">
+      <UniqueIdentifier>{b75650c2-c649-4282-bbab-f6ebf37478eb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -203,6 +206,9 @@
     </ClCompile>
     <ClCompile Include="RayTracingRenderer.cpp">
       <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Exporter.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -481,6 +487,9 @@
     </ClInclude>
     <ClInclude Include="RayTracingRenderer.h">
       <Filter>Source Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Exporter.h">
+      <Filter>Source Files\Exporter</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

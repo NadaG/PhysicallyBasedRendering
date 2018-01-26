@@ -137,11 +137,4 @@ void writeDDS(mat3 * tab, vec2 * tabAmplitude, int N)
 	delete [] data;
 }
 
-void writePNG(mat3 * tab, vec2 * tabAmplitude, int N)
-{
-
-
-	cout << "success" << endl;
-}
-
 #endif

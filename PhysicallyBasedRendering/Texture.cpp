@@ -1,6 +1,8 @@
 #include "Texture.h"
 #include "dds.h"
 
+#include "Debug.h"
+
 Texture::Texture(char const * path)
 {
 	LoadTexture(path);
@@ -9,6 +11,7 @@ Texture::Texture(char const * path)
 // internal format은 gpu에서 사용될 포맷을 말하고
 // format은 client에서 사용되는 포맷을 말한다
 // 따라서 데이터의 크기는 format과 type에 의해서 결정된다.(물론 width와 height도 결정)
+// format은 RGB냐 RGBA냐 등을 말하고, type은 unsigned byte냐 int냐 float이냐를 말한다.
 void Texture::LoadTexture(const GLint& internalformat, const GLsizei& width, const GLsizei& height, const GLenum& format, const GLenum& type)
 {
 	glGenTextures(1, &texture);
@@ -100,9 +103,30 @@ void Texture::LoadDepthTexture(const float& width, const float& height)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 }
 
-void Texture::TexImage(float* a)
+// delete를 호출한 쪽에서 해결하도록 함
+float* Texture::TexImage()
 {
+	float* a;
+	int nrComponenets;
+	switch (format)
+	{
+	case GL_RED:
+		nrComponenets = 1;
+		break;
+	case GL_RGB:
+		nrComponenets = 3;
+		break;
+	case GL_RGBA:
+		nrComponenets = 4;
+		break;
+	default:
+		break;
+	}
+
+	a = new float[width * height * nrComponenets];
 	glGetTexImage(GL_TEXTURE_2D, 0, format, type, a);
+
+	return a;
 }
 
 //void Texture::Bind(GLenum texture)

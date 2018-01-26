@@ -7,7 +7,7 @@ void StarBurstRenderer::InitializeRender()
 
 	lightShader = new ShaderProgram("light.vs", "light.fs");
 	lightShader->Use();
-
+	
 	pbrShader = new ShaderProgram("PBR.vs", "PBRBrightness.fs");
 	pbrShader->Use();
 	// bind의 순서와 shader 내에서의 sampler2D 정의 순서는 연관되어 있다.
@@ -144,16 +144,16 @@ void StarBurstRenderer::InitializeRender()
 		lensParticles[i * 12 + 0] = 0.3f * glm::cos(nowTheta);
 		lensParticles[i * 12 + 1] = 0.3f * glm::sin(nowTheta);
 		lensParticles[i * 12 + 2] = 0.0f;
-		lensParticles[i * 12 + 3] = 0.0f;
+		lensParticles[i * 12 + 3] = 1.0f;
 		lensParticles[i * 12 + 4] = 1.0f;
-		lensParticles[i * 12 + 5] = 0.0f;
+		lensParticles[i * 12 + 5] = 1.0f;
 
 		lensParticles[i * 12 + 6] = 5.0f * glm::cos(nowTheta);
 		lensParticles[i * 12 + 7] = 5.0f * glm::sin(nowTheta);
 		lensParticles[i * 12 + 8] = 0.0f;
-		lensParticles[i * 12 + 9] = 0.0f;
+		lensParticles[i * 12 + 9] = 1.0f;
 		lensParticles[i * 12 + 10] = 1.0f;
-		lensParticles[i * 12 + 11] = 0.0f;
+		lensParticles[i * 12 + 11] = 1.0f;
 		nowTheta += perTheta;
 	}
 

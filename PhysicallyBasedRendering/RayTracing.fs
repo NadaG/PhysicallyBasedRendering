@@ -71,7 +71,7 @@ bool RaySphereIntersect(Ray ray, Sphere sphere, out float t)
 	if(D >= 0 && bPrime <= 0)
 	{
 		float t1 = (-bPrime + sqrt(D)) / a;
-		float t2 = (-bPrime + sqrt(D)) / a;
+		float t2 = (-bPrime - sqrt(D)) / a;
 		t = t1 > t2 ? t2 : t1;
 		return true;
 	}
@@ -91,8 +91,11 @@ Ray GenerateCameraRay()
 
 	ray.origin = vec3(0.0);
 
+	// view matrix의 translate 성분만 가져옴
 	ray.origin = (-view*vec4(vec3(0.0), 1)).xyz;
+	// view matrix의 rotate 성분을 가져옴
     ray.dir    = normalize((view*vec4(ray.dir, 0)).xyz);
+	// view matrix는 camera 기준의 x, y, z축을 column으로 두기 때문에(normalize됨) scale 성분이 의미가 없음 
 
 	return ray;
 }
@@ -160,9 +163,12 @@ vec3 ToSRGB(vec3 v)   { return PowVec3(v, 1.0/gamma); }
 void main()
 {
     vec4 floorPlane = vec4(0, 1, 0, 0);
-	Sphere sphere;
-	sphere.origin = vec3(0.0, 0.0, -10.0);
-	sphere.radius = 1.0f;
+	Sphere sphere1, sphere2;
+	sphere1.origin = vec3(0.0, 0.0, -8.0);
+	sphere1.radius = 1.0f;
+
+	sphere2.origin = vec3(3.0, 0.0, -8.0);
+	sphere2.radius = 1.0f;
 
 	// output color
     vec3 col = vec3(0.1, 0.2, 0.4);
@@ -171,11 +177,11 @@ void main()
 
     float distToFloor, distToSphere;
     bool hitFloor = RayPlaneIntersect(ray, floorPlane, distToFloor);
-	bool hitSphere = RaySphereIntersect(ray, sphere, distToSphere);
+	bool hitSphere = RaySphereIntersect(ray, sphere1, distToSphere);
 	// floor의 색을 칠해야 함
     if(hitFloor)
     {
-        vec3 hitPoint = ray.origin + ray.dir*distToFloor;
+        vec3 hitPoint = ray.origin + ray.dir * distToFloor;
 
         vec3 N = floorPlane.xyz;
         vec3 V = -ray.dir;
@@ -190,7 +196,7 @@ void main()
 		SRay.dir = S;
 		float tmpDist;
 		// TODO
-		if(RaySphereIntersect(SRay, sphere, tmpDist))
+		if(RaySphereIntersect(SRay, sphere1, tmpDist))
 			col = vec3(0.0, 0.0, 0.0);
 		else
 			col = vec3(1.0, 0.0, 0.0);
@@ -203,7 +209,7 @@ void main()
 	{
 		vec3 hitPoint = ray.origin + ray.dir * distToSphere;
 		vec3 L = normalize(lightPos - hitPoint);
-		vec3 N = normalize(hitPoint - sphere.origin);
+		vec3 N = normalize(hitPoint - sphere1.origin);
 
 		vec3 ambient = vec3(0.2, 0.2, 0.2);
 
@@ -211,9 +217,10 @@ void main()
 
 		vec3 V = -ray.dir;
 
-		vec3 specular = vec3(0.1, 0.4, 0.2) * max(0, pow(dot(normalize(reflect(L, N)), V), 16));
+		vec3 specular = vec3(0.1, 0.4, 0.2) * max(0, pow(dot(normalize(reflect(-L, N)), V), 16));
 
 		col = ambient + diffuse + specular;
+		//col = vec3(distToSphere);
 	}
 
     color = col;

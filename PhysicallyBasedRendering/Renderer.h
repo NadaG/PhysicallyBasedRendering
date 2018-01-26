@@ -12,6 +12,7 @@
 
 #include "FrameBufferObject.h"
 
+#include "Exporter.h"
 #include "Debug.h"
 
 using std::vector;

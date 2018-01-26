@@ -8,8 +8,9 @@ Texture::Texture(char const * path)
 	LoadTexture(path);
 }
 
-// internal format은 gpu에서 사용될 포맷을 말하고
-// format은 client에서 사용되는 포맷을 말한다
+// internal format은 gpu 내부에서 사용될 포맷을 말하고
+// format은 client에서 사용되는 포맷을 말한다, 즉 데이터가 어떤 형태로 들어왔냐는 format이다.
+// 퍼포먼스를 해칠 수 있기 때문에 이 두개를 compatible하도록 만드는 것이 중요하단다. 
 // 따라서 데이터의 크기는 format과 type에 의해서 결정된다.(물론 width와 height도 결정)
 // format은 RGB냐 RGBA냐 등을 말하고, type은 unsigned byte냐 int냐 float이냐를 말한다.
 void Texture::LoadTexture(const GLint& internalformat, const GLsizei& width, const GLsizei& height, const GLenum& format, const GLenum& type)
@@ -19,11 +20,10 @@ void Texture::LoadTexture(const GLint& internalformat, const GLsizei& width, con
 	glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height, 0, format, type, 0);
 	this->format = format;
 	this->type = type;
+	this->internalformat = internalformat;
 	this->width = width;
 	this->height = height;
 }
-
-
 
 void Texture::LoadTexture(const string& s)
 {
@@ -101,6 +101,12 @@ void Texture::LoadDepthTexture(const float& width, const float& height)
 	glBindTexture(GL_TEXTURE_2D, texture);
 	// depth texture의 경우 float으로 저장한다는 것을 주의!
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+}
+
+
+void Texture::UpdateTexture(float* data)
+{
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, format, type, data);
 }
 
 // delete를 호출한 쪽에서 해결하도록 함

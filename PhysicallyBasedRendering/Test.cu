@@ -3,16 +3,22 @@
 #include <cuda_runtime.h>
 #include <stdio.h>
 
-__global__ void makernel()
+__global__ void makernel(float* data)
 {
 	unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
-	printf("%d", i);
-	printf("Hello from mykernel\n");
+	data[i] = 7.0f;
 }
 
-int hello()
+int hello(float* data)
 {
-	makernel << <1, 10 >> > ();
+	float* ddata;
+	cudaMalloc((void**)&ddata, 3 * sizeof(float));
+
+	makernel << <1, 3 >> > (ddata);
+
+	cudaMemcpy(data, ddata, 3 * sizeof(float), cudaMemcpyDeviceToHost);
+
+	cudaFree(ddata);
 	cudaDeviceSynchronize();
 	return 0;
 }

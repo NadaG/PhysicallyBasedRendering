@@ -19,6 +19,9 @@ void RayTracingRenderer::InitializeRender()
 	
 	rayTracingFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &rayTracingTex);
 	rayTracingFBO.DrawBuffers();
+
+	float* data = new float[3];
+	hello(data);
 }
 
 // glm의 cross(a, b)는 오른손으로 a방향에서 b방향으로 감싸쥘 때의 엄지방향이다.
@@ -46,7 +49,6 @@ void RayTracingRenderer::Render()
 	// world 그리기
 	rayTracingShader->Use();
 	rayTracingShader->SetUniformMatrix4f("view", view);
-	// 왜 반대로 되는 걸까??
 	rayTracingShader->SetUniformVector3f("lightPos", glm::vec3(5.0f, 0.0f, -5.0f));
 	UseDefaultFrameBufferObject();
 	quad.DrawModel();
@@ -64,6 +66,7 @@ void RayTracingRenderer::Render()
 			pngExporter.WritePngFile("bab2.png", rayTracingTex);
 		writeFileNum++;
 	}
+
 }
 
 void RayTracingRenderer::TerminateRender()

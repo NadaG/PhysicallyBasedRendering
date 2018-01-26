@@ -33,6 +33,8 @@ public:
 	void LoadTextureDDS(const string& s);
 	void LoadTexture(const GLint& internalformat, const GLsizei& width, const GLsizei& height, const GLenum& format, const GLenum& type);
 
+	void UpdateTexture(float* data);
+
 	// depth를 받는 texture, 포맷이 depth로 고정되어 있고, 타입은 float이다.
 	void LoadDepthTexture(const float& width, const float& height);
 	
@@ -56,4 +58,5 @@ protected:
 
 	GLsizei width, height;
 	GLenum type, format;
+	GLint internalformat;
 };

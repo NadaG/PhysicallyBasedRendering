@@ -21,6 +21,8 @@ private:
 
 	int writeFileNum = 0;
 
+	GLuint testPBO;
+
 	FrameBufferObject rayTracingFBO;
 	Texture2D rayTracingTex;
 

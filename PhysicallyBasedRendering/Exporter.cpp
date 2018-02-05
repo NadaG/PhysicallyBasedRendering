@@ -94,34 +94,13 @@ void PNGExporter::WritePngFile(const string fileName, Texture2D texture)
 	{
 		for (int j = 0; j < texture.GetWidth(); j++)
 		{
-			// TODO texture to image 수정 할 것
-			rawData[i][j * 4 + 0] = (png_byte)texData[i*texture.GetHeight() + j];
-			rawData[i][j * 4 + 1] = (png_byte)texData[i*texture.GetHeight() + j];
-			rawData[i][j * 4 + 2] = (png_byte)texData[i*texture.GetHeight() + j];
-			rawData[i][j * 4 + 3] = (png_byte)texData[i*texture.GetHeight() + j];
+			rawData[i][j * 4 + 0] = (png_byte)floor(texData[i * texture.GetWidth() * 4 + j * 4 + 0] * 255.0f);
+			rawData[i][j * 4 + 1] = (png_byte)floor(texData[i * texture.GetWidth() * 4 + j * 4 + 1] * 255.0f);
+			rawData[i][j * 4 + 2] = (png_byte)floor(texData[i * texture.GetWidth() * 4 + j * 4 + 2] * 255.0f);
+			// 응~ 불투명
+			rawData[i][j * 4 + 3] = 255;
 		}
 	}
 
 	WritePngFile(fileName, rawData, texture.GetWidth(), texture.GetHeight(), 8, PNG_COLOR_TYPE_RGBA);
-}
-
-void PNGExporter::DebugGenerateRawData()
-{
-	const int height = 128, width = 128;
-	const int colorChannel = 4;
-	png_bytep* rawData = new png_bytep[height];
-
-	for (int i = 0; i < height; i++)
-		rawData[i] = new png_byte[width * colorChannel];
-
-	for (int i = 0; i < height; i++)
-	{
-		for (int j = 0; j < width; j++)
-		{
-			rawData[i][j*colorChannel + 0] = 200;
-			rawData[i][j*colorChannel + 1] = 32;
-			rawData[i][j*colorChannel + 2] = 32;
-			rawData[i][j*colorChannel + 3] = 255;
-		}
-	}
 }

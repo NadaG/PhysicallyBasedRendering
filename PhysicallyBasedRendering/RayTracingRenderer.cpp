@@ -1,5 +1,8 @@
 #include "RayTracingRenderer.h"
 
+#include<cuda_runtime.h>
+#include<cuda_gl_interop.h>
+
 void RayTracingRenderer::InitializeRender()
 {
 	UseDefaultFrameBufferObject();
@@ -21,7 +24,31 @@ void RayTracingRenderer::InitializeRender()
 	rayTracingFBO.DrawBuffers();
 
 	float* data = new float[3];
+	// parameter로 데이터 불러오기
 	hello(data);
+
+	glGenBuffers(1, &testPBO);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, testPBO);
+	glBufferData(
+		GL_PIXEL_UNPACK_BUFFER, 
+		WindowManager::GetInstance()->width * WindowManager::GetInstance()->height * sizeof(GLubyte) * 4, 
+		0, 
+		GL_STREAM_DRAW);
+
+	cudaGraphicsResource* cuda_pbo_resource;
+	cudaGraphicsGLRegisterBuffer(&cuda_pbo_resource, testPBO, cudaGraphicsMapFlagsWriteDiscard);
+
+	unsigned int* output;
+	cudaGraphicsMapResources(1, &cuda_pbo_resource, 0);
+	size_t num_bytes;
+	cudaGraphicsResourceGetMappedPointer((void**)&output, &num_bytes, cuda_pbo_resource);
+
+	cudaMemset(output, 0, WindowManager::GetInstance()->width * WindowManager::GetInstance()->height * 4);
+
+	// render
+
+
+	cudaGraphicsUnmapResources(1, &cuda_pbo_resource, 0);
 }
 
 // glm의 cross(a, b)는 오른손으로 a방향에서 b방향으로 감싸쥘 때의 엄지방향이다.
@@ -50,6 +77,7 @@ void RayTracingRenderer::Render()
 	rayTracingShader->Use();
 	rayTracingShader->SetUniformMatrix4f("view", view);
 	rayTracingShader->SetUniformVector3f("lightPos", glm::vec3(5.0f, 0.0f, -5.0f));
+	
 	UseDefaultFrameBufferObject();
 	quad.DrawModel();
 	
@@ -62,11 +90,8 @@ void RayTracingRenderer::Render()
 			pngExporter.WritePngFile("bab.png", rayTracingTex);
 		if (writeFileNum == 1)
 			pngExporter.WritePngFile("bab1.png", rayTracingTex);
-		if (writeFileNum == 2)
-			pngExporter.WritePngFile("bab2.png", rayTracingTex);
 		writeFileNum++;
 	}
-
 }
 
 void RayTracingRenderer::TerminateRender()

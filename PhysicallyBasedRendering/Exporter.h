@@ -17,8 +17,6 @@ public:
 
 private:
 
-	void DebugGenerateRawData();
-
 	const string exportDir = "./ExportData/";
 };
 

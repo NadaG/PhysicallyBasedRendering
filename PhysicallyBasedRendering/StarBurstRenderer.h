@@ -63,8 +63,15 @@ private:
 	TextureCube* hdrSkyBoxTex;
 	Texture2D hdrTex;
 
+	VertexArrayObject lensFibersVAO;
+	VertexArrayObject lensPupilVAO;
 	VertexArrayObject lensParticlesVAO;
 
-	const int lensParticlesNum = 36;
+	int lensParticlesNum = 0;
 	const int lensFibersNum = 300;
+	const int lensPupilTrianglesNum = 500;
+
+	const float pupilRadius = 0.7f;
+	const float lensFiberInRadius = 0.5f;
+	const float lensFiberOutRadius = 5.0f;
 };

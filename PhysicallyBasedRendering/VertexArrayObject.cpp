@@ -9,6 +9,8 @@ VertexArrayObject::~VertexArrayObject()
 
 void VertexArrayObject::GenVAOVBOIBO()
 {
+
+
 	glGenVertexArrays(1, &vao);
 	glGenBuffers(1, &vbo);
 	glGenBuffers(1, &ibo);

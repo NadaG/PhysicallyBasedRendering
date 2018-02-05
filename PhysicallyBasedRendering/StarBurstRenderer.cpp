@@ -136,37 +136,134 @@ void StarBurstRenderer::InitializeRender()
 
 	backgroundColor = glm::vec4(0.2f, 0.2f, 0.2f, 0.0f);
 
-	GLfloat* lensParticles = new GLfloat[lensFibersNum * 12];
+	////////////////////////////////////////////////////////////////////////
+	// lens fiber
+	////////////////////////////////////////////////////////////////////////
+	GLfloat* lensFibers = new GLfloat[lensFibersNum * 12];
 	const float perTheta = 2 * 3.141592653 / lensFibersNum;
 	float nowTheta = 0.0f;
 	for (int i = 0; i < lensFibersNum; ++i)
 	{
-		lensParticles[i * 12 + 0] = 0.3f * glm::cos(nowTheta);
-		lensParticles[i * 12 + 1] = 0.3f * glm::sin(nowTheta);
-		lensParticles[i * 12 + 2] = 0.0f;
-		lensParticles[i * 12 + 3] = 1.0f;
-		lensParticles[i * 12 + 4] = 1.0f;
-		lensParticles[i * 12 + 5] = 1.0f;
+		lensFibers[i * 12 + 0] = lensFiberInRadius * glm::cos(nowTheta);
+		lensFibers[i * 12 + 1] = lensFiberInRadius * glm::sin(nowTheta);
+		lensFibers[i * 12 + 2] = 0.0f;
+		lensFibers[i * 12 + 3] = 0.0f;
+		lensFibers[i * 12 + 4] = 0.0f;
+		lensFibers[i * 12 + 5] = 0.0f;
 
-		lensParticles[i * 12 + 6] = 5.0f * glm::cos(nowTheta);
-		lensParticles[i * 12 + 7] = 5.0f * glm::sin(nowTheta);
-		lensParticles[i * 12 + 8] = 0.0f;
-		lensParticles[i * 12 + 9] = 1.0f;
-		lensParticles[i * 12 + 10] = 1.0f;
-		lensParticles[i * 12 + 11] = 1.0f;
+		lensFibers[i * 12 + 6] = lensFiberOutRadius * glm::cos(nowTheta);
+		lensFibers[i * 12 + 7] = lensFiberOutRadius * glm::sin(nowTheta);
+		lensFibers[i * 12 + 8] = 0.0f;
+		lensFibers[i * 12 + 9] = 0.0f;
+		lensFibers[i * 12 + 10] = 0.0f;
+		lensFibers[i * 12 + 11] = 0.0f;
 		nowTheta += perTheta;
 	}
 
-	// TODO 미리 vertex의 float 갯수(stride)를 설정할 수 있으면 좋을 거 같음
-	lensParticlesVAO.GenVAOVBOIBO();
-	lensParticlesVAO.SetDrawMode(GL_LINES);
+	lensFibersVAO.GenVAOVBOIBO();
+	lensFibersVAO.SetDrawMode(GL_LINES);
 
-	lensParticlesVAO.VertexBufferData(lensFibersNum * sizeof(GLfloat) * 12, lensParticles);
+	lensFibersVAO.VertexBufferData(lensFibersNum * sizeof(GLfloat) * 12, lensFibers);
+
+	// position
+	lensFibersVAO.VertexAttribPointer(3, 6);
+	// color
+	lensFibersVAO.VertexAttribPointer(3, 6);
+
+	////////////////////////////////////////////////////////////////////////
+	// lens pupil
+	////////////////////////////////////////////////////////////////////////
+
+	// TODO pupil size가 luminance(조도)에 따라 달라지는 것 구현해야 함
+	GLfloat* lensPupilTriangles = new GLfloat[lensPupilTrianglesNum * 18];
+	const float perTriangleTheta = 2 * 3.141592653 / (lensPupilTrianglesNum * 2 / 3);
+	nowTheta = 0.0f;
+	for (int i = 0; i < lensPupilTrianglesNum; ++i)
+	{
+		lensPupilTriangles[i * 18 + 0] = 0.0f;
+		lensPupilTriangles[i * 18 + 1] = 0.0f;
+		lensPupilTriangles[i * 18 + 2] = 0.0f;
+		lensPupilTriangles[i * 18 + 3] = 1.0f;
+		lensPupilTriangles[i * 18 + 4] = 1.0f;
+		lensPupilTriangles[i * 18 + 5] = 1.0f;
+
+		lensPupilTriangles[i * 18 + 6] = pupilRadius * glm::cos(nowTheta);
+		lensPupilTriangles[i * 18 + 7] = pupilRadius * glm::sin(nowTheta);
+		lensPupilTriangles[i * 18 + 8] = 0.0f;
+		lensPupilTriangles[i * 18 + 9] = 1.0f;
+		lensPupilTriangles[i * 18 + 10] = 1.0f;
+		lensPupilTriangles[i * 18 + 11] = 1.0f;
+
+		lensPupilTriangles[i * 18 + 12] = pupilRadius * glm::cos(nowTheta + perTriangleTheta);
+		lensPupilTriangles[i * 18 + 13] = pupilRadius * glm::sin(nowTheta + perTriangleTheta);
+		lensPupilTriangles[i * 18 + 14] = 0.0f;
+		lensPupilTriangles[i * 18 + 15] = 1.0f;
+		lensPupilTriangles[i * 18 + 16] = 1.0f;
+		lensPupilTriangles[i * 18 + 17] = 1.0f;
+		nowTheta += perTriangleTheta;
+	}
+
+	lensPupilVAO.GenVAOVBOIBO();
+	lensPupilVAO.SetDrawMode(GL_TRIANGLES);
+
+	lensPupilVAO.VertexBufferData(lensPupilTrianglesNum * sizeof(GLfloat) * 18, lensPupilTriangles);
+
+	// position
+	lensPupilVAO.VertexAttribPointer(3, 6);
+	// color
+	lensPupilVAO.VertexAttribPointer(3, 6);
+
+	////////////////////////////////////////////////////////////////////////
+	// lens particles
+	////////////////////////////////////////////////////////////////////////
+	
+	srand(time(nullptr));
+	
+	const int lineWidth = 23;
+	const float linePerWidth = 0.06f;
+	const int lineDepths[] = { 1, 2, 3, 4, 5, 9, 12, 14, 15, 16, 16, 16, 16, 16, 15, 14, 12, 9, 5, 4, 3, 2, 1 };
+	const float linePerDepth = 0.06f;
+
+	for (int i = 0; i < lineWidth; ++i)
+	{
+		lensParticlesNum += lineDepths[i];
+	}
+
+	// TODO particles가 deformation하는 것 구현해야 함
+	GLfloat* lensParticles = new GLfloat[lensParticlesNum * 6];
+
+	int index = 0;
+	for (int i = 0; i < lineWidth; ++i)
+	{
+		for (int j = 0; j < lineDepths[i]; ++j)
+		{
+			// 0 부터 180까지의 float
+			float randomDegree = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 180.0f;
+			float randomRadians = glm::radians(randomDegree);
+
+			lensParticles[index * 6 + 0] = (i - lineWidth / 2) * linePerWidth;
+			lensParticles[index * 6 + 1] = glm::tan(randomRadians) * (lineDepths[i] - j) * linePerDepth;
+			lensParticles[index * 6 + 2] = 0.0f;
+			lensParticles[index * 6 + 3] = 0.0f;
+			lensParticles[index * 6 + 4] = 0.0f;
+			lensParticles[index * 6 + 5] = 0.0f;
+			index++;
+		}
+	}
+
+	lensParticlesVAO.GenVAOVBOIBO();
+	lensParticlesVAO.SetDrawMode(GL_POINTS);
+
+	lensParticlesVAO.VertexBufferData(lensParticlesNum * sizeof(GLfloat) * 6, lensParticles);
 
 	// position
 	lensParticlesVAO.VertexAttribPointer(3, 6);
 	// color
 	lensParticlesVAO.VertexAttribPointer(3, 6);
+	
+	delete[] lensFibers;
+	delete[] lensPupilTriangles;
+	delete[] lensParticles;
 }
 
 void StarBurstRenderer::Render()
@@ -268,9 +365,14 @@ void StarBurstRenderer::Render()
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	primitiveShader->Use();
-	//quad.DrawModel();
-
-	DrawWithVAO(lensParticlesVAO, lensFibersNum * 2);
+	
+	glDisable(GL_DEPTH_TEST);
+	DrawWithVAO(lensPupilVAO, lensPupilTrianglesNum * 3);
+	DrawWithVAO(lensFibersVAO, lensFibersNum * 2);
+	DrawWithVAO(lensParticlesVAO, lensParticlesNum);
+	// TODO point size를 z값에 따라 다르게 그리는 것 해야함
+	glPointSize(5);
+	glEnable(GL_DEPTH_TEST);
 
 	UseDefaultFrameBufferObject();
 	bloomShader->Use();

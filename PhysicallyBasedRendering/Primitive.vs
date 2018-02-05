@@ -9,6 +9,7 @@ out vec3 outColor;
 
 void main()
 {
-	outColor = vertexColor;
+	// TODO 원래는 vertexColor를 보내야 함
+	outColor = vertexNormal;
 	gl_Position = vec4(vertexPos, 1.0);
 }

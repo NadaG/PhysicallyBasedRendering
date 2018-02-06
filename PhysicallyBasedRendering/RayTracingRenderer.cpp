@@ -25,30 +25,39 @@ void RayTracingRenderer::InitializeRender()
 
 	float* data = new float[3];
 	// parameter로 데이터 불러오기
-	hello(data);
+	TestFunction(data);
 
 	glGenBuffers(1, &testPBO);
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, testPBO);
 	glBufferData(
 		GL_PIXEL_UNPACK_BUFFER, 
-		WindowManager::GetInstance()->width * WindowManager::GetInstance()->height * sizeof(GLubyte) * 4, 
+		WindowManager::GetInstance()->width * WindowManager::GetInstance()->height * sizeof(GLfloat) * 4, 
 		0, 
 		GL_STREAM_DRAW);
 
 	cudaGraphicsResource* cuda_pbo_resource;
 	cudaGraphicsGLRegisterBuffer(&cuda_pbo_resource, testPBO, cudaGraphicsMapFlagsWriteDiscard);
 
-	unsigned int* output;
+	// render start //
 	cudaGraphicsMapResources(1, &cuda_pbo_resource, 0);
+
+	float* output;
 	size_t num_bytes;
 	cudaGraphicsResourceGetMappedPointer((void**)&output, &num_bytes, cuda_pbo_resource);
-
+	
+	// 각 픽셀마다 rgba
 	cudaMemset(output, 0, WindowManager::GetInstance()->width * WindowManager::GetInstance()->height * 4);
 
-	// render
-
+	pboTest(output);
 
 	cudaGraphicsUnmapResources(1, &cuda_pbo_resource, 0);
+	// render end // 
+
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, testPBO);
+	glBindTexture(GL_TEXTURE_2D, rayTracingTex.GetTexture());
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height,
+		GL_RGBA, GL_FLOAT, 0);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 }
 
 // glm의 cross(a, b)는 오른손으로 a방향에서 b방향으로 감싸쥘 때의 엄지방향이다.
@@ -81,8 +90,8 @@ void RayTracingRenderer::Render()
 	UseDefaultFrameBufferObject();
 	quad.DrawModel();
 	
-	rayTracingFBO.Use();
-	quad.DrawModel();
+	/*rayTracingFBO.Use();
+	quad.DrawModel();*/
 
 	if (writeFileNum < 5)
 	{

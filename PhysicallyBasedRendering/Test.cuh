@@ -1,2 +1,4 @@
 
-int hello(float* data);
+int TestFunction(float* data);
+
+void pboTest(float* data);

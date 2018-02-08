@@ -23,10 +23,6 @@ void RayTracingRenderer::InitializeRender()
 	rayTracingFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &rayTracingTex);
 	rayTracingFBO.DrawBuffers();
 
-	float* data = new float[3];
-	// parameter로 데이터 불러오기
-	TestFunction(data);
-
 	glGenBuffers(1, &testPBO);
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, testPBO);
 	glBufferData(
@@ -41,14 +37,14 @@ void RayTracingRenderer::InitializeRender()
 	// render start //
 	cudaGraphicsMapResources(1, &cuda_pbo_resource, 0);
 
-	float* output;
+	float4* output;
 	size_t num_bytes;
 	cudaGraphicsResourceGetMappedPointer((void**)&output, &num_bytes, cuda_pbo_resource);
 	
 	// 각 픽셀마다 rgba
-	cudaMemset(output, 0, WindowManager::GetInstance()->width * WindowManager::GetInstance()->height * 4);
+	cudaMemset(output, 0, WindowManager::GetInstance()->width * WindowManager::GetInstance()->height);
 
-	pboTest(output);
+	RayTrace(output);
 
 	cudaGraphicsUnmapResources(1, &cuda_pbo_resource, 0);
 	// render end // 

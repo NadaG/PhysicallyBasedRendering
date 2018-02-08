@@ -46,10 +46,14 @@ private:
 	ShaderProgram* brightShader;
 	ShaderProgram* glareShader;
 	ShaderProgram* primitiveShader;
+	ShaderProgram* fresnelDiffractionShader;
+	ShaderProgram* multiplyShader;
 
 	FrameBufferObject apertureFBO;
+	FrameBufferObject fresnelDiffractionFBO;
 
 	Texture2D apertureTex;
+	Texture2D fresnelDiffractionTex;
 
 	shared_ptr<ShaderProgram> skyboxShader;
 

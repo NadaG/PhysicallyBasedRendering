@@ -345,6 +345,12 @@
     <None Include="Primitive.fs">
       <Filter>Shader Files\Basic</Filter>
     </None>
+    <None Include="FresnelDiffraction.fs">
+      <Filter>Shader Files\TemporalGlare</Filter>
+    </None>
+    <None Include="Multiply.fs">
+      <Filter>Shader Files\TemporalGlare</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ShaderProgram.h">
@@ -461,9 +467,6 @@
     <ClInclude Include="Material.h">
       <Filter>Source Files\Material</Filter>
     </ClInclude>
-    <ClInclude Include="Test.cuh">
-      <Filter>Source Files\Cuda</Filter>
-    </ClInclude>
     <ClInclude Include="Object.h">
       <Filter>Source Files\Object</Filter>
     </ClInclude>
@@ -491,9 +494,12 @@
     <ClInclude Include="Exporter.h">
       <Filter>Source Files\Exporter</Filter>
     </ClInclude>
+    <ClInclude Include="RayTracer.cuh">
+      <Filter>Source Files\Cuda</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="Test.cu">
+    <CudaCompile Include="RayTracer.cu">
       <Filter>Source Files\Cuda</Filter>
     </CudaCompile>
   </ItemGroup>

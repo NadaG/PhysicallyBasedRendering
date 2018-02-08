@@ -197,6 +197,8 @@
   <ItemGroup>
     <None Include="Basic.fs" />
     <None Include="Basic.vs" />
+    <None Include="FresnelDiffraction.fs" />
+    <None Include="Multiply.fs" />
     <None Include="Primitive.fs" />
     <None Include="Primitive.vs" />
     <None Include="Pupil.fs" />
@@ -283,7 +285,7 @@
     <ClInclude Include="SmokeSceneManager.h" />
     <ClInclude Include="StarBurstRenderer.h" />
     <ClInclude Include="StarBurstSceneManager.h" />
-    <ClInclude Include="Test.cuh" />
+    <ClInclude Include="RayTracer.cuh" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Texture2D.h" />
     <ClInclude Include="TextureCube.h" />
@@ -292,7 +294,7 @@
     <ClInclude Include="WindowManager.h" />
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="Test.cu" />
+    <CudaCompile Include="RayTracer.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

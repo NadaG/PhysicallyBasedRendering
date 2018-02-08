@@ -3,7 +3,7 @@
 #include "Renderer.h"
 #include "RayTracingSceneManager.h"
 
-#include "Test.cuh"
+#include "RayTracer.cuh"
 
 class RayTracingRenderer : public Renderer
 {

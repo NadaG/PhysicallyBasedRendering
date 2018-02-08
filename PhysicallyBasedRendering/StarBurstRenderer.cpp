@@ -30,7 +30,7 @@ void StarBurstRenderer::InitializeRender()
 	bloomShader->Use();
 	bloomShader->BindTexture(&worldMap, "worldMap");
 	bloomShader->BindTexture(&pingpongBlurMap[1], "blurredBrightMap");
-	bloomShader->BindTexture(&apertureTex, "debugMap");
+	bloomShader->BindTexture(&fresnelDiffractionTex, "debugMap");
 	bloomShader->SetUniform1f("exposure", 1.0);
 
 	glareShader = new ShaderProgram("Quad.vs", "Pupil.fs");
@@ -43,6 +43,14 @@ void StarBurstRenderer::InitializeRender()
 
 	primitiveShader = new ShaderProgram("Primitive.vs", "Primitive.fs");
 	primitiveShader->Use();
+
+	fresnelDiffractionShader = new ShaderProgram("Quad.vs", "FresnelDiffraction.fs");
+	fresnelDiffractionShader->Use();
+
+	multiplyShader = new ShaderProgram("Quad.vs", "Multiply.fs");
+	multiplyShader->Use();
+	multiplyShader->BindTexture(&apertureTex, "apertureTex");
+	multiplyShader->BindTexture(&fresnelDiffractionTex ,"fresnelDiffractionTex");
 
 	// TODO 지금은 texture를 불러오는 과정을 각 랜더러에서 하고 있지만 나중에는 VertexShader등의 class에서 해주어야한다.
 	/*string folder = "StreetLight";
@@ -107,8 +115,21 @@ void StarBurstRenderer::InitializeRender()
 	apertureTex.SetParameters(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
 	apertureFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &apertureTex);
-
 	apertureFBO.DrawBuffers();
+
+	fresnelDiffractionFBO.GenFrameBufferObject();
+	fresnelDiffractionFBO.BindDefaultDepthBuffer(WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
+
+	fresnelDiffractionTex.LoadTexture(
+		GL_RGBA16F,
+		WindowManager::GetInstance()->width,
+		WindowManager::GetInstance()->height,
+		GL_RGB,
+		GL_FLOAT);
+	fresnelDiffractionTex.SetParameters(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+	fresnelDiffractionFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &fresnelDiffractionTex);
+	fresnelDiffractionFBO.DrawBuffers();
 
 	hdrTex.LoadTexture("Texture/Factory/BG.jpg");
 	hdrTex.SetParameters(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
@@ -374,8 +395,15 @@ void StarBurstRenderer::Render()
 	glPointSize(5);
 	glEnable(GL_DEPTH_TEST);
 
+	fresnelDiffractionFBO.Use();
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	fresnelDiffractionShader->Use();
+
+	quad.DrawModel();
+
 	UseDefaultFrameBufferObject();
-	bloomShader->Use();
+	multiplyShader->Use();
 	quad.DrawModel();
 }
 

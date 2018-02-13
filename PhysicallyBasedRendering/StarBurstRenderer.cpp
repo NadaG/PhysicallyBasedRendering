@@ -7,7 +7,7 @@ void StarBurstRenderer::InitializeRender()
 
 	lightShader = new ShaderProgram("light.vs", "light.fs");
 	lightShader->Use();
-	
+
 	pbrShader = new ShaderProgram("PBR.vs", "PBRBrightness.fs");
 	pbrShader->Use();
 	// bind의 순서와 shader 내에서의 sampler2D 정의 순서는 연관되어 있다.
@@ -50,7 +50,7 @@ void StarBurstRenderer::InitializeRender()
 	multiplyShader = new ShaderProgram("Quad.vs", "Multiply.fs");
 	multiplyShader->Use();
 	multiplyShader->BindTexture(&apertureTex, "apertureTex");
-	multiplyShader->BindTexture(&fresnelDiffractionTex ,"fresnelDiffractionTex");
+	multiplyShader->BindTexture(&fresnelDiffractionTex, "fresnelDiffractionTex");
 
 	// TODO 지금은 texture를 불러오는 과정을 각 랜더러에서 하고 있지만 나중에는 VertexShader등의 class에서 해주어야한다.
 	/*string folder = "StreetLight";
@@ -62,7 +62,7 @@ void StarBurstRenderer::InitializeRender()
 
 	emissionTex.LoadTexture("Texture/" + folder + "/emission.jpg");
 	emissionTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
-	
+
 	metallicTex.LoadTexture("Texture/" + folder + "/metallic.png");
 	metallicTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
@@ -79,10 +79,10 @@ void StarBurstRenderer::InitializeRender()
 	worldFBO.BindDefaultDepthBuffer(WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 
 	worldMap.LoadTexture(
-		GL_RGB16F, 
-		WindowManager::GetInstance()->width, 
-		WindowManager::GetInstance()->height, 
-		GL_RGB, 
+		GL_RGB16F,
+		WindowManager::GetInstance()->width,
+		WindowManager::GetInstance()->height,
+		GL_RGB,
 		GL_FLOAT);
 	worldMap.SetParameters(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
@@ -145,10 +145,10 @@ void StarBurstRenderer::InitializeRender()
 		pingpongBlurFBO[i].GenFrameBufferObject();
 		pingpongBlurFBO[i].BindDefaultDepthBuffer(WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 		pingpongBlurMap[i].LoadTexture(
-			GL_RGB16F, 
-			WindowManager::GetInstance()->width, 
-			WindowManager::GetInstance()->height, 
-			GL_RGB, 
+			GL_RGB16F,
+			WindowManager::GetInstance()->width,
+			WindowManager::GetInstance()->height,
+			GL_RGB,
 			GL_FLOAT);
 		pingpongBlurMap[i].SetParameters(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 		pingpongBlurFBO[i].BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &pingpongBlurMap[i]);
@@ -237,9 +237,9 @@ void StarBurstRenderer::InitializeRender()
 	////////////////////////////////////////////////////////////////////////
 	// lens particles
 	////////////////////////////////////////////////////////////////////////
-	
+
 	srand(time(nullptr));
-	
+
 	const int lineWidth = 23;
 	const float linePerWidth = 0.06f;
 	const int lineDepths[] = { 1, 2, 3, 4, 5, 9, 12, 14, 15, 16, 16, 16, 16, 16, 15, 14, 12, 9, 5, 4, 3, 2, 1 };
@@ -281,10 +281,15 @@ void StarBurstRenderer::InitializeRender()
 	lensParticlesVAO.VertexAttribPointer(3, 6);
 	// color
 	lensParticlesVAO.VertexAttribPointer(3, 6);
-	
+
 	delete[] lensFibers;
 	delete[] lensPupilTriangles;
 	delete[] lensParticles;
+
+	// DEBUG fourier transform test
+	// real part는 array대로이고 imginary part는 전부 0임!
+	int dxNum = 128;
+	
 }
 
 void StarBurstRenderer::Render()
@@ -388,23 +393,41 @@ void StarBurstRenderer::Render()
 	primitiveShader->Use();
 	
 	glDisable(GL_DEPTH_TEST);
+	glPointSize(5);
 	DrawWithVAO(lensPupilVAO, lensPupilTrianglesNum * 3);
 	DrawWithVAO(lensFibersVAO, lensFibersNum * 2);
 	DrawWithVAO(lensParticlesVAO, lensParticlesNum);
 	// TODO point size를 z값에 따라 다르게 그리는 것 해야함
-	glPointSize(5);
 	glEnable(GL_DEPTH_TEST);
 
 	fresnelDiffractionFBO.Use();
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	fresnelDiffractionShader->Use();
-
 	quad.DrawModel();
 
 	UseDefaultFrameBufferObject();
 	multiplyShader->Use();
 	quad.DrawModel();
+
+	float* aperture = apertureTex.TexImage();
+	fftw_complex* f = new fftw_complex[apertureTex.GetWidth() * apertureTex.GetHeight()];
+	fftw_complex* F = new fftw_complex[apertureTex.GetWidth() * apertureTex.GetHeight()];
+
+	for (int i = 0; i < apertureTex.GetWidth()*apertureTex.GetHeight(); i++)
+	{
+		f[i][0] = aperture[i];
+	}
+
+	fftw_plan p = fftw_plan_dft_2d(apertureTex.GetWidth(), apertureTex.GetHeight(), f, F, FFTW_FORWARD, FFTW_ESTIMATE);
+	fftw_execute(p);
+	fftw_destroy_plan(p);
+
+	for (int i = 0; i < apertureTex.GetWidth()*apertureTex.GetHeight(); i++)
+	{
+		if (i % 200 == 0)
+			cout << F[i][0] << endl;
+	}
 }
 
 void StarBurstRenderer::TerminateRender()

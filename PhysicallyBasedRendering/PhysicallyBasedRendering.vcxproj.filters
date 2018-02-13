@@ -91,6 +91,9 @@
     <Filter Include="Source Files\Exporter">
       <UniqueIdentifier>{b75650c2-c649-4282-bbab-f6ebf37478eb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\MyMath">
+      <UniqueIdentifier>{5938992f-0d03-4106-bd4e-94c832d9de5c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -209,6 +212,9 @@
     </ClCompile>
     <ClCompile Include="Exporter.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MyMath.cpp">
+      <Filter>Source Files\MyMath</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -496,6 +502,9 @@
     </ClInclude>
     <ClInclude Include="RayTracer.cuh">
       <Filter>Source Files\Cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="MyMath.h">
+      <Filter>Source Files\MyMath</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

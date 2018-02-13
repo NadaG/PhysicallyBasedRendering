@@ -112,7 +112,7 @@ void Texture::UpdateTexture(float* data)
 // delete를 호출한 쪽에서 해결하도록 함
 float* Texture::TexImage()
 {
-	float* a;
+	float* data;
 	int nrComponenets;
 	switch (format)
 	{
@@ -129,10 +129,10 @@ float* Texture::TexImage()
 		break;
 	}
 
-	a = new float[width * height * nrComponenets];
-	glGetTexImage(GL_TEXTURE_2D, 0, format, type, a);
+	data = new float[width * height * nrComponenets];
+	glGetTexImage(GL_TEXTURE_2D, 0, format, type, data);
 
-	return a;
+	return data;
 }
 
 //void Texture::Bind(GLenum texture)

@@ -12,6 +12,8 @@
 
 #include "FrameBufferObject.h"
 
+#include "MyMath.h"
+
 #include "Exporter.h"
 #include "Debug.h"
 

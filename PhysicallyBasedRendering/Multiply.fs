@@ -11,19 +11,26 @@ uniform sampler2D fresnelDiffractionTex;
 
 float Fresnel(float value)
 {
-	float lambda = 0.3f;
-	float d = 0.1f;
+	float lambda = 0.001f;
+	float d = 0.001f;
 
-	float x = (outUV.x - 0.5f)*0.5f;
-	float y = (outUV.y - 0.5f)*0.5f;
+	float x = (outUV.x - 0.5f);
+	float y = (outUV.y - 0.5f);
 	float ret = cos(pi / (lambda * d) * (x*x + y*y)) * value;
 	
+	if(value <= 0.000)
+		return 1.0;
 	return ret;
 }
 
 void main()
 {	
-	float value = texture(apertureTex, outUV).r ;
+	float value = texture(apertureTex, outUV).r;
 
-	color = vec3(Fresnel(value));
+	float radius = sqrt((outUV.x-0.5f)*(outUV.x-0.5f) + (outUV.y-0.5f)*(outUV.y-0.5f));
+
+	if(radius < 0.35f)
+		color = vec3(Fresnel(1 - value));
+	else
+		color = vec3(0.0);
 }

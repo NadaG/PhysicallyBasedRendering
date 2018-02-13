@@ -18,13 +18,15 @@ public:
 		return instance;
 	}
 
-	void Log(const std::size_t& num);
-	void Log(const int& inum);
-	void Log(const unsigned int& inum);
-	void Log(const float& fnum);
+	// TODO template programming이 시급함
+	void Log(const std::size_t num);
+	void Log(const int inum);
+	void Log(const unsigned int inum);
+	void Log(const float fnum);
+	void Log(const double dnum);
 	void Log(const unsigned char& c);
 	void Log(const string& str);
-	void Log(const glm::mat4& mat);
+	void Log(const glm::mat4 mat);
 	void Log(const glm::vec3 vec);
 	void Log(const glm::vec2 vec);
 

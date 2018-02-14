@@ -51,9 +51,11 @@ private:
 
 	FrameBufferObject apertureFBO;
 	FrameBufferObject fresnelDiffractionFBO;
+	FrameBufferObject multipliedFBO;
 
 	Texture2D apertureTex;
 	Texture2D fresnelDiffractionTex;
+	Texture2D multipliedTex;
 
 	shared_ptr<ShaderProgram> skyboxShader;
 

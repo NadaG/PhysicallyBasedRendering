@@ -16,7 +16,7 @@ float Fresnel(float value)
 
 	float x = (outUV.x - 0.5f);
 	float y = (outUV.y - 0.5f);
-	float ret = cos(pi / (lambda * d) * (x*x + y*y)) * value;
+	float ret = clamp(cos(pi / (lambda * d) * (x*x + y*y)), 0f, 1.0f) * value;
 	
 	if(value <= 0.000)
 		return 1.0;
@@ -33,4 +33,6 @@ void main()
 		color = vec3(Fresnel(1 - value));
 	else
 		color = vec3(0.0);
+
+	//color = vec3(value);
 }

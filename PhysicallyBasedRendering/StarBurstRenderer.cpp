@@ -131,6 +131,20 @@ void StarBurstRenderer::InitializeRender()
 	fresnelDiffractionFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &fresnelDiffractionTex);
 	fresnelDiffractionFBO.DrawBuffers();
 
+	multipliedFBO.GenFrameBufferObject();
+	multipliedFBO.BindDefaultDepthBuffer(WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
+
+	multipliedTex.LoadTexture(
+		GL_RGBA16F,
+		WindowManager::GetInstance()->width,
+		WindowManager::GetInstance()->height,
+		GL_RGB,
+		GL_FLOAT);
+	multipliedTex.SetParameters(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+	multipliedFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &multipliedTex);
+	multipliedFBO.DrawBuffers();
+
 	hdrTex.LoadTexture("Texture/Factory/BG.jpg");
 	hdrTex.SetParameters(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
 
@@ -406,28 +420,34 @@ void StarBurstRenderer::Render()
 	fresnelDiffractionShader->Use();
 	quad.DrawModel();
 
+	multipliedFBO.Use();
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	multiplyShader->Use();
+	quad.DrawModel();
+
 	UseDefaultFrameBufferObject();
 	multiplyShader->Use();
 	quad.DrawModel();
 
-	float* aperture = apertureTex.TexImage();
-	fftw_complex* f = new fftw_complex[apertureTex.GetWidth() * apertureTex.GetHeight()];
-	fftw_complex* F = new fftw_complex[apertureTex.GetWidth() * apertureTex.GetHeight()];
+	float* multipliedTexArray = multipliedTex.TexImage();
+	fftw_complex* f = new fftw_complex[multipliedTex.GetWidth() * multipliedTex.GetHeight()];
+	fftw_complex* F = new fftw_complex[multipliedTex.GetWidth() * multipliedTex.GetHeight()];
 
-	for (int i = 0; i < apertureTex.GetWidth()*apertureTex.GetHeight(); i++)
+	for (int i = 0; i < multipliedTex.GetWidth() * multipliedTex.GetHeight(); i++)
 	{
-		f[i][0] = aperture[i];
+		f[i][0] = multipliedTexArray[i];
 	}
 
-	fftw_plan p = fftw_plan_dft_2d(apertureTex.GetWidth(), apertureTex.GetHeight(), f, F, FFTW_FORWARD, FFTW_ESTIMATE);
+	fftw_plan p = fftw_plan_dft_2d(multipliedTex.GetWidth(), multipliedTex.GetHeight(), f, F, FFTW_FORWARD, FFTW_ESTIMATE);
 	fftw_execute(p);
 	fftw_destroy_plan(p);
 
-	for (int i = 0; i < apertureTex.GetWidth()*apertureTex.GetHeight(); i++)
+	/*for (int i = 0; i < apertureTex.GetWidth()*apertureTex.GetHeight(); i++)
 	{
-		if (i % 200 == 0)
+		if (F[i][0] > 10)
 			cout << F[i][0] << endl;
-	}
+	}*/
 }
 
 void StarBurstRenderer::TerminateRender()

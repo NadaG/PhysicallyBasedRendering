@@ -40,6 +40,7 @@ int main(int argc, char **argv)
 
 	// TO Refacto 어딘가로 버려버릴것
 	glewExperimental = true;
+
 	if (glewInit() != GLEW_OK)
 	{
 		fprintf(stderr, "Failed to initialize GLEW\n");

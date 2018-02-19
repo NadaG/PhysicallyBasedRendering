@@ -22,6 +22,7 @@ void FrameBufferObject::BindRenderBuffer(GLenum attachment, RenderBufferObject r
 void FrameBufferObject::BindTexture(GLenum attachment, GLenum textarget, Texture* texture)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	glBindTexture(GL_TEXTURE_2D, texture->GetTexture());
 	glFramebufferTexture2D(
 		GL_FRAMEBUFFER, 
 		attachment, 
@@ -37,6 +38,7 @@ void FrameBufferObject::BindDefaultDepthBuffer(const int width, const int height
 	glGenRenderbuffers(1, &rbo);
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+	
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	glFramebufferRenderbuffer(
 		GL_FRAMEBUFFER,
@@ -78,4 +80,10 @@ const GLenum& FrameBufferObject::CheckStatus()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	return glCheckFramebufferStatus(GL_FRAMEBUFFER);
+}
+
+bool FrameBufferObject::IsComplete()
+{
+	GLenum err = CheckStatus();
+	return GL_FRAMEBUFFER_COMPLETE == err;
 }

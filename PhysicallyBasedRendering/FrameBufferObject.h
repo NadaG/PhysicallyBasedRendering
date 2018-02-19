@@ -28,6 +28,8 @@ public:
 
 	const GLenum& CheckStatus();
 
+	bool IsComplete();
+
 private:
 
 	GLuint fbo;

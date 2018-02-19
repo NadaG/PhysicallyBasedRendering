@@ -1,4 +1,4 @@
-#version 440 core
+#version 330 core
 
 const float pi = 3.141592653;
 
@@ -9,11 +9,11 @@ out vec3 color;
 uniform sampler2D apertureTex;
 uniform sampler2D fresnelDiffractionTex;
 
+uniform float lambda;
+uniform float d;
+
 float Fresnel(float value)
 {
-	float lambda = 0.001f;
-	float d = 0.001f;
-
 	float x = (outUV.x - 0.5f);
 	float y = (outUV.y - 0.5f);
 	float ret = clamp(cos(pi / (lambda * d) * (x*x + y*y)), 0f, 1.0f) * value;
@@ -34,5 +34,6 @@ void main()
 	else
 		color = vec3(0.0);
 
+	//color = vec3(1.0);
 	//color = vec3(value);
 }

@@ -73,6 +73,9 @@ private:
 	VertexArrayObject lensPupilVAO;
 	VertexArrayObject lensParticlesVAO;
 
+	PNGExporter pngExporter;
+	int writeFileNum = 0;
+
 	int lensParticlesNum = 0;
 	const int lensFibersNum = 300;
 	const int lensPupilTrianglesNum = 500;
@@ -80,4 +83,7 @@ private:
 	const float pupilRadius = 0.7f;
 	const float lensFiberInRadius = 0.5f;
 	const float lensFiberOutRadius = 5.0f;
+
+	const float lambda = 0.1f;
+	const float d = 0.01f;
 };

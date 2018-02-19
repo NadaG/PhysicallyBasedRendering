@@ -58,3 +58,19 @@ void Debug::Log(const glm::vec2 vec)
 {
 	cout << "x: " << vec.x << " y: " << vec.y << endl;
 }
+
+// TODO
+void Debug::Log(const char * format, ...)
+{
+	/*va_list* arg;
+	__va_start(arg, format);
+	vfprintf(stdout, format, *arg);
+	__crt_va_end(*arg);*/
+}
+
+#include <GL\glew.h>
+
+void Debug::LogError()
+{
+	cerr << "opengl error:" << glGetError() << endl;
+}

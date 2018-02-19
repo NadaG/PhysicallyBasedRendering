@@ -16,7 +16,7 @@ Texture::Texture(char const * path)
 void Texture::LoadTexture(const GLint& internalformat, const GLsizei& width, const GLsizei& height, const GLenum& format, const GLenum& type)
 {
 	glGenTextures(1, &texture);
-	Bind(this->texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
 	glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height, 0, format, type, 0);
 	this->format = format;
 	this->type = type;
@@ -98,7 +98,7 @@ void Texture::LoadTextureDDS(const string & s)
 void Texture::LoadDepthTexture(const float& width, const float& height)
 {
 	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, this->texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
 	// depth texture의 경우 float으로 저장한다는 것을 주의!
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 }
@@ -106,14 +106,13 @@ void Texture::LoadDepthTexture(const float& width, const float& height)
 
 void Texture::UpdateTexture(float* data)
 {
-	glBindTexture(GL_TEXTURE_2D, this->texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, format, type, data);
 }
 
-// delete를 호출한 쪽에서 해결하도록 함
 float* Texture::TexImage()
 {
-	glBindTexture(GL_TEXTURE_2D, this->texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
 
 	float* data;
 	int nrComponenets;

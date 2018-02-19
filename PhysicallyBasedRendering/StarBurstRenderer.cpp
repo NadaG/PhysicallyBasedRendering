@@ -51,6 +51,8 @@ void StarBurstRenderer::InitializeRender()
 	multiplyShader->Use();
 	multiplyShader->BindTexture(&apertureTex, "apertureTex");
 	multiplyShader->BindTexture(&fresnelDiffractionTex, "fresnelDiffractionTex");
+	multiplyShader->SetUniform1f("lambda", lambda);
+	multiplyShader->SetUniform1f("d", d);
 
 	// TODO 지금은 texture를 불러오는 과정을 각 랜더러에서 하고 있지만 나중에는 VertexShader등의 class에서 해주어야한다.
 	/*string folder = "StreetLight";
@@ -73,10 +75,7 @@ void StarBurstRenderer::InitializeRender()
 	roughnessTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);*/
 
 	brightFBO.GenFrameBufferObject();
-	brightFBO.BindDefaultDepthBuffer(WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
-
 	worldFBO.GenFrameBufferObject();
-	worldFBO.BindDefaultDepthBuffer(WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 
 	worldMap.LoadTexture(
 		GL_RGB16F,
@@ -97,6 +96,8 @@ void StarBurstRenderer::InitializeRender()
 	worldFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &worldMap);
 	brightFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &brightMap);
 
+	brightFBO.BindDefaultDepthBuffer(WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
+	worldFBO.BindDefaultDepthBuffer(WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 	// fbo를 bind하고 clear(gl_color_buffer_bit)를 하면
 	// glDrawBuffers로 셋팅된 모든 buffer가 clear 된다.
 	// glDrawBuffers를 이용해 잠깐 바꿈으로써 특정한 buffer만 clear할 수 있다.
@@ -144,8 +145,8 @@ void StarBurstRenderer::InitializeRender()
 
 	multipliedFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &multipliedTex);
 	multipliedFBO.DrawBuffers();
-
-	hdrTex.LoadTexture("Texture/Factory/BG.jpg");
+	
+	/*hdrTex.LoadTexture("Texture/Factory/BG.jpg");
 	hdrTex.SetParameters(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
 
 	hdrSkyBoxTex = new TextureCube();
@@ -169,7 +170,7 @@ void StarBurstRenderer::InitializeRender()
 		pingpongBlurFBO[i].DrawBuffers();
 	}
 
-	backgroundColor = glm::vec4(0.2f, 0.2f, 0.2f, 0.0f);
+	backgroundColor = glm::vec4(0.2f, 0.2f, 0.2f, 0.0f);*/
 
 	////////////////////////////////////////////////////////////////////////
 	// lens fiber
@@ -299,11 +300,6 @@ void StarBurstRenderer::InitializeRender()
 	delete[] lensFibers;
 	delete[] lensPupilTriangles;
 	delete[] lensParticles;
-
-	// DEBUG fourier transform test
-	// real part는 array대로이고 imginary part는 전부 0임!
-	int dxNum = 128;
-	
 }
 
 void StarBurstRenderer::Render()
@@ -360,7 +356,7 @@ void StarBurstRenderer::Render()
 	lightShader->SetUniformMatrix4f("view", view);
 	lightShader->SetUniformMatrix4f("projection", projection);
 	RenderObjects(lightShader, lights);
-	
+
 	// skybox 그리는 부분
 	/*glDepthFunc(GL_LEQUAL);
 	skyboxShader->Use();
@@ -405,7 +401,7 @@ void StarBurstRenderer::Render()
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	primitiveShader->Use();
-	
+
 	glDisable(GL_DEPTH_TEST);
 	glPointSize(5);
 	DrawWithVAO(lensPupilVAO, lensPupilTrianglesNum * 3);
@@ -430,7 +426,12 @@ void StarBurstRenderer::Render()
 	multiplyShader->Use();
 	quad.DrawModel();
 
+	glActiveTexture(GL_TEXTURE0);
+
+	// TODO load texture data
 	float* multipliedTexArray = multipliedTex.TexImage();
+	float* psfArray = new float[multipliedTex.GetWidth() * multipliedTex.GetHeight() * 4];
+
 	fftw_complex* f = new fftw_complex[multipliedTex.GetWidth() * multipliedTex.GetHeight()];
 	fftw_complex* F = new fftw_complex[multipliedTex.GetWidth() * multipliedTex.GetHeight()];
 
@@ -443,11 +444,26 @@ void StarBurstRenderer::Render()
 	fftw_execute(p);
 	fftw_destroy_plan(p);
 
-	/*for (int i = 0; i < apertureTex.GetWidth()*apertureTex.GetHeight(); i++)
+	for (int i = 0; i < apertureTex.GetWidth()*apertureTex.GetHeight(); i++)
 	{
-		if (F[i][0] > 10)
-			cout << F[i][0] << endl;
-	}*/
+		F[i][0] = F[i][0] * F[i][0];
+		F[i][0] /= (lambda*lambda*d*d);
+	}
+
+	for (int i = 0; i < multipliedTex.GetWidth() * multipliedTex.GetHeight(); ++i)
+	{
+		psfArray[i * 4 + 0] = F[i][0];
+		psfArray[i * 4 + 1] = F[i][0];
+		psfArray[i * 4 + 2] = F[i][0];
+		psfArray[i * 4 + 3] = F[i][0];
+	}
+
+	// 오잉?? 이게 fourier transofmr인가?
+	if (!writeFileNum)
+	{
+		pngExporter.WritePngFile("psf.png", psfArray, multipliedTex.GetWidth(), multipliedTex.GetHeight());
+		writeFileNum++;
+	}
 }
 
 void StarBurstRenderer::TerminateRender()

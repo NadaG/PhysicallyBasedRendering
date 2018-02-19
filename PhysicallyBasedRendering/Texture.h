@@ -37,9 +37,8 @@ public:
 
 	// depth를 받는 texture, 포맷이 depth로 고정되어 있고, 타입은 float이다.
 	void LoadDepthTexture(const float& width, const float& height);
-	
-	// 깔끔하게 void*로 할까?
-	// float 메모리 할당은 생성하는 쪽에서 해주어야함
+
+	// delete를 호출한 쪽에서 해결하도록 함
 	float* TexImage();
 
 	const GLuint& GetTexture() const { return texture; }

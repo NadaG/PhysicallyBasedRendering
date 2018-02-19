@@ -51,7 +51,10 @@ void RayTracingRenderer::InitializeRender()
 
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, testPBO);
 	glBindTexture(GL_TEXTURE_2D, rayTracingTex.GetTexture());
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height,
+	glTexSubImage2D(
+		GL_TEXTURE_2D, 0, 0, 0, 
+		WindowManager::GetInstance()->width, 
+		WindowManager::GetInstance()->height,
 		GL_RGBA, GL_FLOAT, 0);
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 }

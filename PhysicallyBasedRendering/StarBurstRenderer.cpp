@@ -428,46 +428,26 @@ void StarBurstRenderer::Render()
 
 	glActiveTexture(GL_TEXTURE0);
 
+	Texture2D outputTex = ft.fourierTransform2D(multipliedTex);
+	
 	// TODO texture로부터 png를 그리는 코드를 따로 함수로 빼둔 후
 	// sign texture를 input으로 두고 점 2개만 있는 output image가 나오는지 test 할 것
 	// height, width, rgb 순으로 데이터가 모여있음
-	float* multipliedTexArray = multipliedTex.TexImage();
-	float* psfArray = new float[multipliedTex.GetWidth() * multipliedTex.GetHeight() * 4];
-
-	fftw_complex* f = new fftw_complex[multipliedTex.GetWidth() * multipliedTex.GetHeight()];
-	fftw_complex* F = new fftw_complex[multipliedTex.GetWidth() * multipliedTex.GetHeight()];
-
-	for (int i = 0; i < multipliedTex.GetWidth() * multipliedTex.GetHeight(); ++i)
+	
+	// normalization
+	/*for (int i = 0; i < width * height; ++i)
 	{
-		f[i][0] = multipliedTexArray[i * 3 + 0];
-		// 어차피 아래나 위나 똑같음
-		// f[i][0] = multipliedTexArray[i * 3 + 1];
-		// f[i][0] = multipliedTexArray[i * 3 + 2];
-	}
+	F[i][0] = F[i][0] * F[i][0];
+	F[i][0] /= (lambda * lambda * d * d);
+	}*/
 
-	fftw_plan p = fftw_plan_dft_2d(multipliedTex.GetWidth(), multipliedTex.GetHeight(), f, F, FFTW_FORWARD, FFTW_ESTIMATE);
-	fftw_execute(p);
-	fftw_destroy_plan(p);
-
-	for (int i = 0; i < apertureTex.GetWidth() * apertureTex.GetHeight(); ++i)
-	{
-		F[i][0] = F[i][0] * F[i][0];
-		F[i][0] /= (lambda * lambda * d * d);
-	}
-
-	for (int i = 0; i < multipliedTex.GetWidth() * multipliedTex.GetHeight(); ++i)
-	{
-		psfArray[i * 4 + 0] = F[i][0];
-		psfArray[i * 4 + 1] = F[i][0];
-		psfArray[i * 4 + 2] = F[i][0];
-		psfArray[i * 4 + 3] = 255;
-	}
 
 	// 오잉?? 이게 fourier transofmr인가?
 	// 딱봐도 아닌거 같은데..
 	if (!writeFileNum)
 	{
-		pngExporter.WritePngFile("psf.png", psfArray, multipliedTex.GetWidth(), multipliedTex.GetHeight());
+		pngExporter.WritePngFile("psf.png", outputTex);
+		//pngExporter.WritePngFile("psf.png", psfArray, multipliedTex.GetWidth(), multipliedTex.GetHeight());
 		writeFileNum++;
 	}
 }

@@ -84,27 +84,7 @@ void PNGExporter::WritePngFile(const string fileName, Texture2D texture)
 {
 	// pointer는 reture으로 써야하는 구나
 	float* texData = texture.TexImage();
-
 	WritePngFile(fileName, texData, texture.GetWidth(), texture.GetHeight());
-
-	//png_bytep* rawData = new png_bytep[texture.GetHeight()];
-
-	//for (int i = 0; i < texture.GetHeight(); i++)
-	//	rawData[i] = new png_byte[texture.GetWidth() * 4];
-
-	//for (int i = 0; i < texture.GetHeight(); i++)
-	//{
-	//	for (int j = 0; j < texture.GetWidth(); j++)
-	//	{
-	//		rawData[i][j * 4 + 0] = (png_byte)floor(texData[i * texture.GetWidth() * 4 + j * 4 + 0] * 255.0f);
-	//		rawData[i][j * 4 + 1] = (png_byte)floor(texData[i * texture.GetWidth() * 4 + j * 4 + 1] * 255.0f);
-	//		rawData[i][j * 4 + 2] = (png_byte)floor(texData[i * texture.GetWidth() * 4 + j * 4 + 2] * 255.0f);
-	//		// 응~ 불투명
-	//		rawData[i][j * 4 + 3] = 255;
-	//	}
-	//}
-
-	//WritePngFile(fileName, rawData, texture.GetWidth(), texture.GetHeight(), 8, PNG_COLOR_TYPE_RGBA);
 }
 
 void PNGExporter::WritePngFile(const string fileName, float* data, const int width, const int height)
@@ -114,13 +94,13 @@ void PNGExporter::WritePngFile(const string fileName, float* data, const int wid
 	for (int i = 0; i < height; i++)
 		rawData[i] = new png_byte[width * 4];
 
-	for (int i = 0; i < height; i++)
+	for (int i = 0; i < height; ++i)
 	{
-		for (int j = 0; j < width; j++)
+		for (int j = 0; j < width; ++j)
 		{
-			rawData[i][j * 4 + 0] = (png_byte)floor(data[i * width * 4 + j * 4 + 0] * 255.0f);
-			rawData[i][j * 4 + 1] = (png_byte)floor(data[i * width * 4 + j * 4 + 1] * 255.0f);
-			rawData[i][j * 4 + 2] = (png_byte)floor(data[i * width * 4 + j * 4 + 2] * 255.0f);
+			rawData[i][j * 4 + 0] = (png_byte)floor(data[i * width * 3 + j * 3 + 0] * 255.0f);
+			rawData[i][j * 4 + 1] = (png_byte)floor(data[i * width * 3 + j * 3 + 1] * 255.0f);
+			rawData[i][j * 4 + 2] = (png_byte)floor(data[i * width * 3 + j * 3 + 2] * 255.0f);
 			// 응~ 불투명
 			rawData[i][j * 4 + 3] = 255;
 		}

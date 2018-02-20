@@ -15,6 +15,7 @@
 #include "MyMath.h"
 
 #include "Exporter.h"
+#include "FourierTransform.h"
 #include "Debug.h"
 
 using std::vector;

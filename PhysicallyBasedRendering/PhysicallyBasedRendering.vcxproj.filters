@@ -94,6 +94,9 @@
     <Filter Include="Source Files\MyMath">
       <UniqueIdentifier>{5938992f-0d03-4106-bd4e-94c832d9de5c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\FourierTransform">
+      <UniqueIdentifier>{12817b2d-33d3-4d70-8ffa-82eab3cbc5cc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -210,11 +213,14 @@
     <ClCompile Include="RayTracingRenderer.cpp">
       <Filter>Source Files\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="Exporter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="MyMath.cpp">
       <Filter>Source Files\MyMath</Filter>
+    </ClCompile>
+    <ClCompile Include="Exporter.cpp">
+      <Filter>Source Files\Exporter</Filter>
+    </ClCompile>
+    <ClCompile Include="FourierTransform.cpp">
+      <Filter>Source Files\FourierTransform</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -505,6 +511,9 @@
     </ClInclude>
     <ClInclude Include="MyMath.h">
       <Filter>Source Files\MyMath</Filter>
+    </ClInclude>
+    <ClInclude Include="FourierTransform.h">
+      <Filter>Source Files\FourierTransform</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

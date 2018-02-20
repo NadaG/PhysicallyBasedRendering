@@ -162,6 +162,7 @@
     <ClCompile Include="FluidSceneManager.cpp" />
     <ClCompile Include="FluidRenderer.cpp" />
     <ClCompile Include="FluidSimulationImporter.cpp" />
+    <ClCompile Include="FourierTransform.cpp" />
     <ClCompile Include="FrameBufferObject.cpp" />
     <ClCompile Include="LightMovement.cpp" />
     <ClCompile Include="LTCRenderer.cpp" />
@@ -259,6 +260,7 @@
     <ClInclude Include="FluidRenderer.h" />
     <ClInclude Include="FluidSceneManager.h" />
     <ClInclude Include="FluidSimulationImporter.h" />
+    <ClInclude Include="FourierTransform.h" />
     <ClInclude Include="FrameBufferObject.h" />
     <ClInclude Include="LightMovement.h" />
     <ClInclude Include="LTCRenderer.h" />

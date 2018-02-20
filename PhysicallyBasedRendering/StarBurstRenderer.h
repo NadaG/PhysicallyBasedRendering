@@ -76,6 +76,8 @@ private:
 	PNGExporter pngExporter;
 	int writeFileNum = 0;
 
+	FourierTransform ft;
+
 	int lensParticlesNum = 0;
 	const int lensFibersNum = 300;
 	const int lensPupilTrianglesNum = 500;

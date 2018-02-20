@@ -31,7 +31,12 @@ public:
 
 	void LoadTexture(const string& s);
 	void LoadTextureDDS(const string& s);
-	void LoadTexture(const GLint& internalformat, const GLsizei& width, const GLsizei& height, const GLenum& format, const GLenum& type);
+	void LoadTexture(
+		const GLint& internalformat, 
+		const GLsizei& width, 
+		const GLsizei& height, 
+		const GLenum& format, 
+		const GLenum& type);
 
 	void UpdateTexture(float* data);
 
@@ -39,7 +44,7 @@ public:
 	void LoadDepthTexture(const float& width, const float& height);
 
 	// delete를 호출한 쪽에서 해결하도록 함
-	float* TexImage();
+	float* TexImage() const;
 
 	const GLuint& GetTexture() const { return texture; }
 
@@ -49,8 +54,13 @@ public:
 
 	const GLsizei GetWidth() const { return width; }
 	const GLsizei GetHeight() const { return height; }
+
 	const GLenum GetType() const { return type; }
 	const GLenum GetFormat() const { return format; }
+	
+	const GLint GetInternalFormat() const { return internalformat; }
+	
+	const int GetPerPixelFloatNum() const;
 
 protected:
 	GLuint texture;

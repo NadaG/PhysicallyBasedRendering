@@ -222,6 +222,12 @@
     <ClCompile Include="FourierTransform.cpp">
       <Filter>Source Files\FourierTransform</Filter>
     </ClCompile>
+    <ClCompile Include="TemporalGlareRenderer.cpp">
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="TemporalGlareSceneManager.cpp">
+      <Filter>Source Files\SceneManager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -514,6 +520,12 @@
     </ClInclude>
     <ClInclude Include="FourierTransform.h">
       <Filter>Source Files\FourierTransform</Filter>
+    </ClInclude>
+    <ClInclude Include="TemporalGlareRenderer.h">
+      <Filter>Source Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="TemporalGlareSceneManager.h">
+      <Filter>Source Files\SceneManager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

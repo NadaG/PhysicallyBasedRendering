@@ -5,9 +5,13 @@ void Renderer::Initialize(GLFWwindow* window)
 	this->window = window;
 }
 
-void Renderer::UseDefaultFrameBufferObject()
+void Renderer::UseDefaultFBO()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Renderer::ClearDefaultFBO()
+{
 	glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }

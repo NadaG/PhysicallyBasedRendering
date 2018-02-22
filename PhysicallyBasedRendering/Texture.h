@@ -34,11 +34,17 @@ public:
 	void LoadTexture(
 		const GLint& internalformat, 
 		const GLsizei& width, 
-		const GLsizei& height, 
-		const GLenum& format, 
+		const GLsizei& height);
+
+	void LoadTexture(
+		const GLint& internalformat,
+		const GLsizei& width,
+		const GLsizei& height,
+		const GLenum& format,
 		const GLenum& type);
 
-	void UpdateTexture(float* data);
+
+	void UpdateTexture(float* data, GLenum format, GLenum type);
 
 	// depth를 받는 texture, 포맷이 depth로 고정되어 있고, 타입은 float이다.
 	void LoadDepthTexture(const float& width, const float& height);
@@ -54,18 +60,12 @@ public:
 
 	const GLsizei GetWidth() const { return width; }
 	const GLsizei GetHeight() const { return height; }
-
-	const GLenum GetType() const { return type; }
-	const GLenum GetFormat() const { return format; }
 	
 	const GLint GetInternalFormat() const { return internalformat; }
-	
-	const int GetPerPixelFloatNum() const;
 
 protected:
 	GLuint texture;
 
 	GLsizei width, height;
-	GLenum type, format;
 	GLint internalformat;
 };

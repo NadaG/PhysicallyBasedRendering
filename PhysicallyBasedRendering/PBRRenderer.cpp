@@ -80,7 +80,7 @@ void PBRRenderer::InitializeRender()
 		sceneManager->skyboxObj.DrawModel();
 	}
 
-	UseDefaultFrameBufferObject();
+	UseDefaultFBO();
 
 	hdrSkyboxTex.GenerateMipmap();
 
@@ -106,7 +106,7 @@ void PBRRenderer::InitializeRender()
 
 		sceneManager->skyboxObj.DrawModel();
 	}
-	UseDefaultFrameBufferObject();
+	UseDefaultFBO();
 
 	////////////////////////////////////////////////////
 	prefilterSkyboxTex.LoadTextureCubeMap(GL_RGB16F, 128, 128, GL_RGB, GL_FLOAT);
@@ -145,7 +145,7 @@ void PBRRenderer::InitializeRender()
 			sceneManager->skyboxObj.DrawModel();
 		}
 	}
-	UseDefaultFrameBufferObject();
+	UseDefaultFBO();
 
 	////////////////////////////////////////////////////
 	brdfTex.LoadTexture(GL_RG16F, 512, 512, GL_RG, GL_FLOAT);
@@ -160,7 +160,7 @@ void PBRRenderer::InitializeRender()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	sceneManager->quadObj.DrawModel();
 
-	UseDefaultFrameBufferObject();
+	UseDefaultFBO();
 	////////////////////////////////////////////////////
 }
 
@@ -179,7 +179,7 @@ void PBRRenderer::Render()
 
 	// glfwGetFramebufferSize로 받아오는 방식이 더 좋을 거 같음
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
-	UseDefaultFrameBufferObject();
+	UseDefaultFBO();
 	
 	pbrShader->Use();
 

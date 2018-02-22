@@ -60,13 +60,13 @@ void Debug::Log(const glm::vec2 vec)
 }
 
 // TODO
-void Debug::Log(const char * format, ...)
-{
-	/*va_list* arg;
-	__va_start(arg, format);
-	vfprintf(stdout, format, *arg);
-	__crt_va_end(*arg);*/
-}
+//void Debug::Log(const char * format, ...)
+//{
+//	/*va_list* arg;
+//	__va_start(arg, format);
+//	vfprintf(stdout, format, *arg);
+//	__crt_va_end(*arg);*/
+//}
 
 #include <GL\glew.h>
 

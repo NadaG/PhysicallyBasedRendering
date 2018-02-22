@@ -5,7 +5,7 @@
 
 void RayTracingRenderer::InitializeRender()
 {
-	UseDefaultFrameBufferObject();
+	UseDefaultFBO();
 	rayTracingShader = new ShaderProgram("Quad.vs", "RayTracing.fs");
 	rayTracingShader->Use();
 
@@ -86,7 +86,7 @@ void RayTracingRenderer::Render()
 	rayTracingShader->SetUniformMatrix4f("view", view);
 	rayTracingShader->SetUniformVector3f("lightPos", glm::vec3(5.0f, 0.0f, -5.0f));
 	
-	UseDefaultFrameBufferObject();
+	UseDefaultFBO();
 	quad.DrawModel();
 	
 	/*rayTracingFBO.Use();

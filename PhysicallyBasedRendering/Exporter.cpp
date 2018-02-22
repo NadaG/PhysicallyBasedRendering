@@ -48,34 +48,9 @@ void PNGExporter::WritePngFile(const string fileName, png_bytep* rowPointers, co
 
 	const int byteDepth = bitDepth / 8;
 
-	// bit_depth / 8을 한 이유는 bit로 표현된 것을 byte로 표현하기 위해
-	/*png_byte* row = new png_byte[colorChannel * byteDepth * width];
-	int arrayloc = 0;
-
-	for (int i = 0; i < height; i++)
-	{
-		arrayloc = 0;
-		for (int j = 0; j < width; j++)
-		{
-			row[(arrayloc * colorChannel * byteDepth)] = 100;
-			row[(arrayloc * colorChannel * byteDepth) + byteDepth * 1] = 2;
-			row[(arrayloc * colorChannel * byteDepth) + byteDepth * 2] = 255;
-			row[(arrayloc * colorChannel * byteDepth) + byteDepth * 3] = 255;
-
-			arrayloc++;
-		}
-		png_write_row(png_ptr, row);
-	}*/
-
 	png_write_image(png_ptr, rowPointers);
 
 	png_write_end(png_ptr, NULL);
-
-	/* cleanup heap allocation */
-	/*for (int y = 0; y < height; y++)
-		delete rowPointers[y];
-
-	delete rowPointers;*/
 
 	fclose(fp);
 }
@@ -98,9 +73,9 @@ void PNGExporter::WritePngFile(const string fileName, float* data, const int wid
 	{
 		for (int j = 0; j < width; ++j)
 		{
-			rawData[i][j * 4 + 0] = (png_byte)floor(data[i * width * 3 + j * 3 + 0] * 255.0f);
-			rawData[i][j * 4 + 1] = (png_byte)floor(data[i * width * 3 + j * 3 + 1] * 255.0f);
-			rawData[i][j * 4 + 2] = (png_byte)floor(data[i * width * 3 + j * 3 + 2] * 255.0f);
+			rawData[i][j * 4 + 0] = (png_byte)floor(data[(i * width + j) * 4 + 0] * 255.0f);
+			rawData[i][j * 4 + 1] = (png_byte)floor(data[(i * width + j) * 4 + 0] * 255.0f);
+			rawData[i][j * 4 + 2] = (png_byte)floor(data[(i * width + j) * 4 + 0] * 255.0f);
 			// 응~ 불투명
 			rawData[i][j * 4 + 3] = 255;
 		}

@@ -14,7 +14,7 @@ class StarBurstRenderer : public Renderer
 {
 public:
 	StarBurstRenderer(SceneManager* sceneManager)
-		:Renderer(sceneManager), blurStep(0)
+		:Renderer(sceneManager), blurStep(2)
 	{
 		zNear = 0.01f;
 		zFar = 100.0f;
@@ -44,20 +44,6 @@ private:
 	ShaderProgram* blurShader;
 	ShaderProgram* bloomShader;
 	ShaderProgram* brightShader;
-	ShaderProgram* glareShader;
-	ShaderProgram* primitiveShader;
-	ShaderProgram* fresnelDiffractionShader;
-	ShaderProgram* multiplyShader;
-
-	FrameBufferObject apertureFBO;
-	FrameBufferObject fresnelDiffractionFBO;
-	FrameBufferObject multipliedFBO;
-
-	Texture2D apertureTex;
-	Texture2D fresnelDiffractionTex;
-	Texture2D multipliedTex;
-
-	shared_ptr<ShaderProgram> skyboxShader;
 
 	Texture2D aoTex;
 	Texture2D albedoTex;
@@ -65,27 +51,4 @@ private:
 	Texture2D normalTex;
 	Texture2D roughnessTex;
 	Texture2D emissionTex;
-
-	TextureCube* hdrSkyBoxTex;
-	Texture2D hdrTex;
-
-	VertexArrayObject lensFibersVAO;
-	VertexArrayObject lensPupilVAO;
-	VertexArrayObject lensParticlesVAO;
-
-	PNGExporter pngExporter;
-	int writeFileNum = 0;
-
-	FourierTransform ft;
-
-	int lensParticlesNum = 0;
-	const int lensFibersNum = 300;
-	const int lensPupilTrianglesNum = 500;
-
-	const float pupilRadius = 0.7f;
-	const float lensFiberInRadius = 0.5f;
-	const float lensFiberOutRadius = 5.0f;
-
-	const float lambda = 0.1f;
-	const float d = 0.01f;
 };

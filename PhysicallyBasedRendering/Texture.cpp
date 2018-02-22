@@ -18,8 +18,16 @@ void Texture::LoadTexture(const GLint& internalformat, const GLsizei& width, con
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height, 0, format, type, 0);
-	this->format = format;
-	this->type = type;
+	this->internalformat = internalformat;
+	this->width = width;
+	this->height = height;
+}
+
+void Texture::LoadTexture(const GLint& internalformat, const GLsizei& width, const GLsizei& height)
+{
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height, 0, GL_RGB, GL_FLOAT, 0);
 	this->internalformat = internalformat;
 	this->width = width;
 	this->height = height;
@@ -35,6 +43,8 @@ void Texture::LoadTexture(const string& s)
 
 	if (data)
 	{
+		// input할 데이터의 format
+		// input할 데이터의 type은 GL_UNSIGNED_BYTE임
 		GLenum format;
 		if (nrComponents == 1)
 			format = GL_RED;
@@ -103,7 +113,7 @@ void Texture::LoadDepthTexture(const float& width, const float& height)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 }
 
-void Texture::UpdateTexture(float* data)
+void Texture::UpdateTexture(float* data, GLenum format, GLenum type)
 {
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, format, type, data);
@@ -114,10 +124,11 @@ float* Texture::TexImage() const
 	glBindTexture(GL_TEXTURE_2D, texture);
 
 	float* data;
-	int nrComponenets = GetPerPixelFloatNum();
 
-	data = new float[width * height * nrComponenets];
-	glGetTexImage(GL_TEXTURE_2D, 0, format, type, data);
+	// glGetTexImage는 한 픽셀에 대해 internal four-component에 상관없이 4개의 value를 반환함
+	data = new float[width * height * 4];
+
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, data);
 
 	return data;
 }
@@ -135,26 +146,4 @@ void Texture::GenerateMipmap()
 {
 	glBindTexture(GL_TEXTURE_CUBE_MAP, this->texture);
 	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-}
-
-const int Texture::GetPerPixelFloatNum() const
-{
-	int nrComponenets;
-	switch (format)
-	{
-	case GL_RED:
-		nrComponenets = 1;
-		break;
-	case GL_RGB:
-		nrComponenets = 3;
-		break;
-	case GL_RGBA:
-		nrComponenets = 4;
-		break;
-	default:
-		nrComponenets = 0;
-		break;
-	}
-
-	return nrComponenets;
 }

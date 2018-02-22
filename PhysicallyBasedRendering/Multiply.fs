@@ -4,7 +4,7 @@ const float pi = 3.141592653;
 
 in vec2 outUV;
 
-out vec3 color;
+out vec4 color;
 
 uniform sampler2D apertureTex;
 uniform sampler2D fresnelDiffractionTex;
@@ -30,10 +30,9 @@ void main()
 	float radius = sqrt((outUV.x-0.5f)*(outUV.x-0.5f) + (outUV.y-0.5f)*(outUV.y-0.5f));
 
 	if(radius < 0.35f)
-		color = vec3(Fresnel(1 - value));
+		color = vec4(vec3(Fresnel(1 - value)), 1.0f);
 	else
-		color = vec3(0.0);
+		color = vec4(0.0, 0.0f, 0.0f, 1.0f);
 
-	//color = vec3(1.0);
-	//color = vec3(value);
+	color = vec4(vec3(value), 1.0f);
 }

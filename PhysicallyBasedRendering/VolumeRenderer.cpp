@@ -83,7 +83,7 @@ const float cubeLength = 1.0f;
 
 void VolumeRenderer::Render()
 {
-	UseDefaultFrameBufferObject();
+	UseDefaultFBO();
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 
 	glEnable(GL_DEPTH_TEST);

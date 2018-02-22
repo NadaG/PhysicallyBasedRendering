@@ -207,7 +207,8 @@ void FluidRenderer::Render()
 	// depth, thickness blur 끝
 
 	// quad 그리기
-	UseDefaultFrameBufferObject();
+	UseDefaultFBO();
+	ClearDefaultFBO();
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 
 	surfaceShader->Use();

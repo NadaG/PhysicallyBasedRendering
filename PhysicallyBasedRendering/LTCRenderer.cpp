@@ -2,7 +2,7 @@
 
 void LTCRenderer::InitializeRender()
 {
-	UseDefaultFrameBufferObject();
+	UseDefaultFBO();
 	ltcShader = new ShaderProgram("Quad.vs", "LTC.fs");
 	ltcShader->Use();
 	ltcShader->SetUniform1i("ltc_mat", 0);

@@ -30,7 +30,7 @@ public:
 	void Log(const glm::vec3 vec);
 	void Log(const glm::vec2 vec);
 
-	void Log(const char* format, ...);
+	//void Log(const char* format, ...);
 
 	void LogError();
 

@@ -189,6 +189,8 @@
     <ClCompile Include="SmokeSimulationImporter.cpp" />
     <ClCompile Include="StarBurstRenderer.cpp" />
     <ClCompile Include="StarBurstSceneManager.cpp" />
+    <ClCompile Include="TemporalGlareRenderer.cpp" />
+    <ClCompile Include="TemporalGlareSceneManager.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Texture2D.cpp" />
     <ClCompile Include="TextureCube.cpp" />
@@ -290,6 +292,8 @@
     <ClInclude Include="StarBurstRenderer.h" />
     <ClInclude Include="StarBurstSceneManager.h" />
     <ClInclude Include="RayTracer.cuh" />
+    <ClInclude Include="TemporalGlareRenderer.h" />
+    <ClInclude Include="TemporalGlareSceneManager.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Texture2D.h" />
     <ClInclude Include="TextureCube.h" />

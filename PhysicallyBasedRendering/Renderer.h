@@ -55,7 +55,9 @@ public:
 	virtual void TerminateRender() = 0;
 
 protected:
-	void UseDefaultFrameBufferObject();
+	void UseDefaultFBO();
+	void ClearDefaultFBO();
+
 	void RenderObjects(ShaderProgram* shader, vector<SceneObject> objs);
 	void RenderObjects(ShaderProgram* shader, vector<SceneObject*> objs);
 	void RenderObject(ShaderProgram* shader, SceneObject obj);

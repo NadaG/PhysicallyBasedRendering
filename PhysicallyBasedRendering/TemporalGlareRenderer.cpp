@@ -63,6 +63,12 @@ void TemporalGlareRenderer::InitializeRender()
 	GenerateFibersVAO();
 	GenerateParticlesVAO();
 	GeneratePupilVAO();
+
+	GenerateCosTex();
+	cosFourierTex = ft.fourierTransform2D(cosTex);
+
+	pngExporter.WritePngFile("tmp.png", cosTex);
+	pngExporter.WritePngFile("tmp2.png", cosFourierTex);
 }
 
 void TemporalGlareRenderer::Render()
@@ -99,7 +105,7 @@ void TemporalGlareRenderer::Render()
 	multiplyShader->Use();
 	quad.DrawModel();
 
-	Texture2D outputTex = ft.fourierTransform2D(multipliedTex);
+	//Texture2D outputTex = ft.fourierTransform2D(multipliedTex);
 
 	// TODO texture로부터 png를 그리는 코드를 따로 함수로 빼둔 후
 	// sign texture를 input으로 두고 점 2개만 있는 output image가 나오는지 test 할 것
@@ -114,8 +120,8 @@ void TemporalGlareRenderer::Render()
 
 	if (!writeFileNum)
 	{
-		pngExporter.WritePngFile("psf_before.png", multipliedTex);
-		pngExporter.WritePngFile("psf.png", outputTex);
+		//pngExporter.WritePngFile("psf_before.png", multipliedTex);
+		//pngExporter.WritePngFile("psf.png", outputTex);
 		
 		writeFileNum++;
 	}
@@ -269,5 +275,16 @@ void TemporalGlareRenderer::GenerateParticlesVAO()
 
 void TemporalGlareRenderer::GenerateCosTex()
 {
-	ShaderProgram* cosShader = new ShaderProgram("vvv.vs", "vvvv.fs");
+	SceneObject& quad = sceneManager->quadObj;
+
+	cosTex.LoadTexture(GL_RGBA32F, 1024, 1024, GL_RGBA, GL_FLOAT);
+
+	FrameBufferObject cosFBO;
+	cosFBO.GenFrameBufferObject();
+	cosFBO.BindDefaultDepthBuffer(1024, 1024);
+	cosFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &cosTex);
+
+	ShaderProgram* cosShader = new ShaderProgram("Quad.vs", "Cos.fs");
+	cosShader->Use();
+	quad.DrawModel();
 }

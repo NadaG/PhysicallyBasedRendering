@@ -97,6 +97,9 @@
     <Filter Include="Source Files\FourierTransform">
       <UniqueIdentifier>{12817b2d-33d3-4d70-8ffa-82eab3cbc5cc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader Files\Debug">
+      <UniqueIdentifier>{a5cd879a-26b4-4fd5-992b-10cfa62a6d95}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -368,6 +371,9 @@
     </None>
     <None Include="Multiply.fs">
       <Filter>Shader Files\TemporalGlare</Filter>
+    </None>
+    <None Include="Cos.fs">
+      <Filter>Shader Files\Debug</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

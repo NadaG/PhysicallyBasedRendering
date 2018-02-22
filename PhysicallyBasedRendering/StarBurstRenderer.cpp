@@ -54,13 +54,17 @@ void StarBurstRenderer::InitializeRender()
 	worldMap.LoadTexture(
 		GL_RGB16F,
 		WindowManager::GetInstance()->width,
-		WindowManager::GetInstance()->height);
+		WindowManager::GetInstance()->height,
+		GL_RGB,
+		GL_FLOAT);
 	worldMap.SetParameters(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
 	brightMap.LoadTexture(
 		GL_RGB16F,
 		WindowManager::GetInstance()->width,
-		WindowManager::GetInstance()->height);
+		WindowManager::GetInstance()->height,
+		GL_RGB,
+		GL_FLOAT);
 	brightMap.SetParameters(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
 	worldFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &worldMap);

@@ -201,6 +201,7 @@
   <ItemGroup>
     <None Include="Basic.fs" />
     <None Include="Basic.vs" />
+    <None Include="Cos.fs" />
     <None Include="FresnelDiffraction.fs" />
     <None Include="Multiply.fs" />
     <None Include="Primitive.fs" />

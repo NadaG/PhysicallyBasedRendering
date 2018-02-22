@@ -23,16 +23,6 @@ void Texture::LoadTexture(const GLint& internalformat, const GLsizei& width, con
 	this->height = height;
 }
 
-void Texture::LoadTexture(const GLint& internalformat, const GLsizei& width, const GLsizei& height)
-{
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height, 0, GL_RGB, GL_FLOAT, 0);
-	this->internalformat = internalformat;
-	this->width = width;
-	this->height = height;
-}
-
 void Texture::LoadTexture(const string& s)
 {
 	glGenTextures(1, &texture);

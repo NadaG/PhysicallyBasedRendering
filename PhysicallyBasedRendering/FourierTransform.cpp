@@ -1,6 +1,8 @@
 #include "FourierTransform.h"
 #include "Texture2D.h"
 
+#include "Debug.h"
+
 float * FourierTransform::fourierTransform2D(const int width, const int height, float * f)
 {
 	return nullptr;
@@ -21,23 +23,35 @@ Texture2D FourierTransform::fourierTransform2D(const Texture2D& inputTexture)
 
 	for (int i = 0; i < width * height; ++i)
 	{
+		F[i][0] = 0.0f;
+		F[i][1] = 0.0f;
+
 		f[i][0] = inArray[i * 4];
+		f[i][1] = 0.0f;
 	}
 
 	fftw_plan p = fftw_plan_dft_2d(width, height, f, F, FFTW_FORWARD, FFTW_ESTIMATE);
 	fftw_execute(p);
 	fftw_destroy_plan(p);
 
-	/*F[i][0] = F[i][0] * F[i][0];
-	F[i][0] /= (lambda * lambda * d * d);*/
-
 	for (int i = 0; i < width * height; ++i)
 	{
-		float value = F[i][0] * F[i][0] / ((0.01f*0.1f)*(0.01f*0.1f));
-		outArray[i * 4 + 0] = value;
-		outArray[i * 4 + 1] = value;
-		outArray[i * 4 + 2] = value;
-		outArray[i * 4 + 3] = 1.0f;
+		F[i][0] = F[i][0] / (float)(width*height);
+	}
+
+	for (int i = 0; i < width*height; ++i)
+	{
+		float re = F[i][0];
+		float mag = sqrt(re*re);
+		float value = mag;
+
+		//const int index = (i * 4 + (width*height) / 2) % (width*height);
+		const int index = i * 4;
+
+		outArray[index + 0] = value;
+		outArray[index + 1] = value;
+		outArray[index + 2] = value;
+		outArray[index + 3] = 1.0f;
 	}
 
 	outputTexture.LoadTexture(
@@ -47,6 +61,9 @@ Texture2D FourierTransform::fourierTransform2D(const Texture2D& inputTexture)
 		GL_RGBA, 
 		GL_FLOAT);
 	outputTexture.UpdateTexture(outArray, GL_RGBA, GL_FLOAT);
+
+	/*fftw_free(f);
+	fftw_free(F);*/
 
 	return outputTexture;
 }

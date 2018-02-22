@@ -32,11 +32,6 @@ public:
 	void LoadTexture(const string& s);
 	void LoadTextureDDS(const string& s);
 	void LoadTexture(
-		const GLint& internalformat, 
-		const GLsizei& width, 
-		const GLsizei& height);
-
-	void LoadTexture(
 		const GLint& internalformat,
 		const GLsizei& width,
 		const GLsizei& height,

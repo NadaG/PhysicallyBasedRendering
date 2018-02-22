@@ -73,11 +73,10 @@ void PNGExporter::WritePngFile(const string fileName, float* data, const int wid
 	{
 		for (int j = 0; j < width; ++j)
 		{
-			rawData[i][j * 4 + 0] = (png_byte)floor(data[(i * width + j) * 4 + 0] * 255.0f);
-			rawData[i][j * 4 + 1] = (png_byte)floor(data[(i * width + j) * 4 + 0] * 255.0f);
-			rawData[i][j * 4 + 2] = (png_byte)floor(data[(i * width + j) * 4 + 0] * 255.0f);
-			// 응~ 불투명
-			rawData[i][j * 4 + 3] = 255;
+			rawData[height - i - 1][j * 4 + 0] = (png_byte)floor(data[(i * width + j) * 4 + 0] * 255.0f);
+			rawData[height - i - 1][j * 4 + 1] = (png_byte)floor(data[(i * width + j) * 4 + 1] * 255.0f);
+			rawData[height - i - 1][j * 4 + 2] = (png_byte)floor(data[(i * width + j) * 4 + 2] * 255.0f);
+			rawData[height - i - 1][j * 4 + 3] = 255;
 		}
 	}
 

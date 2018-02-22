@@ -143,7 +143,7 @@ __device__ Ray GenerateCameraRay(int y, int x)
 
 	//// -1 ~ 1
 	ray.origin = make_float3(0.0f, 0.0f, 0.0f);
-	ray.dir = normalize(make_float3(xx, -yy, -1.0));
+	ray.dir = normalize(make_float3(xx, yy, -1.0));
 
 	//// view matrix의 translate 성분만 가져옴
 	//ray.origin = (-view*vec4(vec3(0.0), 1)).xyz;
@@ -161,13 +161,17 @@ __global__ void RayTraceD(float4* data)
 	Ray ray = GenerateCameraRay(blockIdx.x, threadIdx.x);
 
 	Sphere sphere;
-	sphere.origin = make_float3(0.0f, 0.0f, -5.0f);
+	sphere.origin = make_float3(0.0f, 0.0f, -2.0f);
 	sphere.radius = 0.1f;
+
+	Sphere sphere2;
+	sphere2.origin = make_float3(1.5f, 0.0f, -2.0f);
+	sphere2.radius = 0.2f;
 
 	Triangle triangle;
 	triangle.v0 = make_float3(0.0f, 0.0f, -5.0f);
-	triangle.v1 = make_float3(3.0f, 0.0f, -5.0f);
-	triangle.v2 = make_float3(1.0f, 3.0f, -5.0f);
+	triangle.v1 = make_float3(1.0f, 0.0f, -5.0f);
+	triangle.v2 = make_float3(1.0f, 1.0f, -5.0f);
 
 	float distToSphere, distToTriangle;
 
@@ -189,24 +193,34 @@ __global__ void RayTraceD(float4* data)
 
 		float3 col = ambient + diffuse + specular;
 
-		data[x].x = col.x;
-		data[x].y = col.y;
-		data[x].z = col.z;
+		data[x] = make_float4(col.x, col.y, col.z, 1.0f);
+	}
+	else if (RaySphereIntersect(ray, sphere2, distToSphere))
+	{
+		float3 hitPoint = ray.origin + ray.dir * distToSphere;
+		float3 L = normalize(lightPos - hitPoint);
+		float3 N = normalize(hitPoint - sphere2.origin);
+
+		float3 ambient = make_float3(0.2, 0.2, 0.2);
+
+		float3 diffuse = make_float3(0.1, 0.4, 0.2) * mymax(0, dot(N, L));
+
+		float3 V = -ray.dir;
+
+		float3 specular = make_float3(0.1, 0.4, 0.2) * mymax(0, pow(mymax(dot(normalize(reflect(-L, N)), V), 0.0), 16));
+
+		float3 col = ambient + diffuse + specular;
+
+		data[x] = make_float4(col.x, col.y, col.z, 1.0f);
 	}
 	else if (RayTriangleIntersect(ray, triangle, distToTriangle))
 	{
-		data[x].x = 1.0f;
-		data[x].y = 0.0f;
-		data[x].z = 0.0f;
+		data[x] = make_float4(1.0f, 0.0f, 0.0f, 1.0f);
 	}
 	else
 	{
-		data[x].x = 0.0f;
-		data[x].y = 0.0f;
-		data[x].z = 0.0f;
+		data[x] = make_float4(0.0f, 0.0f, 0.0f, 1.0f);
 	}
-	
-	data[x].w = 1.0f;
 }
 
 void RayTrace(float4* data)

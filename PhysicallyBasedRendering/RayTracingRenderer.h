@@ -21,11 +21,9 @@ private:
 
 	int writeFileNum = 0;
 
-	GLuint testPBO;
+	GLuint rayTracePBO;
 
-	FrameBufferObject rayTracingFBO;
 	Texture2D rayTracingTex;
 
-	ShaderProgram* rayTracingShader;
 	PNGExporter pngExporter;
 };

@@ -37,8 +37,12 @@ void RayTracingRenderer::InitializeRender()
 	// 각 픽셀마다 rgba
 	cudaMemset(output, 0, WindowManager::GetInstance()->width * WindowManager::GetInstance()->height);
 
+	Matrix44 m;
+
+	m.m[0][3] = -1.0f;
+
 	// 여기서 render가 다 일어남
-	RayTrace(output);
+	RayTrace(output, m);
 
 	cudaGraphicsUnmapResources(1, &cuda_pbo_resource, 0);
 	// render end // 

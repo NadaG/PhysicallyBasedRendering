@@ -3,6 +3,7 @@
 #include <cuda_runtime.h>
 #include <stdio.h>
 
+#include <math_constants.h>
 #include <math.h>
 
 struct Ray
@@ -23,6 +24,14 @@ struct Triangle
 	float3 v1;
 	float3 v2;
 };
+
+struct Matrix44
+{
+	float m[4][4];
+};
+
+const int WINDOW_HEIGHT = 1024;
+const int WINDOW_WIDTH = 1024;
 
 __device__ float3 operator+(const float3& a, const float3& b)
 {
@@ -47,6 +56,15 @@ __device__ float3 operator*(const float3& a, const float& b)
 __device__ float3 operator*(const float& a, const float3& b)
 {
 	return b * a;
+}
+
+__device__ float4 operator*(const float4& a, const Matrix44& mat)
+{
+	return make_float4(
+		mat.m[0][0] * a.x + mat.m[0][1] * a.y + mat.m[0][2] * a.z + mat.m[0][3] * a.w,
+		mat.m[1][0] * a.x + mat.m[1][1] * a.y + mat.m[1][2] * a.z + mat.m[1][3] * a.w,
+		mat.m[2][0] * a.x + mat.m[2][1] * a.y + mat.m[2][2] * a.z + mat.m[2][3] * a.w,
+		mat.m[3][0] * a.x + mat.m[3][1] * a.y + mat.m[3][2] * a.z + mat.m[3][3] * a.w);
 }
 
 __device__ float mymax(const float x, const float y)
@@ -77,6 +95,10 @@ __device__ float3 normalize(float3 v)
 	normalizedV.y = v.y / length;
 	normalizedV.z = v.z / length;
 	return normalizedV;
+}
+
+__device__ Matrix44 operator-(const Matrix44& mat)
+{
 }
 
 __device__ bool RaySphereIntersect(Ray ray, Sphere sphere, float& dist)
@@ -138,8 +160,16 @@ __device__ Ray GenerateCameraRay(int y, int x)
 {
 	Ray ray;
 
-	float yy = ((float)y / (float)1024 - 0.5f) * 2.0f;
-	float xx = ((float)x / (float)1024 - 0.5f) * 2.0f;
+	float NDCy = (y + 0.5f) / WINDOW_HEIGHT;
+	float NDCx = (x + 0.5f) / WINDOW_WIDTH;
+
+	float aspectRatio = WINDOW_WIDTH / WINDOW_HEIGHT;
+
+	float fov = 45.0f;
+
+	float xx = (((float)(x + 0.5f) / (float)WINDOW_WIDTH) * 2.0f - 1.0f) * 
+		tan(fov / 2 * 3.141592653f / 180.0f) * aspectRatio;
+	float yy = (1.0f - ((float)(y + 0.5f) / (float)WINDOW_HEIGHT) * 2.0f) * tan(fov / 2 * 3.141592653f / 180.0f);
 
 	//// -1 ~ 1
 	ray.origin = make_float3(0.0f, 0.0f, 0.0f);
@@ -154,19 +184,20 @@ __device__ Ray GenerateCameraRay(int y, int x)
 	return ray;
 }
 
-__global__ void RayTraceD(float4* data)
+__global__ void RayTraceD(float4* data, Matrix44 mat)
 {
 	unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
 
 	Ray ray = GenerateCameraRay(blockIdx.x, threadIdx.x);
 
 	Sphere sphere;
-	sphere.origin = make_float3(0.0f, 0.0f, -2.0f);
+	float4 translatedPos = make_float4(0.0f, 0.0f, -2.0f, 1.0f);
+	sphere.origin = make_float3(translatedPos.x, translatedPos.y, translatedPos.z);
 	sphere.radius = 0.1f;
 
 	Sphere sphere2;
-	sphere2.origin = make_float3(1.5f, 0.0f, -2.0f);
-	sphere2.radius = 0.2f;
+	sphere2.origin = make_float3(10.0f, 0.0f, -20.0f);
+	sphere2.radius = 5.0f;
 
 	Triangle triangle;
 	triangle.v0 = make_float3(0.0f, 0.0f, -5.0f);
@@ -221,9 +252,11 @@ __global__ void RayTraceD(float4* data)
 	{
 		data[x] = make_float4(0.0f, 0.0f, 0.0f, 1.0f);
 	}
+
+	
 }
 
-void RayTrace(float4* data)
+void RayTrace(float4* data, Matrix44 mat)
 {
-	RayTraceD << <1024, 1024 >> > (data);
+	RayTraceD << <WINDOW_HEIGHT, WINDOW_WIDTH >> > (data, mat);
 }

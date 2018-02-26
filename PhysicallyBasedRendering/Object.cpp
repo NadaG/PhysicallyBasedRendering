@@ -27,12 +27,30 @@ const glm::mat4 Object::GetModelMatrix() const
 
 void Object::Translate(const glm::vec3& vec)
 {
-	this->positionVector += vec;
+	this->positionVector += glm::fmat3(rotationMatrix) * vec;
 }
 
+// radians
+// z y x
 void Object::Rotate(const glm::vec3& vec, float angle)
 {
-	this->rotationMatrix = glm::rotate(rotationMatrix, angle, vec);
+	glm::vec3 v = glm::inverse(glm::fmat3(rotationMatrix)) * vec;
+	this->rotationMatrix = glm::rotate(rotationMatrix, angle, v);
+}
+
+void Object::RotateX(const float angle)
+{
+	this->rotateX += angle;
+}
+
+void Object::RotateY(const float angle)
+{
+	this->rotateY += angle;
+}
+
+void Object::RotateZ(const float angle)
+{
+	this->rotateZ += angle;
 }
 
 void Object::Scale(const glm::vec3& vec)

@@ -19,6 +19,10 @@ public:
 
 	void Translate(const glm::vec3& vec);
 	void Rotate(const glm::vec3& vec, float angle);
+	void RotateX(const float angle);
+	void RotateY(const float angle);
+	void RotateZ(const float angle);
+
 	void Scale(const glm::vec3& vec);
 
 	void SetRotation(const glm::mat4& rotMat) { rotationMatrix = rotMat; }
@@ -38,5 +42,10 @@ private:
 
 	glm::vec3 scaleVector;
 	glm::mat4 rotationMatrix;
+
+	float rotateX;
+	float rotateY;
+	float rotateZ;
+
 	glm::vec3 positionVector;
 };

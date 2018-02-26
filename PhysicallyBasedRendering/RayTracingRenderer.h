@@ -21,6 +21,10 @@ private:
 
 	int writeFileNum = 0;
 
+	glm::vec3 cameraInitPos;
+
+	cudaGraphicsResource* cuda_pbo_resource;
+
 	GLuint rayTracePBO;
 
 	Texture2D rayTracingTex;

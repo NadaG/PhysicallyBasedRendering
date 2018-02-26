@@ -1,6 +1,20 @@
+#pragma once
 
-struct float4;
-struct float3;
-struct Matrix44;
+#include <glm\glm.hpp>
+#include <cuda_runtime.h>
+#include <glm\gtc\matrix_transform.hpp>
 
-void RayTrace(float4* data, Matrix44 mat);
+using glm::vec3;
+using glm::vec4;
+using glm::normalize;
+using glm::cross;
+using glm::dot;
+
+struct Triangle
+{
+	glm::vec3 v0;
+	glm::vec3 v1;
+	glm::vec3 v2;
+};
+
+void RayTrace(glm::vec4* data, glm::mat4 mat);

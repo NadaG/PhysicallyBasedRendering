@@ -47,6 +47,8 @@ private:
 	Texture2D fresnelDiffractionTex;
 	Texture2D multipliedTex;
 
+	Texture2D ftMultipliedTex;
+
 	VertexArrayObject lensFibersVAO;
 	VertexArrayObject lensPupilVAO;
 	VertexArrayObject lensParticlesVAO;

@@ -60,15 +60,25 @@ void TemporalGlareRenderer::InitializeRender()
 	multipliedFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &multipliedTex);
 	multipliedFBO.DrawBuffers();
 
+	ftMultipliedTex.LoadTexture(
+		GL_RGBA32F,
+		WindowManager::GetInstance()->width,
+		WindowManager::GetInstance()->height,
+		GL_RGBA,
+		GL_FLOAT
+	);
+	ftMultipliedTex.SetParameters(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
 	GenerateFibersVAO();
 	GenerateParticlesVAO();
 	GeneratePupilVAO();
 
+	//
 	GenerateCosTex();
 	cosFourierTex = ft.fourierTransform2D(cosTex);
 
-	pngExporter.WritePngFile("tmp.png", cosTex);
-	pngExporter.WritePngFile("tmp2.png", cosFourierTex);
+	pngExporter.WritePngFile("cos_before.png", cosTex);
+	pngExporter.WritePngFile("cos_after.png", cosFourierTex);
 }
 
 void TemporalGlareRenderer::Render()
@@ -90,11 +100,6 @@ void TemporalGlareRenderer::Render()
 	DrawWithVAO(lensParticlesVAO, lensParticlesNum);
 	glEnable(GL_DEPTH_TEST);
 
-	/*fresnelDiffractionFBO.Use();
-	fresnelDiffractionFBO.Clear(0.0f, 0.0f, 0.0f, 0.0f);
-	fresnelDiffractionShader->Use();
-	quad.DrawModel();*/
-
 	multipliedFBO.Use();
 	multipliedFBO.Clear(0.0f, 0.0f, 0.0f, 0.0f);
 	multiplyShader->Use();
@@ -105,23 +110,12 @@ void TemporalGlareRenderer::Render()
 	multiplyShader->Use();
 	quad.DrawModel();
 
-	//Texture2D outputTex = ft.fourierTransform2D(multipliedTex);
-
-	// TODO texture로부터 png를 그리는 코드를 따로 함수로 빼둔 후
-	// sign texture를 input으로 두고 점 2개만 있는 output image가 나오는지 test 할 것
-	// height, width, rgb 순으로 데이터가 모여있음
-
-	// normalization
-	/*for (int i = 0; i < width * height; ++i)
-	{
-	F[i][0] = F[i][0] * F[i][0];
-	F[i][0] /= (lambda * lambda * d * d);
-	}*/
-
 	if (!writeFileNum)
 	{
-		//pngExporter.WritePngFile("psf_before.png", multipliedTex);
-		//pngExporter.WritePngFile("psf.png", outputTex);
+		ftMultipliedTex = ft.fourierTransform2D(multipliedTex);
+
+		pngExporter.WritePngFile("psf_before.png", multipliedTex);
+		pngExporter.WritePngFile("psf_after.png", ftMultipliedTex);
 		
 		writeFileNum++;
 	}

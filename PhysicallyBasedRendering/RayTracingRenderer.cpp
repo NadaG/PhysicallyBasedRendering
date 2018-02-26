@@ -47,13 +47,10 @@ void RayTracingRenderer::Render()
 	cudaGraphicsResourceGetMappedPointer((void**)&output, &num_bytes, cuda_pbo_resource);
 
 	// 각 픽셀마다 rgba
-	cudaMemset(output, 0, WindowManager::GetInstance()->width * WindowManager::GetInstance()->height);
+	cudaMemset(output, 0, WindowManager::GetInstance()->width * WindowManager::GetInstance()->height * 16);
 
 	glm::mat4 view;
-	//view = glm::lookAt(
-		//camera->GetWorldPosition(), 
-		//camera->GetWorldPosition() - glm::vec3(camera->GetRotate() * glm::vec4(cameraInitPos, 0.0f)), 
-		//glm::vec3(glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)));
+	// 원래 이렇게 써야함...
 	view = glm::inverse(camera->GetModelMatrix());
 
 	// 여기서 render가 다 일어남

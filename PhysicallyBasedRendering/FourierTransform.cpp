@@ -60,7 +60,7 @@ Texture2D FourierTransform::fourierTransform2D(const Texture2D& inputTexture)
 	////////////////////////////////////////////////////////////////////////////////
 
 	////////////////////////////////////////////////////////////////////////////////
-	for (int i = 0; i < width*height; ++i)
+	for (int i = 0; i < width * height; ++i)
 	{
 		float re = F[i][0] * F[i][0] / (0.1f*0.1f*0.1f*0.1f);
 		float value = re;
@@ -77,12 +77,16 @@ Texture2D FourierTransform::fourierTransform2D(const Texture2D& inputTexture)
 			index = (index + width * height * 2);
 		}
 
+		// 오른쪽이라면
 		if (index % (width * 4) > width * 2)
 		{
-			index = (index + width * 4) % (width * 2);
+			index = index - width * 2;
+			//value = 0.0f;
 		}
 		else
 		{
+			if (index + width * 2 < index*width*height)
+				index = index + width * 2;
 			//value = 0.0f;
 		}
 

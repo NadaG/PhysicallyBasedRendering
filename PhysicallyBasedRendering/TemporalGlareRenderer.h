@@ -48,6 +48,7 @@ private:
 	Texture2D multipliedTex;
 
 	Texture2D ftMultipliedTex;
+	Texture2D iftMultipliedTex;
 
 	VertexArrayObject lensFibersVAO;
 	VertexArrayObject lensPupilVAO;
@@ -72,5 +73,5 @@ private:
 	const float lensFiberOutRadius = 5.0f;
 
 	const float lambda = 0.1f;
-	const float d = 0.01f;
+	const float d = 0.1f;
 };

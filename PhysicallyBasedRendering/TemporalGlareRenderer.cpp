@@ -69,13 +69,22 @@ void TemporalGlareRenderer::InitializeRender()
 	);
 	ftMultipliedTex.SetParameters(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
+	iftMultipliedTex.LoadTexture(
+		GL_RGBA32F,
+		WindowManager::GetInstance()->width,
+		WindowManager::GetInstance()->height,
+		GL_RGBA,
+		GL_FLOAT
+	);
+	iftMultipliedTex.SetParameters(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
 	GenerateFibersVAO();
 	GenerateParticlesVAO();
 	GeneratePupilVAO();
 
 	//
 	GenerateCosTex();
-	cosFourierTex = ft.fourierTransform2D(cosTex);
+	cosFourierTex = ft.fourierTransform2D(cosTex, 1.0f, false);
 
 	pngExporter.WritePngFile("cos_before.png", cosTex);
 	pngExporter.WritePngFile("cos_after.png", cosFourierTex);
@@ -112,10 +121,12 @@ void TemporalGlareRenderer::Render()
 
 	if (!writeFileNum)
 	{
-		ftMultipliedTex = ft.fourierTransform2D(multipliedTex);
+		ftMultipliedTex = ft.fourierTransform2D(multipliedTex, d*lambda, false);
+		iftMultipliedTex = ft.fourierTransform2D(ftMultipliedTex, d*lambda, true);
 
 		pngExporter.WritePngFile("psf_before.png", multipliedTex);
 		pngExporter.WritePngFile("psf_after.png", ftMultipliedTex);
+		pngExporter.WritePngFile("psf_after_inverse.png", iftMultipliedTex);
 		
 		writeFileNum++;
 	}

@@ -3,12 +3,12 @@
 
 #include "Debug.h"
 
-float * FourierTransform::fourierTransform2D(const int width, const int height, float * f)
+float* FourierTransform::fourierTransform2D(const int width, const int height, float* f, const bool isInverse)
 {
 	return nullptr;
 }
 
-Texture2D FourierTransform::fourierTransform2D(const Texture2D& inputTexture)
+Texture2D FourierTransform::fourierTransform2D(const Texture2D& inputTexture, const float scalingFactor, const bool isInverse)
 {
 	Texture2D outputTexture;
 
@@ -21,6 +21,7 @@ Texture2D FourierTransform::fourierTransform2D(const Texture2D& inputTexture)
 	fftw_complex* f = new fftw_complex[width * height];
 	fftw_complex* F = new fftw_complex[width * height];
 
+	// 초기화
 	for (int i = 0; i < width * height; ++i)
 	{
 		F[i][0] = 0.0f;
@@ -30,9 +31,10 @@ Texture2D FourierTransform::fourierTransform2D(const Texture2D& inputTexture)
 		f[i][1] = 0.0f;
 	}
 
-	fftw_plan p = fftw_plan_dft_2d(width, height, f, F, FFTW_FORWARD, FFTW_ESTIMATE);
+	fftw_plan p = fftw_plan_dft_2d(width, height, f, F, isInverse ? FFTW_BACKWARD : FFTW_FORWARD, FFTW_ESTIMATE);
 	fftw_execute(p);
 	fftw_destroy_plan(p);
+	fftw_cleanup();
 
 	////////////////////////////////////////////////////////////////////////////////
 	//for (int i = 0; i < width * height; ++i)
@@ -62,33 +64,46 @@ Texture2D FourierTransform::fourierTransform2D(const Texture2D& inputTexture)
 	////////////////////////////////////////////////////////////////////////////////
 	for (int i = 0; i < width * height; ++i)
 	{
-		float re = F[i][0] * F[i][0] / (0.1f*0.1f*0.1f*0.1f);
+		int y = i / width;
+		int x = i % width;
+
+		x = (x + width / 2) % width;
+		y = (y + height / 2) % height;
+
+		int newi = y * width + x;
+
+		// temporal glare에 한정된 코드
+		float re = F[newi][0] * F[newi][0] / (scalingFactor * scalingFactor);
+
+		if (isInverse)
+			re /= width*height;
+
 		float value = re;
 
 		int index = i * 4;
 
-		// 위쪽이라면
-		if (index > width*height * 2)
-		{
-			index = (index + width * height * 2) % (width*height * 4);
-		}
-		else
-		{
-			index = (index + width * height * 2);
-		}
+		//// 위쪽이라면
+		//if (index > width*height * 2)
+		//{
+		//	index = (index + width * height * 2) % (width*height * 4);
+		//}
+		//else
+		//{
+		//	index = (index + width * height * 2);
+		//}
 
-		// 오른쪽이라면
-		if (index % (width * 4) > width * 2)
-		{
-			index = index - width * 2;
-			//value = 0.0f;
-		}
-		else
-		{
-			if (index + width * 2 < index*width*height)
-				index = index + width * 2;
-			//value = 0.0f;
-		}
+		//// 오른쪽이라면
+		//if (index % (width * 4) > width * 2)
+		//{
+		//	index = index - width * 2;
+		//	//value = 0.0f;
+		//}
+		//else
+		//{
+		//	if (index + width * 2 < index*width*height)
+		//		index = index + width * 2;
+		//	//value = 0.0f;
+		//}
 
 		outArray[index + 0] = value;
 		outArray[index + 1] = value;
@@ -105,20 +120,11 @@ Texture2D FourierTransform::fourierTransform2D(const Texture2D& inputTexture)
 		GL_FLOAT);
 	outputTexture.UpdateTexture(outArray, GL_RGBA, GL_FLOAT);
 
-	/*fftw_free(f);
-	fftw_free(F);*/
+	delete[] f;
+	delete[] F;
 
-	return outputTexture;
-}
-
-float * FourierTransform::InverseFourierTransform2D(const int width, const int height, float * F)
-{
-	return nullptr;
-}
-
-Texture2D FourierTransform::InverseFourierTransform2D(const Texture2D& inputTexture)
-{
-	Texture2D outputTexture;
+	delete[] inArray;
+	delete[] outArray;
 
 	return outputTexture;
 }

@@ -104,7 +104,7 @@ __device__ Ray GenerateCameraRay(int y, int x, glm::mat4 view)
 	return ray;
 }
 
-__global__ void RayTraceD(glm::vec4* data, glm::mat4 view)
+__global__ void RayTraceD(glm::vec4* data, glm::mat4 view, Triangle* triangles)
 {
 	unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -165,7 +165,7 @@ __global__ void RayTraceD(glm::vec4* data, glm::mat4 view)
 	}
 	else if (RayTriangleIntersect(ray, triangle, distToTriangle))
 	{
-		//data[x] = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+		data[x] = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 	}
 	else
 	{
@@ -173,7 +173,7 @@ __global__ void RayTraceD(glm::vec4* data, glm::mat4 view)
 	}
 }
 
-void RayTrace(glm::vec4* data, glm::mat4 view)
+void RayTrace(glm::vec4* data, glm::mat4 view, Triangle* triangles)
 {
-	RayTraceD << <WINDOW_HEIGHT, WINDOW_WIDTH >> > (data, view);
+	RayTraceD << <WINDOW_HEIGHT, WINDOW_WIDTH >> > (data, view, triangles);
 }

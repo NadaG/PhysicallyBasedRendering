@@ -17,4 +17,4 @@ struct Triangle
 	glm::vec3 v2;
 };
 
-void RayTrace(glm::vec4* data, glm::mat4 mat);
+void RayTrace(glm::vec4* data, glm::mat4 mat, Triangle* triangles);

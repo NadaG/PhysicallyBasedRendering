@@ -53,8 +53,17 @@ void RayTracingRenderer::Render()
 	// 원래 이렇게 써야함...
 	view = glm::inverse(camera->GetModelMatrix());
 
+	Triangle* triangles = new Triangle[2];
+	triangles[0].v0 = glm::vec3();
+	triangles[0].v1 = glm::vec3(1.0f, 0.0f, 0.0f);
+	triangles[0].v2 = glm::vec3(0.0f, 1.0f, 0.0f);
+
+	triangles[1].v0 = glm::vec3(-0.5f, 0.0f, 0.0f);
+	triangles[1].v1 = glm::vec3(-1.0f, 0.0f, 0.0f);
+	triangles[1].v2 = glm::vec3(0.0f, -1.0f, 0.0f);
+
 	// 여기서 render가 다 일어남
-	RayTrace(output, view);
+	RayTrace(output, view, triangles);
 
 	cudaGraphicsUnmapResources(1, &cuda_pbo_resource, 0);
 

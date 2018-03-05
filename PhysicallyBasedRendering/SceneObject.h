@@ -23,6 +23,8 @@ public:
 	void Delete() override { Object::Delete(); model.Delete(); }
 	// 딱히 Update를 override할 필요가 없었음
 
+	std::vector<Triangle> GetTriangles() const;
+
 private:
 
 	// To Refacto 이거는 확실히 바꿔야 함

@@ -5,6 +5,8 @@
 #include "StarBurstRenderer.h"
 #include "RayTracingRenderer.h"
 #include "TemporalGlareRenderer.h"
+#include "LectureSceneRenderer.h"
+
 #include "WindowManager.h"
 #include "Debug.h"
 #include "RayTracer.cuh"
@@ -19,7 +21,9 @@ enum Scene
 	SMOKE_SCENE = 3,
 	STARBURST_SCENE = 4,
 	TEMPORALGLARE_SCENE = 5,
-	RAYTRACING_SCENE = 6
+	RAYTRACING_SCENE = 6,
+
+	FOR_LECTURE_SCENE = 100
 };
 
 // TODO movement 셋팅하고 사용하는 부분 너무 복잡함, 함수로 빼내던가 해야함
@@ -98,6 +102,12 @@ int main(int argc, char **argv)
 	{
 		sceneManager = new RayTracingSceneManager();
 		renderer = new RayTracingRenderer(sceneManager);
+		break;
+	}
+	case FOR_LECTURE_SCENE:
+	{
+		sceneManager = new LectureSceneManager();
+		renderer = new LectureSceneRenderer(sceneManager);
 		break;
 	}
 	default:

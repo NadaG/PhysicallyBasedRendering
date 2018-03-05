@@ -9,6 +9,7 @@
 #include<cstdio>
 #include<vector>
 
+#include "RayTracer.cuh"
 #include "VertexArrayObject.h"
 
 using std::string;
@@ -40,6 +41,8 @@ private:
 
 	glm::vec3 albedo;
 
+	std::vector<Triangle> triangles;
+
 	//GLuint vao, vbo, ibo;
 	VertexArrayObject vao;
 
@@ -48,7 +51,7 @@ public:
 	virtual ~Mesh();
 
 	void SetMesh(aiMesh* mesh);
-
+	
 	// file name을 통해 mesh를 생성
 	void LoadMesh(const string& fileName);
 	void LoadMesh(MeshType meshType);
@@ -61,8 +64,5 @@ public:
 
 	const glm::vec3& GetAlbedo() { return albedo; }
 
-	const Vertex& GetVertice(int index) { return vertices[index]; }
-	const int& GetVertexNum() { return vertexNum; }
-	GLuint* GetIndices() { return indices; }
-	const GLuint& GetIndexNum() { return indexNum; }
+	std::vector<Triangle> GetTriangles() const;
 };

@@ -4,6 +4,11 @@ void RayTracingSceneManager::InitializeObjects()
 {
 	quadObj.LoadModel(QUAD);
 	movingCamera->Translate(glm::vec3(0.0f, 0.0f, 20.0f));
+
+	SceneObject nanosuit;
+	nanosuit.LoadModel("Obj/torus.obj");
+	
+	sceneObjs.push_back(nanosuit);
 }
 
 void RayTracingSceneManager::Update()

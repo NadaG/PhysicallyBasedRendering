@@ -3,6 +3,7 @@
 #include <glm\glm.hpp>
 #include <cuda_runtime.h>
 #include <glm\gtc\matrix_transform.hpp>
+#include <vector>
 
 using glm::vec3;
 using glm::vec4;
@@ -17,4 +18,4 @@ struct Triangle
 	glm::vec3 v2;
 };
 
-void RayTrace(glm::vec4* data, glm::mat4 mat, Triangle* triangles);
+void RayTrace(glm::vec4* data, glm::mat4 mat, const std::vector<Triangle> &triangles);

@@ -121,8 +121,10 @@ void TemporalGlareRenderer::Render()
 
 	if (!writeFileNum)
 	{
-		ftMultipliedTex = ft.fourierTransform2D(multipliedTex, d*lambda, false);
-		iftMultipliedTex = ft.fourierTransform2D(ftMultipliedTex, d*lambda, true);
+		/*ftMultipliedTex = ft.fourierTransform2D(multipliedTex, d*lambda, false);
+		iftMultipliedTex = ft.fourierTransform2D(ftMultipliedTex, d*lambda, true);*/
+		ftMultipliedTex = ft.fourierTransform2D(multipliedTex, 1000.0f, false);
+		iftMultipliedTex = ft.fourierTransform2D(ftMultipliedTex, 1000.0f, true);
 
 		pngExporter.WritePngFile("psf_before.png", multipliedTex);
 		pngExporter.WritePngFile("psf_after.png", ftMultipliedTex);

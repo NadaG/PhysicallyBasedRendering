@@ -3,6 +3,8 @@
 
 #include "Debug.h"
 
+#include <glm/glm.hpp>
+
 float* FourierTransform::fourierTransform2D(const int width, const int height, float* f, const bool isInverse)
 {
 	return nullptr;
@@ -105,9 +107,12 @@ Texture2D FourierTransform::fourierTransform2D(const Texture2D& inputTexture, co
 		//	//value = 0.0f;
 		//}
 
-		outArray[index + 0] = value;
-		outArray[index + 1] = value;
-		outArray[index + 2] = value;
+		//outArray[index + 0] = value;
+		//outArray[index + 1] = value;
+		//outArray[index + 2] = value;
+		outArray[index + 0] = glm::clamp(value, 0.0f, 1.0f);
+		outArray[index + 1] = glm::clamp(value, 0.0f, 1.0f);
+		outArray[index + 2] = glm::clamp(value, 0.0f, 1.0f);
 		outArray[index + 3] = 1.0f;
 	}
 	////////////////////////////////////////////////////////////////////////////////

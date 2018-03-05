@@ -187,6 +187,10 @@
     <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="SmokeSceneManager.cpp" />
     <ClCompile Include="SmokeSimulationImporter.cpp" />
+    <ClCompile Include="MATRIX.cpp" />
+    <ClCompile Include="LectureSceneManager.cpp" />
+    <ClCompile Include="LectureSceneRenderer.cpp" />
+    <ClCompile Include="VECTOR.cpp" />
     <ClCompile Include="StarBurstRenderer.cpp" />
     <ClCompile Include="StarBurstSceneManager.cpp" />
     <ClCompile Include="TemporalGlareRenderer.cpp" />
@@ -265,6 +269,10 @@
     <ClInclude Include="FluidSimulationImporter.h" />
     <ClInclude Include="FourierTransform.h" />
     <ClInclude Include="FrameBufferObject.h" />
+    <ClInclude Include="LectureSceneRenderer.h" />
+    <ClInclude Include="LectureSceneManager.h" />
+    <ClInclude Include="MATRIX.h" />
+    <ClInclude Include="VECTOR.h" />
     <ClInclude Include="LightMovement.h" />
     <ClInclude Include="LTCRenderer.h" />
     <ClInclude Include="LTCSceneManager.h" />

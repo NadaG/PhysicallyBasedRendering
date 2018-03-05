@@ -13,6 +13,8 @@ public:
 
 	void Delete();
 
+	std::vector<Triangle> GetTriangles() const;
+
 private:
 
 	unsigned int* meshMaterialIndex;

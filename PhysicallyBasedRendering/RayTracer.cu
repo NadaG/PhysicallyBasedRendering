@@ -6,6 +6,7 @@
 #include <glm\gtc\matrix_transform.hpp>
 #include <math_constants.h>
 #include <math.h>
+#include <thrust\device_vector.h>
 
 struct Ray
 {
@@ -72,6 +73,7 @@ __device__ bool RayTriangleIntersect(Ray ray, Triangle triangle, float& dist)
 
 	float t = dot(v0v2, qvec) * invDet;
 
+
 	return true;
 }
 
@@ -104,7 +106,7 @@ __device__ Ray GenerateCameraRay(int y, int x, glm::mat4 view)
 	return ray;
 }
 
-__global__ void RayTraceD(glm::vec4* data, glm::mat4 view, Triangle* triangles)
+__global__ void RayTraceD(glm::vec4* data, glm::mat4 view, Triangle* triangles, int triangleNum)
 {
 	unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -123,11 +125,44 @@ __global__ void RayTraceD(glm::vec4* data, glm::mat4 view, Triangle* triangles)
 	triangle.v1 = glm::vec3(1.0f, 0.0f, -5.0f);
 	triangle.v2 = glm::vec3(1.0f, 1.0f, -5.0f);
 
-	float distToSphere, distToTriangle;
+	float distToTriangle;
+	float minDistToTriangle = 99999999.0f;
 
 	glm::vec3 lightPos = glm::vec3(10.0f, 0.0f, 0.0f);
 
-	if (RaySphereIntersect(ray, sphere, distToSphere))
+	data[x] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+	for (int i = 0; i < triangleNum; i++)
+	{
+		if (RayTriangleIntersect(ray, triangles[i], distToTriangle))
+		{
+			if (true)
+			{
+				minDistToTriangle = distToTriangle;
+				glm::vec3 hitPoint = ray.origin + ray.dir * distToTriangle;
+				glm::vec3 L = glm::normalize(lightPos - hitPoint);
+				glm::vec3 N = normalize(cross(triangles[i].v2 - triangles[i].v0, triangles[i].v1 - triangles[i].v0));
+
+				glm::vec3 ambient = glm::vec3(0.2, 0.2, 0.2);
+
+				glm::vec3 diffuse = glm::vec3(0.1, 0.8, 0.2) * glm::max(0.0f, dot(N, L));
+
+				glm::vec3 V = -ray.dir;
+
+				glm::vec3 specular = glm::vec3(0.1, 0.8, 0.2) * glm::max(0.0f, pow(glm::max(dot(normalize(reflect(-L, N)), V), 0.0f), 16));
+
+				glm::vec3 col = ambient + diffuse + specular;
+
+				data[x] = glm::vec4(col.x, col.y, col.z, 1.0f);
+			}
+			/*else
+			{
+				data[x] = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+			}*/
+		}
+	}
+
+	/*if (RaySphereIntersect(ray, sphere, distToSphere))
 	{
 		glm::vec3 hitPoint = ray.origin + ray.dir * distToSphere;
 		glm::vec3 L = glm::normalize(lightPos - hitPoint);
@@ -170,10 +205,13 @@ __global__ void RayTraceD(glm::vec4* data, glm::mat4 view, Triangle* triangles)
 	else
 	{
 		data[x] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-	}
+	}*/
 }
 
-void RayTrace(glm::vec4* data, glm::mat4 view, Triangle* triangles)
+//void RayTrace(glm::vec4* data, glm::mat4 view, Triangle* triangles, int triangleNum)
+void RayTrace(glm::vec4* data, glm::mat4 view, const std::vector<Triangle> &triangles)
 {
-	RayTraceD << <WINDOW_HEIGHT, WINDOW_WIDTH >> > (data, view, triangles);
+	thrust::device_vector<Triangle> t = triangles;
+
+	RayTraceD << <WINDOW_HEIGHT, WINDOW_WIDTH >> > (data, view, t.data().get(), t.size());
 }

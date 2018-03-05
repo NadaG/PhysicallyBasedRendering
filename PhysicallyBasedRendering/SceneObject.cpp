@@ -15,6 +15,11 @@ void SceneObject::SetColor(const glm::vec3& color)
 	this->color = color;
 }
 
+std::vector<Triangle> SceneObject::GetTriangles() const
+{
+	return model.GetTriangles();
+}
+
 void SceneObject::DrawModel()
 {
 	model.Draw();

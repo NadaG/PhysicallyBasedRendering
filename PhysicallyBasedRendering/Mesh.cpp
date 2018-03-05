@@ -42,6 +42,13 @@ void Mesh::SetMesh(aiMesh* mesh)
 		indices[i * 3 + 0] = mesh->mFaces[i].mIndices[0];
 		indices[i * 3 + 1] = mesh->mFaces[i].mIndices[1];
 		indices[i * 3 + 2] = mesh->mFaces[i].mIndices[2];
+
+		Triangle triangle;
+		triangle.v0 = vertices[indices[i * 3 + 0]].position;
+		triangle.v1 = vertices[indices[i * 3 + 1]].position;
+		triangle.v2 = vertices[indices[i * 3 + 2]].position;
+
+		triangles.push_back(triangle);
 	}
 }
 
@@ -117,14 +124,26 @@ void Mesh::LoadMesh(const string& fileName)
 		{
 			for (int j = 0; j < scene->mMeshes[i]->mNumFaces; j++)
 			{
-				indices[j * 3 + offset] = indexOffset + scene->mMeshes[i]->mFaces[j].mIndices[0];
+				indices[j * 3 + offset + 0] = indexOffset + scene->mMeshes[i]->mFaces[j].mIndices[0];
 				indices[j * 3 + offset + 1] = indexOffset + scene->mMeshes[i]->mFaces[j].mIndices[1];
 				indices[j * 3 + offset + 2] = indexOffset + scene->mMeshes[i]->mFaces[j].mIndices[2];
+
+				Triangle triangle;
+				triangle.v0 = vertices[indices[j * 3 + offset + 0]].position;
+				triangle.v1 = vertices[indices[j * 3 + offset + 1]].position;
+				triangle.v2 = vertices[indices[j * 3 + offset + 2]].position;
+
+				triangles.push_back(triangle);
 			}
 			offset += scene->mMeshes[i]->mNumFaces * 3;
 			indexOffset += scene->mMeshes[i]->mNumVertices;
 		}
 	}
+}
+
+std::vector<Triangle> Mesh::GetTriangles() const
+{
+	return triangles;
 }
 
 void Mesh::LoadMesh(MeshType meshType)
@@ -279,3 +298,4 @@ void Mesh::Delete()
 	delete[] vertices;
 	delete[] indices;
 }
+

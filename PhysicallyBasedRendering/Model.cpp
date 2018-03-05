@@ -69,3 +69,17 @@ void Model::Delete()
 	for (int i = 0; i < meshes.size(); i++)
 		meshes[i].Delete();
 }
+
+std::vector<Triangle> Model::GetTriangles() const
+{
+	vector<Triangle> triangles;
+	for (int i = 0; i < meshes.size(); i++)
+	{
+		vector<Triangle> meshTriangles = meshes[i].GetTriangles();
+		for (int j = 0; j < meshTriangles.size(); j++)
+		{
+			triangles.push_back(meshTriangles[j]);
+		}
+	}
+	return triangles;
+}

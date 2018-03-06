@@ -43,6 +43,7 @@ __device__ bool RaySphereIntersect(Ray ray, Sphere sphere, float& dist)
 		return false;
 }
 
+// back face culling이 적용되어 있음
 __device__ bool RayTriangleIntersect(Ray ray, Triangle triangle, float& dist)
 {
 	glm::vec3 v0v1 = triangle.v1 - triangle.v0;
@@ -71,8 +72,7 @@ __device__ bool RayTriangleIntersect(Ray ray, Triangle triangle, float& dist)
 	if (v < 0 || u + v > 1)
 		return false;
 
-	float t = dot(v0v2, qvec) * invDet;
-
+	dist = dot(v0v2, qvec) * invDet;
 
 	return true;
 }
@@ -90,128 +90,126 @@ __device__ Ray GenerateCameraRay(int y, int x, glm::mat4 view)
 
 	float fov = 45.0f;
 
-	float xx = (((float)(x + 0.5f) / (float)WINDOW_WIDTH) * 2.0f - 1.0f) * tan(fov *0.5f * 3.141592653f / 180.0f) * aspectRatio;
-	float yy = (1.0f - ((float)(y + 0.5f) / (float)WINDOW_HEIGHT) * 2.0f) * tan(fov * 0.5f * 3.141592653f / 180.0f);
+	float xx = ((NDCx) * 2.0f - 1.0f) * tan(fov *0.5f * 3.141592653f / 180.0f) * aspectRatio;
+	float yy = (1.0f - NDCy * 2.0f) * tan(fov * 0.5f * 3.141592653f / 180.0f);
 
-	//// -1 ~ 1
+	// -1 ~ 1
 	ray.origin = glm::vec3(-view * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 	ray.dir = normalize(vec3(view * vec4(glm::vec3(xx, yy, -1.0), 0.0f)));
-
-	//// view matrix의 translate 성분만 가져옴
-	//ray.origin = (-view*vec4(vec3(0.0), 1)).xyz;
-	//// view matrix의 rotate 성분을 가져옴
-	//ray.dir = normalize((view*vec4(ray.dir, 0)).xyz);
-	//// view matrix는 camera 기준의 x, y, z축을 column으로 두기 때문에(normalize됨) scale 성분이 의미가 없음 
 
 	return ray;
 }
 
-__global__ void RayTraceD(glm::vec4* data, glm::mat4 view, Triangle* triangles, int triangleNum)
+__device__ vec3 RayTraceColor(Ray ray, Triangle* triangles, int triangleNum, Light* lights, int lightNum, int depth)
 {
-	unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
+	if (depth <= 0)
+		return vec3(0.0f);
 
-	Ray ray = GenerateCameraRay(blockIdx.x, threadIdx.x, view);
-
-	Sphere sphere;
-	sphere.origin = glm::vec3(0.0f, 0.0f, -20.0f);
-	sphere.radius = 2.0f;
-
-	Sphere sphere2;
-	sphere2.origin = glm::vec3(3.0f, 0.0f, -20.0f);
-	sphere2.radius = 2.0f;
-
-	Triangle triangle;
-	triangle.v0 = glm::vec3(0.0f, 0.0f, -5.0f);
-	triangle.v1 = glm::vec3(1.0f, 0.0f, -5.0f);
-	triangle.v2 = glm::vec3(1.0f, 1.0f, -5.0f);
+	vec3 color = vec3(0.0f);
 
 	float distToTriangle;
 	float minDistToTriangle = 99999999.0f;
-
-	glm::vec3 lightPos = glm::vec3(10.0f, 0.0f, 0.0f);
-
-	data[x] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 	for (int i = 0; i < triangleNum; i++)
 	{
 		if (RayTriangleIntersect(ray, triangles[i], distToTriangle))
 		{
-			if (true)
+			// 가장 앞에 있는 픽셀만 그리기
+			if (distToTriangle < minDistToTriangle)
 			{
 				minDistToTriangle = distToTriangle;
-				glm::vec3 hitPoint = ray.origin + ray.dir * distToTriangle;
-				glm::vec3 L = glm::normalize(lightPos - hitPoint);
-				glm::vec3 N = normalize(cross(triangles[i].v2 - triangles[i].v0, triangles[i].v1 - triangles[i].v0));
 
-				glm::vec3 ambient = glm::vec3(0.2, 0.2, 0.2);
+				for (int j = 0; j < lightNum; j++)
+				{
+					glm::vec3 hitPoint = ray.origin + ray.dir * distToTriangle;
 
-				glm::vec3 diffuse = glm::vec3(0.1, 0.8, 0.2) * glm::max(0.0f, dot(N, L));
+					Ray shadowRay;
+					shadowRay.origin = hitPoint;
+					shadowRay.dir = normalize(lights[j].pos - hitPoint);
 
-				glm::vec3 V = -ray.dir;
+					bool isLighted = true;
+					float tmp;
+					for (int k = 0; k < triangleNum; k++)
+					{
+						if (i != k)
+							if (RayTriangleIntersect(shadowRay, triangles[k], tmp))
+								// 앞쪽의 dir만 봄
+								if (tmp > 0.0f)
+									isLighted = false;
+					}
 
-				glm::vec3 specular = glm::vec3(0.1, 0.8, 0.2) * glm::max(0.0f, pow(glm::max(dot(normalize(reflect(-L, N)), V), 0.0f), 16));
+					if (!isLighted)
+					{
+						color = glm::vec3(0.1f, 0.1f, 0.1f);
+						continue;
+					}
 
-				glm::vec3 col = ambient + diffuse + specular;
+					glm::vec3 L = glm::normalize(lights[j].pos - hitPoint);
+					glm::vec3 N = normalize(triangles[i].normal);
+					glm::vec3 V = -ray.dir;
 
-				data[x] = glm::vec4(col.x, col.y, col.z, 1.0f);
+					glm::vec3 ambient = glm::vec3(0.2, 0.2, 0.2) * lights[j].color;
+					glm::vec3 diffuse = glm::vec3(0.3, 0.3, 0.3) * lights[j].color * glm::max(0.0f, dot(N, L));
+					glm::vec3 specular = glm::vec3(0.1, 0.8, 0.2) * lights[j].color * glm::max(0.0f, pow(glm::max(dot(normalize(reflect(-L, N)), V), 0.0f), 16));
+
+					glm::vec3 col = ambient + diffuse + specular;
+
+					color = col;
+
+					if (depth > 1)
+					{
+						Ray reflectRay;
+						reflectRay.origin = hitPoint;
+						reflectRay.dir = normalize(reflect(-L, N));
+
+						//color += RayTraceColor(reflectRay, triangles, triangleNum, lights, lightNum, depth - 1) * 0.2f;
+						////////////////////////////////////////////////////////////////////////////////////
+
+						// 굴절률이 높다는 것은 더 휘어져서 들어간다는 것, (normal 방향으로 휘어짐)
+						Ray refractRay;
+						refractRay.origin = hitPoint;
+						refractRay.dir = normalize(refract(-L, N, 2.0f));
+
+						///////////////// Naive Algorithm without Recursion ////////////////////////////////
+						//
+
+						//color += RayTraceColor(refractRay, triangles, triangleNum, lights, lightNum, depth - 1) * 0.2f;
+						////////////////////////////////////////////////////////////////////////////////////
+					}
+				}
 			}
-			/*else
-			{
-				data[x] = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-			}*/
 		}
 	}
 
-	/*if (RaySphereIntersect(ray, sphere, distToSphere))
-	{
-		glm::vec3 hitPoint = ray.origin + ray.dir * distToSphere;
-		glm::vec3 L = glm::normalize(lightPos - hitPoint);
-		glm::vec3 N = normalize(hitPoint - sphere.origin);
+	return color;
+}
 
-		glm::vec3 ambient = glm::vec3(0.2, 0.2, 0.2);
+// TODO view matrix를 점검할 것
+__global__ void RayTraceD(
+	glm::vec4* data, 
+	glm::mat4 view, 
+	Triangle* triangles, int triangleNum,
+	Light* lights, int lightNum)
+{
+	unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
 
-		glm::vec3 diffuse = glm::vec3(0.1, 0.4, 0.2) * glm::max(0.0f, dot(N, L));
+	Ray ray = GenerateCameraRay(blockIdx.x, threadIdx.x, view);
 
-		glm::vec3 V = -ray.dir;
+	vec3 color = RayTraceColor(ray, triangles, triangleNum, lights, lightNum, 2);
 
-		glm::vec3 specular = glm::vec3(0.1, 0.4, 0.2) * glm::max(0.0f, pow(glm::max(dot(normalize(reflect(-L, N)), V), 0.0f), 16));
-
-		glm::vec3 col = ambient + diffuse + specular;
-
-		data[x] = glm::vec4(col.x, col.y, col.z, 1.0f);
-	}
-	else if (RaySphereIntersect(ray, sphere2, distToSphere))
-	{
-		glm::vec3 hitPoint = ray.origin + ray.dir * distToSphere;
-		glm::vec3 L = normalize(lightPos - hitPoint);
-		glm::vec3 N = normalize(hitPoint - sphere2.origin);
-
-		glm::vec3 ambient = glm::vec3(0.2, 0.2, 0.2);
-
-		glm::vec3 diffuse = glm::vec3(0.1, 0.4, 0.2) * glm::max(0.0f, dot(N, L));
-
-		glm::vec3 V = -ray.dir;
-
-		glm::vec3 specular = glm::vec3(0.1, 0.4, 0.2) * glm::max(0.0f, pow(glm::max(dot(normalize(reflect(-L, N)), V), 0.0f), 16));
-
-		glm::vec3 col = ambient + diffuse + specular;
-
-		data[x] = glm::vec4(col.x, col.y, col.z, 1.0f);
-	}
-	else if (RayTriangleIntersect(ray, triangle, distToTriangle))
-	{
-		data[x] = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-	}
-	else
-	{
-		data[x] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-	}*/
+	data[x] = glm::vec4(color, 1.0f);
 }
 
 //void RayTrace(glm::vec4* data, glm::mat4 view, Triangle* triangles, int triangleNum)
-void RayTrace(glm::vec4* data, glm::mat4 view, const std::vector<Triangle> &triangles)
+void RayTrace(glm::vec4* data, glm::mat4 view, const vector<Triangle> &triangles, const vector<Light>& lights)
 {
 	thrust::device_vector<Triangle> t = triangles;
+	thrust::device_vector<Light> l = lights;
 
-	RayTraceD << <WINDOW_HEIGHT, WINDOW_WIDTH >> > (data, view, t.data().get(), t.size());
+	size_t size;
+	cudaDeviceSetLimit(cudaLimitStackSize, 1000000 * sizeof(float));
+	cudaDeviceGetLimit(&size, cudaLimitStackSize);
+
+
+	RayTraceD << <WINDOW_HEIGHT, WINDOW_WIDTH >> > (data, view, t.data().get(), t.size(), l.data().get(), l.size());
 }

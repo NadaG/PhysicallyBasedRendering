@@ -48,6 +48,14 @@ void Mesh::SetMesh(aiMesh* mesh)
 		triangle.v1 = vertices[indices[i * 3 + 1]].position;
 		triangle.v2 = vertices[indices[i * 3 + 2]].position;
 
+		triangle.normal =
+			normalize((
+				vertices[indices[i * 3 + 0]].normal +
+				vertices[indices[i * 3 + 1]].normal +
+				vertices[indices[i * 3 + 2]].normal) 
+				/ 3.0f);
+
+
 		triangles.push_back(triangle);
 	}
 }
@@ -127,11 +135,16 @@ void Mesh::LoadMesh(const string& fileName)
 				indices[j * 3 + offset + 0] = indexOffset + scene->mMeshes[i]->mFaces[j].mIndices[0];
 				indices[j * 3 + offset + 1] = indexOffset + scene->mMeshes[i]->mFaces[j].mIndices[1];
 				indices[j * 3 + offset + 2] = indexOffset + scene->mMeshes[i]->mFaces[j].mIndices[2];
-
+				
 				Triangle triangle;
 				triangle.v0 = vertices[indices[j * 3 + offset + 0]].position;
 				triangle.v1 = vertices[indices[j * 3 + offset + 1]].position;
 				triangle.v2 = vertices[indices[j * 3 + offset + 2]].position;
+
+				triangle.normal =
+					normalize((vertices[indices[j * 3 + offset + 0]].normal +
+						vertices[indices[j * 3 + offset + 1]].normal +
+						vertices[indices[j * 3 + offset + 2]].normal) / 3.0f);
 
 				triangles.push_back(triangle);
 			}

@@ -30,4 +30,7 @@ private:
 	Texture2D rayTracingTex;
 
 	PNGExporter pngExporter;
+
+	std::vector<Triangle> triangles;
+	std::vector<Light> lights;
 };

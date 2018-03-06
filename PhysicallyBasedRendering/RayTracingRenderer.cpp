@@ -27,6 +27,32 @@ void RayTracingRenderer::InitializeRender()
 	cudaGraphicsGLRegisterBuffer(&cuda_pbo_resource, rayTracePBO, cudaGraphicsMapFlagsWriteDiscard);
 
 	cameraInitPos = sceneManager->movingCamera->GetWorldPosition();
+
+	Light light;
+	light.pos = glm::vec3(10.0f, -5.0f, 0.0f);
+	light.color = glm::vec3(0.0f, 1.0f, 0.0f);
+	lights.push_back(light);
+
+	/*light.pos = glm::vec3(0.0f, 10.0f, 0.0f);
+	light.color = glm::vec3(1.0f, 0.0f, 0.0f);
+	lights.push_back(light);*/
+
+	triangles = sceneManager->sceneObjs[0].GetTriangles();
+
+	const float halfWidth = 20.0f;
+
+	Triangle halfPlane1, halfPlane2;
+	halfPlane1.v0 = glm::vec3(-halfWidth, 3.0f,  halfWidth);
+	halfPlane1.v1 = glm::vec3(-halfWidth, 3.0f, -halfWidth);
+	halfPlane1.v2 = glm::vec3( halfWidth, 3.0f,  halfWidth);
+	halfPlane1.normal = glm::vec3(0.0f, 1.0f, 0.0f);
+	triangles.push_back(halfPlane1);
+
+	halfPlane2.v0 = glm::vec3( halfWidth, 3.0f,  halfWidth);
+	halfPlane2.v1 = glm::vec3(-halfWidth, 3.0f, -halfWidth);
+	halfPlane2.v2 = glm::vec3( halfWidth, 3.0f, -halfWidth);
+	halfPlane2.normal = glm::vec3(0.0f, 1.0f, 0.0f);
+	triangles.push_back(halfPlane2);
 }
 
 // glm의 cross(a, b)는 오른손으로 a방향에서 b방향으로 감싸쥘 때의 엄지방향이다.
@@ -50,24 +76,12 @@ void RayTracingRenderer::Render()
 	cudaMemset(output, 0, WindowManager::GetInstance()->width * WindowManager::GetInstance()->height * 16);
 
 	glm::mat4 view;
-	// 원래 이렇게 써야함...
+	// camera의 model matrix의 inverse가 바로 view matrix
+	// y가 뒤바뀌는 이유
 	view = glm::inverse(camera->GetModelMatrix());
 
-	//Triangle* triangles = new Triangle[2];
-	/*std::vector<Triangle> triangles(2);
-	triangles[0].v0 = glm::vec3();
-	triangles[0].v1 = glm::vec3(1.0f, 0.0f, 0.0f);
-	triangles[0].v2 = glm::vec3(0.0f, 1.0f, 0.0f);
-
-	triangles[1].v0 = glm::vec3(-0.5f, 0.0f, 0.0f);
-	triangles[1].v1 = glm::vec3(-1.0f, 0.0f, 0.0f);
-	triangles[1].v2 = glm::vec3(0.0f, -1.0f, 0.0f);
-*/
-	
-	//cudaMemcpy()
-
 	// 여기서 render가 다 일어남
-	RayTrace(output, view, sceneManager->sceneObjs[0].GetTriangles());
+	RayTrace(output, view, triangles, lights);
 
 	cudaGraphicsUnmapResources(1, &cuda_pbo_resource, 0);
 

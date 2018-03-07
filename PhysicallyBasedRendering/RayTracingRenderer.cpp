@@ -29,7 +29,7 @@ void RayTracingRenderer::InitializeRender()
 	cameraInitPos = sceneManager->movingCamera->GetWorldPosition();
 
 	Light light;
-	light.pos = glm::vec3(10.0f, -5.0f, 0.0f);
+	light.pos = glm::vec3(0.0f, -5.0f, 0.0f);
 	light.color = glm::vec3(0.0f, 1.0f, 0.0f);
 	lights.push_back(light);
 

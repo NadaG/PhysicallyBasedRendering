@@ -86,6 +86,29 @@ __device__ bool RayTriangleIntersect(Ray ray, Triangle triangle, float& dist)
 	return true;
 }
 
+// 가장 가까운 triangle의 id를 반환하고 해당 점까지의 dist를 가져온다
+__device__ int FindNearestTriangleIdx(Ray ray, Triangle* triangles, int triangleNum, float& dist)
+{	
+	const float rayThreshold = 0.0001f;
+
+	for (int i = 0; i < triangleNum; i++)
+	{
+		// intersect 할 경우
+		// reflect ray와 refract ray 생성
+		if (RayTriangleIntersect(ray, triangles[i], dist))
+		{
+			if (dist < rayThreshold)
+			{
+				continue;
+			}
+
+			// 가장 앞에 있는 픽셀만 그리기
+
+			glm::vec3 hitPoint = ray.origin + ray.dir * dist;
+		}
+	}
+}
+
 __device__ Ray GenerateCameraRay(int y, int x, glm::mat4 view)
 {
 	Ray ray;
@@ -108,12 +131,12 @@ __device__ Ray GenerateCameraRay(int y, int x, glm::mat4 view)
 }
 
 __device__ vec3 GenerateRayQueue(
-	Ray ray, 
-	RayNode* rayQueue, 
-	Triangle* triangles, 
-	int triangleNum, 
-	Light* lights, 
-	int lightNum, 
+	Ray ray,
+	RayNode* rayQueue,
+	Triangle* triangles,
+	int triangleNum,
+	Light* lights,
+	int lightNum,
 	int depth)
 {
 	vec3 color = vec3(0.0f);
@@ -128,7 +151,7 @@ __device__ vec3 GenerateRayQueue(
 	front++;
 
 	// 총 7 (1 + 2 + 4)개의 ray가 나옴
-	for (int d = 0; d < depth; d++)
+	for (int d = 1; d < depth; d++)
 	{
 		int target = front;
 
@@ -217,7 +240,7 @@ __device__ vec3 GenerateRayQueue(
 					}
 				}
 			}
-			
+
 			float s = (float)glm::floor(glm::log((float)nowDepth) / glm::log(2.0f));
 			color += minColor * pow(0.2f, s);
 		}
@@ -233,110 +256,21 @@ __device__ vec3 GenerateRayQueue(
 	return color;
 }
 
-//__device__ vec3 RayTraceColor(Ray ray, Triangle* triangles, int triangleNum, Light* lights, int lightNum, int depth)
-//{
-//	if (depth <= 0)
-//		return vec3(0.0f);
-//
-//	vec3 color = vec3(0.0f);
-//
-//	float distToTriangle;
-//	float minDistToTriangle = 99999999.0f;
-//
-//	for (int i = 0; i < triangleNum; i++)
-//	{
-//		if (RayTriangleIntersect(ray, triangles[i], distToTriangle))
-//		{
-//			// 가장 앞에 있는 픽셀만 그리기
-//			if (distToTriangle < minDistToTriangle)
-//			{
-//				minDistToTriangle = distToTriangle;
-//
-//				for (int j = 0; j < lightNum; j++)
-//				{
-//					glm::vec3 hitPoint = ray.origin + ray.dir * distToTriangle;
-//
-//					Ray shadowRay;
-//					shadowRay.origin = hitPoint;
-//					shadowRay.dir = normalize(lights[j].pos - hitPoint);
-//
-//					bool isLighted = true;
-//					float tmp;
-//					for (int k = 0; k < triangleNum; k++)
-//					{
-//						if (i != k)
-//							if (RayTriangleIntersect(shadowRay, triangles[k], tmp))
-//								// 앞쪽의 dir만 봄
-//								if (tmp > 0.0f)
-//									isLighted = false;
-//					}
-//
-//					if (!isLighted)
-//					{
-//						color = glm::vec3(0.1f, 0.1f, 0.1f);
-//						continue;
-//					}
-//
-//					glm::vec3 L = glm::normalize(lights[j].pos - hitPoint);
-//					glm::vec3 N = normalize(triangles[i].normal);
-//					glm::vec3 V = -ray.dir;
-//
-//					glm::vec3 ambient = glm::vec3(0.2, 0.2, 0.2) * lights[j].color;
-//					glm::vec3 diffuse = glm::vec3(0.3, 0.3, 0.3) * lights[j].color * glm::max(0.0f, dot(N, L));
-//					glm::vec3 specular = glm::vec3(0.1, 0.8, 0.2) * lights[j].color * glm::max(0.0f, pow(glm::max(dot(normalize(reflect(-L, N)), V), 0.0f), 16));
-//
-//					glm::vec3 col = ambient + diffuse + specular;
-//
-//					color = col;
-//
-//					if (depth > 1)
-//					{
-//						Ray reflectRay;
-//						reflectRay.origin = hitPoint;
-//						reflectRay.dir = normalize(reflect(-L, N));
-//
-//						//glm::vec3 C1 = RayTraceColor(reflectRay, triangles, triangleNum, lights, lightNum, depth - 1) * 0.0002f;
-//						////////////////////////////////////////////////////////////////////////////////////
-//
-//						// 굴절률이 높다는 것은 더 휘어져서 들어간다는 것, (normal 방향으로 휘어짐)
-//						Ray refractRay;
-//						refractRay.origin = hitPoint;
-//						refractRay.dir = normalize(refract(-L, N, 2.0f));
-//
-//						///////////////// Naive Algorithm without Recursion ////////////////////////////////
-//						//
-//
-//						//color += RayTraceColor(refractRay, triangles, triangleNum, lights, lightNum, depth - 1) * 0.0002f;
-//						//glm::vec3 C2 = RayTraceColor(refractRay, triangles, triangleNum, lights, lightNum, depth - 1) * 0.0002f;
-//
-//						////////////////////////////////////////////////////////////////////////////////////
-//					}
-//				}
-//			}
-//		}
-//	}
-//
-//	return color;
-//}
-
 // TODO view matrix를 점검할 것
 __global__ void RayTraceD(
 	glm::vec4* data,
 	glm::mat4 view,
 	Triangle* triangles, int triangleNum,
-	Light* lights, int lightNum,
-	RayNode* rayQueue, int queueSize)
+	Light* lights, int lightNum)
 {
 	unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
 
 	Ray ray = GenerateCameraRay(blockIdx.x, threadIdx.x, view);
 
-	rayQueue = new RayNode[1+2+4];
+	RayNode rayQueueStack[3];
 
 	// ray들을 생성하고 queue에 넣는 과정
-	vec3 color = GenerateRayQueue(ray, rayQueue, triangles, triangleNum, lights, lightNum, 2);
-
-	delete[] rayQueue;
+	vec3 color = GenerateRayQueue(ray, rayQueueStack, triangles, triangleNum, lights, lightNum, 2);
 
 	// ray들을 queue에서 꺼내면서 color를 정하는 과정
 
@@ -351,11 +285,6 @@ void RayTrace(glm::vec4* data, glm::mat4 view, const vector<Triangle> &triangles
 	thrust::device_vector<Triangle> t = triangles;
 	thrust::device_vector<Light> l = lights;
 
-	std::vector<RayNode> hQueue;
-	hQueue.resize(7);
-
-	thrust::device_vector<RayNode> dQueue = hQueue;
-
 	size_t size;
 	cudaDeviceSetLimit(cudaLimitMallocHeapSize, 100000000 * sizeof(float));
 	cudaDeviceGetLimit(&size, cudaLimitMallocHeapSize);
@@ -367,7 +296,6 @@ void RayTrace(glm::vec4* data, glm::mat4 view, const vector<Triangle> &triangles
 		t.data().get(),
 		t.size(),
 		l.data().get(),
-		l.size(),
-		dQueue.data().get(),
-		dQueue.size());
+		l.size()
+		);
 }

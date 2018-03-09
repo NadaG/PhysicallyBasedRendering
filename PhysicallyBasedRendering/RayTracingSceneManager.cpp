@@ -5,10 +5,10 @@ void RayTracingSceneManager::InitializeObjects()
 	quadObj.LoadModel(QUAD);
 	movingCamera->Translate(glm::vec3(0.0f, 0.0f, 20.0f));
 
-	SceneObject nanosuit;
-	nanosuit.LoadModel("Obj/torus.obj");
+	SceneObject obj;
+	obj.LoadModel("Obj/Torus.obj");
 	
-	sceneObjs.push_back(nanosuit);
+	sceneObjs.push_back(obj);
 }
 
 void RayTracingSceneManager::Update()
@@ -73,6 +73,16 @@ void RayTracingSceneManager::Update()
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_S))
 	{
 		movingCamera->Rotate(glm::vec3(1.0f, 0.0f, 0.0f), 0.005f);
+	}
+
+	if (InputManager::GetInstance()->IsKey(GLFW_KEY_Q))
+	{
+		movingCamera->Rotate(glm::vec3(0.0f, 0.0f, 1.0f), -0.005f);
+	}
+
+	if (InputManager::GetInstance()->IsKey(GLFW_KEY_E))
+	{
+		movingCamera->Rotate(glm::vec3(0.0f, 0.0f, 1.0f), 0.005f);
 	}
 }
 

@@ -15,12 +15,6 @@ struct Ray
 	glm::vec3 dir;
 };
 
-struct RayNode
-{
-	Ray ray;
-	int depth = 1;
-};
-
 struct Sphere
 {
 	glm::vec3 origin;
@@ -30,7 +24,7 @@ struct Sphere
 const int WINDOW_HEIGHT = 1024;
 const int WINDOW_WIDTH = 1024;
 
-using std::queue;
+const int QUEUE_SIZE = 3;
 
 __device__ bool RaySphereIntersect(Ray ray, Sphere sphere, float& dist)
 {
@@ -88,23 +82,20 @@ __device__ bool RayTriangleIntersect(Ray ray, Triangle triangle, float& dist)
 
 // 가장 가까운 triangle의 id를 반환하고 해당 점까지의 dist를 가져온다
 __device__ int FindNearestTriangleIdx(Ray ray, Triangle* triangles, int triangleNum, float& dist)
-{	
+{
 	const float rayThreshold = 0.0001f;
 
 	for (int i = 0; i < triangleNum; i++)
 	{
 		// intersect 할 경우
-		// reflect ray와 refract ray 생성
 		if (RayTriangleIntersect(ray, triangles[i], dist))
 		{
+			// 잘 못 찾은 경우, 다시 찾기
 			if (dist < rayThreshold)
-			{
 				continue;
-			}
-
-			// 가장 앞에 있는 픽셀만 그리기
-
-			glm::vec3 hitPoint = ray.origin + ray.dir * dist;
+			// 잘 찾은 경우, 다시 찾지 않기
+			else
+				return i;
 		}
 	}
 }
@@ -130,9 +121,22 @@ __device__ Ray GenerateCameraRay(int y, int x, glm::mat4 view)
 	return ray;
 }
 
+__device__ void Enqueue(Ray* rayQueue, Ray ray, int& front)
+{
+	rayQueue[front] = ray;
+	front = (front + 1) % QUEUE_SIZE;
+}
+
+__device__ Ray Dequeue(Ray* rayQueue, int& rear)
+{
+	Ray ray = rayQueue[rear];
+	rear = (rear + 1) % QUEUE_SIZE;
+	return ray;
+}
+
 __device__ vec3 GenerateRayQueue(
 	Ray ray,
-	RayNode* rayQueue,
+	Ray* rayQueue,
 	Triangle* triangles,
 	int triangleNum,
 	Light* lights,
@@ -143,113 +147,154 @@ __device__ vec3 GenerateRayQueue(
 	int front = 0, rear = 0;
 
 	// 첫 번째 ray를 node로 하는 queue 생성
-	RayNode rayNode;
-	rayNode.ray = ray;
-	rayNode.depth = 1;
+	Enqueue(rayQueue, ray, front);
 
-	rayQueue[front] = rayNode;
-	front++;
+	int nowDepth = 1;
 
 	// 총 7 (1 + 2 + 4)개의 ray가 나옴
-	for (int d = 1; d < depth; d++)
+	for (int i = 1; i < depth; i++)
 	{
 		int target = front;
 
-		while (rear < target)
+		while (rear != target)
 		{
-			Ray nowRay = rayQueue[rear].ray;
-			const int nowDepth = rayQueue[rear].depth;
-			rear++;
+			Ray nowRay;
+
+			nowRay = Dequeue(rayQueue, rear);
 
 			float distToTriangle;
-			float minDistToTriangle = 99999999.0f;
+			int nearestTriangleIdx = FindNearestTriangleIdx(nowRay, triangles, triangleNum, distToTriangle);
+			Triangle nearestTriangle = triangles[nearestTriangleIdx];
+
 			glm::vec3 minColor = glm::vec3(0, 0, 0);
 
-			for (int i = 0; i < triangleNum; i++)
+			for (int k = 0; k < lightNum; k++)
 			{
-				// intersect 할 경우
-				// reflect ray와 refract ray 생성
-				if (RayTriangleIntersect(nowRay, triangles[i], distToTriangle))
+				glm::vec3 hitPoint = nowRay.origin + nowRay.dir * distToTriangle;
+
+				Ray shadowRay;
+				shadowRay.origin = hitPoint;
+				shadowRay.dir = normalize(lights[k].pos - hitPoint);
+
+				bool isLighted = true;
+				float tmp;
+				for (int k = 0; k < triangleNum; k++)
 				{
-					if (distToTriangle < 1.0f) {
-						continue;
-					}
-
-					// 가장 앞에 있는 픽셀만 그리기
-					if (distToTriangle < minDistToTriangle)
-					{
-						minDistToTriangle = distToTriangle;
-
-						for (int j = 0; j < lightNum; j++)
-						{
-							glm::vec3 hitPoint = nowRay.origin + nowRay.dir * distToTriangle;
-
-							Ray shadowRay;
-							shadowRay.origin = hitPoint;
-							shadowRay.dir = normalize(lights[j].pos - hitPoint);
-
-							bool isLighted = true;
-							float tmp;
-							for (int k = 0; k < triangleNum; k++)
-							{
-								if (i != k)
-									if (RayTriangleIntersect(shadowRay, triangles[k], tmp))
-										// 앞쪽의 dir만 봄
-										if (tmp > 0.0f)
-											isLighted = false;
-							}
-
-							if (!isLighted)
-							{
-								//color = glm::vec3(0.1f, 0.1f, 0.1f);
-								continue;
-							}
-
-							glm::vec3 L = glm::normalize(lights[j].pos - hitPoint);
-							glm::vec3 N = normalize(triangles[i].normal);
-							glm::vec3 V = -nowRay.dir;
-
-							glm::vec3 ambient = glm::vec3(0.2, 0.2, 0.2) * lights[j].color;
-							glm::vec3 diffuse = glm::vec3(0.3, 0.3, 0.3) * lights[j].color * glm::max(0.0f, dot(N, L));
-							glm::vec3 specular = glm::vec3(0.1, 0.8, 0.2) * lights[j].color * glm::max(0.0f, pow(glm::max(dot(normalize(reflect(-L, N)), V), 0.0f), 16));
-
-							glm::vec3 col = ambient + diffuse + specular;
-
-							//float s = (float)glm::floor(glm::log((float)nowDepth) / glm::log(2.0f));
-							//color += col * pow(0.2f, s);
-							minColor = col;
-
-							Ray reflectRay;
-							reflectRay.origin = hitPoint;
-							reflectRay.dir = normalize(reflect(-L, N));
-
-							rayQueue[front].depth = nowDepth + 1;
-							rayQueue[front].ray = reflectRay;
-							front++;
-
-							Ray refractRay;
-							refractRay.origin = hitPoint;
-							refractRay.dir = normalize(refract(-L, N, 2.0f));
-
-							rayQueue[front].depth = nowDepth + 1;
-							rayQueue[front].ray = refractRay;
-							front++;
-
-							//data = i*scalingfactor*color;
-						}
-					}
+					if (nearestTriangleIdx != k)
+						if (RayTriangleIntersect(shadowRay, triangles[k], tmp))
+							// 앞쪽의 dir만 봄
+							if (tmp > 0.0f)
+								isLighted = false;
 				}
+
+				if (!isLighted)
+				{
+					//color = glm::vec3(0.1f, 0.1f, 0.1f);
+					continue;
+				}
+
+				glm::vec3 L = glm::normalize(lights[k].pos - hitPoint);
+				glm::vec3 N = normalize(nearestTriangle.normal);
+				glm::vec3 V = -nowRay.dir;
+
+				glm::vec3 ambient = glm::vec3(0.2, 0.2, 0.2) * lights[k].color;
+				glm::vec3 diffuse = glm::vec3(0.3, 0.3, 0.3) * lights[k].color * glm::max(0.0f, dot(N, L));
+				glm::vec3 specular = glm::vec3(0.1, 0.8, 0.2) * lights[k].color * glm::max(0.0f, pow(glm::max(dot(normalize(reflect(-L, N)), V), 0.0f), 16));
+
+				glm::vec3 col = ambient + diffuse + specular;
+
+				minColor = col;
+
+				Ray reflectRay;
+				reflectRay.origin = hitPoint;
+				reflectRay.dir = normalize(reflect(-L, N));
+
+				Enqueue(rayQueue, reflectRay, front);
+
+				Ray refractRay;
+				refractRay.origin = hitPoint;
+				refractRay.dir = normalize(refract(-L, N, 2.0f));
+
+				Enqueue(rayQueue, refractRay, front);
 			}
 
 			float s = (float)glm::floor(glm::log((float)nowDepth) / glm::log(2.0f));
 			color += minColor * pow(0.2f, s);
 		}
+
+		nowDepth++;
 	}
 
 	// 나오지 못한 queue들 나오게 하기
-	while (rear < front)
+	while (rear != front)
 	{
-		rear++;
+		Ray nowRay;
+
+		nowRay = Dequeue(rayQueue, rear);
+
+		float distToTriangle;
+		float minDistToTriangle = 99999999.0f;
+		glm::vec3 minColor = glm::vec3(0, 0, 0);
+
+		for (int i = 0; i < triangleNum; i++)
+		{
+			// intersect 할 경우
+			// reflect ray와 refract ray 생성
+			if (RayTriangleIntersect(nowRay, triangles[i], distToTriangle))
+			{
+				if (distToTriangle < 1.0f) {
+					continue;
+				}
+
+				// 가장 앞에 있는 픽셀만 그리기
+				if (distToTriangle < minDistToTriangle)
+				{
+					minDistToTriangle = distToTriangle;
+
+					for (int j = 0; j < lightNum; j++)
+					{
+						glm::vec3 hitPoint = nowRay.origin + nowRay.dir * distToTriangle;
+
+						Ray shadowRay;
+						shadowRay.origin = hitPoint;
+						shadowRay.dir = normalize(lights[j].pos - hitPoint);
+
+						bool isLighted = true;
+						float tmp;
+						for (int k = 0; k < triangleNum; k++)
+						{
+							if (i != k)
+								if (RayTriangleIntersect(shadowRay, triangles[k], tmp))
+									// 앞쪽의 dir만 봄
+									if (tmp > 0.0f)
+										isLighted = false;
+						}
+
+						if (!isLighted)
+						{
+							continue;
+						}
+
+						glm::vec3 L = glm::normalize(lights[j].pos - hitPoint);
+						glm::vec3 N = normalize(triangles[i].normal);
+						glm::vec3 V = -nowRay.dir;
+
+						glm::vec3 ambient = glm::vec3(0.2, 0.2, 0.2) * lights[j].color;
+						glm::vec3 diffuse = glm::vec3(0.3, 0.3, 0.3) * lights[j].color * glm::max(0.0f, dot(N, L));
+						glm::vec3 specular = glm::vec3(0.1, 0.8, 0.2) * lights[j].color * glm::max(0.0f, pow(glm::max(dot(normalize(reflect(-L, N)), V), 0.0f), 16));
+
+						glm::vec3 col = ambient + diffuse + specular;
+
+						minColor = col;
+					}
+				}
+			}
+		}
+
+		float s = (float)glm::floor(glm::log((float)nowDepth) / glm::log(2.0f));
+		//color += minColor * pow(0.2f, s);
+		color += minColor * 0.8f;
+
 		// color 계산
 	}
 
@@ -267,14 +312,9 @@ __global__ void RayTraceD(
 
 	Ray ray = GenerateCameraRay(blockIdx.x, threadIdx.x, view);
 
-	RayNode rayQueueStack[3];
+	Ray rayQueue[3];
 
-	// ray들을 생성하고 queue에 넣는 과정
-	vec3 color = GenerateRayQueue(ray, rayQueueStack, triangles, triangleNum, lights, lightNum, 2);
-
-	// ray들을 queue에서 꺼내면서 color를 정하는 과정
-
-	//vec3 color = RayTraceColor(ray, triangles, triangleNum, lights, lightNum, 1);
+	vec3 color = GenerateRayQueue(ray, rayQueue, triangles, triangleNum, lights, lightNum, 1);
 
 	data[x] = glm::vec4(color, 1.0f);
 }
@@ -286,9 +326,8 @@ void RayTrace(glm::vec4* data, glm::mat4 view, const vector<Triangle> &triangles
 	thrust::device_vector<Light> l = lights;
 
 	size_t size;
-	cudaDeviceSetLimit(cudaLimitMallocHeapSize, 100000000 * sizeof(float));
+	cudaDeviceSetLimit(cudaLimitMallocHeapSize, 10000 * sizeof(float));
 	cudaDeviceGetLimit(&size, cudaLimitMallocHeapSize);
-
 
 	RayTraceD << <WINDOW_HEIGHT, WINDOW_WIDTH >> > (
 		data,

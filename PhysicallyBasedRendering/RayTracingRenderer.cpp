@@ -37,7 +37,16 @@ void RayTracingRenderer::InitializeRender()
 	light.color = glm::vec3(1.0f, 0.0f, 0.0f);
 	lights.push_back(light);*/
 
+	glm::mat4 translateMat = glm::translate(glm::vec3(3.0f, 0.0f, 0.0f));
+
 	triangles = sceneManager->sceneObjs[0].GetTriangles();
+
+	for (int i = 0; i < triangles.size(); i++)
+	{
+		triangles[i].v0 = glm::vec3(translateMat * glm::vec4(triangles[i].v0, 1.0f));
+		triangles[i].v1 = glm::vec3(translateMat * glm::vec4(triangles[i].v1, 1.0f));
+		triangles[i].v2 = glm::vec3(translateMat * glm::vec4(triangles[i].v2, 1.0f));
+	}
 
 	const float halfWidth = 20.0f;
 

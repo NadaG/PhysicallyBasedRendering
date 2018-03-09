@@ -22,18 +22,19 @@ glm::vec3 Object::GetWorldPosition() const
 
 const glm::mat4 Object::GetModelMatrix() const
 {
-	return glm::translate(positionVector) * rotationMatrix * glm::scale(scaleVector);
+	return rotationMatrix * glm::scale(scaleVector) * glm::translate(positionVector);
 }
 
 void Object::Translate(const glm::vec3& vec)
 {
-	this->positionVector += glm::fmat3(rotationMatrix) * vec;
+	this->positionVector += vec;
 }
 
 // radians
 // z y x
 void Object::Rotate(const glm::vec3& vec, float angle)
 {
+	// 현재 축을 기준으로 rotate
 	glm::vec3 v = glm::inverse(glm::fmat3(rotationMatrix)) * vec;
 	this->rotationMatrix = glm::rotate(rotationMatrix, angle, v);
 }

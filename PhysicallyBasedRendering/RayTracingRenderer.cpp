@@ -54,13 +54,13 @@ void RayTracingRenderer::InitializeRender()
 	halfPlane1.v0 = glm::vec3(-halfWidth, 3.0f,  halfWidth);
 	halfPlane1.v1 = glm::vec3(-halfWidth, 3.0f, -halfWidth);
 	halfPlane1.v2 = glm::vec3( halfWidth, 3.0f,  halfWidth);
-	halfPlane1.normal = glm::vec3(0.0f, 1.0f, 0.0f);
+	halfPlane1.normal = glm::vec3(0.0f, -1.0f, 0.0f);
 	triangles.push_back(halfPlane1);
 
 	halfPlane2.v0 = glm::vec3( halfWidth, 3.0f,  halfWidth);
 	halfPlane2.v1 = glm::vec3(-halfWidth, 3.0f, -halfWidth);
 	halfPlane2.v2 = glm::vec3( halfWidth, 3.0f, -halfWidth);
-	halfPlane2.normal = glm::vec3(0.0f, 1.0f, 0.0f);
+	halfPlane2.normal = glm::vec3(0.0f, -1.0f, 0.0f);
 	triangles.push_back(halfPlane2);
 }
 

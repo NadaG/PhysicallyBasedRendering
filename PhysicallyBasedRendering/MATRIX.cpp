@@ -1,50 +1,5 @@
 #include "MATRIX.h"
 
-MATRIX MATRIX::Add(MATRIX m)
-{
-	MATRIX result;
-	for (int i = 0; i < 3; i++)
-		for (int j = 0; j < 3; j++)
-			result.ele[i][j] = ele[i][j] + m.ele[i][j];
-
-	return result;
-}
-
-MATRIX MATRIX::Subtract(MATRIX m)
-{
-	MATRIX result;
-	for (int i = 0; i < 3; i++)
-		for (int j = 0; j < 3; j++)
-			result.ele[i][j] = ele[i][j] - m.ele[i][j];
-
-	return result;
-}
-
-MATRIX MATRIX::Multiply(MATRIX m)
-{
-	MATRIX result;
-	for (int i = 0; i < 3; i++)
-		for (int j = 0; j < 3; j++)
-			result.ele[i][j] = 0.0;
-
-	for (int i = 0; i < 3; i++)
-		for (int j = 0; j < 3; j++)
-			for (int k = 0; k < 3; k++)
-				result.ele[i][j] += ele[i][k] * m.ele[k][j];
-
-	return result;
-}
-
-MATRIX MATRIX::Multiply(float t)
-{
-	MATRIX result;
-	for (int i = 0; i < 3; i++)
-		for (int j = 0; j < 3; j++)
-			result.ele[i][j] = t * ele[i][j];
-
-	return result;
-}
-
 MATRIX MATRIX::Transpose()
 {
 	MATRIX result;
@@ -88,6 +43,56 @@ MATRIX MATRIX::Inverse()
 			result.ele[i][j] /= determinant;
 
 	return result;
+}
+
+MATRIX MATRIX::operator+(MATRIX m)
+{
+	MATRIX result;
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++)
+			result.ele[i][j] = ele[i][j] + m.ele[i][j];
+
+	return result;
+}
+
+MATRIX MATRIX::operator-(MATRIX m)
+{
+	MATRIX result;
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++)
+			result.ele[i][j] = ele[i][j] - m.ele[i][j];
+
+	return result;
+}
+
+MATRIX MATRIX::operator*(MATRIX m)
+{
+	MATRIX result;
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++)
+			result.ele[i][j] = 0.0;
+
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++)
+			for (int k = 0; k < 3; k++)
+				result.ele[i][j] += ele[i][k] * m.ele[k][j];
+
+	return result;
+}
+
+MATRIX MATRIX::operator*(float t)
+{
+	MATRIX result;
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++)
+			result.ele[i][j] = t * ele[i][j];
+
+	return result;
+}
+
+MATRIX operator*(float t, MATRIX m)
+{
+	return m * t;
 }
 
 VECTOR2D MATRIX::operator*(VECTOR2D v)

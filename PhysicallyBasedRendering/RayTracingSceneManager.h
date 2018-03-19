@@ -12,5 +12,12 @@ public:
 	void InitializeObjects();
 	void Update();
 
+	std::vector<Triangle> triangles;
+	std::vector<Light> lights;
+	std::vector<Material> materials;
+
 private:
+
+	glm::vec3 cameraInitPos;
+
 };

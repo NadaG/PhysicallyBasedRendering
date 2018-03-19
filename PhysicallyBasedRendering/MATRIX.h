@@ -11,14 +11,14 @@ public:
 	MATRIX()
 	:ele{ 0 }{}
 
-	MATRIX  Add(MATRIX m);
-	MATRIX  Subtract(MATRIX m);
-	MATRIX  Multiply(MATRIX m);
-	MATRIX  Multiply(float t);
 	MATRIX  Transpose();
-
 	MATRIX  Inverse();
 	float   Determinant();
+
+	MATRIX operator+(MATRIX m);
+	MATRIX operator-(MATRIX m);
+	MATRIX operator*(MATRIX m);
+	MATRIX operator*(float t);
 
 	VECTOR2D operator*(VECTOR2D v);
 	VECTOR3D operator*(VECTOR3D v);

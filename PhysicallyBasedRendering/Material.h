@@ -11,15 +11,15 @@ enum MaterialTexture
 	DIFFUSE_TEX = 1
 };
 
-class Material
-{
-public:
-	Material();
-	virtual ~Material();
-
-	void BindShader(ShaderProgram* const shader);
-
-private:
-
-	ShaderProgram* shader;
-};
+//class Material
+//{
+//public:
+//	Material();
+//	virtual ~Material();
+//
+//	void BindShader(ShaderProgram* const shader);
+//
+//private:
+//
+//	ShaderProgram* shader;
+//};

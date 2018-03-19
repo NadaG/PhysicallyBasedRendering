@@ -48,12 +48,19 @@ void Mesh::SetMesh(aiMesh* mesh)
 		triangle.v1 = vertices[indices[i * 3 + 1]].position;
 		triangle.v2 = vertices[indices[i * 3 + 2]].position;
 
-		triangle.normal =
-			normalize((
-				vertices[indices[i * 3 + 0]].normal +
-				vertices[indices[i * 3 + 1]].normal +
-				vertices[indices[i * 3 + 2]].normal) 
-				/ 3.0f);
+		if (vertices[indices[i * 3 + 0]].normal == glm::vec3(0.0f, 0.0f, 0.0f))
+		{
+			triangle.normal = cross(triangle.v1 - triangle.v0, triangle.v2 - triangle.v0);
+		}
+		else
+		{
+			triangle.normal =
+				normalize((
+					vertices[indices[i * 3 + 0]].normal +
+					vertices[indices[i * 3 + 1]].normal +
+					vertices[indices[i * 3 + 2]].normal)
+					/ 3.0f);
+		}
 
 
 		triangles.push_back(triangle);

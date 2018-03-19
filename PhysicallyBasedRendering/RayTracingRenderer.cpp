@@ -25,49 +25,16 @@ void RayTracingRenderer::InitializeRender()
 		GL_STREAM_DRAW);
 
 	cudaGraphicsGLRegisterBuffer(&cuda_pbo_resource, rayTracePBO, cudaGraphicsMapFlagsWriteDiscard);
-
-	cameraInitPos = sceneManager->movingCamera->GetWorldPosition();
-
-	Light light;
-	light.pos = glm::vec3(0.0f, -5.0f, 0.0f);
-	light.color = glm::vec3(0.0f, 1.0f, 0.0f);
-	lights.push_back(light);
-
-	/*light.pos = glm::vec3(0.0f, 10.0f, 0.0f);
-	light.color = glm::vec3(1.0f, 0.0f, 0.0f);
-	lights.push_back(light);*/
-
-	glm::mat4 translateMat = glm::translate(glm::vec3(3.0f, 0.0f, 0.0f));
-
-	triangles = sceneManager->sceneObjs[0].GetTriangles();
-
-	for (int i = 0; i < triangles.size(); i++)
-	{
-		triangles[i].v0 = glm::vec3(translateMat * glm::vec4(triangles[i].v0, 1.0f));
-		triangles[i].v1 = glm::vec3(translateMat * glm::vec4(triangles[i].v1, 1.0f));
-		triangles[i].v2 = glm::vec3(translateMat * glm::vec4(triangles[i].v2, 1.0f));
-	}
-
-	const float halfWidth = 20.0f;
-
-	Triangle halfPlane1, halfPlane2;
-	halfPlane1.v0 = glm::vec3(-halfWidth, 3.0f,  halfWidth);
-	halfPlane1.v1 = glm::vec3(-halfWidth, 3.0f, -halfWidth);
-	halfPlane1.v2 = glm::vec3( halfWidth, 3.0f,  halfWidth);
-	halfPlane1.normal = glm::vec3(0.0f, -1.0f, 0.0f);
-	triangles.push_back(halfPlane1);
-
-	halfPlane2.v0 = glm::vec3( halfWidth, 3.0f,  halfWidth);
-	halfPlane2.v1 = glm::vec3(-halfWidth, 3.0f, -halfWidth);
-	halfPlane2.v2 = glm::vec3( halfWidth, 3.0f, -halfWidth);
-	halfPlane2.normal = glm::vec3(0.0f, -1.0f, 0.0f);
-	triangles.push_back(halfPlane2);
 }
 
 // glm의 cross(a, b)는 오른손으로 a방향에서 b방향으로 감싸쥘 때의 엄지방향이다.
 void RayTracingRenderer::Render()
 {
 	Object* camera = sceneManager->movingCamera;
+
+	vector<Triangle> triangles = dynamic_cast<RayTracingSceneManager*>(sceneManager)->triangles;
+	vector<Light> lights = dynamic_cast<RayTracingSceneManager*>(sceneManager)->lights;
+	vector<Material> materials = dynamic_cast<RayTracingSceneManager*>(sceneManager)->materials;
 
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 	UseDefaultFBO();
@@ -90,7 +57,7 @@ void RayTracingRenderer::Render()
 	view = glm::inverse(camera->GetModelMatrix());
 
 	// 여기서 render가 다 일어남
-	RayTrace(output, view, triangles, lights);
+	RayTrace(output, view, triangles, lights, materials);
 
 	cudaGraphicsUnmapResources(1, &cuda_pbo_resource, 0);
 

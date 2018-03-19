@@ -21,8 +21,6 @@ private:
 
 	int writeFileNum = 0;
 
-	glm::vec3 cameraInitPos;
-
 	cudaGraphicsResource* cuda_pbo_resource;
 
 	GLuint rayTracePBO;
@@ -31,6 +29,4 @@ private:
 
 	PNGExporter pngExporter;
 
-	std::vector<Triangle> triangles;
-	std::vector<Light> lights;
 };

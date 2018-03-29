@@ -5,6 +5,7 @@
 
 #include "RenderBufferObject.h"
 #include "Texture.h"
+#include "PixelBufferObject.h"
 
 using std::vector;
 

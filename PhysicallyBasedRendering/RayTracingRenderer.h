@@ -26,7 +26,7 @@ private:
 	GLuint rayTracePBO;
 
 	Texture2D rayTracingTex;
+	Texture2D frontTex;
 
 	PNGExporter pngExporter;
-
 };

@@ -103,6 +103,9 @@
     <Filter Include="ForLecture">
       <UniqueIdentifier>{0f4c761a-24bf-4fb5-94d1-a7bdeed7f7f6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\PixelBufferObject">
+      <UniqueIdentifier>{098a2370-dfc9-444a-8133-a1e54713bdee}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -245,6 +248,9 @@
     </ClCompile>
     <ClCompile Include="LectureSceneRenderer.cpp">
       <Filter>ForLecture</Filter>
+    </ClCompile>
+    <ClCompile Include="PixelBufferObject.cpp">
+      <Filter>Source Files\PixelBufferObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -559,6 +565,9 @@
     </ClInclude>
     <ClInclude Include="LectureSceneRenderer.h">
       <Filter>ForLecture</Filter>
+    </ClInclude>
+    <ClInclude Include="PixelBufferObject.h">
+      <Filter>Source Files\PixelBufferObject</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

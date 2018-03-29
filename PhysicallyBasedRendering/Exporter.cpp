@@ -58,7 +58,7 @@ void PNGExporter::WritePngFile(const string fileName, png_bytep* rowPointers, co
 void PNGExporter::WritePngFile(const string fileName, Texture2D texture)
 {
 	// pointer는 reture으로 써야하는 구나
-	float* texData = texture.TexImage();
+	float* texData = texture.GetTexImage();
 	WritePngFile(fileName, texData, texture.GetWidth(), texture.GetHeight());
 }
 

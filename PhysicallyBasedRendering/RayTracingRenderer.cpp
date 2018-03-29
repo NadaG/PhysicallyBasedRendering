@@ -6,7 +6,13 @@
 void RayTracingRenderer::InitializeRender()
 {
 	debugQuadShader->Use();
+	// 셰이더는 이 텍스쳐를 그리겠다고 지정했음
 	debugQuadShader->BindTexture(&rayTracingTex, "map");
+
+	frontTex.LoadTexture("Texture/SkyBox/front.jpg");
+	frontTex.SetParameters(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+	unsigned char* frontArray = frontTex.GetTexImage(GL_RGB, GL_UNSIGNED_BYTE);
 
 	rayTracingTex.LoadTexture(
 		GL_RGBA16F,
@@ -46,9 +52,11 @@ void RayTracingRenderer::Render()
 	//float4* output;
 	glm::vec4* output;
 	size_t num_bytes;
+	// cuda memory로부터 cpu memory로 포인터 위치를 가져오는 건가?
 	cudaGraphicsResourceGetMappedPointer((void**)&output, &num_bytes, cuda_pbo_resource);
 
 	// 각 픽셀마다 rgba
+	// count만큼의 크기의 device 메모리 영역(devPtr부터 시작)에 value로 값을 셋팅 
 	cudaMemset(output, 0, WindowManager::GetInstance()->width * WindowManager::GetInstance()->height * 16);
 
 	glm::mat4 view;
@@ -63,6 +71,7 @@ void RayTracingRenderer::Render()
 
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, rayTracePBO);
 	glBindTexture(GL_TEXTURE_2D, rayTracingTex.GetTexture());
+	// pixels를 0으로 함으로써 연결된 PBO로 부터 픽셀 정보를 가져옴
 	glTexSubImage2D(
 		GL_TEXTURE_2D, 0, 0, 0,
 		WindowManager::GetInstance()->width,

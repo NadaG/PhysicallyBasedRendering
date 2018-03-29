@@ -17,7 +17,7 @@ Texture2D FourierTransform::fourierTransform2D(const Texture2D& inputTexture, co
 	const int width = inputTexture.GetWidth();
 	const int height = inputTexture.GetHeight();
 
-	float* inArray = inputTexture.TexImage();
+	float* inArray = inputTexture.GetTexImage();
 	float* outArray = new float[width * height * 4];
 
 	fftw_complex* f = new fftw_complex[width * height];

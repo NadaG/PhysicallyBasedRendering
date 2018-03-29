@@ -33,8 +33,15 @@ const int WINDOW_WIDTH = 1024;
 
 const int QUEUE_SIZE = 3;
 
+// cudaReadModeElementType:  no conversion performed
+// cudeReadModeNormalizedFloat   
+// if type is integer, value returned is mapped to[-1.0, 1.0] for signed, and[0.0, 1.0] for unsigned
+
+texture<float, 1, cudaReadModeElementType> tex;
+
 __device__ bool RaySphereIntersect(Ray ray, Sphere sphere, float& dist)
 {
+
 	glm::vec3 s = ray.origin - sphere.origin;
 
 	float a = dot(ray.dir, ray.dir);
@@ -119,6 +126,8 @@ __device__ Ray GenerateCameraRay(int y, int x, glm::mat4 view)
 	Ray ray;
 
 	// 0~1
+	// world 좌표로 ray를 쏨, 옆으로 긴 window일수록 옆으로 많은 ray를 쏨
+	// 값을 NDC 좌표로 변환함
 	float NDCy = (y + 0.5f) / WINDOW_HEIGHT;
 	float NDCx = (x + 0.5f) / WINDOW_WIDTH;
 
@@ -126,10 +135,13 @@ __device__ Ray GenerateCameraRay(int y, int x, glm::mat4 view)
 
 	float fov = 45.0f;
 
-	// -1 ~ 1
+	// NDC 좌표를 -1 ~ 1로 변환
 	// tan(halfRadian)
+	// world 좌표에서 z축 방향이 1이기 때문에 곱하지 않음
 	float xx = (NDCx * 2.0f - 1.0f) * tan(fov * 0.5f * 3.141592653f / 180.0f) * aspectRatio;
 	float yy = (NDCy * 2.0f - 1.0f) * tan(fov * 0.5f * 3.141592653f / 180.0f);
+
+	// ray들의 world 방향이 정해짐
 
 	ray.origin = glm::vec3(-view * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 	ray.dir = normalize(vec3(view * vec4(glm::vec3(xx, yy, -1.0), 0.0f)));

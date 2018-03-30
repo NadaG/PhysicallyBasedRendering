@@ -9,11 +9,6 @@ void RayTracingRenderer::InitializeRender()
 	// 셰이더는 이 텍스쳐를 그리겠다고 지정했음
 	debugQuadShader->BindTexture(&rayTracingTex, "map");
 
-	frontTex.LoadTexture("Texture/SkyBox/front.jpg");
-	frontTex.SetParameters(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-
-	unsigned char* frontArray = frontTex.GetTexImage(GL_RGB, GL_UNSIGNED_BYTE);
-
 	rayTracingTex.LoadTexture(
 		GL_RGBA16F,
 		WindowManager::GetInstance()->width,
@@ -21,6 +16,18 @@ void RayTracingRenderer::InitializeRender()
 		GL_RGBA,
 		GL_FLOAT);
 	rayTracingTex.SetParameters(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+	/*albedoTex.LoadTexture("Texture/SkyBox/front.jpg");
+	albedoTex.SetParameters(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+	unsigned char* frontArray = albedoTex.GetTexImage(GL_RGB, GL_UNSIGNED_BYTE);
+
+	for (int i = 0; i < 30 * 30; i++)
+	{
+		albedoTexArray.push_back((float)frontArray[i] / 255.0f);
+	}
+
+	delete[] frontArray;*/
 
 	glGenBuffers(1, &rayTracePBO);
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, rayTracePBO);

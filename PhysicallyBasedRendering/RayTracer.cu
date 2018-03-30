@@ -33,12 +33,6 @@ const int WINDOW_WIDTH = 1024;
 
 const int QUEUE_SIZE = 3;
 
-// cudaReadModeElementType:  no conversion performed
-// cudeReadModeNormalizedFloat   
-// if type is integer, value returned is mapped to[-1.0, 1.0] for signed, and[0.0, 1.0] for unsigned
-
-texture<float, 1, cudaReadModeElementType> tex;
-
 __device__ bool RaySphereIntersect(Ray ray, Sphere sphere, float& dist)
 {
 
@@ -180,10 +174,11 @@ __device__ bool IsQueueEmpty(const int front, const int rear)
 __device__ vec3 RayCastColor(
 	vec3 V,
 	vec3 hitPoint, 
-	Light light, 
+	Light light,
 	Triangle* triangles, 
 	const int triangleNum, 
 	Material* materials,
+	const int materialNum,
 	const int nearestTriangleIdx)
 {
 	vec3 color = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -283,7 +278,8 @@ __device__ vec4 RayTraceColor(
 			for (int k = 0; k < lightNum; k++)
 			{
 				lightedColor += glm::vec4(
-					RayCastColor(-nowRay.dir, hitPoint, lights[k], triangles, triangleNum, materials, nearestTriangleIdx)
+					RayCastColor(-nowRay.dir, hitPoint, lights[k], 
+						triangles, triangleNum, materials, matNum, nearestTriangleIdx)
 					, 1.0f);
 			}
 
@@ -328,7 +324,8 @@ __device__ vec4 RayTraceColor(
 		for (int k = 0; k < lightNum; k++)
 		{
 			lightedColor += glm::vec4(
-				RayCastColor(-nowRay.dir, hitPoint, lights[k], triangles, triangleNum, materials, nearestTriangleIdx)
+				RayCastColor(-nowRay.dir, hitPoint, lights[k], 
+					triangles, triangleNum, materials, matNum, nearestTriangleIdx)
 				, 1.0f);
 		}
 
@@ -362,8 +359,8 @@ __global__ void RayTraceD(
 
 void RayTrace(
 	glm::vec4* data, 
-	glm::mat4 view, 
-	const vector<Triangle> &triangles, 
+	glm::mat4 view,
+	const vector<Triangle>& triangles, 
 	const vector<Light>& lights,
 	const vector<Material>& materials)
 {
@@ -371,18 +368,22 @@ void RayTrace(
 	thrust::device_vector<Light> l = lights;
 	thrust::device_vector<Material> m = materials;
 
+	Triangle* d_t = thrust::raw_pointer_cast(&t[0]);
+	Light* d_l = thrust::raw_pointer_cast(&l[0]);
+	Material* d_m = thrust::raw_pointer_cast(&m[0]);
+
 	size_t size;
-	cudaDeviceSetLimit(cudaLimitMallocHeapSize, 10000000 * sizeof(float));
+	cudaDeviceSetLimit(cudaLimitMallocHeapSize, 1000000 * sizeof(float));
 	cudaDeviceGetLimit(&size, cudaLimitMallocHeapSize);
 
 	RayTraceD << <WINDOW_HEIGHT, WINDOW_WIDTH >> > (
 		data,
 		view,
-		t.data().get(),
+		d_t,
 		t.size(),
-		l.data().get(),
+		d_l,
 		l.size(),
-		m.data().get(),
+		d_m ,
 		m.size()
-		);
+	);
 }

@@ -49,6 +49,7 @@ struct Light
 
 struct Material
 {
+	//////
 	glm::vec3 ambient;
 	glm::vec3 diffuse;
 	glm::vec3 specular;
@@ -56,7 +57,7 @@ struct Material
 
 void RayTrace(
 	glm::vec4* data, 
-	glm::mat4 mat, 
-	const vector<Triangle> &triangles, 
+	glm::mat4 view,
+	const vector<Triangle>& triangles, 
 	const vector<Light>& lights, 
 	const vector<Material>& materials);

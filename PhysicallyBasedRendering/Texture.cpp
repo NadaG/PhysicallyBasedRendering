@@ -138,7 +138,7 @@ unsigned char* Texture::GetTexImage(const GLenum& format, const GLenum& type) co
 	if (format == GL_RGB)
 		data = new unsigned char[width * height * 3];
 	else
-		data = new unsigned char[width*height * 4];
+		data = new unsigned char[width * height * 4];
 
 	glGetTexImage(GL_TEXTURE_2D, 0, format, type, data);
 

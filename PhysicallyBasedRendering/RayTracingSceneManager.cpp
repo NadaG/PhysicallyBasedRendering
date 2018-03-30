@@ -53,7 +53,6 @@ void RayTracingSceneManager::InitializeObjects()
 	defaultMat.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
 	defaultMat.diffuse = glm::vec3(0.2f, 0.2f, 0.6f);
 	defaultMat.specular = glm::vec3(0.2f, 0.2f, 0.7f);
-	materials.push_back(defaultMat);
 }
 
 void RayTracingSceneManager::Update()

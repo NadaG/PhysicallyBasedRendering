@@ -8,25 +8,27 @@ void RayTracingSceneManager::InitializeObjects()
 
 	SceneObject obj;
 	//obj.LoadModel("Obj/Fluid/0200.obj");
+	//obj.LoadModel("Obj/CornellBox.obj");
 	obj.LoadModel("Obj/torus.obj");
-	
+
 	sceneObjs.push_back(obj);
 
 	cameraInitPos = movingCamera->GetWorldPosition();
 
 	Light light;
-	light.pos = glm::vec3(0.0f, 200.0f, 0.0f);
+	light.pos = glm::vec3(0.0f, 100.0f, 0.0f);
 	light.color = glm::vec3(1.0f, 1.0f, 1.0f);
 	lights.push_back(light);
 
-	glm::mat4 translateMat = glm::translate(glm::vec3(0.0f, 0.0f, 0.0f));
+	glm::mat4 translateMat = glm::translate(glm::vec3(0.0f, 0.0f, -10.0f));
+	glm::mat4 scaleMat = glm::scale(glm::vec3(1.0f, 1.0f, 1.0f));
 	triangles = sceneObjs[0].GetTriangles();
 
 	for (int i = 0; i < triangles.size(); i++)
 	{
-		triangles[i].v0 = glm::vec3(translateMat * glm::vec4(triangles[i].v0, 1.0f));
-		triangles[i].v1 = glm::vec3(translateMat * glm::vec4(triangles[i].v1, 1.0f));
-		triangles[i].v2 = glm::vec3(translateMat * glm::vec4(triangles[i].v2, 1.0f));
+		triangles[i].v0 = glm::vec3(translateMat * scaleMat * glm::vec4(triangles[i].v0, 1.0f));
+		triangles[i].v1 = glm::vec3(translateMat * scaleMat * glm::vec4(triangles[i].v1, 1.0f));
+		triangles[i].v2 = glm::vec3(translateMat * scaleMat * glm::vec4(triangles[i].v2, 1.0f));
 	}
 
 	const float halfWidth = 200.0f;
@@ -51,7 +53,6 @@ void RayTracingSceneManager::InitializeObjects()
 	defaultMat.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
 	defaultMat.diffuse = glm::vec3(0.2f, 0.2f, 0.6f);
 	defaultMat.specular = glm::vec3(0.2f, 0.2f, 0.7f);
-	materials.push_back(defaultMat);
 }
 
 void RayTracingSceneManager::Update()

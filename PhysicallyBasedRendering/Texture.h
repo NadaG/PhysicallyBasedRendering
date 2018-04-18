@@ -45,7 +45,8 @@ public:
 	void LoadDepthTexture(const float& width, const float& height);
 
 	// delete를 호출한 쪽에서 해결하도록 함
-	float* TexImage() const;
+	float* GetTexImage() const;
+	unsigned char* GetTexImage(const GLenum& format, const GLenum& type) const;
 
 	const GLuint& GetTexture() const { return texture; }
 

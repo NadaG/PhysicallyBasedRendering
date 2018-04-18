@@ -19,5 +19,5 @@ public:
 private:
 
 	glm::vec3 cameraInitPos;
-
+	Texture2D frontTex;
 };

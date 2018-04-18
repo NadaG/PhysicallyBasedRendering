@@ -27,6 +27,8 @@ private:
 
 	Texture2D rayTracingTex;
 
-	PNGExporter pngExporter;
+	Texture2D albedoTex;
+	vector<float> albedoTexArray;
 
+	PNGExporter pngExporter;
 };

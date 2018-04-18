@@ -21,7 +21,7 @@ Texture2D FourierTransform::PointSpreadFunction(
 	const int width = inputTexture.GetWidth();
 	const int height = inputTexture.GetHeight();
 
-	float* inArray = inputTexture.TexImage();
+	float* inArray = inputTexture.GetTexImage();
 	float* outArray = new float[width * height * 4];
 
 	fftw_complex* f = new fftw_complex[width * height];

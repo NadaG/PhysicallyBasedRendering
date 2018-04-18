@@ -35,6 +35,7 @@ const int QUEUE_SIZE = 3;
 
 __device__ bool RaySphereIntersect(Ray ray, Sphere sphere, float& dist)
 {
+
 	glm::vec3 s = ray.origin - sphere.origin;
 
 	float a = dot(ray.dir, ray.dir);
@@ -119,6 +120,8 @@ __device__ Ray GenerateCameraRay(int y, int x, glm::mat4 view)
 	Ray ray;
 
 	// 0~1
+	// world 좌표로 ray를 쏨, 옆으로 긴 window일수록 옆으로 많은 ray를 쏨
+	// 값을 NDC 좌표로 변환함
 	float NDCy = (y + 0.5f) / WINDOW_HEIGHT;
 	float NDCx = (x + 0.5f) / WINDOW_WIDTH;
 
@@ -126,10 +129,13 @@ __device__ Ray GenerateCameraRay(int y, int x, glm::mat4 view)
 
 	float fov = 45.0f;
 
-	// -1 ~ 1
+	// NDC 좌표를 -1 ~ 1로 변환
 	// tan(halfRadian)
+	// world 좌표에서 z축 방향이 1이기 때문에 곱하지 않음
 	float xx = (NDCx * 2.0f - 1.0f) * tan(fov * 0.5f * 3.141592653f / 180.0f) * aspectRatio;
 	float yy = (NDCy * 2.0f - 1.0f) * tan(fov * 0.5f * 3.141592653f / 180.0f);
+
+	// ray들의 world 방향이 정해짐
 
 	ray.origin = glm::vec3(-view * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 	ray.dir = normalize(vec3(view * vec4(glm::vec3(xx, yy, -1.0), 0.0f)));
@@ -168,10 +174,11 @@ __device__ bool IsQueueEmpty(const int front, const int rear)
 __device__ vec3 RayCastColor(
 	vec3 V,
 	vec3 hitPoint, 
-	Light light, 
+	Light light,
 	Triangle* triangles, 
 	const int triangleNum, 
 	Material* materials,
+	const int materialNum,
 	const int nearestTriangleIdx)
 {
 	vec3 color = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -271,7 +278,8 @@ __device__ vec4 RayTraceColor(
 			for (int k = 0; k < lightNum; k++)
 			{
 				lightedColor += glm::vec4(
-					RayCastColor(-nowRay.dir, hitPoint, lights[k], triangles, triangleNum, materials, nearestTriangleIdx)
+					RayCastColor(-nowRay.dir, hitPoint, lights[k], 
+						triangles, triangleNum, materials, matNum, nearestTriangleIdx)
 					, 1.0f);
 			}
 
@@ -316,7 +324,8 @@ __device__ vec4 RayTraceColor(
 		for (int k = 0; k < lightNum; k++)
 		{
 			lightedColor += glm::vec4(
-				RayCastColor(-nowRay.dir, hitPoint, lights[k], triangles, triangleNum, materials, nearestTriangleIdx)
+				RayCastColor(-nowRay.dir, hitPoint, lights[k], 
+					triangles, triangleNum, materials, matNum, nearestTriangleIdx)
 				, 1.0f);
 		}
 
@@ -350,8 +359,8 @@ __global__ void RayTraceD(
 
 void RayTrace(
 	glm::vec4* data, 
-	glm::mat4 view, 
-	const vector<Triangle> &triangles, 
+	glm::mat4 view,
+	const vector<Triangle>& triangles, 
 	const vector<Light>& lights,
 	const vector<Material>& materials)
 {
@@ -359,18 +368,22 @@ void RayTrace(
 	thrust::device_vector<Light> l = lights;
 	thrust::device_vector<Material> m = materials;
 
+	Triangle* d_t = thrust::raw_pointer_cast(&t[0]);
+	Light* d_l = thrust::raw_pointer_cast(&l[0]);
+	Material* d_m = thrust::raw_pointer_cast(&m[0]);
+
 	size_t size;
-	cudaDeviceSetLimit(cudaLimitMallocHeapSize, 10000000 * sizeof(float));
+	cudaDeviceSetLimit(cudaLimitMallocHeapSize, 1000000 * sizeof(float));
 	cudaDeviceGetLimit(&size, cudaLimitMallocHeapSize);
 
 	RayTraceD << <WINDOW_HEIGHT, WINDOW_WIDTH >> > (
 		data,
 		view,
-		t.data().get(),
+		d_t,
 		t.size(),
-		l.data().get(),
+		d_l,
 		l.size(),
-		m.data().get(),
+		d_m ,
 		m.size()
-		);
+	);
 }

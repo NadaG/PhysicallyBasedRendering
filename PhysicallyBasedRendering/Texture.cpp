@@ -37,12 +37,18 @@ void Texture::LoadTexture(const string& s)
 		// input할 데이터의 type은 GL_UNSIGNED_BYTE임
 		GLenum format;
 		if (nrComponents == 1)
+		{
 			format = GL_RED;
+		}
 		else if (nrComponents == 3)
+		{
 			format = GL_RGB;
+		}
 		else if (nrComponents == 4)
+		{
 			format = GL_RGBA;
-
+		}
+		
 		// 보통 이미지의 경우 unsigned byte로 저장하고
 		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
@@ -78,7 +84,6 @@ void Texture::LoadTextureDDS(const string & s)
 		else if (nrComponents == 4)
 			format = GL_RGBA;
 
-		// 보통 이미지의 경우 unsigned byte로 저장하고
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, format, GL_FLOAT, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -109,7 +114,7 @@ void Texture::UpdateTexture(float* data, GLenum format, GLenum type)
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, format, type, data);
 }
 
-float* Texture::TexImage() const
+float* Texture::GetTexImage() const
 {
 	glBindTexture(GL_TEXTURE_2D, texture);
 
@@ -119,6 +124,23 @@ float* Texture::TexImage() const
 	data = new float[width * height * 4];
 
 	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, data);
+
+	return data;
+}
+
+unsigned char* Texture::GetTexImage(const GLenum& format, const GLenum& type) const
+{
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	unsigned char* data;
+
+	// glGetTexImage는 한 픽셀에 대해 internal four-component에 상관없이 4개의 value를 반환함
+	if (format == GL_RGB)
+		data = new unsigned char[width * height * 3];
+	else
+		data = new unsigned char[width * height * 4];
+
+	glGetTexImage(GL_TEXTURE_2D, 0, format, type, data);
 
 	return data;
 }

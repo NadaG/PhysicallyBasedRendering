@@ -20,6 +20,8 @@ public:
 	}
 	virtual ~TemporalGlareRenderer() {};
 
+	vector<vec3> LoadColorMatchingFunction();
+
 	void InitializeRender();
 	void Render();
 	void TerminateRender();
@@ -72,6 +74,11 @@ private:
 	const float lensFiberInRadius = 0.5f;
 	const float lensFiberOutRadius = 5.0f;
 
-	const float lambda = 0.1f;
-	const float d = 0.1f;
+	double lambda = 0.000000380;
+	double lambdaDelta = (0.000000770 - 0.000000380) / 32.0;
+	const double n = 32.0;
+
+	float d = 0.017f;
+
+	const double scalingFactor = 300000.0;
 };

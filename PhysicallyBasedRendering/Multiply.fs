@@ -24,9 +24,10 @@ float Fresnel(float value)
 void main()
 {	
 	float value = texture(apertureTex, outUV).r;
+	float fresnelValue = texture(fresnelDiffractionTex, outUV).r;
 
 	float radius = sqrt((outUV.x-0.5f)*(outUV.x-0.5f) + (outUV.y-0.5f)*(outUV.y-0.5f));
-
+		
 	color = vec4(Fresnel(value));
 
 	//if(radius < 0.35f)
@@ -34,5 +35,5 @@ void main()
 	//else
 	//	color = vec4(0.0, 0.0f, 0.0f, 1.0f);
 
-	color = vec4(vec3(value), 1.0f);
+	color = vec4(value, value, value, 1.0f);
 }

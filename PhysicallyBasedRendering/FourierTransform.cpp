@@ -3,14 +3,18 @@
 
 #include "Debug.h"
 
-#include <glm/glm.hpp>
 
-float* FourierTransform::fourierTransform2D(const int width, const int height, float* f, const bool isInverse)
+float* FourierTransform::PointSpreadFunction(const int width, const int height, float* f, const bool isInverse)
 {
 	return nullptr;
 }
 
-Texture2D FourierTransform::fourierTransform2D(const Texture2D& inputTexture, const float scalingFactor, const bool isInverse)
+Texture2D FourierTransform::PointSpreadFunction(
+	const Texture2D& inputTexture, 
+	const float d, 
+	const float lambda,
+	const bool isInverse,
+	const vec3 cmf)
 {
 	Texture2D outputTexture;
 
@@ -38,32 +42,6 @@ Texture2D FourierTransform::fourierTransform2D(const Texture2D& inputTexture, co
 	fftw_destroy_plan(p);
 	fftw_cleanup();
 
-	////////////////////////////////////////////////////////////////////////////////
-	//for (int i = 0; i < width * height; ++i)
-	//{
-	//	F[i][0] = F[i][0] / (float)(width*height);
-	//}
-
-	//for (int i = 0; i < width*height; ++i)
-	//{
-	//	float re = F[i][0];
-	//	float mag = sqrt(re*re);
-	//	float value = mag;
-
-	//	//const int index = (i * 4 + (width*height) / 2) % (width*height);
-	//	const int index = i * 4;
-
-	//	outArray[index + 0] = value;
-	//	outArray[index + 1] = value;
-	//	outArray[index + 2] = value;
-	//	outArray[index + 3] = 1.0f;
-
-	//	/*if (value > 0.01f)
-	//		Debug::GetInstance()->Log(i);*/
-	//}
-	////////////////////////////////////////////////////////////////////////////////
-
-	////////////////////////////////////////////////////////////////////////////////
 	for (int i = 0; i < width * height; ++i)
 	{
 		int y = i / width;
@@ -75,7 +53,7 @@ Texture2D FourierTransform::fourierTransform2D(const Texture2D& inputTexture, co
 		int newi = y * width + x;
 
 		// temporal glare에 한정된 코드
-		float re = F[newi][0] * F[newi][0] / (scalingFactor * scalingFactor);
+		float re = F[newi][0] * F[newi][0] / (d * lambda * d * lambda);
 
 		if (isInverse)
 			re /= width*height;
@@ -84,35 +62,11 @@ Texture2D FourierTransform::fourierTransform2D(const Texture2D& inputTexture, co
 
 		int index = i * 4;
 
-		//// 위쪽이라면
-		//if (index > width*height * 2)
-		//{
-		//	index = (index + width * height * 2) % (width*height * 4);
-		//}
-		//else
-		//{
-		//	index = (index + width * height * 2);
-		//}
+		cout << cmf.r << endl;
 
-		//// 오른쪽이라면
-		//if (index % (width * 4) > width * 2)
-		//{
-		//	index = index - width * 2;
-		//	//value = 0.0f;
-		//}
-		//else
-		//{
-		//	if (index + width * 2 < index*width*height)
-		//		index = index + width * 2;
-		//	//value = 0.0f;
-		//}
-
-		//outArray[index + 0] = value;
-		//outArray[index + 1] = value;
-		//outArray[index + 2] = value;
-		outArray[index + 0] = glm::clamp(value, 0.0f, 1.0f);
-		outArray[index + 1] = glm::clamp(value, 0.0f, 1.0f);
-		outArray[index + 2] = glm::clamp(value, 0.0f, 1.0f);
+		outArray[index + 0] = glm::clamp(value, 0.0f, 1.0f) * cmf.r;
+		outArray[index + 1] = glm::clamp(value, 0.0f, 1.0f) * cmf.g;
+		outArray[index + 2] = glm::clamp(value, 0.0f, 1.0f) * cmf.b;
 		outArray[index + 3] = 1.0f;
 	}
 	////////////////////////////////////////////////////////////////////////////////

@@ -14,7 +14,6 @@ public:
 	FourierTransform() {}
 	virtual ~FourierTransform() {}
 
-	float* PointSpreadFunction(const int width, const int height, float* f, const bool isInverse);
 	Texture2D PointSpreadFunction(
 		const Texture2D& inputTexture,
 		const float d,

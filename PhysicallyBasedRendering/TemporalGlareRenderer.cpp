@@ -21,12 +21,11 @@ vector<vec3> TemporalGlareRenderer::LoadColorMatchingFunction()
 				int commaIdx = 0;
 				while (line[commaIdx++] != ',');
 
+				line.erase(0, commaIdx);
 				if (i == 0)
 					rgb.r = stof(line.substr(0, commaIdx - 1));
-				else if(i==1)
+				else if (i == 1)
 					rgb.g = stof(line.substr(0, commaIdx - 1));
-
-				line.erase(0, commaIdx);
 				if (i == commaNum - 1)
 					rgb.b = stof(line);
 			}
@@ -160,7 +159,27 @@ void TemporalGlareRenderer::InitializeRender()
 
 	//iftMultipliedTex = ft.PointSpreadFunction(ftMultipliedTex, d, lambda, true);
 
-	for (int i = 0; i < n; i++)
+	png_bytep* initialImage = pngExporter.ReadPngFile("/psf_afters/psf_after0.png");
+	//png_bytep* newImage;
+
+	for (int i = 1; i < n; i++)
+	{
+		string fileName = "/psf_afters/psf_after";
+		fileName.append(std::to_string(i));
+		fileName.append(".png");
+
+		cout << fileName << endl;
+		png_bytep* newImage = pngExporter.SumPng(initialImage, fileName);
+	}
+
+	/*pngExporter.WritePngFile("/psf_afters/psf_sum.png", newImage, 1024, 1024, 8, PNG_COLOR_TYPE_RGBA);
+
+	png_bytep* sumedImage = pngExporter.SumPng("/psf_afters/psf_after0.png", "/psf_afters/psf_after1.png");
+	png_bytep* sumedImage2 = pngExporter.SumPng(sumedImage, "/psf_afters/psf_after2.png");
+	
+	pngExporter.WritePngFile("/psf_afters/psf_sum0.png", sumedImage2, 1024, 1024, 8, PNG_COLOR_TYPE_RGBA);*/
+
+	/*for (int i = 0; i < n; i++)
 	{
 		fresnelDiffractionFBO.Use();
 		fresnelDiffractionFBO.Clear(0.0f, 0.0f, 0.0f, 0.0f);
@@ -174,15 +193,13 @@ void TemporalGlareRenderer::InitializeRender()
 		ftMultipliedTex = ft.PointSpreadFunction(multipliedTex, d, lambda, false, cmf[i * 2]);
 		pngExporter.WritePngFile(fileName, ftMultipliedTex);
 		lambda += lambdaDelta;
-
-		cout << lambda << endl;
 	}
 
 	pngExporter.WritePngFile("psf_before.png", multipliedTex);
 	pngExporter.WritePngFile("psf_after_inverse.png", iftMultipliedTex);
 	pngExporter.WritePngFile("fresnel_term.png", fresnelDiffractionTex);
 
-	writeFileNum++;
+	writeFileNum++;*/
 }
 
 void TemporalGlareRenderer::Render()

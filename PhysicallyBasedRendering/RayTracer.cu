@@ -35,7 +35,6 @@ const int QUEUE_SIZE = 3;
 
 __device__ bool RaySphereIntersect(Ray ray, Sphere sphere, float& dist)
 {
-
 	glm::vec3 s = ray.origin - sphere.origin;
 
 	float a = dot(ray.dir, ray.dir);
@@ -205,9 +204,14 @@ __device__ vec3 RayCastColor(
 		glm::vec3 N = nearestTriangle.normal;
 		glm::vec3 L = glm::normalize(light.pos - hitPoint);
 
-		glm::vec3 matAmbient = materials[nearestTriangle.matrialId].ambient;
+		// TODO materialID, materials 예외처리하자...
+		/*glm::vec3 matAmbient = materials[nearestTriangle.matrialId].ambient;
 		glm::vec3 matDiffuse = materials[nearestTriangle.matrialId].diffuse;
-		glm::vec3 matSpecular = materials[nearestTriangle.matrialId].specular;
+		glm::vec3 matSpecular = materials[nearestTriangle.matrialId].specular;*/
+
+		glm::vec3 matAmbient = glm::vec3(0.2, 0.2, 0.2);
+		glm::vec3 matDiffuse = glm::vec3(0.2, 0.2, 0.2);
+		glm::vec3 matSpecular = glm::vec3(0.2, 0.2, 0.2);
 
 		glm::vec3 ambient = glm::vec3(
 			matAmbient.r * light.color.r,
@@ -243,7 +247,7 @@ __device__ vec4 RayTraceColor(
 	int matNum,
 	int depth)
 {
-	vec4 color = vec4(0.0f);
+	vec4 color = vec4(0.2f);
 	int front = 0, rear = 0;
 
 	// 첫 번째 ray를 node로 하는 queue 생성
@@ -281,6 +285,8 @@ __device__ vec4 RayTraceColor(
 					RayCastColor(-nowRay.dir, hitPoint, lights[k], 
 						triangles, triangleNum, materials, matNum, nearestTriangleIdx)
 					, 1.0f);
+
+				lightedColor += glm::vec4(0.01f, 0.0f, 0.0f, 0.0f);
 			}
 
 			Ray reflectRay;
@@ -368,22 +374,17 @@ void RayTrace(
 	thrust::device_vector<Light> l = lights;
 	thrust::device_vector<Material> m = materials;
 
-	Triangle* d_t = thrust::raw_pointer_cast(&t[0]);
-	Light* d_l = thrust::raw_pointer_cast(&l[0]);
-	Material* d_m = thrust::raw_pointer_cast(&m[0]);
-
 	size_t size;
-	cudaDeviceSetLimit(cudaLimitMallocHeapSize, 1000000 * sizeof(float));
-	cudaDeviceGetLimit(&size, cudaLimitMallocHeapSize);
+	cudaDeviceSetLimit(cudaLimitMallocHeapSize, 10000000 * sizeof(float));
 
 	RayTraceD << <WINDOW_HEIGHT, WINDOW_WIDTH >> > (
 		data,
 		view,
-		d_t,
+		t.data().get(),
 		t.size(),
-		d_l,
+		l.data().get(),
 		l.size(),
-		d_m ,
+		m.data().get(),
 		m.size()
 	);
 }

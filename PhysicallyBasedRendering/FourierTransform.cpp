@@ -3,12 +3,6 @@
 
 #include "Debug.h"
 
-
-float* FourierTransform::PointSpreadFunction(const int width, const int height, float* f, const bool isInverse)
-{
-	return nullptr;
-}
-
 Texture2D FourierTransform::PointSpreadFunction(
 	const Texture2D& inputTexture, 
 	const float d, 
@@ -62,11 +56,13 @@ Texture2D FourierTransform::PointSpreadFunction(
 
 		int index = i * 4;
 
-		cout << cmf.r << endl;
+		const float nm = 0.07f;
 
-		outArray[index + 0] = glm::clamp(value, 0.0f, 1.0f) * cmf.r;
-		outArray[index + 1] = glm::clamp(value, 0.0f, 1.0f) * cmf.g;
-		outArray[index + 2] = glm::clamp(value, 0.0f, 1.0f) * cmf.b;
+		//cout << cmf.r << endl << cmf.g << endl << cmf.b << endl;
+
+		outArray[index + 0] = value * cmf.r * nm;
+		outArray[index + 1] = value * cmf.g * nm;
+		outArray[index + 2] = value * cmf.b * nm;
 		outArray[index + 3] = 1.0f;
 	}
 	////////////////////////////////////////////////////////////////////////////////

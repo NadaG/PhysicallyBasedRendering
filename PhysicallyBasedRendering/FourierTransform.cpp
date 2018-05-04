@@ -194,7 +194,7 @@ Texture2D FourierTransform::ApertureFrourierTransform(
 
 		float value = re*re + im*im;
 
-		value /= (lambda*lambda *d*d);
+		value /= (lambda*lambda * d*d);
 
 		int index = i * 4;
 

@@ -3,14 +3,14 @@
 void RayTracingSceneManager::InitializeObjects()
 {
 	quadObj.LoadModel(QUAD);
-	//movingCamera->Translate(glm::vec3(50.0f, 20.0f, 200.0f));
-	movingCamera->Translate(glm::vec3(0.0f, 5.0f, 100.0f));
+	movingCamera->Translate(glm::vec3(50.0f, 20.0f, 200.0f));
+	//movingCamera->Translate(glm::vec3(0.0f, 5.0f, 100.0f));
 
 	SceneObject obj;
-	//obj.LoadModel("Obj/Fluid/0200.obj");
+	obj.LoadModel("Obj/Fluid/0200.obj");
 	//obj.LoadModel("Obj/StreetLight.obj");
 	//obj.LoadModel("Obj/street_lamp.obj");
-	obj.LoadModel("Obj/torus.obj");
+	//obj.LoadModel("Obj/torus.obj");
 
 	sceneObjs.push_back(obj);
 
@@ -21,16 +21,33 @@ void RayTracingSceneManager::InitializeObjects()
 	light.color = glm::vec3(1.0f, 1.0f, 1.0f);
 	lights.push_back(light);
 
+	// model matrix
 	glm::mat4 translateMat = glm::translate(glm::vec3(0.0f, 0.0f, 0.0f));
 	glm::mat4 scaleMat = glm::scale(glm::vec3(1.0f, 1.0f, 1.0f));
 	triangles = sceneObjs[0].GetTriangles();
+
+	glm::vec3 bmin;
+	glm::vec3 bmax;
 
 	for (int i = 0; i < triangles.size(); i++)
 	{
 		triangles[i].v0 = glm::vec3(translateMat * scaleMat * glm::vec4(triangles[i].v0, 1.0f));
 		triangles[i].v1 = glm::vec3(translateMat * scaleMat * glm::vec4(triangles[i].v1, 1.0f));
 		triangles[i].v2 = glm::vec3(translateMat * scaleMat * glm::vec4(triangles[i].v2, 1.0f));
+
+		bmin.x = min(min(min(triangles[i].v0.x, triangles[i].v1.x), triangles[i].v2.x), bmin.x);
+		bmin.y = min(min(min(triangles[i].v0.y, triangles[i].v1.y), triangles[i].v2.y), bmin.y);
+		bmin.z = min(min(min(triangles[i].v0.z, triangles[i].v1.z), triangles[i].v2.z), bmin.z);
+
+		bmax.x = max(max(max(triangles[i].v0.x, triangles[i].v1.x), triangles[i].v2.x), bmax.x);
+		bmax.y = max(max(max(triangles[i].v0.y, triangles[i].v1.y), triangles[i].v2.y), bmax.y);
+		bmax.z = max(max(max(triangles[i].v0.z, triangles[i].v1.z), triangles[i].v2.z), bmax.z);
 	}
+
+	Debug::GetInstance()->Log(bmin);
+	Debug::GetInstance()->Log(bmax);
+
+	//LoadPlane();
 }
 
 void RayTracingSceneManager::Update()

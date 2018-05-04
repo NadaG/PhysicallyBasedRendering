@@ -10,10 +10,11 @@ class TemporalGlareRenderer : public Renderer
 public:
 	TemporalGlareRenderer(SceneManager* sceneManager)
 		:Renderer(sceneManager), 
-		scale(350000.0f),
+		scale(400000.0f),
 		n(32.0),
 		d(0.017f),
-		lambda(0.000000380),
+		centerLambda(0.000000575),
+		minLambda(0.000000380),
 		lambdaDelta((0.000000770 - 0.000000380) / 32.0),
 		lensParticlesNum(0),
 		lensFibersNum(300),
@@ -81,13 +82,16 @@ private:
 
 	// m(미터)를 기준으로 됨!!!
 	// scaling 된 후 0.1
-	double lambda = 0.000000380;
+	double centerLambda = 0.000000575;
+	double minLambda = 0.000000380;
 	double lambdaDelta = (0.000000770 - 0.000000380) / 32.0;
 	const double n = 32.0;
 
 	// pulil과 cornea사이의 거리
 	// scaling 된 후 5000
 	float d = 0.017f;
+
+	float retinaDiameter = 0.003f;
 
 	//const double scalingFactor = 300000.0;
 	const float scale;

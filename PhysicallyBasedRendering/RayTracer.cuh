@@ -1,6 +1,6 @@
 #pragma once
 
-#define DLLExport __declspec( dllexport )
+#define DLLExport extern "C" __declspec( dllexport )
 
 #include <glm\glm.hpp>
 #include <cuda_runtime.h>
@@ -57,10 +57,16 @@ struct Material
 	glm::vec3 specular;
 };
 
+struct AABB
+{
+	glm::vec3 bounds[2];
+};
+
 DLLExport
 void RayTrace(
 	glm::vec4* data, 
 	glm::mat4 view,
+	const vector<AABB>& objects,
 	const vector<Triangle>& triangles, 
 	const vector<Light>& lights, 
 	const vector<Material>& materials);

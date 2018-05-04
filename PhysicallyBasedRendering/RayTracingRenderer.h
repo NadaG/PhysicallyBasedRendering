@@ -31,4 +31,6 @@ private:
 	vector<float> albedoTexArray;
 
 	PNGExporter pngExporter;
+
+	vector<AABB> objects;
 };

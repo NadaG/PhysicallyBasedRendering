@@ -48,9 +48,9 @@ void TemporalGlareRenderer::ExportSpecturmPSF(vector<vec3> cmf, fftw_complex* f)
 		string fileName = "/psf_afters/psf_after";
 		fileName.append(std::to_string(i));
 		fileName.append(".png");
-		ftMultipliedTex = ft.ApertureFrourierTransform(f, 1024, 1024, lambda, d, cmf[i * 2]);
+		ftMultipliedTex = ft.ApertureFrourierTransform(f, 1024, 1024, centerLambda, d, cmf[i * 2]);
 		pngExporter.WritePngFile(fileName, ftMultipliedTex);
-		lambda += lambdaDelta;
+		centerLambda += lambdaDelta;
 		Sleep(3000);
 		cout << i << "번째 이미지 그리는 중" << endl;
 	}
@@ -84,7 +84,7 @@ void TemporalGlareRenderer::ExportSumPSF()
 void TemporalGlareRenderer::ExportMiddlePSF()
 {
 	string fileName = "/psf_after.png";
-	ftMultipliedTex = ft.PointSpreadFunction(multipliedTex, d, lambda, false, glm::vec3(1.0, 1.0, 1.0));
+	ftMultipliedTex = ft.PointSpreadFunction(multipliedTex, d, centerLambda, false, glm::vec3(1.0, 1.0, 1.0));
 	pngExporter.WritePngFile(fileName, ftMultipliedTex);
 }
 
@@ -93,12 +93,13 @@ void TemporalGlareRenderer::InitializeRender()
 	vector<vec3> cmf = LoadColorMatchingFunction();
 
 	d *= scale;
-	lambda *= scale;
+	centerLambda *= scale;
 	lambdaDelta *= scale;
+	minLambda *= scale;
 
 	cout << scale << endl;
 	cout << d << endl;
-	cout << lambda << endl;
+	cout << centerLambda << endl;
 	cout << lambdaDelta << endl;
 
 	glareShader = new ShaderProgram("Quad.vs", "Pupil.fs");
@@ -109,7 +110,7 @@ void TemporalGlareRenderer::InitializeRender()
 
 	fresnelDiffractionShader = new ShaderProgram("Quad.vs", "FresnelDiffraction.fs");
 	fresnelDiffractionShader->Use();
-	fresnelDiffractionShader->SetUniform1f("lambda", lambda);
+	fresnelDiffractionShader->SetUniform1f("lambda", centerLambda);
 	fresnelDiffractionShader->SetUniform1f("d", d);
 	fresnelDiffractionShader->SetUniform1f("scalingFactor", scale);
 
@@ -117,7 +118,7 @@ void TemporalGlareRenderer::InitializeRender()
 	multiplyShader->Use();
 	multiplyShader->BindTexture(&apertureTex, "apertureTex");
 	multiplyShader->BindTexture(&fresnelDiffractionTex, "fresnelDiffractionTex");
-	multiplyShader->SetUniform1f("lambda", lambda);
+	multiplyShader->SetUniform1f("lambda", centerLambda);
 	multiplyShader->SetUniform1f("d", d);
 
 	apertureFBO.GenFrameBufferObject();
@@ -218,41 +219,62 @@ void TemporalGlareRenderer::InitializeRender()
 	multiplyShader->Use();
 	quad.DrawModel();
 
-	/*ExportSpecturmPSF(cmf);
-	SumPSF();*/
+	/*ExportSpecturmPSF(cmf); */
+	ExportSumPSF();
 	//ExportMiddlePSF();
 
-	fftw_complex* f = new fftw_complex[1024 * 1024];
-	float* aperture = multipliedTex.GetTexImage();
+	
+	//// i가 width, j가 height
+	//const float center = 1024.0f / 2.0f;
+	//double nowLambda = minLambda;
+	//
+	//for (int k = 0; k < n; k++)
+	//{
+	//	fftw_complex* f = new fftw_complex[1024 * 1024];
+	//	float* aperture = multipliedTex.GetTexImage();
+	//	for (int i = 0; i < 1024; i++)
+	//	{
+	//		for (int j = 0; j < 1024; j++)
+	//		{
+	//			// apeture의 상대적인 크기를 정할 수 있음
+	//			float x = (i - center) / 1024.0f;
+	//			float y = (j - center) / 1024.0f;
 
-	// i가 width, j가 height
-	float center = 1024.0f / 2.0f;
+	//			x *= (retinaDiameter * scale);
+	//			y *= (retinaDiameter * scale);
 
-	for (int i = 0; i < 1024; i++)
-	{
-		for (int j = 0; j < 1024; j++)
-		{
-			float x = (i - center) / 1024000.0f;
-			float y = (j - center) / 1024000.0f;
+	//			x *= centerLambda / nowLambda;
+	//			y *= centerLambda / nowLambda;
 
-			x *= scale;
-			y *= scale;
+	//			float ape = aperture[i * 1024 * 4 + j * 4 + 0];
 
-			float ape = aperture[i * 1024 * 4 + j * 4 + 0];
+	//			// real 
+	//			f[i * 1024 + j][0] = cos(3.141592653 * (x*x + y*y) / (nowLambda * d)) * ape;
+	//			// complex
+	//			f[i * 1024 + j][1] = sin(3.141592653 * (x*x + y*y) / (nowLambda * d)) * ape;
+	//		}
+	//	}
+	//	/*string fileName = "/psf_after.png";
+	//	pngExporter.WritePngFile(fileName, ftMultipliedTex);*/
+	//	Sleep(3000.0f);
 
-			// real 
-			f[i * 1024 + j][0] = cos(3.141592653 * (x*x + y*y) / (lambda * d)) * ape;
-			// complex
-			f[i * 1024 + j][1] = sin(3.141592653 * (x*x + y*y) / (lambda * d)) * ape;
-		}
-	}
+	//	string fileName = "/psf_afters/psf_after";
+	//	fileName.append(std::to_string(k));
+	//	fileName.append(".png");
+
+	//	ftMultipliedTex = ft.ApertureFrourierTransform(f, 1024, 1024, nowLambda, d, cmf[k * 2]);
+	//	
+	//	pngExporter.WritePngFile(fileName, ftMultipliedTex);
+	//	Sleep(3000);
+
+	//	delete[] f;
+	//	delete[] aperture;
+	//	nowLambda += lambdaDelta;
+	//	cout << k << "번째 이미지 그리는 중" << endl;
+	//}
 
 	//ExportSpecturmPSF(cmf, f);
 	//ExportSumPSF();
-
-	ftMultipliedTex = ft.ApertureFrourierTransform(f, 1024, 1024, lambda, d, vec3(1.0, 1.0, 1.0));
-	string fileName = "/psf_after.png";
-	pngExporter.WritePngFile(fileName, ftMultipliedTex);
 }
 
 void TemporalGlareRenderer::Render()

@@ -87,6 +87,49 @@ __device__ bool RayTriangleIntersect(Ray ray, Triangle triangle, float& dist)
 	return true;
 }
 
+__device__ bool RayAABBIntersect(Ray ray, AABB box)
+{
+	float tmin, tmax, tymin, tymax, tzmin, tzmax;
+
+	glm::vec3 invdir = 1.0f / ray.dir;
+	int sign[3];
+	sign[0] = invdir.x < 0;
+	sign[1] = invdir.y < 0;
+	sign[2] = invdir.z < 0;
+
+	tmin = (box.bounds[sign[0]].x - ray.origin.x) * invdir.x;
+	tmax = (box.bounds[1 - sign[0]].x - ray.origin.x) * invdir.x;
+	tymin = (box.bounds[sign[1]].y - ray.origin.y) * invdir.y;
+	tymax = (box.bounds[1 - sign[1]].y - ray.origin.y) * invdir.y;
+
+	if ((tmin > tymax) || (tymin > tmax))
+		return false;
+	if (tymin > tmin)
+		tmin = tymin;
+	if (tymax < tmax)
+		tmax = tymax;
+
+	tzmin = (box.bounds[sign[2]].z - ray.origin.z) * invdir.z;
+	tzmax = (box.bounds[1 - sign[2]].z - ray.origin.z) * invdir.z;
+
+	if ((tmin > tzmax) || (tzmin > tmax))
+		return false;
+
+	return true;
+}
+
+__device__ bool RayAABBsIntersect(Ray ray, AABB* boxes, int boxNum)
+{
+	bool isIntersect = false;
+
+	for (int it = 0; it < boxNum; it++)
+	{
+		if (RayAABBIntersect(ray, boxes[it]))
+			isIntersect = true;
+	}
+	return isIntersect;
+}
+
 // 가장 가까운 triangle의 id를 반환하고 해당 점까지의 dist를 가져온다
 __device__ int FindNearestTriangleIdx(Ray ray, Triangle* triangles, int triangleNum, float& dist)
 {
@@ -239,6 +282,8 @@ __device__ vec3 RayCastColor(
 __device__ vec4 RayTraceColor(
 	Ray ray,
 	Ray* rayQueue,
+	AABB* objects,
+	int objNum,
 	Triangle* triangles,
 	int triangleNum,
 	Light* lights,
@@ -265,6 +310,9 @@ __device__ vec4 RayTraceColor(
 			Ray nowRay;
 			nowRay = GetQueueFront(rayQueue, front);
 			Dequeue(rayQueue, front);
+
+			if (!RayAABBsIntersect(nowRay, objects, objNum))
+				continue;
 
 			float distToTriangle;
 			int nearestTriangleIdx = FindNearestTriangleIdx(nowRay, triangles, triangleNum, distToTriangle);
@@ -342,10 +390,10 @@ __device__ vec4 RayTraceColor(
 	return color;
 }
 
-// TODO view matrix를 점검할 것
 __global__ void RayTraceD(
 	glm::vec4* data,
 	glm::mat4 view,
+	AABB* boundingboxes, int boxNum,
 	Triangle* triangles, int triangleNum,
 	Light* lights, int lightNum,
 	Material* materials, int matNum)
@@ -355,31 +403,42 @@ __global__ void RayTraceD(
 	Ray ray = GenerateCameraRay(blockIdx.x, threadIdx.x, view);
 
 	Ray rayQueue[QUEUE_SIZE];
-
+	// NOTICE for문을 돌릴 때 iter를 변수로 하니까 검은 화면이 나옴
 	// y, x로 들어가고
 	// 0, 0 좌표는 좌하단
-	vec4 color = RayTraceColor(ray, rayQueue, triangles, triangleNum, lights, lightNum, materials, matNum, 1);
-
-	data[x] = color;
+	data[x] = RayTraceColor(
+		ray,
+		rayQueue,
+		boundingboxes,
+		boxNum,
+		triangles,
+		triangleNum,
+		lights,
+		lightNum,
+		materials,
+		matNum, 2);
 }
 
 void RayTrace(
-	glm::vec4* data, 
+	glm::vec4* data,
 	glm::mat4 view,
+	const vector<AABB>& boundingboxes,
 	const vector<Triangle>& triangles, 
 	const vector<Light>& lights,
 	const vector<Material>& materials)
 {
+	thrust::device_vector<AABB> b = boundingboxes;
 	thrust::device_vector<Triangle> t = triangles;
 	thrust::device_vector<Light> l = lights;
 	thrust::device_vector<Material> m = materials;
 
-	size_t size;
 	cudaDeviceSetLimit(cudaLimitMallocHeapSize, 500000000 * sizeof(float));
 
 	RayTraceD << <WINDOW_HEIGHT, WINDOW_WIDTH >> > (
 		data,
 		view,
+		b.data().get(),
+		b.size(),
 		t.data().get(),
 		t.size(),
 		l.data().get(),

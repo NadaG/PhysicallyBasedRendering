@@ -4,11 +4,12 @@ void RayTracingSceneManager::InitializeObjects()
 {
 	quadObj.LoadModel(QUAD);
 	//movingCamera->Translate(glm::vec3(50.0f, 20.0f, 200.0f));
-	movingCamera->Translate(glm::vec3(0.0f, 0.0f, 20.0f));
+	movingCamera->Translate(glm::vec3(0.0f, 5.0f, 100.0f));
 
 	SceneObject obj;
 	//obj.LoadModel("Obj/Fluid/0200.obj");
-	//obj.LoadModel("Obj/CornellBox.obj");
+	//obj.LoadModel("Obj/StreetLight.obj");
+	//obj.LoadModel("Obj/street_lamp.obj");
 	obj.LoadModel("Obj/torus.obj");
 
 	sceneObjs.push_back(obj);
@@ -20,7 +21,7 @@ void RayTracingSceneManager::InitializeObjects()
 	light.color = glm::vec3(1.0f, 1.0f, 1.0f);
 	lights.push_back(light);
 
-	glm::mat4 translateMat = glm::translate(glm::vec3(0.0f, 0.0f, -10.0f));
+	glm::mat4 translateMat = glm::translate(glm::vec3(0.0f, 0.0f, 0.0f));
 	glm::mat4 scaleMat = glm::scale(glm::vec3(1.0f, 1.0f, 1.0f));
 	triangles = sceneObjs[0].GetTriangles();
 
@@ -30,29 +31,6 @@ void RayTracingSceneManager::InitializeObjects()
 		triangles[i].v1 = glm::vec3(translateMat * scaleMat * glm::vec4(triangles[i].v1, 1.0f));
 		triangles[i].v2 = glm::vec3(translateMat * scaleMat * glm::vec4(triangles[i].v2, 1.0f));
 	}
-
-	const float halfWidth = 200.0f;
-	const float planeY = -5.0f;
-
-	// 오른손 좌표계로 삼각형의 앞면이 그려진다.
-	Triangle halfPlane1, halfPlane2;
-	halfPlane1.v0 = glm::vec3(-halfWidth, planeY, halfWidth);
-	halfPlane1.v1 = glm::vec3(halfWidth, planeY, halfWidth);
-	halfPlane1.v2 = glm::vec3(-halfWidth, planeY, -halfWidth);
-	halfPlane1.normal = glm::vec3(0.0f, 1.0f, 0.0f);
-
-	triangles.push_back(halfPlane1);
-
-	halfPlane2.v0 = glm::vec3(halfWidth, planeY, halfWidth);
-	halfPlane2.v1 = glm::vec3(halfWidth, planeY, -halfWidth);
-	halfPlane2.v2 = glm::vec3(-halfWidth, planeY, -halfWidth);
-	halfPlane2.normal = glm::vec3(0.0f, 1.0f, 0.0f);
-	triangles.push_back(halfPlane2);
-
-	Material defaultMat;
-	defaultMat.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
-	defaultMat.diffuse = glm::vec3(0.2f, 0.2f, 0.6f);
-	defaultMat.specular = glm::vec3(0.2f, 0.2f, 0.7f);
 }
 
 void RayTracingSceneManager::Update()
@@ -128,6 +106,36 @@ void RayTracingSceneManager::Update()
 	{
 		movingCamera->Rotate(glm::vec3(0.0f, 0.0f, 1.0f), 0.005f);
 	}
+}
+
+void RayTracingSceneManager::LoadPlane()
+{
+	const float halfWidth = 200.0f;
+	const float planeY = -5.0f;
+
+	// 오른손 좌표계로 삼각형의 앞면이 그려진다.
+	Triangle halfPlane1, halfPlane2;
+	halfPlane1.v0 = glm::vec3(-halfWidth, planeY, halfWidth);
+	halfPlane1.v1 = glm::vec3(halfWidth, planeY, halfWidth);
+	halfPlane1.v2 = glm::vec3(-halfWidth, planeY, -halfWidth);
+	halfPlane1.normal = glm::vec3(0.0f, 1.0f, 0.0f);
+
+	triangles.push_back(halfPlane1);
+
+	halfPlane2.v0 = glm::vec3(halfWidth, planeY, halfWidth);
+	halfPlane2.v1 = glm::vec3(halfWidth, planeY, -halfWidth);
+	halfPlane2.v2 = glm::vec3(-halfWidth, planeY, -halfWidth);
+	halfPlane2.normal = glm::vec3(0.0f, 1.0f, 0.0f);
+	triangles.push_back(halfPlane2);
+}
+
+void RayTracingSceneManager::LoadMaterial()
+{
+	///
+	Material defaultMat;
+	defaultMat.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
+	defaultMat.diffuse = glm::vec3(0.2f, 0.2f, 0.6f);
+	defaultMat.specular = glm::vec3(0.2f, 0.2f, 0.7f);
 }
 
 // quaternion은 

@@ -1,5 +1,7 @@
 #pragma once
 
+#define DLLExport __declspec( dllexport )
+
 #include <glm\glm.hpp>
 #include <cuda_runtime.h>
 #include <glm\gtc\matrix_transform.hpp>
@@ -55,6 +57,7 @@ struct Material
 	glm::vec3 specular;
 };
 
+DLLExport
 void RayTrace(
 	glm::vec4* data, 
 	glm::mat4 view,

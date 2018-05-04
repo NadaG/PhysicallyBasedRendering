@@ -358,7 +358,7 @@ __global__ void RayTraceD(
 
 	// y, x로 들어가고
 	// 0, 0 좌표는 좌하단
-	vec4 color = RayTraceColor(ray, rayQueue, triangles, triangleNum, lights, lightNum, materials, matNum, 2);
+	vec4 color = RayTraceColor(ray, rayQueue, triangles, triangleNum, lights, lightNum, materials, matNum, 1);
 
 	data[x] = color;
 }
@@ -375,7 +375,7 @@ void RayTrace(
 	thrust::device_vector<Material> m = materials;
 
 	size_t size;
-	cudaDeviceSetLimit(cudaLimitMallocHeapSize, 10000000 * sizeof(float));
+	cudaDeviceSetLimit(cudaLimitMallocHeapSize, 500000000 * sizeof(float));
 
 	RayTraceD << <WINDOW_HEIGHT, WINDOW_WIDTH >> > (
 		data,

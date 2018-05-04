@@ -16,6 +16,9 @@ public:
 	std::vector<Light> lights;
 	std::vector<Material> materials;
 
+	void LoadPlane();
+	void LoadMaterial();
+
 private:
 
 	glm::vec3 cameraInitPos;

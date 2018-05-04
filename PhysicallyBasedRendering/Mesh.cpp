@@ -51,7 +51,7 @@ void Mesh::SetMesh(aiMesh* mesh)
 		if (vertices[indices[i * 3 + 0]].normal == glm::vec3(0.0f, 0.0f, 0.0f))
 		{
 			triangle.normal = cross(triangle.v1 - triangle.v0, triangle.v2 - triangle.v0);
-			Debug::GetInstance()->Log(triangle.normal);
+			//Debug::GetInstance()->Log(triangle.normal);
 		}
 		else
 		{

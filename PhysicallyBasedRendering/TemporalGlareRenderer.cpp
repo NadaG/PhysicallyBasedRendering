@@ -23,14 +23,14 @@ vector<vec3> TemporalGlareRenderer::LoadColorMatchingFunction()
 				int commaIdx = 0;
 				while (line[commaIdx++] != ',');
 
-				line.erase(0, commaIdx);
-				if (i == 0)
+				if (i == 1)
 					rgb.r = stof(line.substr(0, commaIdx - 1));
-				else if (i == 1)
+				else if (i == 2)
 					rgb.g = stof(line.substr(0, commaIdx - 1));
-				if (i == commaNum - 1)
-					rgb.b = stof(line);
+
+				line.erase(0, commaIdx);
 			}
+			rgb.b = stof(line);
 			cmfVector.push_back(rgb);
 		}
 		cmf.close();
@@ -39,13 +39,67 @@ vector<vec3> TemporalGlareRenderer::LoadColorMatchingFunction()
 	return cmfVector;
 }
 
+void TemporalGlareRenderer::ExportSpecturmPSF(vector<vec3> cmf, fftw_complex* f)
+{
+	SceneObject& quad = sceneManager->quadObj;
+	for (int i = 0; i < n; i++)
+	{
+		
+		string fileName = "/psf_afters/psf_after";
+		fileName.append(std::to_string(i));
+		fileName.append(".png");
+		ftMultipliedTex = ft.ApertureFrourierTransform(f, 1024, 1024, lambda, d, cmf[i * 2]);
+		pngExporter.WritePngFile(fileName, ftMultipliedTex);
+		lambda += lambdaDelta;
+		Sleep(3000);
+		cout << i << "번째 이미지 그리는 중" << endl;
+	}
+
+	/*pngExporter.WritePngFile("psf_before.png", multipliedTex);
+	pngExporter.WritePngFile("psf_after_inverse.png", iftMultipliedTex);
+	pngExporter.WritePngFile("fresnel_term.png", fresnelDiffractionTex);
+
+	writeFileNum++;*/
+}
+
+void TemporalGlareRenderer::ExportSumPSF()
+{
+	png_bytep* initialImage = pngExporter.ReadPngFile("/psf_afters/psf_after0.png");
+
+	for (int i = 1; i < n; i++)
+	{
+		string fileName = "/psf_afters/psf_after";
+		fileName.append(std::to_string(i));
+		fileName.append(".png");
+
+		initialImage = pngExporter.SumPng(initialImage, fileName);
+
+		Sleep(3000);
+		cout << i << "번째 이미지 합치는 중" << endl;
+	}
+
+	pngExporter.WritePngFile("/psf_afters/psf_sum.png", initialImage, 1024, 1024, 8, PNG_COLOR_TYPE_RGBA);
+}
+
+void TemporalGlareRenderer::ExportMiddlePSF()
+{
+	string fileName = "/psf_after.png";
+	ftMultipliedTex = ft.PointSpreadFunction(multipliedTex, d, lambda, false, glm::vec3(1.0, 1.0, 1.0));
+	pngExporter.WritePngFile(fileName, ftMultipliedTex);
+}
+
 void TemporalGlareRenderer::InitializeRender()
 {
 	vector<vec3> cmf = LoadColorMatchingFunction();
 
-	d *= scalingFactor;
-	lambda *= scalingFactor;
-	lambdaDelta *= scalingFactor;
+	d *= scale;
+	lambda *= scale;
+	lambdaDelta *= scale;
+
+	cout << scale << endl;
+	cout << d << endl;
+	cout << lambda << endl;
+	cout << lambdaDelta << endl;
 
 	glareShader = new ShaderProgram("Quad.vs", "Pupil.fs");
 	glareShader->Use();
@@ -57,6 +111,7 @@ void TemporalGlareRenderer::InitializeRender()
 	fresnelDiffractionShader->Use();
 	fresnelDiffractionShader->SetUniform1f("lambda", lambda);
 	fresnelDiffractionShader->SetUniform1f("d", d);
+	fresnelDiffractionShader->SetUniform1f("scalingFactor", scale);
 
 	multiplyShader = new ShaderProgram("Quad.vs", "Multiply.fs");
 	multiplyShader->Use();
@@ -129,13 +184,12 @@ void TemporalGlareRenderer::InitializeRender()
 	GenerateParticlesVAO();
 	GeneratePupilVAO();
 
-	////////////////// debugind 용도임
+	////////////////// debuging 용도임
 	/*GenerateCosTex();
 	cosFourierTex = ft.PointSpreadFunction(cosTex, 1.0f, 1.0f, false);
 
 	pngExporter.WritePngFile("cos_before.png", cosTex);
 	pngExporter.WritePngFile("cos_after.png", cosFourierTex);*/
-
 
 	vector<SceneObject>& sceneObjs = sceneManager->sceneObjs;
 	Object* camera = sceneManager->movingCamera;
@@ -154,50 +208,51 @@ void TemporalGlareRenderer::InitializeRender()
 	DrawWithVAO(lensParticlesVAO, lensParticlesNum);
 	glEnable(GL_DEPTH_TEST);
 
+	fresnelDiffractionFBO.Use();
+	fresnelDiffractionFBO.Clear(0.0f, 0.0f, 0.0f, 0.0f);
+	fresnelDiffractionShader->Use();
+	quad.DrawModel();
+
 	multipliedFBO.Use();
 	multipliedFBO.Clear(0.0f, 0.0f, 0.0f, 0.0f);
 	multiplyShader->Use();
 	quad.DrawModel();
 
-	png_bytep* initialImage = pngExporter.ReadPngFile("/psf_afters/psf_after0.png");
+	/*ExportSpecturmPSF(cmf);
+	SumPSF();*/
+	//ExportMiddlePSF();
 
-	for (int i = 1; i < n; i++)
+	fftw_complex* f = new fftw_complex[1024 * 1024];
+	float* aperture = multipliedTex.GetTexImage();
+
+	// i가 width, j가 height
+	float center = 1024.0f / 2.0f;
+
+	for (int i = 0; i < 1024; i++)
 	{
-		string fileName = "/psf_afters/psf_after";
-		fileName.append(std::to_string(i));
-		fileName.append(".png");
+		for (int j = 0; j < 1024; j++)
+		{
+			float x = (i - center) / 1024000.0f;
+			float y = (j - center) / 1024000.0f;
 
-		initialImage = pngExporter.SumPng(initialImage, fileName);
+			x *= scale;
+			y *= scale;
 
-		Sleep(3000);
-		cout << i << endl;
+			float ape = aperture[i * 1024 * 4 + j * 4 + 0];
+
+			// real 
+			f[i * 1024 + j][0] = cos(3.141592653 * (x*x + y*y) / (lambda * d)) * ape;
+			// complex
+			f[i * 1024 + j][1] = sin(3.141592653 * (x*x + y*y) / (lambda * d)) * ape;
+		}
 	}
 
-	pngExporter.WritePngFile("/psf_afters/psf_sum.png", initialImage, 1024, 1024, 8, PNG_COLOR_TYPE_RGBA);
+	//ExportSpecturmPSF(cmf, f);
+	//ExportSumPSF();
 
-	/*for (int i = 0; i < n; i++)
-	{
-		fresnelDiffractionFBO.Use();
-		fresnelDiffractionFBO.Clear(0.0f, 0.0f, 0.0f, 0.0f);
-		fresnelDiffractionShader->Use();
-		fresnelDiffractionShader->SetUniform1f("lambda", lambda);
-		quad.DrawModel();
-
-		string fileName = "/psf_afters/psf_after";
-		fileName.append(std::to_string(i));
-		fileName.append(".png");
-		ftMultipliedTex = ft.PointSpreadFunction(multipliedTex, d, lambda, false, cmf[i * 2]);
-		pngExporter.WritePngFile(fileName, ftMultipliedTex);
-		lambda += lambdaDelta;
-		Sleep(3000);
-		cout << i << endl;
-	}*/
-
-	/*pngExporter.WritePngFile("psf_before.png", multipliedTex);
-	pngExporter.WritePngFile("psf_after_inverse.png", iftMultipliedTex);
-	pngExporter.WritePngFile("fresnel_term.png", fresnelDiffractionTex);
-
-	writeFileNum++;*/
+	ftMultipliedTex = ft.ApertureFrourierTransform(f, 1024, 1024, lambda, d, vec3(1.0, 1.0, 1.0));
+	string fileName = "/psf_after.png";
+	pngExporter.WritePngFile(fileName, ftMultipliedTex);
 }
 
 void TemporalGlareRenderer::Render()
@@ -213,23 +268,18 @@ void TemporalGlareRenderer::Render()
 
 	if (!writeFileNum)
 	{
-		/*iftMultipliedTex = ft.fourierTransform2D(ftMultipliedTex, d, lambda, true);
-
-		for (int i = 0; i < n; i++)
+		
+		/*for (int i = 0; i < n; i++)
 		{
-			string fileName = "/psf_afters/psf_after";
-			fileName.append(std::to_string(i));
-			fileName.append(".png");
+			string fileName = "/psf_afters/psf_after.png";
 			ftMultipliedTex = ft.fourierTransform2D(multipliedTex, d, lambda, false);
 			pngExporter.WritePngFile(fileName, ftMultipliedTex);
-			lambda += lambdaDelta;
 		}
 
 		pngExporter.WritePngFile("psf_before.png", multipliedTex);
 		pngExporter.WritePngFile("psf_after_inverse.png", iftMultipliedTex);
 		pngExporter.WritePngFile("fresnel_term.png", fresnelDiffractionTex);
-		
-		writeFileNum++;*/
+		*/
 	}
 }
 

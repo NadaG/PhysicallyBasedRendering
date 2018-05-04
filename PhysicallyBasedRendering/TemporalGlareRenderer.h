@@ -5,15 +5,19 @@
 
 #include <memory>
 
-// TODO path tracing and bloom here
-// Renderer에서는 각각의 ShaderProgram과 Object 배열이 있고
-// ShaderProgram의 vertex shader, fragment shader를 선택하는 과정이 있으며
-// ShaderProgram을 use하고 object를 render하는 과정이 있다.
 class TemporalGlareRenderer : public Renderer
 {
 public:
 	TemporalGlareRenderer(SceneManager* sceneManager)
-		:Renderer(sceneManager)
+		:Renderer(sceneManager), 
+		scale(350000.0f),
+		n(32.0),
+		d(0.017f),
+		lambda(0.000000380),
+		lambdaDelta((0.000000770 - 0.000000380) / 32.0),
+		lensParticlesNum(0),
+		lensFibersNum(300),
+		lensPupilTrianglesNum(500)
 	{
 		zNear = 0.01f;
 		zFar = 100.0f;
@@ -21,6 +25,9 @@ public:
 	virtual ~TemporalGlareRenderer() {};
 
 	vector<vec3> LoadColorMatchingFunction();
+	void ExportSpecturmPSF(vector<vec3>, fftw_complex*);
+	void ExportSumPSF();
+	void ExportMiddlePSF();
 
 	void InitializeRender();
 	void Render();
@@ -35,7 +42,6 @@ public:
 	//
 
 private:
-
 	ShaderProgram* glareShader;
 	ShaderProgram* primitiveShader;
 	ShaderProgram* fresnelDiffractionShader;
@@ -59,7 +65,6 @@ private:
 	// DEBUG
 	Texture2D cosTex;
 	Texture2D cosFourierTex;
-	//
 
 	PNGExporter pngExporter;
 	int writeFileNum = 0;
@@ -74,11 +79,16 @@ private:
 	const float lensFiberInRadius = 0.5f;
 	const float lensFiberOutRadius = 5.0f;
 
+	// m(미터)를 기준으로 됨!!!
+	// scaling 된 후 0.1
 	double lambda = 0.000000380;
 	double lambdaDelta = (0.000000770 - 0.000000380) / 32.0;
 	const double n = 32.0;
 
+	// pulil과 cornea사이의 거리
+	// scaling 된 후 5000
 	float d = 0.017f;
 
-	const double scalingFactor = 300000.0;
+	//const double scalingFactor = 300000.0;
+	const float scale;
 };

@@ -1,4 +1,5 @@
 #include "RayTracer.cuh"
+#include "Octree.cuh"
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <glm\glm.hpp>
@@ -18,8 +19,10 @@
 
 struct Ray
 {
-	glm::vec3 origin;
-	glm::vec3 dir;
+	// Ray의 원점
+	vec3 origin;
+	// Ray의 방향
+	vec3 dir;
 };
 
 struct Sphere
@@ -32,6 +35,9 @@ const int WINDOW_HEIGHT = 1024;
 const int WINDOW_WIDTH = 1024;
 
 const int QUEUE_SIZE = 3;
+
+using std::cout;
+using std::endl;
 
 __device__ bool RaySphereIntersect(Ray ray, Sphere sphere, float& dist)
 {
@@ -104,6 +110,7 @@ __device__ bool RayAABBIntersect(Ray ray, AABB box)
 
 	if ((tmin > tymax) || (tymin > tmax))
 		return false;
+
 	if (tymin > tmin)
 		tmin = tymin;
 	if (tymax < tmax)
@@ -393,6 +400,7 @@ __device__ vec4 RayTraceColor(
 __global__ void RayTraceD(
 	glm::vec4* data,
 	glm::mat4 view,
+	OctreeNode* root,
 	AABB* boundingboxes, int boxNum,
 	Triangle* triangles, int triangleNum,
 	Light* lights, int lightNum,
@@ -406,6 +414,13 @@ __global__ void RayTraceD(
 	// NOTICE for문을 돌릴 때 iter를 변수로 하니까 검은 화면이 나옴
 	// y, x로 들어가고
 	// 0, 0 좌표는 좌하단
+
+	if (ray.dir.x < root->bndMin.x)
+	{
+		data[x] = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+		return;
+	}
+
 	data[x] = RayTraceColor(
 		ray,
 		rayQueue,
@@ -422,6 +437,7 @@ __global__ void RayTraceD(
 void RayTrace(
 	glm::vec4* data,
 	glm::mat4 view,
+	OctreeNode* root,
 	const vector<AABB>& boundingboxes,
 	const vector<Triangle>& triangles, 
 	const vector<Light>& lights,
@@ -434,9 +450,13 @@ void RayTrace(
 
 	cudaDeviceSetLimit(cudaLimitMallocHeapSize, 500000000 * sizeof(float));
 
+	vector<Triangle> tss;
+	OctreeNode* d_root = BuildOctree(tss);
+
 	RayTraceD << <WINDOW_HEIGHT, WINDOW_WIDTH >> > (
 		data,
 		view,
+		d_root,
 		b.data().get(),
 		b.size(),
 		t.data().get(),

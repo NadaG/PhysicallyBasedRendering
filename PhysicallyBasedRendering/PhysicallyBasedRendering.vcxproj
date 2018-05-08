@@ -273,6 +273,7 @@
     <ClInclude Include="LectureSceneRenderer.h" />
     <ClInclude Include="LectureSceneManager.h" />
     <ClInclude Include="MATRIX.h" />
+    <ClInclude Include="Octree.cuh" />
     <ClInclude Include="PixelBufferObject.h" />
     <ClInclude Include="VECTOR.h" />
     <ClInclude Include="LightMovement.h" />
@@ -313,6 +314,7 @@
     <ClInclude Include="WindowManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <CudaCompile Include="Octree.cu" />
     <CudaCompile Include="RayTracer.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

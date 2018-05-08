@@ -73,6 +73,7 @@ void RayTracingRenderer::Render()
 	vector<Triangle> triangles = dynamic_cast<RayTracingSceneManager*>(sceneManager)->triangles;
 	vector<Light> lights = dynamic_cast<RayTracingSceneManager*>(sceneManager)->lights;
 	vector<Material> materials = dynamic_cast<RayTracingSceneManager*>(sceneManager)->materials;
+	OctreeNode* root = dynamic_cast<RayTracingSceneManager*>(sceneManager)->root;
 
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 	UseDefaultFBO();
@@ -97,7 +98,7 @@ void RayTracingRenderer::Render()
 	view = glm::inverse(camera->GetModelMatrix());
 
 	// 여기서 render가 다 일어남
-	RayTrace(output, view, objects, triangles, lights, materials);
+	RayTrace(output, view, root, objects, triangles, lights, materials);
 
 	cudaGraphicsUnmapResources(1, &cuda_pbo_resource, 0);
 

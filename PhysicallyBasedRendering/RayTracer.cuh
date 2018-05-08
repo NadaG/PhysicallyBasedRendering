@@ -14,6 +14,8 @@ using glm::cross;
 using glm::dot;
 using std::vector;
 
+struct OctreeNode;
+
 struct Triangle
 {
 	glm::vec3 v0;
@@ -62,10 +64,12 @@ struct AABB
 	glm::vec3 bounds[2];
 };
 
+
 DLLExport
 void RayTrace(
 	glm::vec4* data, 
 	glm::mat4 view,
+	OctreeNode* root,
 	const vector<AABB>& objects,
 	const vector<Triangle>& triangles, 
 	const vector<Light>& lights, 

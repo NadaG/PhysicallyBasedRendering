@@ -569,9 +569,15 @@
     <ClInclude Include="PixelBufferObject.h">
       <Filter>Source Files\PixelBufferObject</Filter>
     </ClInclude>
+    <ClInclude Include="Octree.cuh">
+      <Filter>Source Files\Cuda</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="RayTracer.cu">
+      <Filter>Source Files\Cuda</Filter>
+    </CudaCompile>
+    <CudaCompile Include="Octree.cu">
       <Filter>Source Files\Cuda</Filter>
     </CudaCompile>
   </ItemGroup>

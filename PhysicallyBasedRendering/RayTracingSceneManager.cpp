@@ -3,14 +3,14 @@
 void RayTracingSceneManager::InitializeObjects()
 {
 	quadObj.LoadModel(QUAD);
-	movingCamera->Translate(glm::vec3(50.0f, 20.0f, 200.0f));
-	//movingCamera->Translate(glm::vec3(0.0f, 5.0f, 100.0f));
+	//movingCamera->Translate(glm::vec3(50.0f, 20.0f, 200.0f));
+	movingCamera->Translate(glm::vec3(0.0f, 5.0f, 30.0f));
 
 	SceneObject obj;
-	obj.LoadModel("Obj/Fluid/0200.obj");
+	//obj.LoadModel("Obj/Fluid/0200.obj");
 	//obj.LoadModel("Obj/StreetLight.obj");
 	//obj.LoadModel("Obj/street_lamp.obj");
-	//obj.LoadModel("Obj/torus.obj");
+	obj.LoadModel("Obj/torus.obj");
 
 	sceneObjs.push_back(obj);
 
@@ -47,7 +47,8 @@ void RayTracingSceneManager::InitializeObjects()
 	Debug::GetInstance()->Log(bmin);
 	Debug::GetInstance()->Log(bmax);
 
-	//LoadPlane();
+	LoadPlane();
+	BuildOctree();
 }
 
 void RayTracingSceneManager::Update()
@@ -153,6 +154,14 @@ void RayTracingSceneManager::LoadMaterial()
 	defaultMat.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
 	defaultMat.diffuse = glm::vec3(0.2f, 0.2f, 0.6f);
 	defaultMat.specular = glm::vec3(0.2f, 0.2f, 0.7f);
+}
+
+void RayTracingSceneManager::BuildOctree()
+{
+	OctreeNode* root;
+	root = new OctreeNode;
+	root->bndMin = glm::vec3(-1.0f, -1.0f, -1.0f);
+	root->bndMax = glm::vec3(1.0f, 1.0f, 1.0f);
 }
 
 // quaternion¿∫ 

@@ -18,7 +18,6 @@ public:
 	void TerminateRender();
 
 private:
-
 	int writeFileNum = 0;
 
 	cudaGraphicsResource* cuda_pbo_resource;

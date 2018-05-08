@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SceneManager.h"
+#include "Octree.cuh"
 
 class RayTracingSceneManager : public SceneManager
 {
@@ -18,6 +19,10 @@ public:
 
 	void LoadPlane();
 	void LoadMaterial();
+
+	void BuildOctree();
+
+	OctreeNode* root;
 
 private:
 

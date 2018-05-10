@@ -254,14 +254,9 @@ __device__ vec3 RayCastColor(
 		glm::vec3 N = nearestTriangle.normal;
 		glm::vec3 L = glm::normalize(light.pos - hitPoint);
 
-		// TODO materialID, materials 예외처리하자...
-		/*glm::vec3 matAmbient = materials[nearestTriangle.matrialId].ambient;
-		glm::vec3 matDiffuse = materials[nearestTriangle.matrialId].diffuse;
-		glm::vec3 matSpecular = materials[nearestTriangle.matrialId].specular;*/
-
-		glm::vec3 matAmbient = glm::vec3(0.2, 0.2, 0.2);
-		glm::vec3 matDiffuse = glm::vec3(0.2, 0.2, 0.2);
-		glm::vec3 matSpecular = glm::vec3(0.2, 0.2, 0.2);
+		glm::vec3 matAmbient = materials[nearestTriangle.materialId].ambient;
+		glm::vec3 matDiffuse = materials[nearestTriangle.materialId].diffuse;
+		glm::vec3 matSpecular = materials[nearestTriangle.materialId].specular;
 
 		glm::vec3 ambient = glm::vec3(
 			matAmbient.r * light.color.r,
@@ -299,7 +294,7 @@ __device__ vec4 RayTraceColor(
 	int matNum,
 	int depth)
 {
-	vec4 color = vec4(0.2f);
+	vec4 color = vec4(0.25f);
 	int front = 0, rear = 0;
 
 	// 첫 번째 ray를 node로 하는 queue 생성
@@ -369,6 +364,9 @@ __device__ vec4 RayTraceColor(
 		nowRay = GetQueueFront(rayQueue, front);
 		Dequeue(rayQueue, front);
 
+		if (!RayAABBsIntersect(nowRay, objects, objNum))
+			continue;
+
 		float distToTriangle;
 		int nearestTriangleIdx = FindNearestTriangleIdx(nowRay, triangles, triangleNum, distToTriangle);
 		
@@ -415,11 +413,11 @@ __global__ void RayTraceD(
 	// y, x로 들어가고
 	// 0, 0 좌표는 좌하단
 
-	if (ray.dir.x < root->bndMin.x)
+	/*if (ray.dir.x < root->bndMin.x)
 	{
 		data[x] = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 		return;
-	}
+	}*/
 
 	data[x] = RayTraceColor(
 		ray,
@@ -431,7 +429,8 @@ __global__ void RayTraceD(
 		lights,
 		lightNum,
 		materials,
-		matNum, 2);
+		matNum, 
+		2);
 }
 
 void RayTrace(

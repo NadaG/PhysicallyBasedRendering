@@ -73,6 +73,10 @@ void PNGExporter::WritePngFile(const string fileName, float* data, const int wid
 	{
 		for (int j = 0; j < width; ++j)
 		{
+			data[(i * width + j) * 4 + 0] = glm::clamp(data[(i * width + j) * 4 + 0], 0.0f, 1.0f);
+			data[(i * width + j) * 4 + 1] = glm::clamp(data[(i * width + j) * 4 + 1], 0.0f, 1.0f);
+			data[(i * width + j) * 4 + 2] = glm::clamp(data[(i * width + j) * 4 + 2], 0.0f, 1.0f);
+
 			rawData[height - i - 1][j * 4 + 0] = (png_byte)floor(data[(i * width + j) * 4 + 0] * 255.0f);
 			rawData[height - i - 1][j * 4 + 1] = (png_byte)floor(data[(i * width + j) * 4 + 1] * 255.0f);
 			rawData[height - i - 1][j * 4 + 2] = (png_byte)floor(data[(i * width + j) * 4 + 2] * 255.0f);

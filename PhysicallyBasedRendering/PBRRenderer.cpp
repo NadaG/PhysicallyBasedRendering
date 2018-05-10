@@ -40,7 +40,7 @@ void PBRRenderer::InitializeRender()
 	brdfShader = new ShaderProgram("Brdf.vs", "Brdf.fs");
 	brdfShader->Use();
 
-	SelectMaterialImage("Gold");
+	SelectMaterialImage("Rock");
 
 	captureFBO.GenFrameBufferObject();
 	captureRBO.GenRenderBufferObject();

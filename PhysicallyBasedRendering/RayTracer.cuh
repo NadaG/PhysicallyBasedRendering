@@ -24,7 +24,8 @@ struct Triangle
 
 	glm::vec3 normal;
 
-	int matrialId = 0;
+	int materialId;
+	int meshId;
 
 	Triangle()
 	{
@@ -33,6 +34,8 @@ struct Triangle
 		v2 = glm::vec3();
 
 		normal = glm::vec3();
+
+		materialId = 0;
 	}
 
 	Triangle(glm::vec3 v0, glm::vec3 v1, glm::vec3 v2)
@@ -42,6 +45,8 @@ struct Triangle
 		this->v2 = v0;
 
 		normal = glm::vec3();
+
+		materialId = 0;
 	}
 };
 
@@ -53,17 +58,19 @@ struct Light
 
 struct Material
 {
-	//////
+	//
 	glm::vec3 ambient;
 	glm::vec3 diffuse;
 	glm::vec3 specular;
+
+	float RefractiveIndex;
+	float reflectivity;
 };
 
 struct AABB
 {
 	glm::vec3 bounds[2];
 };
-
 
 DLLExport
 void RayTrace(

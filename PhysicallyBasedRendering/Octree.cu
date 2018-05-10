@@ -6,7 +6,6 @@ using std::max;
 
 __global__ void BuildOctreeD(Triangle* triangles, int triangleNum)
 {
-
 }
 
 OctreeNode* HostToDevice(OctreeNode* root)
@@ -42,13 +41,8 @@ OctreeNode* BuildOctree(const vector<Triangle>& triangles)
 	root->bnd.bounds[0] = glm::vec3(0.0f, -1.0f, -1.0f);
 	root->bnd.bounds[1] = glm::vec3(1.0f, 1.0f, 1.0f);
 
-	
-
-
 	return HostToDevice(root);
 }
-
-
 
 bool IsInNode(OctreeNode* node, Triangle triangle)
 {
@@ -61,7 +55,6 @@ bool IsInNode(OctreeNode* node, Triangle triangle)
 	triangleAABB.bounds[1].x = max(max(triangle.v0.x, triangle.v1.x), triangle.v2.x);
 	triangleAABB.bounds[1].y = max(max(triangle.v0.y, triangle.v1.y), triangle.v2.y);
 	triangleAABB.bounds[1].z = max(max(triangle.v0.z, triangle.v1.z), triangle.v2.z);
-
 
 	if (triangleAABB.bounds[0].x > node->bnd.bounds[1].x) return false;
 	if (triangleAABB.bounds[1].x < node->bnd.bounds[0].x) return false;

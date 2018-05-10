@@ -130,6 +130,7 @@ void StarBurstRenderer::Render()
 	for (int i = 0; i < lights.size(); i++)
 	{
 		pbrShader->SetUniformVector3f("lightPositions[" + std::to_string(i) + "]", lights[i]->GetPosition());
+		//Debug::GetInstance()->Log(lights[i]->GetPosition());
 		pbrShader->SetUniformVector3f("lightColors[" + std::to_string(i) + "]", lights[i]->GetColor());
 	}
 

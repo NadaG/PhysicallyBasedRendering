@@ -17,10 +17,9 @@ public:
 	std::vector<Light> lights;
 	std::vector<Material> materials;
 
-	void LoadPlane();
-	void LoadMaterial();
+	void LoadPlane(glm::vec3 pos);
 
-	void BuildOctree();
+	void LoadMesh(const string meshfile);
 
 	OctreeNode* root;
 

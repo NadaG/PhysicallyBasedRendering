@@ -22,7 +22,7 @@ glm::vec3 Object::GetWorldPosition() const
 
 const glm::mat4 Object::GetModelMatrix() const
 {
-	return rotationMatrix * glm::scale(scaleVector) * glm::translate(positionVector);
+	return glm::translate(positionVector) * rotationMatrix * glm::scale(scaleVector);
 }
 
 void Object::Translate(const glm::vec3& vec)

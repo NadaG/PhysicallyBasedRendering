@@ -17,6 +17,8 @@ public:
 	void Render();
 	void TerminateRender();
 
+	void OfflineRender(const string outfile);
+
 private:
 	int writeFileNum = 0;
 

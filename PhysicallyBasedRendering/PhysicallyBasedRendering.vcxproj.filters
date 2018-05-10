@@ -100,9 +100,6 @@
     <Filter Include="Shader Files\Debug">
       <UniqueIdentifier>{a5cd879a-26b4-4fd5-992b-10cfa62a6d95}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ForLecture">
-      <UniqueIdentifier>{0f4c761a-24bf-4fb5-94d1-a7bdeed7f7f6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\PixelBufferObject">
       <UniqueIdentifier>{098a2370-dfc9-444a-8133-a1e54713bdee}</UniqueIdentifier>
     </Filter>
@@ -236,18 +233,6 @@
     </ClCompile>
     <ClCompile Include="TemporalGlareSceneManager.cpp">
       <Filter>Source Files\SceneManager</Filter>
-    </ClCompile>
-    <ClCompile Include="MATRIX.cpp">
-      <Filter>ForLecture</Filter>
-    </ClCompile>
-    <ClCompile Include="VECTOR.cpp">
-      <Filter>ForLecture</Filter>
-    </ClCompile>
-    <ClCompile Include="LectureSceneManager.cpp">
-      <Filter>ForLecture</Filter>
-    </ClCompile>
-    <ClCompile Include="LectureSceneRenderer.cpp">
-      <Filter>ForLecture</Filter>
     </ClCompile>
     <ClCompile Include="PixelBufferObject.cpp">
       <Filter>Source Files\PixelBufferObject</Filter>
@@ -553,18 +538,6 @@
     </ClInclude>
     <ClInclude Include="TemporalGlareSceneManager.h">
       <Filter>Source Files\SceneManager</Filter>
-    </ClInclude>
-    <ClInclude Include="MATRIX.h">
-      <Filter>ForLecture</Filter>
-    </ClInclude>
-    <ClInclude Include="VECTOR.h">
-      <Filter>ForLecture</Filter>
-    </ClInclude>
-    <ClInclude Include="LectureSceneManager.h">
-      <Filter>ForLecture</Filter>
-    </ClInclude>
-    <ClInclude Include="LectureSceneRenderer.h">
-      <Filter>ForLecture</Filter>
     </ClInclude>
     <ClInclude Include="PixelBufferObject.h">
       <Filter>Source Files\PixelBufferObject</Filter>

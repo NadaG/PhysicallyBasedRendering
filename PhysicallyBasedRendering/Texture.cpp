@@ -33,7 +33,7 @@ void Texture::LoadTexture(const string& s)
 
 	if (data)
 	{
-		// input할 데이터의 format
+		// input할 데이터의 format, 혹은 output할 데이터의 format
 		// input할 데이터의 type은 GL_UNSIGNED_BYTE임
 		GLenum format;
 		if (nrComponents == 1)
@@ -114,16 +114,29 @@ void Texture::UpdateTexture(float* data, GLenum format, GLenum type)
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, format, type, data);
 }
 
-float* Texture::GetTexImage() const
+float* Texture::GetTexImage(GLenum format) const
 {
 	glBindTexture(GL_TEXTURE_2D, texture);
 
 	float* data;
-
+	int channel = 0;
 	// glGetTexImage는 한 픽셀에 대해 internal four-component에 상관없이 4개의 value를 반환함
-	data = new float[width * height * 4];
 
-	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, data);
+	switch (format)
+	{
+	case GL_R:
+		channel = 1;
+		break;
+	case GL_RGB:
+		channel = 3;
+		break;
+	case GL_RGBA:
+		channel = 4;
+		break;
+	}
+	data = new float[width * height * channel];
+
+	glGetTexImage(GL_TEXTURE_2D, 0, format, GL_FLOAT, data);
 
 	return data;
 }

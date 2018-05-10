@@ -54,16 +54,19 @@ void TemporalGlareRenderer::ExportSpecturmPSF(vector<vec3> cmf, fftw_complex* f)
 		cout << i << "번째 이미지 그리는 중" << endl;
 	}
 
-	/*pngExporter.WritePngFile("psf_before.png", multipliedTex);
+	/*
+	pngExporter.WritePngFile("psf_before.png", multipliedTex);
 	pngExporter.WritePngFile("psf_after_inverse.png", iftMultipliedTex);
 	pngExporter.WritePngFile("fresnel_term.png", fresnelDiffractionTex);
 
-	writeFileNum++;*/
+	writeFileNum++;
+	*/
 }
 
 void TemporalGlareRenderer::ExportSumPSF()
 {
-	png_bytep* initialImage = pngExporter.ReadPngFile("/psf_afters/psf_after0.png");
+	int width, height;
+	png_bytep* initialImage = pngExporter.ReadPngFile("./ExportData/psf_afters/psf_after0.png", width, height);
 
 	for (int i = 1; i < n; i++)
 	{
@@ -80,11 +83,15 @@ void TemporalGlareRenderer::ExportSumPSF()
 	pngExporter.WritePngFile("/psf_afters/psf_sum.png", initialImage, 1024, 1024, 8, PNG_COLOR_TYPE_RGBA);
 }
 
-void TemporalGlareRenderer::ExportMiddlePSF()
+void TemporalGlareRenderer::ExportAperture()
 {
-	string fileName = "/psf_after.png";
-	ftMultipliedTex = ft.PointSpreadFunction(multipliedTex, d, centerLambda, false, glm::vec3(1.0, 1.0, 1.0));
-	pngExporter.WritePngFile(fileName, ftMultipliedTex);
+	pngExporter.WritePngFile("/psf_before.png", multipliedTex);
+}
+
+void TemporalGlareRenderer::ExportMiddlePSF(fftw_complex* f)
+{
+	ftMultipliedTex = ft.ApertureFrourierTransform(f, 1024, 1024, centerLambda, d, glm::vec3(1.0, 1.0, 1.0));
+	pngExporter.WritePngFile("/psf_after.png", ftMultipliedTex);
 }
 
 void TemporalGlareRenderer::InitializeRender()
@@ -217,12 +224,7 @@ void TemporalGlareRenderer::InitializeRender()
 	multipliedFBO.Clear(0.0f, 0.0f, 0.0f, 0.0f);
 	multiplyShader->Use();
 	quad.DrawModel();
-
-	/*ExportSpecturmPSF(cmf); */
-	//ExportSumPSF();
-	//ExportMiddlePSF();
-
-	
+ 
 	//// i가 width, j가 height
 	//const float center = 1024.0f / 2.0f;
 	//double nowLambda = minLambda;
@@ -236,15 +238,18 @@ void TemporalGlareRenderer::InitializeRender()
 	//		for (int j = 0; j < 1024; j++)
 	//		{
 	//			// apeture의 상대적인 크기를 정할 수 있음
-	//			float x = (i - center) / 1024.0f;
-	//			float y = (j - center) / 1024.0f;
-
+	//			float x = (float)(i - center) / 512.0f;
+	//			float y = (float)(j - center) / 512.0f;
+	//			
+	//			/*
 	//			x *= (retinaDiameter * scale);
 	//			y *= (retinaDiameter * scale);
+	//			*/
 
-	//			x *= centerLambda / nowLambda;
-	//			y *= centerLambda / nowLambda;
+	//			x *= nowLambda / centerLambda;
+	//			y *= nowLambda / centerLambda;
 
+	//			// r
 	//			float ape = aperture[i * 1024 * 4 + j * 4 + 0];
 
 	//			// real 
@@ -262,7 +267,7 @@ void TemporalGlareRenderer::InitializeRender()
 	//	fileName.append(".png");
 
 	//	ftMultipliedTex = ft.ApertureFrourierTransform(f, 1024, 1024, nowLambda, d, cmf[k * 2]);
-	//	
+
 	//	pngExporter.WritePngFile(fileName, ftMultipliedTex);
 	//	Sleep(3000);
 
@@ -272,8 +277,13 @@ void TemporalGlareRenderer::InitializeRender()
 	//	cout << k << "번째 이미지 그리는 중" << endl;
 	//}
 
-	//ExportSpecturmPSF(cmf, f);
 	//ExportSumPSF();
+
+	int lightPngWidth, lightPngHeight;
+	png_bytep* lightPng = pngExporter.ReadPngFile("./Texture/TemporalGlare/light.png", lightPngWidth, lightPngHeight);
+	Texture2D ftLightPng = ft.ExcuteFourierTransform(lightPng, lightPngWidth, lightPngHeight);
+
+	pngExporter.WritePngFile("/aaaa.png", ftLightPng);
 }
 
 void TemporalGlareRenderer::Render()

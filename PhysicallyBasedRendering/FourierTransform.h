@@ -1,8 +1,8 @@
 #pragma once
 
 #include <fftw3.h>
-
 #include <glm/glm.hpp>
+#include <png.h>
 
 using glm::vec3;
 
@@ -22,7 +22,7 @@ public:
 		const vec3 cmf);
 
 	Texture2D ExcuteFourierTransform(const Texture2D& inputTexture);
-
+	Texture2D ExcuteFourierTransform(const png_bytep* fByte, const int width, const int height);
 	Texture2D ApertureFrourierTransform(
 		fftw_complex* f, const int width, const int height, const float lambda, const float d, const vec3 cmf);
 

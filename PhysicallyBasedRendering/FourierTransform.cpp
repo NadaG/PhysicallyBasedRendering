@@ -1,6 +1,7 @@
 #include "FourierTransform.h"
 #include "Texture2D.h"
 
+#include <algorithm>
 #include "Debug.h"
 
 Texture2D FourierTransform::PointSpreadFunction(
@@ -15,7 +16,7 @@ Texture2D FourierTransform::PointSpreadFunction(
 	const int width = inputTexture.GetWidth();
 	const int height = inputTexture.GetHeight();
 
-	float* inArray = inputTexture.GetTexImage();
+	float* inArray = inputTexture.GetTexImage(GL_RGBA);
 	float* outArray = new float[width * height * 4];
 
 	fftw_complex* f = new fftw_complex[width * height];
@@ -88,7 +89,7 @@ Texture2D FourierTransform::ExcuteFourierTransform(const Texture2D& inputTexture
 	const int width = inputTexture.GetWidth();
 	const int height = inputTexture.GetHeight();
 
-	float* inArray = inputTexture.GetTexImage();
+	float* inArray = inputTexture.GetTexImage(GL_RGBA);
 	float* outArray = new float[width * height * 4];
 
 	fftw_complex* f = new fftw_complex[width * height];
@@ -148,6 +149,81 @@ Texture2D FourierTransform::ExcuteFourierTransform(const Texture2D& inputTexture
 	delete[] F;
 
 	delete[] inArray;
+	delete[] outArray;
+
+	return outputTexture;
+}
+
+Texture2D FourierTransform::ExcuteFourierTransform(const png_bytep* fByte, const int width, const int height)
+{
+	Texture2D outputTexture;
+
+	float* outArray = new float[width * height];
+
+	fftw_complex* f = new fftw_complex[width * height];
+	fftw_complex* F = new fftw_complex[width * height];
+
+	// √ ±‚»≠
+	for (int i = 0; i < width; ++i)
+	{
+		for (int j = 0; j < height; ++j)
+		{
+			F[i*height + j][0] = 0.0f;
+			F[i*height + j][1] = 0.0f;
+
+			f[i*height + j][0] = (double)fByte[j][i];
+			f[i*height + j][1] = 0.0f;
+		}
+	}
+
+	fftw_plan p = fftw_plan_dft_2d(width, height, f, F, FFTW_FORWARD, FFTW_ESTIMATE);
+	fftw_execute(p);
+	fftw_destroy_plan(p);
+	fftw_cleanup();
+
+	float maxValue = 0.0f;
+	for (int i = 0; i < width * height; ++i)
+	{
+		int y = i / width;
+		int x = i % width;
+
+		x = (x + width / 2) % width;
+		y = (y + height / 2) % height;
+
+		int newi = y * width + x;
+
+		float re = F[newi][0];
+		float im = F[newi][1];
+
+		/*if (isInverse)
+		re /= width*height;*/
+		float value = abs(re);
+
+		maxValue = max(value, maxValue);
+		outArray[i] = value;
+	}
+	
+	for (int i = 0; i < width*height; i++)
+	{
+		float c = 1.0f / logf(1 + abs(maxValue));
+		outArray[i] = c * logf(1 + outArray[i]);
+
+		if (outArray[i] > 1.0f)
+			cout << outArray[i] << endl;
+	}
+
+	////////////////////////////////////////////////////////////////////////////////
+	outputTexture.LoadTexture(
+		GL_R16F,
+		width,
+		height,
+		GL_R,
+		GL_FLOAT);
+	outputTexture.UpdateTexture(outArray, GL_R, GL_FLOAT);
+
+	delete[] f;
+	delete[] F;
+
 	delete[] outArray;
 
 	return outputTexture;

@@ -10,7 +10,7 @@ class TemporalGlareRenderer : public Renderer
 public:
 	TemporalGlareRenderer(SceneManager* sceneManager)
 		:Renderer(sceneManager), 
-		scale(400000.0f),
+		scale(800000.0),
 		n(32.0),
 		d(0.017f),
 		centerLambda(0.000000575),
@@ -28,7 +28,8 @@ public:
 	vector<vec3> LoadColorMatchingFunction();
 	void ExportSpecturmPSF(vector<vec3>, fftw_complex*);
 	void ExportSumPSF();
-	void ExportMiddlePSF();
+	void ExportAperture();
+	void ExportMiddlePSF(fftw_complex* f);
 
 	void InitializeRender();
 	void Render();

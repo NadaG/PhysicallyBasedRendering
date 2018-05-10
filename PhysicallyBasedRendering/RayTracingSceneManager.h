@@ -14,12 +14,14 @@ public:
 	void Update();
 
 	std::vector<Triangle> triangles;
+	std::vector<Sphere> spheres;
 	std::vector<Light> lights;
 	std::vector<Material> materials;
 
 	void LoadPlane(glm::vec3 pos);
-
 	void LoadMesh(const string meshfile);
+
+	vector<Triangle> BackFaceCulling(vector<Triangle> triangles, glm::mat4 model);
 
 	OctreeNode* root;
 

@@ -32,7 +32,10 @@ void RayTracingRenderer::InitializeRender()
 	cudaGraphicsGLRegisterBuffer(&cuda_pbo_resource, rayTracePBO, cudaGraphicsMapFlagsWriteDiscard);
 
 	vector<Triangle> triangles = dynamic_cast<RayTracingSceneManager*>(sceneManager)->triangles;
+	vector<Sphere> spheres = dynamic_cast<RayTracingSceneManager*>(sceneManager)->spheres;
 	AABB aabb;
+	aabb.bounds[0] = glm::vec3(0.0f);
+	aabb.bounds[1] = glm::vec3(0.0f);
 	for (int i = 0; i < triangles.size(); i++)
 	{
 		aabb.bounds[0].x = 
@@ -49,6 +52,18 @@ void RayTracingRenderer::InitializeRender()
 		aabb.bounds[1].z =
 			max(max(max(triangles[i].v0.z, triangles[i].v1.z), triangles[i].v2.z), aabb.bounds[1].z);
 	}
+	
+	for (int i = 0; i < spheres.size(); i++)
+	{
+		aabb.bounds[0].x = min(spheres[i].origin.x - spheres[i].radius, aabb.bounds[0].x);
+		aabb.bounds[0].y = min(spheres[i].origin.y - spheres[i].radius, aabb.bounds[0].y);
+		aabb.bounds[0].z = min(spheres[i].origin.z - spheres[i].radius, aabb.bounds[0].z);
+
+		aabb.bounds[1].x = max(spheres[i].origin.x + spheres[i].radius, aabb.bounds[1].x);
+		aabb.bounds[1].y = max(spheres[i].origin.y + spheres[i].radius, aabb.bounds[1].y);
+		aabb.bounds[1].z = max(spheres[i].origin.z + spheres[i].radius, aabb.bounds[1].z);
+	}
+
 	objects.push_back(aabb);
 
 	/*char tmp[1024];
@@ -62,13 +77,13 @@ void RayTracingRenderer::InitializeRender()
 		infile += ".obj";
 		dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadMesh(infile);
 
-		outfile += "fluid_raytracing/";
+		outfile += "fluid_raytracing/new";
 		outfile += tmp;
 		outfile += ".png";
 		OfflineRender(outfile);
-		Sleep(3000.0f);
+		cout << i << "번째 프레임 그리는 중" << endl;
+		Sleep(5000.0f);
 	}*/
-
 }
 
 // glm의 cross(a, b)는 오른손으로 a방향에서 b방향으로 감싸쥘 때의 엄지방향이다.
@@ -79,6 +94,7 @@ void RayTracingRenderer::Render()
 	Object* camera = sceneManager->movingCamera;
 
 	vector<Triangle> triangles = dynamic_cast<RayTracingSceneManager*>(sceneManager)->triangles;
+	vector<Sphere> spheres = dynamic_cast<RayTracingSceneManager*>(sceneManager)->spheres;
 	vector<Light> lights = dynamic_cast<RayTracingSceneManager*>(sceneManager)->lights;
 	vector<Material> materials = dynamic_cast<RayTracingSceneManager*>(sceneManager)->materials;
 	OctreeNode* root = dynamic_cast<RayTracingSceneManager*>(sceneManager)->root;
@@ -106,7 +122,7 @@ void RayTracingRenderer::Render()
 	view = glm::inverse(camera->GetModelMatrix());
 
 	// 여기서 render가 다 일어남
-	RayTrace(output, view, root, objects, triangles, lights, materials);
+	RayTrace(output, view, root, objects, triangles, spheres, lights, materials);
 
 	cudaGraphicsUnmapResources(1, &cuda_pbo_resource, 0);
 
@@ -147,6 +163,7 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	Object* camera = sceneManager->movingCamera;
 
 	vector<Triangle> triangles = dynamic_cast<RayTracingSceneManager*>(sceneManager)->triangles;
+	vector<Sphere> spheres = dynamic_cast<RayTracingSceneManager*>(sceneManager)->spheres;
 	vector<Light> lights = dynamic_cast<RayTracingSceneManager*>(sceneManager)->lights;
 	vector<Material> materials = dynamic_cast<RayTracingSceneManager*>(sceneManager)->materials;
 	OctreeNode* root = dynamic_cast<RayTracingSceneManager*>(sceneManager)->root;
@@ -174,7 +191,7 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	view = glm::inverse(camera->GetModelMatrix());
 
 	// 여기서 render가 다 일어남
-	RayTrace(output, view, root, objects, triangles, lights, materials);
+	RayTrace(output, view, root, objects, triangles, spheres, lights, materials);
 
 	cudaGraphicsUnmapResources(1, &cuda_pbo_resource, 0);
 

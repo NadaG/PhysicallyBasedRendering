@@ -44,7 +44,6 @@ void TemporalGlareRenderer::ExportSpecturmPSF(vector<vec3> cmf, fftw_complex* f)
 	SceneObject& quad = sceneManager->quadObj;
 	for (int i = 0; i < n; i++)
 	{
-		
 		string fileName = "/psf_afters/psf_after";
 		fileName.append(std::to_string(i));
 		fileName.append(".png");
@@ -220,7 +219,7 @@ void TemporalGlareRenderer::InitializeRender()
 	quad.DrawModel();
 
 	/*ExportSpecturmPSF(cmf); */
-	ExportSumPSF();
+	//ExportSumPSF();
 	//ExportMiddlePSF();
 
 	
@@ -290,7 +289,6 @@ void TemporalGlareRenderer::Render()
 
 	if (!writeFileNum)
 	{
-		
 		/*for (int i = 0; i < n; i++)
 		{
 			string fileName = "/psf_afters/psf_after.png";

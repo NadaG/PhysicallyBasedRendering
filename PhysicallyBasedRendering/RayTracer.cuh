@@ -36,6 +36,7 @@ struct Triangle
 		normal = glm::vec3();
 
 		materialId = 0;
+		meshId = 0;
 	}
 
 	Triangle(glm::vec3 v0, glm::vec3 v1, glm::vec3 v2)
@@ -47,7 +48,23 @@ struct Triangle
 		normal = glm::vec3();
 
 		materialId = 0;
+		meshId = 0;
 	}
+};
+
+struct Sphere
+{
+	glm::vec3 origin;
+	float radius;
+
+	int materialId;
+
+	//Sphere()
+	//{
+	//	origin = vec3();
+	//	radius = 1.0f;
+	//	materialId = 0;
+	//}
 };
 
 struct Light
@@ -58,12 +75,12 @@ struct Light
 
 struct Material
 {
-	//
 	glm::vec3 ambient;
 	glm::vec3 diffuse;
 	glm::vec3 specular;
 
-	float RefractiveIndex;
+	// alpha가 높으면 불투명
+	float refractivity;
 	float reflectivity;
 };
 
@@ -79,5 +96,6 @@ void RayTrace(
 	OctreeNode* root,
 	const vector<AABB>& objects,
 	const vector<Triangle>& triangles, 
+	const vector<Sphere>& spheres,
 	const vector<Light>& lights, 
 	const vector<Material>& materials);

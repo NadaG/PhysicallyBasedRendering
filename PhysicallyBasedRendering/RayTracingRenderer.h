@@ -23,13 +23,8 @@ private:
 	int writeFileNum = 0;
 
 	cudaGraphicsResource* cuda_pbo_resource;
-
 	GLuint rayTracePBO;
-
 	Texture2D rayTracingTex;
-
-	Texture2D albedoTex;
-	vector<float> albedoTexArray;
 
 	PNGExporter pngExporter;
 

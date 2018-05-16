@@ -58,11 +58,30 @@ void PNGExporter::WritePngFile(const string fileName, png_bytep* rowPointers, co
 	fclose(fp);
 }
 
-void PNGExporter::WritePngFile(const string fileName, Texture2D texture)
+void PNGExporter::WritePngFile(const string fileName, Texture2D texture, GLenum format)
 {
 	// pointer는 reture으로 써야하는 구나
-	float* texData = texture.GetTexImage(GL_R);
-	WritePngFile(fileName, texData, texture.GetWidth(), texture.GetHeight(), PNG_COLOR_TYPE_GRAY);
+	float* texData = texture.GetTexImage(format);
+
+	png_byte colorType;
+	
+	switch (format)
+	{
+	case GL_R:
+		colorType = PNG_COLOR_TYPE_GRAY;
+		break;
+	case GL_RGB:
+		colorType = PNG_COLOR_TYPE_RGB;
+		break;
+	case GL_RGBA:
+		colorType = PNG_COLOR_TYPE_RGBA;
+		break;
+	default:
+		colorType = PNG_COLOR_TYPE_RGB;
+		break;
+	}
+
+	WritePngFile(fileName, texData, texture.GetWidth(), texture.GetHeight(), colorType);
 }
 
 void PNGExporter::WritePngFile(const string fileName, float* data, const int width, const int height, const png_byte colorType)

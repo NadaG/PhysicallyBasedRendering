@@ -14,7 +14,7 @@ public:
 	void WritePngFile(const string fileName, png_bytep* rowPointers,
 		const int width, const int height, const png_byte bitDepth, const png_byte colorType);
 	
-	void WritePngFile(const string fileName, Texture2D texture);
+	void WritePngFile(const string fileName, Texture2D texture, GLenum format);
 	void WritePngFile(const string fileName, float* data, const int width, const int height, const png_byte colorType);
 
 	png_bytep* ReadPngFile(const string fileName, int& width, int& height);

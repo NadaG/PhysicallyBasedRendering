@@ -17,7 +17,7 @@ void Mesh::SetMesh(aiMesh* mesh)
 	indices = new GLuint[indexNum];
 
 	// vertices지 positions가 아니라는 것을 주의할 것
-	for (int i = 0; i < mesh->mNumVertices; i++)
+	for (int i = 0; i < mesh->mNumVertices; ++i)
 	{
 		vertices[i].position.x = mesh->mVertices[i].x;
 		vertices[i].position.y = mesh->mVertices[i].y;
@@ -37,7 +37,7 @@ void Mesh::SetMesh(aiMesh* mesh)
 		}
 	}
 
-	for (int i = 0; i < mesh->mNumFaces; i++)
+	for (int i = 0; i < mesh->mNumFaces; ++i)
 	{
 		indices[i * 3 + 0] = mesh->mFaces[i].mIndices[0];
 		indices[i * 3 + 1] = mesh->mFaces[i].mIndices[1];
@@ -48,11 +48,12 @@ void Mesh::SetMesh(aiMesh* mesh)
 		triangle.v1 = vertices[indices[i * 3 + 1]].position;
 		triangle.v2 = vertices[indices[i * 3 + 2]].position;
 
+		// vertex에 normal 정보가 없다면 vertex position 정보를 이용해 face normal을 구함
 		if (vertices[indices[i * 3 + 0]].normal == glm::vec3(0.0f, 0.0f, 0.0f))
 		{
 			triangle.normal = cross(triangle.v1 - triangle.v0, triangle.v2 - triangle.v0);
-			//Debug::GetInstance()->Log(triangle.normal);
 		}
+		// face normal과 vertex normal을 대입
 		else
 		{
 			triangle.normal =
@@ -61,10 +62,52 @@ void Mesh::SetMesh(aiMesh* mesh)
 					vertices[indices[i * 3 + 1]].normal +
 					vertices[indices[i * 3 + 2]].normal)
 					/ 3.0f);
+
+			triangle.v0normal = vertices[indices[i * 3 + 0]].normal;
+			triangle.v1normal = vertices[indices[i * 3 + 1]].normal;
+			triangle.v2normal = vertices[indices[i * 3 + 2]].normal;
 		}
 
 
 		triangles.push_back(triangle);
+	}
+
+	vector<vector<int> > neighborFaceMap;
+	for (int i = 0; i < mesh->mNumVertices; ++i)
+	{
+		vector<int> neighborFaces;
+		for (int j = 0; j < mesh->mNumFaces; ++j)
+		{
+			if (i == mesh->mFaces[j].mIndices[0] ||
+				i == mesh->mFaces[j].mIndices[1] ||
+				i == mesh->mFaces[j].mIndices[2])
+				neighborFaces.push_back(j);
+		}
+		neighborFaceMap.push_back(neighborFaces);
+	}
+
+	for (int i = 0; i < mesh->mNumFaces; ++i)
+	{
+		triangles[i].v0normal = glm::vec3();
+		for (int k = 0; k < neighborFaceMap[indices[i * 3 + 0]].size(); k++)
+		{
+			triangles[i].v0normal += triangles[neighborFaceMap[indices[i * 3 + 0]][k]].normal;
+		}
+		triangles[i].v0normal /= neighborFaceMap[indices[i * 3 + 0]].size();
+
+		triangles[i].v1normal = glm::vec3();
+		for (int k = 0; k < neighborFaceMap[indices[i * 3 + 1]].size(); k++)
+		{
+			triangles[i].v1normal += triangles[neighborFaceMap[indices[i * 3 + 1]][k]].normal;
+		}
+		triangles[i].v1normal /= neighborFaceMap[indices[i * 3 + 1]].size();
+
+		triangles[i].v2normal = glm::vec3();
+		for (int k = 0; k < neighborFaceMap[indices[i * 3 + 2]].size(); k++)
+		{
+			triangles[i].v2normal += triangles[neighborFaceMap[indices[i * 3 + 2]][k]].normal;
+		}
+		triangles[i].v2normal /= neighborFaceMap[indices[i * 3 + 2]].size();
 	}
 }
 
@@ -148,6 +191,14 @@ void Mesh::LoadMesh(const string& fileName)
 				triangle.v0 = vertices[indices[j * 3 + offset + 0]].position;
 				triangle.v1 = vertices[indices[j * 3 + offset + 1]].position;
 				triangle.v2 = vertices[indices[j * 3 + offset + 2]].position;
+
+				triangle.v0normal = vertices[indices[j * 3 + offset + 0]].normal;
+				triangle.v1normal = vertices[indices[j * 3 + offset + 1]].normal;
+				triangle.v2normal = vertices[indices[j * 3 + offset + 2]].normal;
+				
+				Debug::GetInstance()->Log(triangle.v0normal);
+				Debug::GetInstance()->Log(triangle.v1normal);
+				Debug::GetInstance()->Log(triangle.v2normal);
 
 				triangle.normal =
 					normalize((vertices[indices[j * 3 + offset + 0]].normal +

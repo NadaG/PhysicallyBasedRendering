@@ -20,17 +20,17 @@ void RayTracingSceneManager::InitializeObjects()
 	light.color = glm::vec3(1.0f, 1.0f, 1.0f);
 	lights.push_back(light);
 
-	LoadMesh("Obj/PouringFluid/0250.obj");
+	LoadMesh("Obj/PouringFluid/0001.obj");
 
 	Material fluidMat, planeMat, sphereMat, sphereMat2;
-	fluidMat.ambient = glm::vec3(0.0f, 0.0f, 0.04f);
-	fluidMat.diffuse = glm::vec3(0.0f, 0.0f, 0.0f);
+	fluidMat.ambient = glm::vec3(0.0f, 0.0f, 0.2f);
+	fluidMat.diffuse = glm::vec3(0.2f, 0.2f, 0.4f);
 	fluidMat.specular = glm::vec3(0.2f, 0.2f, 0.2f);
-	fluidMat.refractivity = 0.9f;
-	fluidMat.reflectivity = 0.9f;
+	fluidMat.refractivity = 0.5f;
+	fluidMat.reflectivity = 0.0f;
 	materials.push_back(fluidMat);
 
-	planeMat.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
+	planeMat.ambient = glm::vec3(0.2f, 0.5f, 0.2f);
 	planeMat.diffuse = glm::vec3(0.2f, 0.2f, 0.2f);
 	planeMat.specular = glm::vec3(0.2f, 0.2f, 0.2f);
 	planeMat.refractivity = 0.0f;
@@ -48,7 +48,7 @@ void RayTracingSceneManager::InitializeObjects()
 	sphereMat2.diffuse = glm::vec3(0.9f, 0.3f, 0.3f);
 	sphereMat2.specular = glm::vec3(0.9f, 0.2f, 0.2f);
 	sphereMat2.refractivity = 0.0f;
-	sphereMat2.reflectivity = 0.5f;
+	sphereMat2.reflectivity = 0.0f;
 	materials.push_back(sphereMat2);
 
 	Sphere sphere;

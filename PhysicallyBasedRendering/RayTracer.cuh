@@ -24,6 +24,10 @@ struct Triangle
 
 	glm::vec3 normal;
 
+	glm::vec3 v0normal;
+	glm::vec3 v1normal;
+	glm::vec3 v2normal;
+
 	int materialId;
 	int meshId;
 

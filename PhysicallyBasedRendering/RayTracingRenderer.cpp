@@ -8,11 +8,6 @@ using namespace std::chrono;
 
 void RayTracingRenderer::InitializeRender()
 {
-
-	debugQuadShader->Use();
-	// 셰이더는 이 텍스쳐를 그리겠다고 지정했음
-	debugQuadShader->BindTexture(&rayTracingTex, "map");
-
 	rayTracingTex.LoadTexture(
 		GL_RGBA16F,
 		WindowManager::GetInstance()->width,
@@ -84,11 +79,18 @@ void RayTracingRenderer::InitializeRender()
 		cout << i << "번째 프레임 그리는 중" << endl;
 		Sleep(5000.0f);
 	}*/
+
+
+	dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadMesh("Obj/PouringFluid/0000.obj");
+	OfflineRender("0000000.png");
+	Sleep(1000.0f);
 }
 
 // glm의 cross(a, b)는 오른손으로 a방향에서 b방향으로 감싸쥘 때의 엄지방향이다.
 void RayTracingRenderer::Render()
 {
+	return;
+
 	milliseconds bms = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 
 	Object* camera = sceneManager->movingCamera;
@@ -137,14 +139,10 @@ void RayTracingRenderer::Render()
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 	// render end // 
 
-	// draw on fbo
-	SceneObject& quad = sceneManager->quadObj;
-	quad.DrawModel();
-
 	// draw on png
 	if (writeFileNum == 0)
 	{
-		pngExporter.WritePngFile("bab.png", rayTracingTex);
+		pngExporter.WritePngFile("bab.png", rayTracingTex, GL_RGBA);
 		writeFileNum++;
 	}
 
@@ -207,11 +205,11 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	// render end // 
 
 	// draw on fbo
-	SceneObject& quad = sceneManager->quadObj;
-	quad.DrawModel();
+	/*SceneObject& quad = sceneManager->quadObj;
+	quad.DrawModel();*/
 
 	// draw on png
-	pngExporter.WritePngFile(outfile, rayTracingTex);
+	pngExporter.WritePngFile(outfile, rayTracingTex, GL_RGB);
 
 	milliseconds ams = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 	cout << ams.count() - bms.count() << " milliseconds" << endl;

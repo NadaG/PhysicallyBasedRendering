@@ -48,7 +48,7 @@ void TemporalGlareRenderer::ExportSpecturmPSF(vector<vec3> cmf, fftw_complex* f)
 		fileName.append(std::to_string(i));
 		fileName.append(".png");
 		ftMultipliedTex = ft.ApertureFrourierTransform(f, 1024, 1024, centerLambda, d, cmf[i * 2]);
-		pngExporter.WritePngFile(fileName, ftMultipliedTex);
+		pngExporter.WritePngFile(fileName, ftMultipliedTex, GL_R);
 		centerLambda += lambdaDelta;
 		Sleep(3000);
 		cout << i << "번째 이미지 그리는 중" << endl;
@@ -85,13 +85,13 @@ void TemporalGlareRenderer::ExportSumPSF()
 
 void TemporalGlareRenderer::ExportAperture()
 {
-	pngExporter.WritePngFile("/psf_before.png", multipliedTex);
+	pngExporter.WritePngFile("/psf_before.png", multipliedTex, GL_R);
 }
 
 void TemporalGlareRenderer::ExportMiddlePSF(fftw_complex* f)
 {
 	ftMultipliedTex = ft.ApertureFrourierTransform(f, 1024, 1024, centerLambda, d, glm::vec3(1.0, 1.0, 1.0));
-	pngExporter.WritePngFile("/psf_after.png", ftMultipliedTex);
+	pngExporter.WritePngFile("/psf_after.png", ftMultipliedTex, GL_RGB);
 }
 
 void TemporalGlareRenderer::InitializeRender()
@@ -283,7 +283,7 @@ void TemporalGlareRenderer::InitializeRender()
 	png_bytep* lightPng = pngExporter.ReadPngFile("./Texture/TemporalGlare/light.png", lightPngWidth, lightPngHeight);
 	Texture2D ftLightPng = ft.ExcuteFourierTransform(lightPng, lightPngWidth, lightPngHeight);
 
-	pngExporter.WritePngFile("/aaaa.png", ftLightPng);
+	pngExporter.WritePngFile("/aaaa.png", ftLightPng, GL_RGB);
 }
 
 void TemporalGlareRenderer::Render()

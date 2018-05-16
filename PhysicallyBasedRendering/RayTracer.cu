@@ -32,13 +32,34 @@ struct Ray
 const int WINDOW_HEIGHT = 1024;
 const int WINDOW_WIDTH = 1024;
 
-const int QUEUE_SIZE = 3;
+const int QUEUE_SIZE = 9;
 
 using std::cout;
 using std::endl;
 
+__device__ vec3 NormalInterpolation(Triangle triangle, vec3 position)
+{
+	vec3 v0 = triangle.v1 - triangle.v0;
+	vec3 v1 = triangle.v2 - triangle.v0;
+	vec3 v2 = position - triangle.v0;
+
+	float d00 = dot(v0, v0);
+	float d01 = dot(v0, v1);
+	float d11 = dot(v1, v1);
+	float d20 = dot(v2, v0);
+	float d21 = dot(v2, v1);
+	float denom = d00*d11 - d01*d01;
+
+	float v = (d11*d20 - d01*d21) / denom;
+	float w = (d00*d21 - d01*d20) / denom;
+	float u = 1.0f - v - w;
+
+	return u*triangle.v0normal + v*triangle.v1normal + w*triangle.v2normal;
+}
+
 __device__ bool RaySphereIntersect(Ray ray, Sphere sphere, float& dist)
 {
+	float minDist = 0.01f;
 	glm::vec3 s = ray.origin - sphere.origin;
 
 	float a = dot(ray.dir, ray.dir);
@@ -51,7 +72,7 @@ __device__ bool RaySphereIntersect(Ray ray, Sphere sphere, float& dist)
 		float t1 = (-bPrime + sqrt(D)) / a;
 		float t2 = (-bPrime - sqrt(D)) / a;
 		dist = t1 > t2 ? t2 : t1;
-		return true;
+		return dist > minDist;
 	}
 	else
 		return false;
@@ -68,9 +89,11 @@ __device__ bool RayTriangleIntersect(Ray ray, Triangle triangle, float& dist)
 
 	float epsilon = 0.0001f;
 
+	// back face culling on
 	if (det < epsilon)
 		return false;
 
+	// back face culling off
 	if (fabs(det) < epsilon)
 		return false;
 
@@ -146,8 +169,6 @@ __device__ int FindNearestTriangleIdx(Ray ray, Triangle* triangles, int triangle
 	// 그대로 dist를 가져와서 사용하니까 이상해짐
 	for (int i = 0; i < triangleNum; ++i)
 	{
-		if (dot(triangles[i].normal, ray.dir) > 0.0f)
-			continue;
 		// intersect 할 경우
 		if (RayTriangleIntersect(ray, triangles[i], tmpDist))
 		{
@@ -177,9 +198,6 @@ __device__ int FindNearestSphereIdx(Ray ray, Sphere* spheres, int sphereNum, flo
 		// intersect 할 경우
 		if (RaySphereIntersect(ray, spheres[i], tmpDist))
 		{
-			if (dot(ray.dir, ray.origin + ray.dir * tmpDist - spheres[i].origin) > 0.0f)
-				continue;
-
 			// 잘 찾은 경우, 다시 찾지 않기
 			if (tmpDist > rayThreshold && tmpDist < minDist)
 			{
@@ -214,7 +232,6 @@ __device__ Ray GenerateCameraRay(int y, int x, glm::mat4 view)
 	float yy = (NDCy * 2.0f - 1.0f) * tan(fov * 0.5f * 3.141592653f / 180.0f);
 
 	// ray들의 world 방향이 정해짐
-
 	ray.origin = glm::vec3(-view * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 	ray.dir = normalize(vec3(view * vec4(glm::vec3(xx, yy, -1.0), 0.0f)));
 
@@ -236,11 +253,6 @@ __device__ void Dequeue(Ray* rayQueue, int& front)
 __device__ Ray GetQueueFront(Ray* rayQueue, const int front)
 {
 	return rayQueue[(front + 1) % QUEUE_SIZE];
-}
-
-__device__ bool IsQueueFull(const int front, const int rear)
-{
-	return front == (rear + 1) % QUEUE_SIZE;
 }
 
 __device__ bool IsQueueEmpty(const int front, const int rear)
@@ -267,22 +279,33 @@ __device__ bool IsLighted(
 	for (int k = 0; k < triangleNum; ++k)
 	{
 		if (nearestTriangleIdx != k)
-			if (RayTriangleIntersect(shadowRay, triangles[k], tmp)) {
+		{
+			if (RayTriangleIntersect(shadowRay, triangles[k], tmp)) 
+			{
 				// 앞쪽의 dir만 봄
-				if (materials[triangles[k].materialId].refractivity == 0) {
+				if (materials[triangles[k].materialId].refractivity == 0)
+				{
 					if (tmp > 0.0001f)
+					{
 						return false;
+					}
 				}
 			}
+		}
 	}
 
 	for (int k = 0; k < sphereNum; ++k)
 	{
 		if (nearestSphereIdx != k)
+		{
 			if (RaySphereIntersect(shadowRay, spheres[k], tmp))
-				// 앞쪽의 dir만 봄
+			{			// 앞쪽의 dir만 봄
 				if (tmp > 0.0001f)
+				{
 					return false;
+				}
+			}
+		}
 	}
 
 	return true;
@@ -397,7 +420,10 @@ __device__ vec4 RayTraceColor(
 					Triangle nearestTriangle = triangles[nearestTriangleIdx];
 					hitPoint = nowRay.origin + nowRay.dir * distToTriangle;
 					materialId = nearestTriangle.materialId;
-					N = glm::normalize(nearestTriangle.normal);
+					N = NormalInterpolation(nearestTriangle, hitPoint);
+					//N = glm::normalize(nearestTriangle.normal);
+
+					// TODO interpolation
 				}
 				else
 				{
@@ -424,6 +450,8 @@ __device__ vec4 RayTraceColor(
 					}
 				}
 
+				color += lightedColor * nowRay.decay;
+
 				Ray reflectRay;
 				reflectRay.origin = hitPoint;
 				reflectRay.dir = normalize(reflect(nowRay.dir, N));
@@ -432,19 +460,20 @@ __device__ vec4 RayTraceColor(
 
 				Ray refractRay;
 				refractRay.origin = hitPoint;
-				refractRay.dir = normalize(refract(nowRay.dir, N, 1.2f));
+				// eta 원래 재질의 굴절률/들어간 재질읠 굴절률인거 같음
+				refractRay.dir = normalize(refract(nowRay.dir, N, 0.95f));
 				refractRay.rayType = 2;
 				refractRay.decay = nowRay.decay * materials[materialId].refractivity;
 
-				if (reflectRay.decay > 0) {
+				if (reflectRay.decay > 0)
+				{
 					Enqueue(rayQueue, reflectRay, rear);
 				}
 
-				if (refractRay.decay > 0) {
+				if (refractRay.decay > 0)
+				{
 					Enqueue(rayQueue, refractRay, rear);
 				}
-
-				color += lightedColor * nowRay.decay;
 			}
 		}
 
@@ -483,7 +512,9 @@ __device__ vec4 RayTraceColor(
 				Triangle nearestTriangle = triangles[nearestTriangleIdx];
 				hitPoint = nowRay.origin + nowRay.dir * distToTriangle;
 				materialId = nearestTriangle.materialId;
-				N = glm::normalize(nearestTriangle.normal);
+				N = NormalInterpolation(nearestTriangle, hitPoint);
+
+				// TODO interpolation
 			}
 			else
 			{
@@ -509,26 +540,6 @@ __device__ vec4 RayTraceColor(
 						1.0f);
 				}
 			}
-
-			/*Ray reflectRay;
-			reflectRay.origin = hitPoint;
-			reflectRay.dir = normalize(reflect(nowRay.dir, N));
-			reflectRay.rayType = 1;
-			reflectRay.decay = nowRay.decay * materials[materialId].reflectivity;
-
-			Ray refractRay;
-			refractRay.origin = hitPoint;
-			refractRay.dir = normalize(refract(nowRay.dir, N, 1.2f));
-			refractRay.rayType = 2;
-			refractRay.decay = nowRay.decay * materials[materialId].refractivity;*/
-
-			//if (reflectRay.decay > 0) {
-			//	Enqueue(rayQueue, reflectRay, rear);
-			//}
-
-			//if (refractRay.decay > 0) {
-			//	Enqueue(rayQueue, refractRay, rear);
-			//}
 
 			color += lightedColor * nowRay.decay;
 		}
@@ -596,7 +607,7 @@ void RayTrace(
 	thrust::device_vector<Light> l = lights;
 	thrust::device_vector<Material> m = materials;
 
-	cudaDeviceSetLimit(cudaLimitMallocHeapSize, 500000000 * sizeof(float));
+	cudaDeviceSetLimit(cudaLimitMallocHeapSize, 5000000000 * sizeof(float));
 
 	vector<Triangle> tss;
 	OctreeNode* d_root = BuildOctree(tss);

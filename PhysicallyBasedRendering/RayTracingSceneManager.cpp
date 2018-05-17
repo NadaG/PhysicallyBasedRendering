@@ -6,21 +6,19 @@ void RayTracingSceneManager::InitializeObjects()
 	movingCamera->Translate(glm::vec3(15.0f, 20.0f, 90.0f));
 	//movingCamera->Translate(glm::vec3(0.0f, 5.0f, 30.0f));
 
-	//SceneObject obj;
+	SceneObject obj;
 	//obj.LoadModel("Obj/Fluid/0200.obj");
 	//obj.LoadModel("Obj/PouringFluid/0250.obj");
 	//obj.LoadModel("Obj/StreetLight.obj");
 	//obj.LoadModel("Obj/street_lamp.obj");
-	//obj.LoadModel("Obj/torus.obj");
-
-	cameraInitPos = movingCamera->GetWorldPosition();
+	obj.LoadModel("Obj/torus.obj");
 
 	Light light;
 	light.pos = glm::vec3(0.0f, 100.0f, 0.0f);
 	light.color = glm::vec3(1.0f, 1.0f, 1.0f);
 	lights.push_back(light);
 
-	LoadMesh("Obj/PouringFluid/0001.obj");
+	//LoadMesh("Obj/PouringFluid/0001.obj");
 
 	Material fluidMat, planeMat, sphereMat, sphereMat2;
 	fluidMat.ambient = glm::vec3(0.0f, 0.0f, 0.2f);
@@ -56,6 +54,8 @@ void RayTracingSceneManager::InitializeObjects()
 	sphere.radius = 3.0f;
 	sphere.materialId = 3;
 	spheres.push_back(sphere);
+
+	LoadMesh("Obj/torus.obj");
 }
 
 void RayTracingSceneManager::Update()
@@ -104,32 +104,32 @@ void RayTracingSceneManager::Update()
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_A))
 	{
-		movingCamera->Rotate(glm::vec3(0.0f, 1.0f, 0.0f), -0.005f);
+		movingCamera->ModelRotate(glm::vec3(0.0f, 1.0f, 0.0f), -0.005f);
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_D))
 	{
-		movingCamera->Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 0.005f);
+		movingCamera->ModelRotate(glm::vec3(0.0f, 1.0f, 0.0f), 0.005f);
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_W))
 	{
-		movingCamera->Rotate(glm::vec3(1.0f, 0.0f, 0.0f), 0.005f);
+		movingCamera->ModelRotate(glm::vec3(1.0f, 0.0f, 0.0f), 0.005f);
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_S))
 	{
-		movingCamera->Rotate(glm::vec3(1.0f, 0.0f, 0.0f), -0.005f);
+		movingCamera->ModelRotate(glm::vec3(1.0f, 0.0f, 0.0f), -0.005f);
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_Q))
 	{
-		movingCamera->Rotate(glm::vec3(0.0f, 0.0f, 1.0f), -0.005f);
+		movingCamera->ModelRotate(glm::vec3(0.0f, 0.0f, 1.0f), -0.005f);
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_E))
 	{
-		movingCamera->Rotate(glm::vec3(0.0f, 0.0f, 1.0f), 0.005f);
+		movingCamera->ModelRotate(glm::vec3(0.0f, 0.0f, 1.0f), 0.005f);
 	}
 }
 
@@ -145,6 +145,9 @@ void RayTracingSceneManager::LoadPlane(glm::vec3 pos)
 	halfPlane1.v1 = glm::vec3(halfWidth, planeY, halfWidth);
 	halfPlane1.v2 = glm::vec3(-halfWidth, planeY, -halfWidth);
 	halfPlane1.normal = glm::vec3(0.0f, 1.0f, 0.0f);
+	halfPlane1.v0normal = halfPlane1.normal;
+	halfPlane1.v1normal = halfPlane1.normal;
+	halfPlane1.v2normal = halfPlane1.normal;
 	halfPlane1.materialId = 1;
 	triangles.push_back(halfPlane1);
 
@@ -152,6 +155,9 @@ void RayTracingSceneManager::LoadPlane(glm::vec3 pos)
 	halfPlane2.v1 = glm::vec3(halfWidth, planeY, -halfWidth);
 	halfPlane2.v2 = glm::vec3(-halfWidth, planeY, -halfWidth);
 	halfPlane2.normal = glm::vec3(0.0f, 1.0f, 0.0f);
+	halfPlane2.v0normal = halfPlane2.normal;
+	halfPlane2.v1normal = halfPlane2.normal;
+	halfPlane2.v2normal = halfPlane2.normal;
 	halfPlane2.materialId = 1;
 	triangles.push_back(halfPlane2);
 
@@ -160,6 +166,9 @@ void RayTracingSceneManager::LoadPlane(glm::vec3 pos)
 	halfPlane3.v1 = glm::vec3(halfWidth, halfWidth, planeZ);
 	halfPlane3.v2 = glm::vec3(-halfWidth, halfWidth, planeZ);
 	halfPlane3.normal = glm::vec3(0.0f, 0.0f, 1.0f);
+	halfPlane3.v0normal = halfPlane3.normal;
+	halfPlane3.v1normal = halfPlane3.normal;
+	halfPlane3.v2normal = halfPlane3.normal;
 	halfPlane3.materialId = 1;
 	triangles.push_back(halfPlane3);
 
@@ -167,6 +176,9 @@ void RayTracingSceneManager::LoadPlane(glm::vec3 pos)
 	halfPlane4.v1 = glm::vec3(halfWidth, -halfWidth, planeZ);
 	halfPlane4.v2 = glm::vec3(halfWidth, halfWidth, planeZ);
 	halfPlane4.normal = glm::vec3(0.0f, 0.0f, 1.0f);
+	halfPlane4.v0normal = halfPlane4.normal;
+	halfPlane4.v1normal = halfPlane4.normal;
+	halfPlane4.v2normal = halfPlane4.normal;
 	halfPlane4.materialId = 1;
 	triangles.push_back(halfPlane4);
 }
@@ -227,19 +239,19 @@ void RayTracingSceneManager::LoadMesh(const string meshfile)
 	LoadPlane(bmin);
 }
 
-vector<Triangle> RayTracingSceneManager::BackFaceCulling(vector<Triangle> triangles, glm::mat4 model)
-{
-	vector<Triangle> culledFaces;
-
-	for (int i = 0; i < triangles.size(); ++i)
-	{
-		vec3 viewSpaceNormal = model * glm::vec4(triangles[i].normal, 1.0f);
-		vec3 v0WorldPosition = model * glm::vec4(triangles[i].v0, 1.0f);
-		if (glm::dot(viewSpaceNormal, v0WorldPosition - movingCamera->GetWorldPosition()) <= 0.0f)
-			culledFaces.push_back(triangles[i]);
-	}
-	return culledFaces;
-}
+//vector<Triangle> RayTracingSceneManager::BackFaceCulling(vector<Triangle> triangles, glm::mat4 model)
+//{
+//	vector<Triangle> culledFaces;
+//
+//	for (int i = 0; i < triangles.size(); ++i)
+//	{
+//		vec3 viewSpaceNormal = model * glm::vec4(triangles[i].normal, 1.0f);
+//		vec3 v0WorldPosition = model * glm::vec4(triangles[i].v0, 1.0f);
+//		if (glm::dot(viewSpaceNormal, v0WorldPosition - movingCamera->GetWorldPosition()) <= 0.0f)
+//			culledFaces.push_back(triangles[i]);
+//	}
+//	return culledFaces;
+//}
 
 // quaternionÀº 
 

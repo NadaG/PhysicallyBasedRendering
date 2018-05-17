@@ -30,13 +30,21 @@ void Object::Translate(const glm::vec3& vec)
 	this->positionVector += vec;
 }
 
+void Object::ModelTranslate(const glm::vec3 & vec)
+{
+}
+
 // radians
 // z y x
-void Object::Rotate(const glm::vec3& vec, float angle)
+void Object::ModelRotate(const glm::vec3& vec, float angle)
 {
 	// 현재 축을 기준으로 rotate
 	glm::vec3 v = glm::inverse(glm::fmat3(rotationMatrix)) * vec;
 	this->rotationMatrix = glm::rotate(rotationMatrix, angle, v);
+}
+
+void Object::WorldRotate(const glm::vec3 & vec, float angle)
+{
 }
 
 void Object::RotateX(const float angle)

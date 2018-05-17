@@ -18,11 +18,18 @@ public:
 	virtual void Delete() { delete movement; }
 
 	void Translate(const glm::vec3& vec);
-	void Rotate(const glm::vec3& vec, float angle);
+	// world 좌표계에서의 위치가 translate
+	void ModelTranslate(const glm::vec3& vec);
+
+	void ModelRotate(const glm::vec3& vec, float angle);
+	// world 좌표계에서 정의된 axis를 따라서 rotate
+	void WorldRotate(const glm::vec3& vec, float angle);
+
 	void RotateX(const float angle);
 	void RotateY(const float angle);
 	void RotateZ(const float angle);
 
+	// model scaling 밖에 없음
 	void Scale(const glm::vec3& vec);
 
 	void SetRotation(const glm::mat4& rotMat) { rotationMatrix = rotMat; }

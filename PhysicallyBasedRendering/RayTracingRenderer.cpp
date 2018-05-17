@@ -8,6 +8,9 @@ using namespace std::chrono;
 
 void RayTracingRenderer::InitializeRender()
 {
+	debugQuadShader->Use();
+	debugQuadShader->BindTexture(&rayTracingTex, "map");
+
 	rayTracingTex.LoadTexture(
 		GL_RGBA16F,
 		WindowManager::GetInstance()->width,
@@ -81,15 +84,15 @@ void RayTracingRenderer::InitializeRender()
 	}*/
 
 
-	dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadMesh("Obj/PouringFluid/0000.obj");
+	/*dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadMesh("Obj/PouringFluid/0000.obj");
 	OfflineRender("0000000.png");
-	Sleep(1000.0f);
+	Sleep(1000.0f);*/
 }
 
 // glm의 cross(a, b)는 오른손으로 a방향에서 b방향으로 감싸쥘 때의 엄지방향이다.
 void RayTracingRenderer::Render()
 {
-	return;
+	//return;
 
 	milliseconds bms = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 
@@ -120,7 +123,6 @@ void RayTracingRenderer::Render()
 
 	glm::mat4 view;
 	// camera의 model matrix의 inverse가 바로 view matrix
-	// y가 뒤바뀌는 이유
 	view = glm::inverse(camera->GetModelMatrix());
 
 	// 여기서 render가 다 일어남
@@ -139,12 +141,8 @@ void RayTracingRenderer::Render()
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 	// render end // 
 
-	// draw on png
-	if (writeFileNum == 0)
-	{
-		pngExporter.WritePngFile("bab.png", rayTracingTex, GL_RGBA);
-		writeFileNum++;
-	}
+	SceneObject& quad = sceneManager->quadObj;
+	quad.DrawModel();
 
 	milliseconds ams = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 	cout << ams.count() - bms.count() << " milliseconds" << endl;

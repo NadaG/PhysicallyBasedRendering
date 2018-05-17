@@ -21,12 +21,11 @@ public:
 	void LoadPlane(glm::vec3 pos);
 	void LoadMesh(const string meshfile);
 
-	vector<Triangle> BackFaceCulling(vector<Triangle> triangles, glm::mat4 model);
+	//vector<Triangle> BackFaceCulling(vector<Triangle> triangles, glm::mat4 model);
 
 	OctreeNode* root;
 
 private:
 
-	glm::vec3 cameraInitPos;
 	Texture2D frontTex;
 };

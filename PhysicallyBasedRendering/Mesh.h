@@ -53,7 +53,7 @@ public:
 	void SetMesh(aiMesh* mesh);
 	
 	// file name을 통해 mesh를 생성
-	void LoadMesh(const string& fileName);
+	//void LoadMesh(const string& fileName);
 	void LoadMesh(MeshType meshType);
 	
 	void GenerateAndSetVAO();

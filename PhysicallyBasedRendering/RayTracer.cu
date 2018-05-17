@@ -78,7 +78,6 @@ __device__ bool RaySphereIntersect(Ray ray, Sphere sphere, float& dist)
 		return false;
 }
 
-// back face culling이 적용되어 있음
 __device__ bool RayTriangleIntersect(Ray ray, Triangle triangle, float& dist)
 {
 	glm::vec3 v0v1 = triangle.v1 - triangle.v0;
@@ -158,7 +157,6 @@ __device__ bool RayAABBsIntersect(Ray ray, AABB* boxes, int boxNum)
 	return isIntersect;
 }
 
-// 가장 가까운 triangle의 id를 반환하고 해당 점까지의 dist를 가져온다
 __device__ int FindNearestTriangleIdx(Ray ray, Triangle* triangles, int triangleNum, float& dist)
 {
 	const float rayThreshold = 0.001f;
@@ -166,13 +164,10 @@ __device__ int FindNearestTriangleIdx(Ray ray, Triangle* triangles, int triangle
 	int minIdx = -1;
 	float tmpDist;
 
-	// 그대로 dist를 가져와서 사용하니까 이상해짐
 	for (int i = 0; i < triangleNum; ++i)
 	{
-		// intersect 할 경우
 		if (RayTriangleIntersect(ray, triangles[i], tmpDist))
 		{
-			// 잘 찾은 경우, 다시 찾지 않기
 			if (tmpDist > rayThreshold && tmpDist < minDist)
 			{
 				minDist = tmpDist;
@@ -192,13 +187,10 @@ __device__ int FindNearestSphereIdx(Ray ray, Sphere* spheres, int sphereNum, flo
 	int minIdx = -1;
 	float tmpDist;
 
-	// 그대로 dist를 가져와서 사용하니까 이상해짐
 	for (int i = 0; i < sphereNum; ++i)
 	{
-		// intersect 할 경우
 		if (RaySphereIntersect(ray, spheres[i], tmpDist))
 		{
-			// 잘 찾은 경우, 다시 찾지 않기
 			if (tmpDist > rayThreshold && tmpDist < minDist)
 			{
 				minDist = tmpDist;
@@ -216,8 +208,6 @@ __device__ Ray GenerateCameraRay(int y, int x, glm::mat4 view)
 	Ray ray;
 
 	// 0~1
-	// world 좌표로 ray를 쏨, 옆으로 긴 window일수록 옆으로 많은 ray를 쏨
-	// 값을 NDC 좌표로 변환함
 	float NDCy = (y + 0.5f) / WINDOW_HEIGHT;
 	float NDCx = (x + 0.5f) / WINDOW_WIDTH;
 
@@ -225,13 +215,11 @@ __device__ Ray GenerateCameraRay(int y, int x, glm::mat4 view)
 
 	float fov = 45.0f;
 
-	// NDC 좌표를 -1 ~ 1로 변환
-	// tan(halfRadian)
-	// world 좌표에서 z축 방향이 1이기 때문에 곱하지 않음
+	// 0~1 -> -1~1, tan(halfRadian), z = 1
 	float xx = (NDCx * 2.0f - 1.0f) * tan(fov * 0.5f * 3.141592653f / 180.0f) * aspectRatio;
 	float yy = (NDCy * 2.0f - 1.0f) * tan(fov * 0.5f * 3.141592653f / 180.0f);
 
-	// ray들의 world 방향이 정해짐
+	// ray in world space
 	ray.origin = glm::vec3(-view * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 	ray.dir = normalize(vec3(view * vec4(glm::vec3(xx, yy, -1.0), 0.0f)));
 

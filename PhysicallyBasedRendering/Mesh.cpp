@@ -11,6 +11,7 @@ Mesh::~Mesh()
 void Mesh::SetMesh(aiMesh* mesh)
 {
 	vertexNum = mesh->mNumVertices;
+	// triangulate 되어 있음
 	indexNum = mesh->mNumFaces * 3;
 
 	vertices = new Vertex[mesh->mNumVertices];
@@ -48,13 +49,8 @@ void Mesh::SetMesh(aiMesh* mesh)
 		triangle.v1 = vertices[indices[i * 3 + 1]].position;
 		triangle.v2 = vertices[indices[i * 3 + 2]].position;
 
-		// vertex에 normal 정보가 없다면 vertex position 정보를 이용해 face normal을 구함
-		if (vertices[indices[i * 3 + 0]].normal == glm::vec3(0.0f, 0.0f, 0.0f))
-		{
-			triangle.normal = cross(triangle.v1 - triangle.v0, triangle.v2 - triangle.v0);
-		}
 		// face normal과 vertex normal을 대입
-		else
+		if(mesh->HasNormals())
 		{
 			triangle.normal =
 				normalize((
@@ -67,47 +63,56 @@ void Mesh::SetMesh(aiMesh* mesh)
 			triangle.v1normal = vertices[indices[i * 3 + 1]].normal;
 			triangle.v2normal = vertices[indices[i * 3 + 2]].normal;
 		}
+		// vertex에 normal 정보가 없다면 vertex position 정보를 이용해 face normal을 구함
+		else
+		{
+			triangle.normal = cross(triangle.v1 - triangle.v0, triangle.v2 - triangle.v0);
+		}
 
 
 		triangles.push_back(triangle);
 	}
 
-	vector<vector<int> > neighborFaceMap;
-	for (int i = 0; i < mesh->mNumVertices; ++i)
+	// vertex에 normal 정보가 없다면 vertex position 정보를 이용해 vertex normal을 구함
+	if (!mesh->HasNormals())
 	{
-		vector<int> neighborFaces;
-		for (int j = 0; j < mesh->mNumFaces; ++j)
+		vector<vector<int> > neighborFaceMap;
+		for (int i = 0; i < mesh->mNumVertices; ++i)
 		{
-			if (i == mesh->mFaces[j].mIndices[0] ||
-				i == mesh->mFaces[j].mIndices[1] ||
-				i == mesh->mFaces[j].mIndices[2])
-				neighborFaces.push_back(j);
+			vector<int> neighborFaces;
+			for (int j = 0; j < mesh->mNumFaces; ++j)
+			{
+				if (i == mesh->mFaces[j].mIndices[0] ||
+					i == mesh->mFaces[j].mIndices[1] ||
+					i == mesh->mFaces[j].mIndices[2])
+					neighborFaces.push_back(j);
+			}
+			neighborFaceMap.push_back(neighborFaces);
 		}
-		neighborFaceMap.push_back(neighborFaces);
-	}
 
-	for (int i = 0; i < mesh->mNumFaces; ++i)
-	{
-		triangles[i].v0normal = glm::vec3();
-		for (int k = 0; k < neighborFaceMap[indices[i * 3 + 0]].size(); k++)
+		for (int i = 0; i < mesh->mNumFaces; ++i)
 		{
-			triangles[i].v0normal += triangles[neighborFaceMap[indices[i * 3 + 0]][k]].normal;
-		}
-		triangles[i].v0normal /= neighborFaceMap[indices[i * 3 + 0]].size();
+			triangles[i].v0normal = glm::vec3();
+			for (int k = 0; k < neighborFaceMap[indices[i * 3 + 0]].size(); k++)
+			{
+				triangles[i].v0normal += triangles[neighborFaceMap[indices[i * 3 + 0]][k]].normal;
+			}
+			triangles[i].v0normal /= neighborFaceMap[indices[i * 3 + 0]].size();
 
-		triangles[i].v1normal = glm::vec3();
-		for (int k = 0; k < neighborFaceMap[indices[i * 3 + 1]].size(); k++)
-		{
-			triangles[i].v1normal += triangles[neighborFaceMap[indices[i * 3 + 1]][k]].normal;
-		}
-		triangles[i].v1normal /= neighborFaceMap[indices[i * 3 + 1]].size();
+			triangles[i].v1normal = glm::vec3();
+			for (int k = 0; k < neighborFaceMap[indices[i * 3 + 1]].size(); k++)
+			{
+				triangles[i].v1normal += triangles[neighborFaceMap[indices[i * 3 + 1]][k]].normal;
+			}
+			triangles[i].v1normal /= neighborFaceMap[indices[i * 3 + 1]].size();
 
-		triangles[i].v2normal = glm::vec3();
-		for (int k = 0; k < neighborFaceMap[indices[i * 3 + 2]].size(); k++)
-		{
-			triangles[i].v2normal += triangles[neighborFaceMap[indices[i * 3 + 2]][k]].normal;
+			triangles[i].v2normal = glm::vec3();
+			for (int k = 0; k < neighborFaceMap[indices[i * 3 + 2]].size(); k++)
+			{
+				triangles[i].v2normal += triangles[neighborFaceMap[indices[i * 3 + 2]][k]].normal;
+			}
+			triangles[i].v2normal /= neighborFaceMap[indices[i * 3 + 2]].size();
 		}
-		triangles[i].v2normal /= neighborFaceMap[indices[i * 3 + 2]].size();
 	}
 }
 
@@ -121,97 +126,93 @@ void Mesh::SetMesh(aiMesh* mesh)
 // illum 4, color on, ambient on, highlight on, reflection on, transparency on 등등을 뜻함
 // map_Kd(이미지 파일) 등의 값은 Kd의 값과 곱해진다 하더라
 
-void Mesh::LoadMesh(const string& fileName)
-{
-	float scale = 3.0f;
-	// aiprocess_triangulate는 triangle 형태가 아닌 model load 할 때 triangle로 불러들이는 것
-	// flipuvs는 y값은 flip하는 것
-	// scene의 mMeshes에는 모든 mesh들이 저장되어 있다
-	// scene은 mRootNode를 가지고 있고 각 노드에는 mesh가 있다
-	Assimp::Importer importer;
-
-	const aiScene *scene = importer.ReadFile(fileName, aiProcess_Triangulate | aiProcess_FlipUVs);
-	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
-	{
-		printf("모델 파일을 불러올 수 없습니다. \n");
-		getchar();
-	}
-	else
-	{
-		// vertex num, index num 총합 구하기
-		int tmpVertexNum = 0, tmpIndexNum = 0;
-		for (int i = 0; i < scene->mNumMeshes; i++)
-		{
-			tmpVertexNum += scene->mMeshes[i]->mNumVertices;
-			tmpIndexNum += scene->mMeshes[i]->mNumFaces * 3;
-		}
-		vertexNum = tmpVertexNum;
-		indexNum = tmpIndexNum;
-
-		vertices = new Vertex[vertexNum];
-		indices = new GLuint[indexNum];
-
-		int offset = 0;
-		for (int i = 0; i < scene->mNumMeshes; i++)
-		{
-			// vertices지 positions가 아니라는 것을 주의할 것
-			for (int j = 0; j < scene->mMeshes[i]->mNumVertices; j++)
-			{
-				vertices[j + offset].position.x = scene->mMeshes[i]->mVertices[j].x;
-				vertices[j + offset].position.y = scene->mMeshes[i]->mVertices[j].y;
-				vertices[j + offset].position.z = scene->mMeshes[i]->mVertices[j].z;
-
-				if (scene->mMeshes[i]->HasNormals())
-				{
-					vertices[j + offset].normal.x = scene->mMeshes[i]->mNormals[j].x;
-					vertices[j + offset].normal.y = scene->mMeshes[i]->mNormals[j].y;
-					vertices[j + offset].normal.z = scene->mMeshes[i]->mNormals[j].z;
-				}
-
-				if (scene->mMeshes[i]->HasTextureCoords(0))
-				{
-					vertices[j + offset].uv.x = scene->mMeshes[i]->mTextureCoords[0][j].x;
-					vertices[j + offset].uv.y = scene->mMeshes[i]->mTextureCoords[0][j].y;
-				}
-			}
-			offset += scene->mMeshes[i]->mNumVertices;
-		}
-
-		int indexOffset = 0;
-		offset = 0;
-		for (int i = 0; i < scene->mNumMeshes; i++)
-		{
-			for (int j = 0; j < scene->mMeshes[i]->mNumFaces; j++)
-			{
-				indices[j * 3 + offset + 0] = indexOffset + scene->mMeshes[i]->mFaces[j].mIndices[0];
-				indices[j * 3 + offset + 1] = indexOffset + scene->mMeshes[i]->mFaces[j].mIndices[1];
-				indices[j * 3 + offset + 2] = indexOffset + scene->mMeshes[i]->mFaces[j].mIndices[2];
-				
-				Triangle triangle;
-				triangle.v0 = vertices[indices[j * 3 + offset + 0]].position;
-				triangle.v1 = vertices[indices[j * 3 + offset + 1]].position;
-				triangle.v2 = vertices[indices[j * 3 + offset + 2]].position;
-
-				triangle.v0normal = vertices[indices[j * 3 + offset + 0]].normal;
-				triangle.v1normal = vertices[indices[j * 3 + offset + 1]].normal;
-				triangle.v2normal = vertices[indices[j * 3 + offset + 2]].normal;
-				
-				Debug::GetInstance()->Log(triangle.v0normal);
-				Debug::GetInstance()->Log(triangle.v1normal);
-				Debug::GetInstance()->Log(triangle.v2normal);
-
-				triangle.normal =
-					normalize((vertices[indices[j * 3 + offset + 0]].normal +
-						vertices[indices[j * 3 + offset + 1]].normal +
-						vertices[indices[j * 3 + offset + 2]].normal) / 3.0f);
-
-				triangles.push_back(triangle);
-			}
-			offset += scene->mMeshes[i]->mNumFaces * 3;
-			indexOffset += scene->mMeshes[i]->mNumVertices;
-		}
-	}
-}
+//void Mesh::LoadMesh(const string& fileName)
+//{
+//	float scale = 3.0f;
+//	// aiprocess_triangulate는 triangle 형태가 아닌 model load 할 때 triangle로 불러들이는 것
+//	// flipuvs는 y값은 flip하는 것
+//	// scene의 mMeshes에는 모든 mesh들이 저장되어 있다
+//	// scene은 mRootNode를 가지고 있고 각 노드에는 mesh가 있다
+//	Assimp::Importer importer;
+//
+//	const aiScene *scene = importer.ReadFile(fileName, aiProcess_Triangulate | aiProcess_FlipUVs);
+//	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+//	{
+//		printf("모델 파일을 불러올 수 없습니다. \n");
+//		getchar();
+//	}
+//	else
+//	{
+//		// vertex num, index num 총합 구하기
+//		int tmpVertexNum = 0, tmpIndexNum = 0;
+//		for (int i = 0; i < scene->mNumMeshes; i++)
+//		{
+//			tmpVertexNum += scene->mMeshes[i]->mNumVertices;
+//			tmpIndexNum += scene->mMeshes[i]->mNumFaces * 3;
+//		}
+//		vertexNum = tmpVertexNum;
+//		indexNum = tmpIndexNum;
+//
+//		vertices = new Vertex[vertexNum];
+//		indices = new GLuint[indexNum];
+//
+//		int offset = 0;
+//		for (int i = 0; i < scene->mNumMeshes; i++)
+//		{
+//			// vertices지 positions가 아니라는 것을 주의할 것
+//			for (int j = 0; j < scene->mMeshes[i]->mNumVertices; j++)
+//			{
+//				vertices[j + offset].position.x = scene->mMeshes[i]->mVertices[j].x;
+//				vertices[j + offset].position.y = scene->mMeshes[i]->mVertices[j].y;
+//				vertices[j + offset].position.z = scene->mMeshes[i]->mVertices[j].z;
+//
+//				if (scene->mMeshes[i]->HasNormals())
+//				{
+//					vertices[j + offset].normal.x = scene->mMeshes[i]->mNormals[j].x;
+//					vertices[j + offset].normal.y = scene->mMeshes[i]->mNormals[j].y;
+//					vertices[j + offset].normal.z = scene->mMeshes[i]->mNormals[j].z;
+//				}
+//
+//				if (scene->mMeshes[i]->HasTextureCoords(0))
+//				{
+//					vertices[j + offset].uv.x = scene->mMeshes[i]->mTextureCoords[0][j].x;
+//					vertices[j + offset].uv.y = scene->mMeshes[i]->mTextureCoords[0][j].y;
+//				}
+//			}
+//			offset += scene->mMeshes[i]->mNumVertices;
+//		}
+//
+//		int indexOffset = 0;
+//		offset = 0;
+//		for (int i = 0; i < scene->mNumMeshes; i++)
+//		{
+//			for (int j = 0; j < scene->mMeshes[i]->mNumFaces; j++)
+//			{
+//				indices[j * 3 + offset + 0] = indexOffset + scene->mMeshes[i]->mFaces[j].mIndices[0];
+//				indices[j * 3 + offset + 1] = indexOffset + scene->mMeshes[i]->mFaces[j].mIndices[1];
+//				indices[j * 3 + offset + 2] = indexOffset + scene->mMeshes[i]->mFaces[j].mIndices[2];
+//				
+//				Triangle triangle;
+//				triangle.v0 = vertices[indices[j * 3 + offset + 0]].position;
+//				triangle.v1 = vertices[indices[j * 3 + offset + 1]].position;
+//				triangle.v2 = vertices[indices[j * 3 + offset + 2]].position;
+//
+//				triangle.v0normal = vertices[indices[j * 3 + offset + 0]].normal;
+//				triangle.v1normal = vertices[indices[j * 3 + offset + 1]].normal;
+//				triangle.v2normal = vertices[indices[j * 3 + offset + 2]].normal;
+//
+//				triangle.normal =
+//					normalize((vertices[indices[j * 3 + offset + 0]].normal +
+//						vertices[indices[j * 3 + offset + 1]].normal +
+//						vertices[indices[j * 3 + offset + 2]].normal) / 3.0f);
+//
+//				triangles.push_back(triangle);
+//			}
+//			offset += scene->mMeshes[i]->mNumFaces * 3;
+//			indexOffset += scene->mMeshes[i]->mNumVertices;
+//		}
+//	}
+//}
 
 std::vector<Triangle> Mesh::GetTriangles() const
 {
@@ -232,18 +233,22 @@ void Mesh::LoadMesh(MeshType meshType)
 		// 왼쪽 위
 		vertices[0].position = glm::vec3(-1.0f, 1.0f, 0.0f);
 		vertices[0].uv = glm::vec2(0.0f, 1.0f);
+		vertices[0].normal = glm::vec3(0.0f, 0.0f, 1.0f);
 
 		// 왼쪽 아래
 		vertices[1].position = glm::vec3(-1.0f, -1.0f, 0.0f);
 		vertices[1].uv = glm::vec2(0.0f, 0.0f);
+		vertices[1].normal = glm::vec3(0.0f, 0.0f, 1.0f);
 
 		// 오른쪽 위
 		vertices[2].position = glm::vec3(1.0f, 1.0f, 0.0f);
 		vertices[2].uv = glm::vec2(1.0f, 1.0f);
+		vertices[2].normal = glm::vec3(0.0f, 0.0f, 1.0f);
 
 		// 오른쪽 아래
 		vertices[3].position = glm::vec3(1.0f, -1.0f, 0.0f);
 		vertices[3].uv = glm::vec2(1.0f, 0.0f);
+		vertices[3].normal = glm::vec3(0.0f, 0.0f, 1.0f);
 
 		indices[0] = 0;
 		indices[1] = 2;

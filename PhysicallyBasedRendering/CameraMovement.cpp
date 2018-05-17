@@ -15,21 +15,21 @@ void CameraMovement::Update()
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_I))
 	{
-		object->Translate(glm::vec3(0.0f, 0.0f, -moveSpeed));
+		object->WorldTranslate(glm::vec3(0.0f, 0.0f, -moveSpeed));
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_K))
 	{
-		object->Translate(glm::vec3(0.0f, 0.0f, moveSpeed));
+		object->WorldTranslate(glm::vec3(0.0f, 0.0f, moveSpeed));
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_U))
 	{
-		object->Translate(glm::vec3(0.0f, moveSpeed, 0.0f));
+		object->WorldTranslate(glm::vec3(0.0f, moveSpeed, 0.0f));
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_O))
 	{
-		object->Translate(glm::vec3(0.0f, -moveSpeed, 0.0f));
+		object->WorldTranslate(glm::vec3(0.0f, -moveSpeed, 0.0f));
 	}
 }

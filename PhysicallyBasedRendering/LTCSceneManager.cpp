@@ -7,9 +7,9 @@ void LTCSceneManager::InitializeObjects()
 	sceneObjs.push_back(quadObj);
 	sceneObjs[0].Scale(glm::vec3(15.0));
 	sceneObjs[0].ModelRotate(glm::vec3(1.0f, 0.0f, 0.0f), glm::radians(90.0f));
-	sceneObjs[0].Translate(glm::vec3(0.0f, 0.0f, 0.0f));
+	sceneObjs[0].WorldTranslate(glm::vec3(0.0f, 0.0f, 0.0f));
 
-	movingCamera->Translate(glm::vec3(0.0f, 5.0f, 20.0f));
+	movingCamera->WorldTranslate(glm::vec3(0.0f, 5.0f, 20.0f));
 }
 
 void LTCSceneManager::Update()

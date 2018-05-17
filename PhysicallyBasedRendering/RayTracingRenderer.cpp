@@ -121,9 +121,9 @@ void RayTracingRenderer::Render()
 	// count만큼의 크기의 device 메모리 영역(devPtr부터 시작)에 value로 값을 셋팅 
 	cudaMemset(output, 0, WindowManager::GetInstance()->width * WindowManager::GetInstance()->height * 16);
 
-	glm::mat4 view;
+	glm::mat4 view = camera->GetModelMatrix();
 	// camera의 model matrix의 inverse가 바로 view matrix
-	view = glm::inverse(camera->GetModelMatrix());
+	// view = glm::inverse(camera->GetModelMatrix());
 
 	// 여기서 render가 다 일어남
 	RayTrace(output, view, root, objects, triangles, spheres, lights, materials);

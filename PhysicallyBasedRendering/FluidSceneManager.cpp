@@ -8,12 +8,12 @@ void FluidSceneManager::InitializeObjects()
 	sceneObjs.push_back(quadObj);
 	sceneObjs[0].Scale(glm::vec3(15.0));
 	sceneObjs[0].ModelRotate(glm::vec3(1.0f, 0.0f, 0.0f), glm::radians(90.0f));
-	sceneObjs[0].Translate(glm::vec3(0.0f, -5.7f, 0.0f));
+	sceneObjs[0].WorldTranslate(glm::vec3(0.0f, -5.7f, 0.0f));
 
 	sceneObjs.push_back(skyboxObj);
 	sceneObjs[1].Scale(glm::vec3(10.0f));
 
-	movingCamera->Translate(glm::vec3(0.0f, 0.0f, 20.0f));
+	movingCamera->WorldTranslate(glm::vec3(0.0f, 0.0f, 20.0f));
 }
 
 void FluidSceneManager::Update()
@@ -29,7 +29,7 @@ void FluidSceneManager::Update()
 		);
 
 		glm::vec4 v = glm::inverse(view) * glm::vec4(-0.2f, 0.0f, 0.0f, 0.0f);
-		sceneObjs[0].Translate(v);
+		sceneObjs[0].WorldTranslate(v);
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_D))
@@ -41,7 +41,7 @@ void FluidSceneManager::Update()
 		);
 
 		glm::vec4 v = glm::inverse(view) * glm::vec4(0.2f, 0.0f, 0.0f, 0.0f);
-		sceneObjs[0].Translate(v);
+		sceneObjs[0].WorldTranslate(v);
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_W))
@@ -53,7 +53,7 @@ void FluidSceneManager::Update()
 		);
 
 		glm::vec4 v = glm::inverse(view) * glm::vec4(0.0f, 0.2f, 0.0f, 0.0f);
-		sceneObjs[0].Translate(v);
+		sceneObjs[0].WorldTranslate(v);
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_S))
@@ -65,6 +65,6 @@ void FluidSceneManager::Update()
 		);
 
 		glm::vec4 v = glm::inverse(view) * glm::vec4(0.0f, -0.2f, 0.0f, 0.0f);
-		sceneObjs[0].Translate(v);
+		sceneObjs[0].WorldTranslate(v);
 	}
 }

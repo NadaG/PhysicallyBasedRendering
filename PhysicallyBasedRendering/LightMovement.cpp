@@ -14,36 +14,36 @@ void LightMovement::Update()
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_A))
 	{
 		glm::vec4 v = glm::inverse(view) * glm::vec4(-moveSpeed, 0.0f, 0.0f, 0.0f);
-		object->Translate(v);
+		object->WorldTranslate(v);
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_D))
 	{
 		glm::vec4 v = glm::inverse(view) * glm::vec4(moveSpeed, 0.0f, 0.0f, 0.0f);
-		object->Translate(v);
+		object->WorldTranslate(v);
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_W))
 	{
 		glm::vec4 v = glm::inverse(view) * glm::vec4(0.0f, 0.0f, -moveSpeed, 0.0f);
-		object->Translate(v);
+		object->WorldTranslate(v);
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_S))
 	{
 		glm::vec4 v = glm::inverse(view) * glm::vec4(0.0f, 0.0f, moveSpeed, 0.0f);
-		object->Translate(v);
+		object->WorldTranslate(v);
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_Q))
 	{
 		glm::vec4 v = glm::inverse(view) * glm::vec4(0.0f, moveSpeed, 0.0f, 0.0f);
-		object->Translate(v);
+		object->WorldTranslate(v);
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_E))
 	{
 		glm::vec4 v = glm::inverse(view) * glm::vec4(0.0f, -moveSpeed, 0.0f, 0.0f);
-		object->Translate(v);
+		object->WorldTranslate(v);
 	}
 }

@@ -1,5 +1,7 @@
 #include "Object.h"
 
+#include "Debug.h"
+
 Object::Object(Movement* const movement)
 {
 	this->positionVector = glm::vec3(0, 0, 0);
@@ -25,13 +27,15 @@ const glm::mat4 Object::GetModelMatrix() const
 	return glm::translate(positionVector) * rotationMatrix * glm::scale(scaleVector);
 }
 
-void Object::Translate(const glm::vec3& vec)
+void Object::WorldTranslate(const glm::vec3& vec)
 {
 	this->positionVector += vec;
 }
 
-void Object::ModelTranslate(const glm::vec3 & vec)
+void Object::ModelTranslate(const glm::vec3& vec)
 {
+	glm::vec4 dir = this->rotationMatrix * glm::vec4(vec, 0.0f);
+	WorldTranslate(glm::vec3(dir));
 }
 
 // radians
@@ -39,11 +43,12 @@ void Object::ModelTranslate(const glm::vec3 & vec)
 void Object::ModelRotate(const glm::vec3& vec, float angle)
 {
 	// 현재 축을 기준으로 rotate
-	glm::vec3 v = glm::inverse(glm::fmat3(rotationMatrix)) * vec;
-	this->rotationMatrix = glm::rotate(rotationMatrix, angle, v);
+	/*glm::vec3 v = glm::inverse(glm::fmat3(rotationMatrix)) * vec;
+	this->rotationMatrix = glm::rotate(rotationMatrix, angle, v);*/
+	this->rotationMatrix = glm::rotate(this->rotationMatrix, angle, vec);
 }
 
-void Object::WorldRotate(const glm::vec3 & vec, float angle)
+void Object::WorldRotate(const glm::vec3 &vec, float angle)
 {
 }
 

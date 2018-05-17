@@ -3,7 +3,7 @@
 void RayTracingSceneManager::InitializeObjects()
 {
 	quadObj.LoadModel(QUAD);
-	movingCamera->Translate(glm::vec3(15.0f, 20.0f, 90.0f));
+	movingCamera->WorldTranslate(glm::vec3(15.0f, 20.0f, 90.0f));
 	//movingCamera->Translate(glm::vec3(0.0f, 5.0f, 30.0f));
 
 	SceneObject obj;
@@ -62,74 +62,62 @@ void RayTracingSceneManager::Update()
 {
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_J))
 	{
-		glm::vec3 dir = glm::vec3(-0.2f, 0.0f, 0.0f);
-		dir = glm::vec4(dir, 0.0f) * movingCamera->GetRotate();
-		movingCamera->Translate(glm::vec3(dir));
+		movingCamera->ModelTranslate(glm::vec3(-moveSpeed, 0.0f, 0.0f));
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_L))
 	{
-		glm::vec3 dir = glm::vec3(0.2f, 0.0f, 0.0f);
-		dir = glm::vec4(dir, 0.0f) * movingCamera->GetRotate();
-		movingCamera->Translate(glm::vec3(dir));
+		movingCamera->ModelTranslate(glm::vec3(moveSpeed, 0.0f, 0.0f));
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_I))
 	{
-		glm::vec3 dir = glm::vec3(0.0f, 0.0f, -0.2f);
-		dir = glm::vec4(dir, 0.0f) * movingCamera->GetRotate();
-		movingCamera->Translate(glm::vec3(dir));
+		movingCamera->ModelTranslate(glm::vec3(0.0f, 0.0f, -moveSpeed));
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_K))
 	{
-		glm::vec3 dir = glm::vec3(0.0f, 0.0f, 0.2f);
-		dir = glm::vec4(dir, 0.0f) * movingCamera->GetRotate();
-		movingCamera->Translate(glm::vec3(dir));
+		movingCamera->ModelTranslate(glm::vec3(0.0f, 0.0f, moveSpeed));
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_U))
 	{
-		glm::vec3 dir = glm::vec3(0.0f, 0.2f, 0.0f);
-		dir = glm::vec4(dir, 0.0f) * movingCamera->GetRotate();
-		movingCamera->Translate(glm::vec3(dir));
+		movingCamera->ModelTranslate(glm::vec3(0.0f, moveSpeed, 0.0f));
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_O))
 	{
-		glm::vec3 dir = glm::vec3(0.0f, -0.2f, 0.0f);
-		dir = glm::vec4(dir, 0.0f) * movingCamera->GetRotate();
-		movingCamera->Translate(glm::vec3(dir));
+		movingCamera->ModelTranslate(glm::vec3(0.0f, -moveSpeed, 0.0f));
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_A))
 	{
-		movingCamera->ModelRotate(glm::vec3(0.0f, 1.0f, 0.0f), -0.005f);
+		movingCamera->ModelRotate(glm::vec3(0.0f, 1.0f, 0.0f), rotateSpeed);
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_D))
 	{
-		movingCamera->ModelRotate(glm::vec3(0.0f, 1.0f, 0.0f), 0.005f);
+		movingCamera->ModelRotate(glm::vec3(0.0f, 1.0f, 0.0f), -rotateSpeed);
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_W))
 	{
-		movingCamera->ModelRotate(glm::vec3(1.0f, 0.0f, 0.0f), 0.005f);
+		movingCamera->ModelRotate(glm::vec3(1.0f, 0.0f, 0.0f), rotateSpeed);
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_S))
 	{
-		movingCamera->ModelRotate(glm::vec3(1.0f, 0.0f, 0.0f), -0.005f);
+		movingCamera->ModelRotate(glm::vec3(1.0f, 0.0f, 0.0f), -rotateSpeed);
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_Q))
 	{
-		movingCamera->ModelRotate(glm::vec3(0.0f, 0.0f, 1.0f), -0.005f);
+		movingCamera->ModelRotate(glm::vec3(0.0f, 0.0f, 1.0f), rotateSpeed);
 	}
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_E))
 	{
-		movingCamera->ModelRotate(glm::vec3(0.0f, 0.0f, 1.0f), 0.005f);
+		movingCamera->ModelRotate(glm::vec3(0.0f, 0.0f, 1.0f), -rotateSpeed);
 	}
 }
 

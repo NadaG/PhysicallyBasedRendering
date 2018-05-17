@@ -17,7 +17,7 @@ public:
 	// 여기서 delete를 하는게 맞는지 저쪽에서 해주는게 맞는지 잘 모르겠음
 	virtual void Delete() { delete movement; }
 
-	void Translate(const glm::vec3& vec);
+	void WorldTranslate(const glm::vec3& vec);
 	// world 좌표계에서의 위치가 translate
 	void ModelTranslate(const glm::vec3& vec);
 

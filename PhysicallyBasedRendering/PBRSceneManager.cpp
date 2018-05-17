@@ -18,14 +18,14 @@ void PBRSceneManager::InitializeObjects()
 			SceneObject sphereObj;
 			sphereObj.LoadModel("Obj/Sphere.obj");
 			sceneObjs.push_back(sphereObj);
-			sceneObjs[i * 3 + j].Translate(pos);
+			sceneObjs[i * 3 + j].WorldTranslate(pos);
 		}
 	}
 
 	skyboxObj.Scale(glm::vec3(1.0f));
 	cubeObj.Scale(glm::vec3(4.0f, 1.0f, 1.0f));
 
-	movingCamera->Translate(glm::vec3(0.0f, 0.0f, 15.0f));
+	movingCamera->WorldTranslate(glm::vec3(0.0f, 0.0f, 15.0f));
 
 	GenerateLight(glm::vec3(10.0f, 0.0f, 0.0f), glm::vec3(0.1f));
 	GenerateLight(glm::vec3(0.0f, 10.0f, 0.0f), glm::vec3(0.1f));

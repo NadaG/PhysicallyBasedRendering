@@ -11,7 +11,7 @@ void StarBurstSceneManager::InitializeObjects()
 	billboardMovement->BindObject(billboard);
 
 	billboard->LoadModel(QUAD);
-	billboard->Translate(glm::vec3(0.0f, 5.0f, 1.0f));
+	billboard->WorldTranslate(glm::vec3(0.0f, 5.0f, 1.0f));
 	billboard->Scale(glm::vec3(3.0f));
 
 	road.LoadModel("Texture/Road/road.obj");
@@ -27,7 +27,7 @@ void StarBurstSceneManager::InitializeObjects()
 	GenerateLight(glm::vec3(10.0f, 0.0f, 10.0f), glm::vec3(0.1f));
 	GenerateLight(glm::vec3(10.0f, 10.0f, 10.0f), glm::vec3(0.1f));
 	
-	movingCamera->Translate(glm::vec3(0.0f, 2.0f, 10.0f));
+	movingCamera->WorldTranslate(glm::vec3(0.0f, 2.0f, 10.0f));
 }
 
 void StarBurstSceneManager::Update()

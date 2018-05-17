@@ -7,7 +7,7 @@ class RayTracingSceneManager : public SceneManager
 {
 public:
 
-	RayTracingSceneManager() {}
+	RayTracingSceneManager():moveSpeed(1.0f), rotateSpeed(0.1f) {}
 	virtual ~RayTracingSceneManager() {}
 
 	void InitializeObjects();
@@ -27,5 +27,6 @@ public:
 
 private:
 
-	Texture2D frontTex;
+	const float moveSpeed;
+	const float rotateSpeed;
 };

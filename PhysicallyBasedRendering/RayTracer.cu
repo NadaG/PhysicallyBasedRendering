@@ -220,7 +220,7 @@ __device__ Ray GenerateCameraRay(int y, int x, glm::mat4 view)
 	float yy = (NDCy * 2.0f - 1.0f) * tan(fov * 0.5f * 3.141592653f / 180.0f);
 
 	// ray in world space
-	ray.origin = glm::vec3(-view * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+	ray.origin = glm::vec3(view * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 	ray.dir = normalize(vec3(view * vec4(glm::vec3(xx, yy, -1.0), 0.0f)));
 
 	return ray;

@@ -10,13 +10,6 @@
 #include <thrust\device_vector.h>
 #include <queue>
 
-// TODO LIST
-// 1. per line draw to eliminate kernel time out problem
-// 2. octree acceleration
-// 3. mtl file load
-// 4. texture mapping with interpolation
-// 5. monte calro path tracer
-
 struct Ray
 {
 	// Ray의 원점
@@ -86,15 +79,15 @@ __device__ bool RayTriangleIntersect(Ray ray, Triangle triangle, float& dist)
 
 	float det = dot(v0v1, pvec);
 
-	float epsilon = 0.0001f;
+	float epsilon = 0.01f;
 
 	// back face culling on
 	if (det < epsilon)
 		return false;
 
-	// back face culling off
-	if (fabs(det) < epsilon)
-		return false;
+	//// back face culling off
+	//if (fabs(det) < epsilon)
+	//	return false;
 
 	float invDet = 1 / det;
 
@@ -159,7 +152,7 @@ __device__ bool RayAABBsIntersect(Ray ray, AABB* boxes, int boxNum)
 
 __device__ int FindNearestTriangleIdx(Ray ray, Triangle* triangles, int triangleNum, float& dist)
 {
-	const float rayThreshold = 0.001f;
+	const float rayThreshold = 0.01f;
 	float minDist = 9999999.0f;
 	int minIdx = -1;
 	float tmpDist;
@@ -182,7 +175,7 @@ __device__ int FindNearestTriangleIdx(Ray ray, Triangle* triangles, int triangle
 
 __device__ int FindNearestSphereIdx(Ray ray, Sphere* spheres, int sphereNum, float& dist)
 {
-	const float rayThreshold = 0.001f;
+	const float rayThreshold = 0.01f;
 	float minDist = 9999999.0f;
 	int minIdx = -1;
 	float tmpDist;
@@ -273,7 +266,7 @@ __device__ bool IsLighted(
 				// 앞쪽의 dir만 봄
 				if (materials[triangles[k].materialId].refractivity == 0)
 				{
-					if (tmp > 0.0001f)
+					if (tmp > 0.01f)
 					{
 						return false;
 					}
@@ -288,7 +281,7 @@ __device__ bool IsLighted(
 		{
 			if (RaySphereIntersect(shadowRay, spheres[k], tmp))
 			{			// 앞쪽의 dir만 봄
-				if (tmp > 0.0001f)
+				if (tmp > 0.01f)
 				{
 					return false;
 				}
@@ -330,20 +323,6 @@ __device__ vec3 RayCastColor(
 		matSpecular.b * light.color.b) *
 		glm::max(0.0f, pow(glm::max(dot(normalize(reflect(-L, N)), V), 0.0f), 16));
 
-	//switch (rayType)
-	//{
-	//case 0:
-	//	color = glm::vec4(glm::vec3(ambient + diffuse + specular), 1.0f);
-	//	break;
-	//case 1: // reflect
-	//	color = glm::vec4(glm::vec3(ambient + diffuse + specular), 1.0f) * material.reflectivity;
-	//	break;
-	//case 2: //refract
-	//	color = glm::vec4(glm::vec3(ambient + diffuse + specular), 1.0f) * material.refractivity;
-	//	break;
-	//default:
-	//	break;
-	//}
 	color = glm::vec4(glm::vec3(ambient + diffuse + specular), 1.0f);
 
 	return color;
@@ -367,12 +346,10 @@ __device__ vec4 RayTraceColor(
 	vec4 color = vec4(0.0f);
 	int front = 0, rear = 0;
 
-	// 첫 번째 ray를 node로 하는 queue 생성
 	Enqueue(rayQueue, ray, rear);
 
 	int nowDepth = 1;
 
-	// 총 7 (1 + 2 + 4)개의 ray가 나옴
 	for (int i = 1; i < depth; ++i)
 	{
 		int target = rear;
@@ -383,8 +360,8 @@ __device__ vec4 RayTraceColor(
 			nowRay = GetQueueFront(rayQueue, front);
 			Dequeue(rayQueue, front);
 
-			/*if (!RayAABBsIntersect(nowRay, objects, objNum))
-				continue;*/
+			if (!RayAABBsIntersect(nowRay, objects, objNum))
+				continue;
 
 			float distToTriangle, distToSphere;
 			int nearestTriangleIdx = FindNearestTriangleIdx(nowRay, triangles, triangleNum, distToTriangle);
@@ -409,9 +386,6 @@ __device__ vec4 RayTraceColor(
 					hitPoint = nowRay.origin + nowRay.dir * distToTriangle;
 					materialId = nearestTriangle.materialId;
 					N = NormalInterpolation(nearestTriangle, hitPoint);
-					//N = glm::normalize(nearestTriangle.normal);
-
-					// TODO interpolation
 				}
 				else
 				{
@@ -448,7 +422,7 @@ __device__ vec4 RayTraceColor(
 
 				Ray refractRay;
 				refractRay.origin = hitPoint;
-				// eta 원래 재질의 굴절률/들어간 재질읠 굴절률인거 같음
+				// eta 원래 재질의 굴절률/들어간 재질의 굴절률인거 같음
 				refractRay.dir = normalize(refract(nowRay.dir, N, 0.95f));
 				refractRay.rayType = 2;
 				refractRay.decay = nowRay.decay * materials[materialId].refractivity;
@@ -501,8 +475,6 @@ __device__ vec4 RayTraceColor(
 				hitPoint = nowRay.origin + nowRay.dir * distToTriangle;
 				materialId = nearestTriangle.materialId;
 				N = NormalInterpolation(nearestTriangle, hitPoint);
-
-				// TODO interpolation
 			}
 			else
 			{
@@ -556,13 +528,6 @@ __global__ void RayTraceD(
 	// NOTICE for문을 돌릴 때 iter를 변수로 하니까 검은 화면이 나옴
 	// y, x로 들어가고
 	// 0, 0 좌표는 좌하단
-
-	/*if (ray.dir.x < root->bndMin.x)
-	{
-		data[x] = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-		return;
-	}*/
-
 	data[x] = RayTraceColor(
 		ray,
 		rayQueue,

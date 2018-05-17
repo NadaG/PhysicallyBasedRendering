@@ -8,7 +8,7 @@ void Model::Load(const string& fileName)
 	// scene은 mRootNode를 가지고 있고 각 노드에는 mesh가 있다
 	Assimp::Importer importer;
 
-	scene = importer.ReadFile(fileName, aiProcess_Triangulate | aiProcess_FlipUVs);
+	scene = importer.ReadFile(fileName, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices);
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
 		printf("모델 파일을 불러올 수 없습니다. \n");

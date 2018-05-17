@@ -18,8 +18,10 @@ public:
 	std::vector<Light> lights;
 	std::vector<Material> materials;
 
-	void LoadPlane(glm::vec3 pos);
-	void LoadMesh(const string meshfile);
+	vector<Triangle> LoadPlaneTriangles(glm::mat4 model, const int materialId);
+	vector<Triangle> LoadMeshTriangles(const string meshfile, glm::mat4 model, const int materialId);
+
+	void InsertTriangles(vector<Triangle> triangles);
 
 	//vector<Triangle> BackFaceCulling(vector<Triangle> triangles, glm::mat4 model);
 

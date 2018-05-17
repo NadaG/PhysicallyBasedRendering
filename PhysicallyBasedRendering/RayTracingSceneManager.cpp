@@ -4,21 +4,11 @@ void RayTracingSceneManager::InitializeObjects()
 {
 	quadObj.LoadModel(QUAD);
 	movingCamera->WorldTranslate(glm::vec3(15.0f, 20.0f, 90.0f));
-	//movingCamera->Translate(glm::vec3(0.0f, 5.0f, 30.0f));
-
-	SceneObject obj;
-	//obj.LoadModel("Obj/Fluid/0200.obj");
-	//obj.LoadModel("Obj/PouringFluid/0250.obj");
-	//obj.LoadModel("Obj/StreetLight.obj");
-	//obj.LoadModel("Obj/street_lamp.obj");
-	obj.LoadModel("Obj/torus.obj");
 
 	Light light;
-	light.pos = glm::vec3(0.0f, 100.0f, 0.0f);
+	light.pos = glm::vec3(100.0f, 100.0f, 0.0f);
 	light.color = glm::vec3(1.0f, 1.0f, 1.0f);
 	lights.push_back(light);
-
-	//LoadMesh("Obj/PouringFluid/0001.obj");
 
 	Material fluidMat, planeMat, sphereMat, sphereMat2;
 	fluidMat.ambient = glm::vec3(0.0f, 0.0f, 0.2f);
@@ -55,7 +45,18 @@ void RayTracingSceneManager::InitializeObjects()
 	sphere.materialId = 3;
 	spheres.push_back(sphere);
 
-	LoadMesh("Obj/torus.obj");
+	glm::mat4 sphereModel = glm::mat4();
+	sphereModel = glm::translate(sphereModel, glm::vec3(10.0f, 10.0f, 0.0f));
+	sphereModel = glm::scale(sphereModel, glm::vec3(10.0f, 10.0f, 10.0f));
+
+	
+	InsertTriangles(LoadMeshTriangles("Obj/PouringFluid/0250.obj", glm::mat4(), 0));
+	InsertTriangles(LoadMeshTriangles("Obj/sphere.obj", sphereModel, 3));
+
+	glm::mat4 planeModel = glm::mat4();
+	planeModel = glm::scale(planeModel, glm::vec3(100.0f, 1.0f, 100.0f));
+	planeModel = glm::translate(planeModel, glm::vec3(0.0f, -5.0f, 0.0f));
+	InsertTriangles(LoadPlaneTriangles(planeModel, 1));
 }
 
 void RayTracingSceneManager::Update()
@@ -121,110 +122,73 @@ void RayTracingSceneManager::Update()
 	}
 }
 
-void RayTracingSceneManager::LoadPlane(glm::vec3 pos)
+vector<Triangle> RayTracingSceneManager::LoadPlaneTriangles(glm::mat4 model, const int materialId)
 {
-	const float halfWidth = 150.0f;
-	const float planeY = pos.y;
-	const float planeZ = pos.z;
+	// 밑에 깔린 plane임
+	Triangle halfPlane1, halfPlane2;
+	halfPlane1.v0 = glm::vec3(model * glm::vec4(-1.0f, 0.0f, 1.0f, 1.0f));
+	halfPlane1.v1 = glm::vec3(model * glm::vec4(1.0f, 0.0f, 1.0f, 1.0f));
+	halfPlane1.v2 = glm::vec3(model * glm::vec4(-1.0f, 0.0f, -1.0f, 1.0f));
+	halfPlane1.normal = model * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
 
-	// 오른손 좌표계로 삼각형의 앞면이 그려진다.
-	Triangle halfPlane1, halfPlane2, halfPlane3, halfPlane4;
-	halfPlane1.v0 = glm::vec3(-halfWidth, planeY, halfWidth);
-	halfPlane1.v1 = glm::vec3(halfWidth, planeY, halfWidth);
-	halfPlane1.v2 = glm::vec3(-halfWidth, planeY, -halfWidth);
-	halfPlane1.normal = glm::vec3(0.0f, 1.0f, 0.0f);
 	halfPlane1.v0normal = halfPlane1.normal;
 	halfPlane1.v1normal = halfPlane1.normal;
 	halfPlane1.v2normal = halfPlane1.normal;
-	halfPlane1.materialId = 1;
+	halfPlane1.materialId = materialId;
 	triangles.push_back(halfPlane1);
 
-	halfPlane2.v0 = glm::vec3(halfWidth, planeY, halfWidth);
-	halfPlane2.v1 = glm::vec3(halfWidth, planeY, -halfWidth);
-	halfPlane2.v2 = glm::vec3(-halfWidth, planeY, -halfWidth);
-	halfPlane2.normal = glm::vec3(0.0f, 1.0f, 0.0f);
+	halfPlane2.v0 = glm::vec3(model * glm::vec4(1.0f, 0.0f, 1.0f, 1.0f));
+	halfPlane2.v1 = glm::vec3(model * glm::vec4(1.0f, 0.0f, -1.0f, 1.0f));
+	halfPlane2.v2 = glm::vec3(model * glm::vec4(-1.0f, 0.0f, -1.0f, 1.0f));
+	halfPlane2.normal = model * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
+
 	halfPlane2.v0normal = halfPlane2.normal;
 	halfPlane2.v1normal = halfPlane2.normal;
 	halfPlane2.v2normal = halfPlane2.normal;
-	halfPlane2.materialId = 1;
+	halfPlane2.materialId = materialId;
 	triangles.push_back(halfPlane2);
 
-	// 오른손 좌표계로 삼각형의 앞면이 그려진다.
-	halfPlane3.v0 = glm::vec3(-halfWidth, -halfWidth, planeZ);
-	halfPlane3.v1 = glm::vec3(halfWidth, halfWidth, planeZ);
-	halfPlane3.v2 = glm::vec3(-halfWidth, halfWidth, planeZ);
-	halfPlane3.normal = glm::vec3(0.0f, 0.0f, 1.0f);
-	halfPlane3.v0normal = halfPlane3.normal;
-	halfPlane3.v1normal = halfPlane3.normal;
-	halfPlane3.v2normal = halfPlane3.normal;
-	halfPlane3.materialId = 1;
-	triangles.push_back(halfPlane3);
-
-	halfPlane4.v0 = glm::vec3(-halfWidth, -halfWidth, planeZ);
-	halfPlane4.v1 = glm::vec3(halfWidth, -halfWidth, planeZ);
-	halfPlane4.v2 = glm::vec3(halfWidth, halfWidth, planeZ);
-	halfPlane4.normal = glm::vec3(0.0f, 0.0f, 1.0f);
-	halfPlane4.v0normal = halfPlane4.normal;
-	halfPlane4.v1normal = halfPlane4.normal;
-	halfPlane4.v2normal = halfPlane4.normal;
-	halfPlane4.materialId = 1;
-	triangles.push_back(halfPlane4);
+	return triangles;
 }
 
-void RayTracingSceneManager::LoadMesh(const string meshfile)
+void RayTracingSceneManager::InsertTriangles(vector<Triangle> triangles)
 {
-	triangles.clear();
-	
+	this->triangles.insert(this->triangles.end(), triangles.begin(), triangles.end());
+
+	glm::vec3 bmin;
+	glm::vec3 bmax;
+	for (int i = 0; i < this->triangles.size(); ++i)
+	{
+		bmin.x = min(min(min(this->triangles[i].v0.x, this->triangles[i].v1.x), this->triangles[i].v2.x), bmin.x);
+		bmin.y = min(min(min(this->triangles[i].v0.y, this->triangles[i].v1.y), this->triangles[i].v2.y), bmin.y);
+		bmin.z = min(min(min(this->triangles[i].v0.z, this->triangles[i].v1.z), this->triangles[i].v2.z), bmin.z);
+
+		bmax.x = max(max(max(this->triangles[i].v0.x, this->triangles[i].v1.x), this->triangles[i].v2.x), bmax.x);
+		bmax.y = max(max(max(this->triangles[i].v0.y, this->triangles[i].v1.y), this->triangles[i].v2.y), bmax.y);
+		bmax.z = max(max(max(this->triangles[i].v0.z, this->triangles[i].v1.z), this->triangles[i].v2.z), bmax.z);
+	}
+}
+
+vector<Triangle> RayTracingSceneManager::LoadMeshTriangles(const string meshfile, glm::mat4 model, const int materialId)
+{
 	SceneObject obj;
 	obj.LoadModel(meshfile.c_str());
 
-	SceneObject sphereObj;
-	sphereObj.LoadModel("Obj/Sphere.obj");
+	vector<Triangle> triangles = obj.GetTriangles();
 
-	// model matrix
-	//vector<Triangle> allTriangles = obj.GetTriangles();
-	//triangles = BackFaceCulling(allTriangles, translateMat * scaleMat);
-	vector<Triangle> fluidTriangles = obj.GetTriangles();
-	glm::mat4 translateMat = glm::translate(glm::vec3(0.0f, 0.0f, 0.0f));
-	glm::mat4 scaleMat = glm::scale(glm::vec3(1.0f, 1.0f, 1.0f));
-
-	for (int i = 0; i < fluidTriangles.size(); i++)
+	for (int i = 0; i < triangles.size(); i++)
 	{
-		fluidTriangles[i].v0 = glm::vec3(translateMat * scaleMat * glm::vec4(fluidTriangles[i].v0, 1.0f));
-		fluidTriangles[i].v1 = glm::vec3(translateMat * scaleMat * glm::vec4(fluidTriangles[i].v1, 1.0f));
-		fluidTriangles[i].v2 = glm::vec3(translateMat * scaleMat * glm::vec4(fluidTriangles[i].v2, 1.0f));
-		fluidTriangles[i].materialId = 0;
+		triangles[i].v0 = glm::vec3(model * glm::vec4(triangles[i].v0, 1.0f));
+		triangles[i].v1 = glm::vec3(model * glm::vec4(triangles[i].v1, 1.0f));
+		triangles[i].v2 = glm::vec3(model * glm::vec4(triangles[i].v2, 1.0f));
+		triangles[i].normal = glm::normalize(glm::vec3(model * glm::vec4(triangles[i].normal, 0.0f)));
+		triangles[i].v0normal = glm::normalize(glm::vec3(model * glm::vec4(triangles[i].v0normal, 0.0f)));
+		triangles[i].v1normal = glm::normalize(glm::vec3(model * glm::vec4(triangles[i].v1normal, 0.0f)));
+		triangles[i].v2normal = glm::normalize(glm::vec3(model * glm::vec4(triangles[i].v2normal, 0.0f)));
+		triangles[i].materialId = materialId;
 	}
 
-	vector<Triangle> sphereTriangles = sphereObj.GetTriangles();
-	translateMat = glm::translate(glm::vec3(15.0f, 25.0f, -20.0f));
-	scaleMat = glm::scale(glm::vec3(10.0f, 10.0f, 10.0f));
-
-	for (int i = 0; i < sphereTriangles.size(); i++)
-	{
-		sphereTriangles[i].v0 = glm::vec3(translateMat * scaleMat * glm::vec4(sphereTriangles[i].v0, 1.0f));
-		sphereTriangles[i].v1 = glm::vec3(translateMat * scaleMat * glm::vec4(sphereTriangles[i].v1, 1.0f));
-		sphereTriangles[i].v2 = glm::vec3(translateMat * scaleMat * glm::vec4(sphereTriangles[i].v2, 1.0f));
-		sphereTriangles[i].materialId = 2;
-	}
-
-	triangles.insert(triangles.end(), fluidTriangles.begin(), fluidTriangles.end());
-	triangles.insert(triangles.end(), sphereTriangles.begin(), sphereTriangles.end());
-	
-	glm::vec3 bmin;
-	glm::vec3 bmax;
-	for (int i = 0; i < triangles.size(); ++i)
-	{
-		bmin.x = min(min(min(triangles[i].v0.x, triangles[i].v1.x), triangles[i].v2.x), bmin.x);
-		bmin.y = min(min(min(triangles[i].v0.y, triangles[i].v1.y), triangles[i].v2.y), bmin.y);
-		bmin.z = min(min(min(triangles[i].v0.z, triangles[i].v1.z), triangles[i].v2.z), bmin.z);
-
-		bmax.x = max(max(max(triangles[i].v0.x, triangles[i].v1.x), triangles[i].v2.x), bmax.x);
-		bmax.y = max(max(max(triangles[i].v0.y, triangles[i].v1.y), triangles[i].v2.y), bmax.y);
-		bmax.z = max(max(max(triangles[i].v0.z, triangles[i].v1.z), triangles[i].v2.z), bmax.z);
-	}
-
-	LoadPlane(bmin);
+	return triangles;
 }
 
 //vector<Triangle> RayTracingSceneManager::BackFaceCulling(vector<Triangle> triangles, glm::mat4 model)

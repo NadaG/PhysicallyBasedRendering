@@ -6,15 +6,15 @@ void RayTracingSceneManager::InitializeObjects()
 	movingCamera->WorldTranslate(glm::vec3(15.0f, 20.0f, 90.0f));
 
 	Light light;
-	light.pos = glm::vec3(100.0f, 100.0f, 0.0f);
+	light.pos = glm::vec3(0.0f, 0.0f, 0.0f);
 	light.color = glm::vec3(1.0f, 1.0f, 1.0f);
 	lights.push_back(light);
 
-	Material fluidMat, planeMat, sphereMat, sphereMat2;
+	Material fluidMat, planeMat, sphereMat, lightMat;
 	fluidMat.ambient = glm::vec3(0.0f, 0.0f, 0.2f);
 	fluidMat.diffuse = glm::vec3(0.2f, 0.2f, 0.4f);
 	fluidMat.specular = glm::vec3(0.2f, 0.2f, 0.2f);
-	fluidMat.refractivity = 0.5f;
+	fluidMat.refractivity = 0.2f;
 	fluidMat.reflectivity = 0.0f;
 	materials.push_back(fluidMat);
 
@@ -29,33 +29,44 @@ void RayTracingSceneManager::InitializeObjects()
 	sphereMat.diffuse = glm::vec3(0.9f, 0.3f, 0.3f);
 	sphereMat.specular = glm::vec3(0.9f, 0.2f, 0.2f);
 	sphereMat.refractivity = 0.0f;
-	sphereMat.reflectivity = 0.0f;
+	sphereMat.reflectivity = 0.2f;
 	materials.push_back(sphereMat);
 
-	sphereMat2.ambient = glm::vec3(0.3f, 0.1f, 0.1f);
+	lightMat.ambient = glm::vec3(1.0f, 1.0f, 0.0f);
+	lightMat.diffuse = glm::vec3(0.0f, 0.0f, 0.0f);
+	lightMat.specular = glm::vec3(0.0f, 0.0f, 0.0f);
+	lightMat.refractivity = 0.0f;
+	lightMat.reflectivity = 0.0f;
+	materials.push_back(lightMat);
+
+	/*sphereMat2.ambient = glm::vec3(0.3f, 0.1f, 0.1f);
 	sphereMat2.diffuse = glm::vec3(0.9f, 0.3f, 0.3f);
 	sphereMat2.specular = glm::vec3(0.9f, 0.2f, 0.2f);
 	sphereMat2.refractivity = 0.0f;
 	sphereMat2.reflectivity = 0.0f;
-	materials.push_back(sphereMat2);
+	materials.push_back(sphereMat2);*/
 
+	// light
 	Sphere sphere;
-	sphere.origin = glm::vec3(20.0f, 10.0f, 25.0f);
-	sphere.radius = 3.0f;
+	sphere.origin = light.pos;
+	sphere.radius = 1.0f;
 	sphere.materialId = 3;
 	spheres.push_back(sphere);
 
-	glm::mat4 sphereModel = glm::mat4();
+	/*glm::mat4 sphereModel = glm::mat4();
 	sphereModel = glm::translate(sphereModel, glm::vec3(10.0f, 10.0f, 0.0f));
 	sphereModel = glm::scale(sphereModel, glm::vec3(10.0f, 10.0f, 10.0f));
-
-	
-	InsertTriangles(LoadMeshTriangles("Obj/PouringFluid/0250.obj", glm::mat4(), 0));
-	InsertTriangles(LoadMeshTriangles("Obj/sphere.obj", sphereModel, 3));
+	InsertTriangles(LoadMeshTriangles("Obj/sphere.obj", sphereModel, 2));*/
 
 	glm::mat4 planeModel = glm::mat4();
-	planeModel = glm::scale(planeModel, glm::vec3(100.0f, 1.0f, 100.0f));
 	planeModel = glm::translate(planeModel, glm::vec3(0.0f, -5.0f, 0.0f));
+	planeModel = glm::scale(planeModel, glm::vec3(30.0f, 1.0f, 30.0f));
+	InsertTriangles(LoadPlaneTriangles(planeModel, 1));
+
+	planeModel = glm::mat4();
+	planeModel = glm::translate(planeModel, glm::vec3(0.0f, 0.0f, -100.0f));
+	planeModel = glm::rotate(planeModel, 1.57079f, glm::vec3(1.0f, 0.0f, 0.0f));
+	planeModel = glm::scale(planeModel, glm::vec3(30.0f, 1.0f, 30.0f));
 	InsertTriangles(LoadPlaneTriangles(planeModel, 1));
 }
 
@@ -120,6 +131,94 @@ void RayTracingSceneManager::Update()
 	{
 		movingCamera->ModelRotate(glm::vec3(0.0f, 0.0f, 1.0f), -rotateSpeed);
 	}
+
+	if (InputManager::GetInstance()->IsKey(GLFW_KEY_G))
+	{
+		lights[0].pos += glm::vec3(0.0f, moveSpeed, 0.0f);
+	}
+
+	if (InputManager::GetInstance()->IsKey(GLFW_KEY_B))
+	{
+		lights[0].pos += glm::vec3(0.0f, -moveSpeed, 0.0f);
+	}
+
+	if (InputManager::GetInstance()->IsKey(GLFW_KEY_V))
+	{
+		lights[0].pos += glm::vec3(-moveSpeed, 0.0f, 0.0f);
+	}
+
+	if (InputManager::GetInstance()->IsKey(GLFW_KEY_N))
+	{
+		lights[0].pos += glm::vec3(moveSpeed, 0.0f, 0.0f);
+	}
+
+	if (InputManager::GetInstance()->IsKey(GLFW_KEY_F))
+	{
+		lights[0].pos += glm::vec3(0.0f, 0.0f, moveSpeed);
+	}
+
+	if (InputManager::GetInstance()->IsKey(GLFW_KEY_H))
+	{
+		lights[0].pos += glm::vec3(0.0f, 0.0f, -moveSpeed);
+	}
+
+	spheres[lightSphereId].origin = lights[0].pos;
+
+	// for demo
+	if (InputManager::GetInstance()->IsKey(GLFW_KEY_1))
+	{
+		if (spheres.size() == 1)
+		{
+			// sphere
+			Sphere sphere;
+			sphere.origin = glm::vec3(20.0f, 10.0f, 25.0f);
+			sphere.radius = 5.0f;
+			sphere.materialId = 2;
+			spheres.push_back(sphere);
+		}
+	}
+
+	// for demo
+	if (InputManager::GetInstance()->IsKey(GLFW_KEY_2))
+	{
+		if (spheres.size() == 2)
+		{
+			glm::mat4 torusModel = glm::mat4();
+			torusModel = glm::translate(torusModel, glm::vec3(-20.0f, 20.0f, 0.0f));
+			torusModel = glm::scale(torusModel, glm::vec3(5.0f, 5.0f, 5.0f));
+			InsertTriangles(LoadMeshTriangles("Obj/torus.obj", torusModel, 0));
+		}
+	}
+
+	// for demo
+	if (InputManager::GetInstance()->IsKey(GLFW_KEY_3))
+	{
+		isDepthTwo = true;
+	}
+
+	// for demo
+	if (InputManager::GetInstance()->IsKey(GLFW_KEY_4))
+	{
+		materials[0].refractivity -= 0.01f;
+	}
+
+	// for demo
+	if (InputManager::GetInstance()->IsKey(GLFW_KEY_5))
+	{
+		materials[0].refractivity += 0.01f;
+	}
+
+	// for demo
+	if (InputManager::GetInstance()->IsKey(GLFW_KEY_6))
+	{
+		materials[2].reflectivity -= 0.01f;
+	}
+
+	// for demo
+	if (InputManager::GetInstance()->IsKey(GLFW_KEY_7))
+	{
+		materials[2].reflectivity += 0.01f;
+	}
 }
 
 vector<Triangle> RayTracingSceneManager::LoadPlaneTriangles(glm::mat4 model, const int materialId)
@@ -154,19 +253,6 @@ vector<Triangle> RayTracingSceneManager::LoadPlaneTriangles(glm::mat4 model, con
 void RayTracingSceneManager::InsertTriangles(vector<Triangle> triangles)
 {
 	this->triangles.insert(this->triangles.end(), triangles.begin(), triangles.end());
-
-	glm::vec3 bmin;
-	glm::vec3 bmax;
-	for (int i = 0; i < this->triangles.size(); ++i)
-	{
-		bmin.x = min(min(min(this->triangles[i].v0.x, this->triangles[i].v1.x), this->triangles[i].v2.x), bmin.x);
-		bmin.y = min(min(min(this->triangles[i].v0.y, this->triangles[i].v1.y), this->triangles[i].v2.y), bmin.y);
-		bmin.z = min(min(min(this->triangles[i].v0.z, this->triangles[i].v1.z), this->triangles[i].v2.z), bmin.z);
-
-		bmax.x = max(max(max(this->triangles[i].v0.x, this->triangles[i].v1.x), this->triangles[i].v2.x), bmax.x);
-		bmax.y = max(max(max(this->triangles[i].v0.y, this->triangles[i].v1.y), this->triangles[i].v2.y), bmax.y);
-		bmax.z = max(max(max(this->triangles[i].v0.z, this->triangles[i].v1.z), this->triangles[i].v2.z), bmax.z);
-	}
 }
 
 vector<Triangle> RayTracingSceneManager::LoadMeshTriangles(const string meshfile, glm::mat4 model, const int materialId)

@@ -32,9 +32,9 @@ void RayTracingRenderer::InitializeRender()
 	vector<Triangle> triangles = dynamic_cast<RayTracingSceneManager*>(sceneManager)->triangles;
 	vector<Sphere> spheres = dynamic_cast<RayTracingSceneManager*>(sceneManager)->spheres;
 	AABB aabb;
-	aabb.bounds[0] = glm::vec3(0.0f);
-	aabb.bounds[1] = glm::vec3(0.0f);
-	for (int i = 0; i < triangles.size(); i++)
+	aabb.bounds[0] = glm::vec3(-100.0f, -100.0f, -100.0f);
+	aabb.bounds[1] = glm::vec3(100.0f, 100.0f, 100.0f);
+	/*for (int i = 0; i < triangles.size(); i++)
 	{
 		aabb.bounds[0].x = 
 			min(min(min(triangles[i].v0.x, triangles[i].v1.x), triangles[i].v2.x), aabb.bounds[0].x);
@@ -60,7 +60,7 @@ void RayTracingRenderer::InitializeRender()
 		aabb.bounds[1].x = max(spheres[i].origin.x + spheres[i].radius, aabb.bounds[1].x);
 		aabb.bounds[1].y = max(spheres[i].origin.y + spheres[i].radius, aabb.bounds[1].y);
 		aabb.bounds[1].z = max(spheres[i].origin.z + spheres[i].radius, aabb.bounds[1].z);
-	}
+	}*/
 
 	objects.push_back(aabb);
 
@@ -103,6 +103,7 @@ void RayTracingRenderer::Render()
 	vector<Light> lights = dynamic_cast<RayTracingSceneManager*>(sceneManager)->lights;
 	vector<Material> materials = dynamic_cast<RayTracingSceneManager*>(sceneManager)->materials;
 	OctreeNode* root = dynamic_cast<RayTracingSceneManager*>(sceneManager)->root;
+	bool isDepthTwo = dynamic_cast<RayTracingSceneManager*>(sceneManager)->isDepthTwo;
 
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 	UseDefaultFBO();
@@ -126,7 +127,7 @@ void RayTracingRenderer::Render()
 	// view = glm::inverse(camera->GetModelMatrix());
 
 	// 여기서 render가 다 일어남
-	RayTrace(output, view, root, objects, triangles, spheres, lights, materials);
+	RayTrace(output, view, root, objects, triangles, spheres, lights, materials, isDepthTwo);
 
 	cudaGraphicsUnmapResources(1, &cuda_pbo_resource, 0);
 
@@ -163,6 +164,7 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	vector<Light> lights = dynamic_cast<RayTracingSceneManager*>(sceneManager)->lights;
 	vector<Material> materials = dynamic_cast<RayTracingSceneManager*>(sceneManager)->materials;
 	OctreeNode* root = dynamic_cast<RayTracingSceneManager*>(sceneManager)->root;
+	bool isDepthTwo = dynamic_cast<RayTracingSceneManager*>(sceneManager)->isDepthTwo;
 
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 	UseDefaultFBO();
@@ -187,7 +189,7 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	view = glm::inverse(camera->GetModelMatrix());
 
 	// 여기서 render가 다 일어남
-	RayTrace(output, view, root, objects, triangles, spheres, lights, materials);
+	RayTrace(output, view, root, objects, triangles, spheres, lights, materials, isDepthTwo);
 
 	cudaGraphicsUnmapResources(1, &cuda_pbo_resource, 0);
 

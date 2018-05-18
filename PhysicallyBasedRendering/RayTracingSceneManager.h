@@ -7,7 +7,7 @@ class RayTracingSceneManager : public SceneManager
 {
 public:
 
-	RayTracingSceneManager():moveSpeed(1.0f), rotateSpeed(0.1f) {}
+	RayTracingSceneManager():moveSpeed(0.5f), rotateSpeed(0.05f), lightSphereId(0), isDepthTwo(false) {}
 	virtual ~RayTracingSceneManager() {}
 
 	void InitializeObjects();
@@ -23,11 +23,13 @@ public:
 
 	void InsertTriangles(vector<Triangle> triangles);
 
-	//vector<Triangle> BackFaceCulling(vector<Triangle> triangles, glm::mat4 model);
-
 	OctreeNode* root;
+	bool isDepthTwo;
 
 private:
+
+	// for demo
+	const int lightSphereId;
 
 	const float moveSpeed;
 	const float rotateSpeed;

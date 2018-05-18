@@ -63,12 +63,12 @@ struct Sphere
 
 	int materialId;
 
-	Sphere()
-	{
-		origin = glm::vec3(0.0f);
-		radius = 1.0f;
-		materialId = 0;
-	}
+	//Sphere()
+	//{
+	//	origin = vec3();
+	//	radius = 1.0f;
+	//	materialId = 0;
+	//}
 };
 
 struct Light
@@ -93,6 +93,7 @@ struct AABB
 	glm::vec3 bounds[2];
 };
 
+DLLExport
 void RayTrace(
 	glm::vec4* data, 
 	glm::mat4 view,

@@ -1,15 +1,12 @@
-#include "FluidRenderer.h"
-#include "PBRRenderer.h"
-#include "LTCRenderer.h"
-#include "VolumeRenderer.h"
-#include "StarBurstRenderer.h"
 #include "RayTracingRenderer.h"
-#include "TemporalGlareRenderer.h"
 #include "LectureSceneRenderer.h"
 
 #include "WindowManager.h"
 #include "Debug.h"
 #include "RayTracer.cuh"
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 using namespace std;
 
@@ -51,51 +48,11 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
-	// TO Refacto 객체의 생성 삭제 씬 이동 등만 관리하는 SceneManager를 만들고
-	// SubJect로 둔다. InputManager와 RenderManager는 observer로 SceneManager의 objects 객체들을 레퍼런스로
-	// 가지고 있으며 SceneManager에서 변경될 때 마다 update된다.
-	// 객체들의 이동은 InputManager에서 관리하며 InputManager는 추상화로 바꿔야한다.
 	Renderer* renderer;
 	SceneManager* sceneManager;
 
-	// Factory 패턴을 이용하면 생성을 분리할 수 있을 거 같음
 	switch (scene)
 	{
-	case PBR_SCENE:
-	{
-		sceneManager = new PBRSceneManager();
-		renderer = new PBRRenderer(sceneManager);
-		break;
-	}
-	case FLUID_SCENE:
-	{	sceneManager = new FluidSceneManager();
-		renderer = new FluidRenderer(sceneManager);
-		break;
-	}
-	case LTC_SCENE:
-	{
-		sceneManager = new LTCSceneManager();
-		renderer = new LTCRenderer(sceneManager);
-		break;
-	}
-	case SMOKE_SCENE:
-	{
-		sceneManager = new SmokeSceneManager();
-		renderer = new VolumeRenderer(sceneManager);
-		break;
-	}
-	case STARBURST_SCENE:
-	{
-		sceneManager = new StarBurstSceneManager();
-		renderer = new StarBurstRenderer(sceneManager);
-		break;
-	}
-	case TEMPORALGLARE_SCENE:
-	{
-		sceneManager = new TemporalGlareSceneManager();
-		renderer = new TemporalGlareRenderer(sceneManager);
-		break;
-	}
 	case RAYTRACING_SCENE:
 	{
 		sceneManager = new RayTracingSceneManager();
@@ -103,8 +60,8 @@ int main(int argc, char **argv)
 		break;
 	}
 	default:
-		sceneManager = new PBRSceneManager();
-		renderer = new PBRRenderer(sceneManager);
+		sceneManager = new RayTracingSceneManager();
+		renderer = new RayTracingRenderer(sceneManager);
 		break;
 	}
 

@@ -29,6 +29,7 @@ public:
 private:
 
 	// for demo
+
 	const int lightSphereId;
 
 	const float moveSpeed;

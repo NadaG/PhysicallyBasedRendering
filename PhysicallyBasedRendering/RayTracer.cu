@@ -25,7 +25,7 @@ struct Ray
 const int WINDOW_HEIGHT = 1024;
 const int WINDOW_WIDTH = 1024;
 
-const int QUEUE_SIZE = 5;
+const int QUEUE_SIZE = 4;
 
 using std::cout;
 using std::endl;
@@ -247,7 +247,7 @@ __device__ bool IsQueueEmpty(const int front, const int rear)
 __device__ bool IsLighted(
 	vec3 hitPoint,
 	Light light,
-	Material* materials,
+	Material *materials,
 	Triangle* triangles,
 	const int triangleNum,
 	const int nearestTriangleIdx,
@@ -260,35 +260,35 @@ __device__ bool IsLighted(
 	shadowRay.origin = hitPoint;
 	shadowRay.dir = normalize(light.pos - hitPoint);
 
+	float distToTriangle;
 
 	for (int t_i = 0; t_i < triangleNum; ++t_i)
 	{
 		// 처음 hit한 triangle은 제외
 		if (nearestTriangleIdx != t_i)
 		{
-			float distToTriangle;
 			// shadow
 			if (RayTriangleIntersect(shadowRay, triangles[t_i], distToTriangle))
 			{
-				if (materials[triangles[t_i].materialId].refractivity == 0)
-				{
+			/*	if (materials[triangles[t_i].materialId].refractivity == 0)
+				{*/
 					// 앞쪽의 dir만 봄
 					if (distToTriangle > 0.01f && distToTriangle < glm::distance(light.pos, hitPoint))
 					{
 						return false;
 					}
-				}
+				//}
 			}
 		}
 	}
 
+	float distToSphere;
 
 	for (int s_i = 0; s_i < sphereNum; ++s_i)
 	{
 		// 광원은 0임, 광원을 제외한 경우에만 그림자 생김
 		if (nearestSphereIdx != s_i && s_i != 0)
 		{
-			float distToSphere;
 			if (RaySphereIntersect(shadowRay, spheres[s_i], distToSphere))
 			{		
 				// 앞쪽의 dir만 봄
@@ -549,7 +549,6 @@ __global__ void RayTraceD(
 	// NOTICE for문을 돌릴 때 iter를 변수로 하니까 검은 화면이 나옴
 	// y, x로 들어가고
 	// 0, 0 좌표는 좌하단
-	
 	data[x] = RayTraceColor(
 		ray,
 		rayQueue,

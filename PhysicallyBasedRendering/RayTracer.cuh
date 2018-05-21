@@ -7,6 +7,7 @@
 #include <glm\gtc\matrix_transform.hpp>
 #include <vector>
 
+using glm::vec2;
 using glm::vec3;
 using glm::vec4;
 using glm::normalize;
@@ -27,6 +28,10 @@ struct Triangle
 	glm::vec3 v0normal;
 	glm::vec3 v1normal;
 	glm::vec3 v2normal;
+	
+	glm::vec2 v0uv;
+	glm::vec2 v1uv;
+	glm::vec2 v2uv;
 
 	int materialId;
 	int meshId;
@@ -86,6 +91,10 @@ struct Material
 	// alpha가 높으면 불투명
 	float refractivity;
 	float reflectivity;
+
+	int texStartIdx;
+	int texWidth;
+	int texHeight;
 };
 
 struct AABB
@@ -96,6 +105,8 @@ struct AABB
 DLLExport
 void RayTrace(
 	glm::vec4* data, 
+	const int gridX,
+	const int gridY,
 	glm::mat4 view,
 	OctreeNode* root,
 	const vector<AABB>& objects,
@@ -103,4 +114,5 @@ void RayTrace(
 	const vector<Sphere>& spheres,
 	const vector<Light>& lights, 
 	const vector<Material>& materials,
-	bool isDepthTwo);
+	const vector<float>& textures
+);

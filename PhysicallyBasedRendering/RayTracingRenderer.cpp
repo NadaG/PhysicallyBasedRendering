@@ -23,7 +23,7 @@ void RayTracingRenderer::InitializeRender()
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, rayTracePBO);
 	glBufferData(
 		GL_PIXEL_UNPACK_BUFFER, 
-		WindowManager::GetInstance()->width * WindowManager::GetInstance()->height * sizeof(GLfloat) * 4, 
+		WindowManager::GetInstance()->width * WindowManager::GetInstance()->height * sizeof(GLfloat) * 4,
 		0, 
 		GL_STREAM_DRAW);
 
@@ -73,7 +73,7 @@ void RayTracingRenderer::InitializeRender()
 		infile += "Obj/PouringFluid/";
 		infile += tmp;
 		infile += ".obj";
-		dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadMesh(infile);
+		dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadFluidScene(infile);
 
 		outfile += "fluid_raytracing/new";
 		outfile += tmp;
@@ -84,7 +84,7 @@ void RayTracingRenderer::InitializeRender()
 	}*/
 
 
-	/*dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadMesh("Obj/PouringFluid/0000.obj");
+	/*dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadMesh("Obj/PouringFluid/0250.obj");
 	OfflineRender("0000000.png");
 	Sleep(1000.0f);*/
 }
@@ -103,7 +103,7 @@ void RayTracingRenderer::Render()
 	vector<Light> lights = dynamic_cast<RayTracingSceneManager*>(sceneManager)->lights;
 	vector<Material> materials = dynamic_cast<RayTracingSceneManager*>(sceneManager)->materials;
 	OctreeNode* root = dynamic_cast<RayTracingSceneManager*>(sceneManager)->root;
-	bool isDepthTwo = dynamic_cast<RayTracingSceneManager*>(sceneManager)->isDepthTwo;
+	vector<float> textures = dynamic_cast<RayTracingSceneManager*>(sceneManager)->textures;
 
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 	UseDefaultFBO();
@@ -112,22 +112,20 @@ void RayTracingRenderer::Render()
 	// render start //
 	cudaGraphicsMapResources(1, &cuda_pbo_resource, 0);
 
-	//float4* output;
 	glm::vec4* output;
 	size_t num_bytes;
-	// cuda memory로부터 cpu memory로 포인터 위치를 가져오는 건가?
+
 	cudaGraphicsResourceGetMappedPointer((void**)&output, &num_bytes, cuda_pbo_resource);
-
-	// 각 픽셀마다 rgba
-	// count만큼의 크기의 device 메모리 영역(devPtr부터 시작)에 value로 값을 셋팅 
-	cudaMemset(output, 0, WindowManager::GetInstance()->width * WindowManager::GetInstance()->height * 16);
-
 	glm::mat4 view = camera->GetModelMatrix();
-	// camera의 model matrix의 inverse가 바로 view matrix
-	// view = glm::inverse(camera->GetModelMatrix());
 
-	// 여기서 render가 다 일어남
-	RayTrace(output, view, root, objects, triangles, spheres, lights, materials, isDepthTwo);
+	for (int i = 0; i < gridY; i++)
+	{
+		for (int j = 0; j < gridX; j++)
+		{
+			// 여기서 render가 다 일어남
+			RayTrace(output, i, j, view, root, objects, triangles, spheres, lights, materials, textures);
+		}
+	}
 
 	cudaGraphicsUnmapResources(1, &cuda_pbo_resource, 0);
 
@@ -164,7 +162,7 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	vector<Light> lights = dynamic_cast<RayTracingSceneManager*>(sceneManager)->lights;
 	vector<Material> materials = dynamic_cast<RayTracingSceneManager*>(sceneManager)->materials;
 	OctreeNode* root = dynamic_cast<RayTracingSceneManager*>(sceneManager)->root;
-	bool isDepthTwo = dynamic_cast<RayTracingSceneManager*>(sceneManager)->isDepthTwo;
+	vector<float> textures = dynamic_cast<RayTracingSceneManager*>(sceneManager)->textures;
 
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 	UseDefaultFBO();
@@ -173,23 +171,20 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	// render start //
 	cudaGraphicsMapResources(1, &cuda_pbo_resource, 0);
 
-	//float4* output;
 	glm::vec4* output;
 	size_t num_bytes;
 	// cuda memory로부터 cpu memory로 포인터 위치를 가져오는 건가?
 	cudaGraphicsResourceGetMappedPointer((void**)&output, &num_bytes, cuda_pbo_resource);
+	glm::mat4 view = camera->GetModelMatrix();
 
-	// 각 픽셀마다 rgba
-	// count만큼의 크기의 device 메모리 영역(devPtr부터 시작)에 value로 값을 셋팅 
-	cudaMemset(output, 0, WindowManager::GetInstance()->width * WindowManager::GetInstance()->height * 16);
-
-	glm::mat4 view;
-	// camera의 model matrix의 inverse가 바로 view matrix
-	// y가 뒤바뀌는 이유
-	view = glm::inverse(camera->GetModelMatrix());
-
-	// 여기서 render가 다 일어남
-	RayTrace(output, view, root, objects, triangles, spheres, lights, materials, isDepthTwo);
+	for (int i = 0; i < gridY; i++)
+	{
+		for (int j = 0; j < gridX; j++)
+		{
+			// 여기서 render가 다 일어남
+			RayTrace(output, i, j, view, root, objects, triangles, spheres, lights, materials, textures);
+		}
+	}
 
 	cudaGraphicsUnmapResources(1, &cuda_pbo_resource, 0);
 

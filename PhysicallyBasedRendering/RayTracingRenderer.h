@@ -9,7 +9,7 @@ class RayTracingRenderer : public Renderer
 {
 public:
 	RayTracingRenderer(SceneManager* sceneManager)
-		:Renderer(sceneManager)
+		:Renderer(sceneManager), gridX(4), gridY(4)
 	{}
 	virtual ~RayTracingRenderer() {};
 
@@ -29,4 +29,7 @@ private:
 	PNGExporter pngExporter;
 
 	vector<AABB> objects;
+
+	const int gridX;
+	const int gridY;
 };

@@ -6,19 +6,31 @@ void RayTracingSceneManager::InitializeObjects()
 	movingCamera->WorldTranslate(glm::vec3(15.0f, 20.0f, 90.0f));
 
 	Light light;
-	light.pos = glm::vec3(0.0f, 0.0f, 0.0f);
+	light.pos = glm::vec3(0.0f, 200.0f, 0.0f);
 	light.color = glm::vec3(1.0f, 1.0f, 1.0f);
 	lights.push_back(light);
 
+	Texture2D rockTex;
+	rockTex.LoadTexture("Texture/Rock/albedo.png");
+	float* rockTexArray = rockTex.GetTexImage(GL_RGBA);
+	
+	for (int i = 0; i < rockTex.GetHeight(); i++)
+	{
+		for (int j = 0; j < rockTex.GetWidth(); j++)
+		{
+			textures.push_back(rockTexArray[i*rockTex.GetHeight() + j]);
+		}
+	}
+
 	Material fluidMat, planeMat, sphereMat, lightMat;
-	fluidMat.ambient = glm::vec3(0.0f, 0.0f, 0.2f);
-	fluidMat.diffuse = glm::vec3(0.2f, 0.2f, 0.4f);
-	fluidMat.specular = glm::vec3(0.2f, 0.2f, 0.2f);
-	fluidMat.refractivity = 0.2f;
+	fluidMat.ambient = glm::vec3(0.0f, 0.0f, 0.0f);
+	fluidMat.diffuse = glm::vec3(0.2f, 0.2f, 0.3f);
+	fluidMat.specular = glm::vec3(0.2f, 0.2f, 0.3f);
+	fluidMat.refractivity = 0.8f;
 	fluidMat.reflectivity = 0.0f;
 	materials.push_back(fluidMat);
 
-	planeMat.ambient = glm::vec3(0.2f, 0.5f, 0.2f);
+	planeMat.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
 	planeMat.diffuse = glm::vec3(0.2f, 0.2f, 0.2f);
 	planeMat.specular = glm::vec3(0.2f, 0.2f, 0.2f);
 	planeMat.refractivity = 0.0f;
@@ -29,7 +41,10 @@ void RayTracingSceneManager::InitializeObjects()
 	sphereMat.diffuse = glm::vec3(0.9f, 0.3f, 0.3f);
 	sphereMat.specular = glm::vec3(0.9f, 0.2f, 0.2f);
 	sphereMat.refractivity = 0.0f;
-	sphereMat.reflectivity = 0.2f;
+	sphereMat.reflectivity = 0.4f;
+	sphereMat.texStartIdx = 0;
+	sphereMat.texWidth = 2048;
+	sphereMat.texHeight = 2048;
 	materials.push_back(sphereMat);
 
 	lightMat.ambient = glm::vec3(1.0f, 1.0f, 0.0f);
@@ -53,20 +68,25 @@ void RayTracingSceneManager::InitializeObjects()
 	sphere.materialId = 3;
 	spheres.push_back(sphere);
 
-	/*glm::mat4 sphereModel = glm::mat4();
-	sphereModel = glm::translate(sphereModel, glm::vec3(10.0f, 10.0f, 0.0f));
-	sphereModel = glm::scale(sphereModel, glm::vec3(10.0f, 10.0f, 10.0f));
-	InsertTriangles(LoadMeshTriangles("Obj/sphere.obj", sphereModel, 2));*/
+	/*sphere.origin = glm::vec3(0.0f, 10.0f, 0.0f);
+	sphere.radius = 10.0f;
+	sphere.materialId = 2;
+	spheres.push_back(sphere);*/
+
+	glm::mat4 sphereModel = glm::mat4();
+	sphereModel = glm::translate(sphereModel, glm::vec3(-20.0f, 20.0f, 0.0f));
+	sphereModel = glm::scale(sphereModel, glm::vec3(5.0f, 5.0f, 5.0f));
+	InsertTriangles(LoadMeshTriangles("Obj/Sphere.obj", sphereModel, 0));
 
 	glm::mat4 planeModel = glm::mat4();
 	planeModel = glm::translate(planeModel, glm::vec3(0.0f, -5.0f, 0.0f));
-	planeModel = glm::scale(planeModel, glm::vec3(30.0f, 1.0f, 30.0f));
+	planeModel = glm::scale(planeModel, glm::vec3(100.0f, 1.0f, 100.0f));
 	InsertTriangles(LoadPlaneTriangles(planeModel, 1));
 
 	planeModel = glm::mat4();
-	planeModel = glm::translate(planeModel, glm::vec3(0.0f, 0.0f, -100.0f));
+	planeModel = glm::translate(planeModel, glm::vec3(0.0f, 0.0f, -50.0f));
 	planeModel = glm::rotate(planeModel, 1.57079f, glm::vec3(1.0f, 0.0f, 0.0f));
-	planeModel = glm::scale(planeModel, glm::vec3(30.0f, 1.0f, 30.0f));
+	planeModel = glm::scale(planeModel, glm::vec3(100.0f, 1.0f, 100.0f));
 	InsertTriangles(LoadPlaneTriangles(planeModel, 1));
 }
 
@@ -193,7 +213,6 @@ void RayTracingSceneManager::Update()
 	// for demo
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_3))
 	{
-		isDepthTwo = true;
 	}
 
 	// for demo
@@ -220,6 +239,8 @@ void RayTracingSceneManager::Update()
 		materials[2].reflectivity += 0.01f;
 	}
 }
+
+
 
 vector<Triangle> RayTracingSceneManager::LoadPlaneTriangles(glm::mat4 model, const int materialId)
 {
@@ -253,6 +274,34 @@ vector<Triangle> RayTracingSceneManager::LoadPlaneTriangles(glm::mat4 model, con
 void RayTracingSceneManager::InsertTriangles(vector<Triangle> triangles)
 {
 	this->triangles.insert(this->triangles.end(), triangles.begin(), triangles.end());
+}
+
+void RayTracingSceneManager::LoadFluidScene(const string meshfile)
+{
+	triangles.clear();
+
+	glm::mat4 planeModel = glm::mat4();
+	planeModel = glm::translate(planeModel, glm::vec3(0.0f, -5.0f, 0.0f));
+	planeModel = glm::scale(planeModel, glm::vec3(100.0f, 1.0f, 100.0f));
+	InsertTriangles(LoadPlaneTriangles(planeModel, 1));
+
+	planeModel = glm::mat4();
+	planeModel = glm::translate(planeModel, glm::vec3(0.0f, 0.0f, -50.0f));
+	planeModel = glm::rotate(planeModel, 1.57079f, glm::vec3(1.0f, 0.0f, 0.0f));
+	planeModel = glm::scale(planeModel, glm::vec3(100.0f, 1.0f, 100.0f));
+	InsertTriangles(LoadPlaneTriangles(planeModel, 1));
+
+	glm::mat4 sphereModel = glm::mat4();
+	sphereModel = glm::translate(sphereModel, glm::vec3(10.0f, 20.0f, 0.0f));
+	sphereModel = glm::scale(sphereModel, glm::vec3(10.0f, 10.0f, 10.0f));
+	InsertTriangles(LoadMeshTriangles("Obj/sphere.obj", sphereModel, 2));
+
+	sphereModel = glm::mat4();
+	sphereModel = glm::translate(sphereModel, glm::vec3(25.0f, 25.0f, 0.0f));
+	sphereModel = glm::scale(sphereModel, glm::vec3(5.0f, 5.0f, 5.0f));
+	InsertTriangles(LoadMeshTriangles("Obj/sphere.obj", sphereModel, 2));
+
+	InsertTriangles(LoadMeshTriangles(meshfile, glm::mat4(), 0));
 }
 
 vector<Triangle> RayTracingSceneManager::LoadMeshTriangles(const string meshfile, glm::mat4 model, const int materialId)

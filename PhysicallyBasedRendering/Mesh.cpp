@@ -69,6 +69,13 @@ void Mesh::SetMesh(aiMesh* mesh)
 			triangle.normal = cross(triangle.v1 - triangle.v0, triangle.v2 - triangle.v0);
 		}
 
+		if (mesh->HasTextureCoords(0))
+		{
+			triangle.v0uv = vertices[indices[i * 3 + 0]].uv;
+			triangle.v1uv = vertices[indices[i * 3 + 1]].uv;
+			triangle.v2uv = vertices[indices[i * 3 + 2]].uv;
+		}
+
 
 		triangles.push_back(triangle);
 	}

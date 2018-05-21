@@ -25,7 +25,10 @@ struct Ray
 const int WINDOW_HEIGHT = 1024;
 const int WINDOW_WIDTH = 1024;
 
-const int QUEUE_SIZE = 4;
+const int RAY_X_NUM = 256;
+const int RAY_Y_NUM = 256;
+
+const int QUEUE_SIZE = 8;
 
 using std::cout;
 using std::endl;
@@ -48,6 +51,26 @@ __device__ vec3 NormalInterpolation(Triangle triangle, vec3 position)
 	float u = 1.0f - v - w;
 
 	return u*triangle.v0normal + v*triangle.v1normal + w*triangle.v2normal;
+}
+
+__device__ vec2 UVInterpolation(Triangle triangle, vec2 uv)
+{
+	/*vec2 v0uv = triangle.v1uv - triangle.v0uv;
+	vec2 v1uv = triangle.v2uv - triangle.v0uv;
+	vec2 v2uv = position - triangle.v0;
+
+	float d00 = dot(v0, v0);
+	float d01 = dot(v0, v1);
+	float d11 = dot(v1, v1);
+	float d20 = dot(v2, v0);
+	float d21 = dot(v2, v1);
+	float denom = d00*d11 - d01*d01;
+
+	float v = (d11*d20 - d01*d21) / denom;
+	float w = (d00*d21 - d01*d20) / denom;
+	float u = 1.0f - v - w;
+
+	return u*triangle.v0normal + v*triangle.v1normal + w*triangle.v2normal;*/
 }
 
 // ray와 sphere가 intersect하는지 검사하는 함수
@@ -83,6 +106,9 @@ __device__ bool RayTriangleIntersect(Ray ray, Triangle triangle, float& dist)
 
 	// back face culling
 	if (det < 0.01f)
+		return false;
+
+	if (fabsf(det) < 0.01f)
 		return false;
 
 	float invDet = 1 / det;
@@ -260,45 +286,45 @@ __device__ bool IsLighted(
 	shadowRay.origin = hitPoint;
 	shadowRay.dir = normalize(light.pos - hitPoint);
 
-	float distToTriangle;
+	//float distToTriangle;
 
-	for (int t_i = 0; t_i < triangleNum; ++t_i)
-	{
-		// 처음 hit한 triangle은 제외
-		if (nearestTriangleIdx != t_i)
-		{
-			// shadow
-			if (RayTriangleIntersect(shadowRay, triangles[t_i], distToTriangle))
-			{
-			/*	if (materials[triangles[t_i].materialId].refractivity == 0)
-				{*/
-					// 앞쪽의 dir만 봄
-					if (distToTriangle > 0.01f && distToTriangle < glm::distance(light.pos, hitPoint))
-					{
-						return false;
-					}
-				//}
-			}
-		}
-	}
+	//for (int t_i = 0; t_i < triangleNum; ++t_i)
+	//{
+	//	// 처음 hit한 triangle은 제외
+	//	if (nearestTriangleIdx != t_i)
+	//	{
+	//		// shadow
+	//		if (RayTriangleIntersect(shadowRay, triangles[t_i], distToTriangle))
+	//		{
+	//			if (materials[triangles[t_i].materialId].refractivity == 0)
+	//			{
+	//				// 앞쪽의 dir만 봄
+	//				if (distToTriangle > 0.01f && distToTriangle < glm::distance(light.pos, hitPoint))
+	//				{
+	//					return false;
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
 
-	float distToSphere;
+	//float distToSphere;
 
-	for (int s_i = 0; s_i < sphereNum; ++s_i)
-	{
-		// 광원은 0임, 광원을 제외한 경우에만 그림자 생김
-		if (nearestSphereIdx != s_i && s_i != 0)
-		{
-			if (RaySphereIntersect(shadowRay, spheres[s_i], distToSphere))
-			{		
-				// 앞쪽의 dir만 봄
-				if (distToSphere > 0.01f && distToSphere < glm::distance(light.pos, hitPoint))
-				{
-					return false;
-				}
-			}
-		}
-	}
+	//for (int s_i = 0; s_i < sphereNum; ++s_i)
+	//{
+	//	// 광원은 0임, 광원을 제외한 경우에만 그림자 생김
+	//	if (nearestSphereIdx != s_i && s_i != 0)
+	//	{
+	//		if (RaySphereIntersect(shadowRay, spheres[s_i], distToSphere))
+	//		{		
+	//			// 앞쪽의 dir만 봄
+	//			if (distToSphere > 0.01f && distToSphere < glm::distance(light.pos, hitPoint))
+	//			{
+	//				return false;
+	//			}
+	//		}
+	//	}
+	//}
 
 	return true;
 }
@@ -396,8 +422,7 @@ __device__ vec4 RayTraceColor(
 	int lightNum,
 	Material* materials,
 	int matNum,
-	int depth,
-	bool isDepthTwo)
+	int depth)
 {
 	vec4 color = vec4(0.0f);
 	int front = 0, rear = 0;
@@ -484,44 +509,41 @@ __device__ vec4 RayTraceColor(
 		nowDepth++;
 	}
 
-	if (isDepthTwo)
+	// 나오지 못한 queue들 나오게 하기
+	while (!IsQueueEmpty(front, rear))
 	{
-		// 나오지 못한 queue들 나오게 하기
-		while (!IsQueueEmpty(front, rear))
+		Ray nowRay;
+		nowRay = GetQueueFront(rayQueue, front);
+		Dequeue(rayQueue, front);
+
+		if (!RayAABBsIntersect(nowRay, objects, objNum))
+			continue;
+
+		vec4 lightedColor = glm::vec4(0.0f);
+		vec3 hitPoint = glm::vec3(0.0f);
+		int materialId = 0;
+		vec3 N = glm::vec4(0.0f);
+		int nearestTriangleIdx = 0;
+		int nearestSphereIdx = 0;
+
+		if (GetHitPointInfo(nowRay, triangles, triangleNum, nearestTriangleIdx, spheres, sphereNum, nearestSphereIdx, hitPoint, materialId, N))
 		{
-			Ray nowRay;
-			nowRay = GetQueueFront(rayQueue, front);
-			Dequeue(rayQueue, front);
-
-			if (!RayAABBsIntersect(nowRay, objects, objNum))
-				continue;
-
-			vec4 lightedColor = glm::vec4(0.0f);
-			vec3 hitPoint = glm::vec3(0.0f);
-			int materialId = 0;
-			vec3 N = glm::vec4(0.0f);
-			int nearestTriangleIdx = 0;
-			int nearestSphereIdx = 0;
-
-			if (GetHitPointInfo(nowRay, triangles, triangleNum, nearestTriangleIdx, spheres, sphereNum, nearestSphereIdx, hitPoint, materialId, N))
+			for (int k = 0; k < lightNum; k++)
 			{
-				for (int k = 0; k < lightNum; k++)
+				vec3 L = glm::normalize(lights[k].pos - hitPoint);
+
+				if (IsLighted(
+					hitPoint,
+					lights[k],
+					materials,
+					triangles, triangleNum, nearestTriangleIdx,
+					spheres, sphereNum, nearestSphereIdx))
 				{
-					vec3 L = glm::normalize(lights[k].pos - hitPoint);
-
-					if (IsLighted(
-						hitPoint,
-						lights[k],
-						materials,
-						triangles, triangleNum, nearestTriangleIdx,
-						spheres, sphereNum, nearestSphereIdx))
-					{
-						lightedColor += glm::vec4(RayCastColor(N, L, V, materials[materialId], lights[k]), 1.0f);
-					}
+					lightedColor += glm::vec4(RayCastColor(N, L, V, materials[materialId], lights[k]), 1.0f);
 				}
-
-				color += lightedColor * nowRay.decay;
 			}
+
+			color += lightedColor * nowRay.decay;
 		}
 	}
 
@@ -530,18 +552,20 @@ __device__ vec4 RayTraceColor(
 
 __global__ void RayTraceD(
 	glm::vec4* data,
+	const int gridX,
+	const int gridY,
 	glm::mat4 view,
 	OctreeNode* root,
 	AABB* boundingboxes, int boxNum,
 	Triangle* triangles, int triangleNum,
 	Sphere* spheres, int sphereNum,
 	Light* lights, int lightNum,
-	Material* materials, int matNum,
-	bool isDepthTwo)
+	Material* materials, int matNum)
 {
-	unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
+	//unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
+	unsigned int x = (blockIdx.x + gridY * RAY_Y_NUM) * WINDOW_HEIGHT + (threadIdx.x + gridX * RAY_X_NUM);
 
-	Ray ray = GenerateCameraRay(blockIdx.x, threadIdx.x, view);
+	Ray ray = GenerateCameraRay(blockIdx.x + gridY * RAY_Y_NUM, threadIdx.x + gridX * RAY_X_NUM, view);
 	ray.rayType = 0;
 	ray.decay = 1.0f;
 
@@ -562,12 +586,13 @@ __global__ void RayTraceD(
 		lightNum,
 		materials,
 		matNum, 
-		2,
-		isDepthTwo);
+		2);
 }
 
 void RayTrace(
 	glm::vec4* data,
+	const int gridX,
+	const int gridY,
 	glm::mat4 view,
 	OctreeNode* root,
 	const vector<AABB>& boundingboxes,
@@ -575,7 +600,7 @@ void RayTrace(
 	const vector<Sphere>& spheres,
 	const vector<Light>& lights,
 	const vector<Material>& materials,
-	bool isDepthTwo)
+	const vector<float>& textures)
 {
 	thrust::device_vector<AABB> b = boundingboxes;
 	thrust::device_vector<Triangle> t = triangles;
@@ -588,8 +613,10 @@ void RayTrace(
 	vector<Triangle> tss;
 	OctreeNode* d_root = BuildOctree(tss);
 
-	RayTraceD << <WINDOW_HEIGHT, WINDOW_WIDTH >> > (
+	RayTraceD << <RAY_Y_NUM, RAY_X_NUM >> > (
 		data,
+		gridX,
+		gridY,
 		view,
 		d_root,
 		b.data().get(),
@@ -601,7 +628,6 @@ void RayTrace(
 		l.data().get(),
 		l.size(),
 		m.data().get(),
-		m.size(),
-		isDepthTwo
+		m.size()
 	);
 }

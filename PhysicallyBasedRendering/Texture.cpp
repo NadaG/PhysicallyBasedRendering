@@ -29,7 +29,8 @@ void Texture::LoadTexture(const string& s)
 	glBindTexture(GL_TEXTURE_2D, texture);
 
 	int width, height, nrComponents;
-	unsigned char* data = stbi_load(s.c_str(), &width, &height, &nrComponents, 0);
+	unsigned char* data = stbi_load(s.c_str(), &width, &height, &nrComponents, 4);
+	nrComponents = 4;
 
 	if (data)
 	{
@@ -50,7 +51,7 @@ void Texture::LoadTexture(const string& s)
 		}
 		
 		// 보통 이미지의 경우 unsigned byte로 저장하고
-		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 		this->width = width;

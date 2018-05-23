@@ -1,5 +1,6 @@
 #include "RayTracingRenderer.h"
 #include "LectureSceneRenderer.h"
+#include "PBRRenderer.h"
 
 #include "WindowManager.h"
 #include "Debug.h"
@@ -57,6 +58,12 @@ int main(int argc, char **argv)
 	{
 		sceneManager = new RayTracingSceneManager();
 		renderer = new RayTracingRenderer(sceneManager);
+		break;
+	}
+	case PBR_SCENE:
+	{
+		sceneManager = new PBRSceneManager();
+		renderer = new PBRRenderer(sceneManager);
 		break;
 	}
 	default:

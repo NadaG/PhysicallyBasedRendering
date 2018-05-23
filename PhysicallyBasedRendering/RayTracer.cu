@@ -3,12 +3,15 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <glm\glm.hpp>
+#include <glm\gtx\component_wise.hpp>
 #include <stdio.h>
 #include <glm\gtc\matrix_transform.hpp>
 #include <math_constants.h>
 #include <math.h>
 #include <thrust\device_vector.h>
 #include <queue>
+#include <curand.h>
+#include <curand_kernel.h>
 
 struct Ray
 {
@@ -33,7 +36,20 @@ const int QUEUE_SIZE = 8;
 using std::cout;
 using std::endl;
 
-__device__ vec3 NormalInterpolation(Triangle triangle, vec3 position)
+
+__device__ vec3 CastRay(vec3 P, vec3 N) 
+{
+	curandState localState;
+	curand_init(0, 0, 0, &localState);
+	for (int n = 0; n < 100; ++n) 
+	{
+		float theta = (curand_uniform(&localState) - 0.5f)*glm::pi<float>();
+		float phi = (curand_uniform(&localState) - 0.5f)*glm::pi<float>();
+
+	}
+}
+
+__device__ vec3 Interpolation(Triangle triangle, vec3 position, vec3& N, vec2& uv)
 {
 	vec3 v0 = triangle.v1 - triangle.v0;
 	vec3 v1 = triangle.v2 - triangle.v0;
@@ -50,27 +66,8 @@ __device__ vec3 NormalInterpolation(Triangle triangle, vec3 position)
 	float w = (d00*d21 - d01*d20) / denom;
 	float u = 1.0f - v - w;
 
-	return u*triangle.v0normal + v*triangle.v1normal + w*triangle.v2normal;
-}
-
-__device__ vec2 UVInterpolation(Triangle triangle, vec2 uv)
-{
-	/*vec2 v0uv = triangle.v1uv - triangle.v0uv;
-	vec2 v1uv = triangle.v2uv - triangle.v0uv;
-	vec2 v2uv = position - triangle.v0;
-
-	float d00 = dot(v0, v0);
-	float d01 = dot(v0, v1);
-	float d11 = dot(v1, v1);
-	float d20 = dot(v2, v0);
-	float d21 = dot(v2, v1);
-	float denom = d00*d11 - d01*d01;
-
-	float v = (d11*d20 - d01*d21) / denom;
-	float w = (d00*d21 - d01*d20) / denom;
-	float u = 1.0f - v - w;
-
-	return u*triangle.v0normal + v*triangle.v1normal + w*triangle.v2normal;*/
+	N = u * triangle.v0normal + v * triangle.v1normal + w * triangle.v2normal;
+	uv = u * triangle.v0uv + v * triangle.v1uv + w * triangle.v2uv;
 }
 
 // ray와 sphere가 intersect하는지 검사하는 함수
@@ -127,6 +124,30 @@ __device__ bool RayTriangleIntersect(Ray ray, Triangle triangle, float& dist)
 
 	return true;
 }
+
+//bool RayPlaneIntersect(Ray ray, vec4 plane, float& t)
+//{
+//	t = -dot(plane, vec4(ray.origin, 1.0)) / glm::dot(glm::vec3(plane), ray.dir);
+//	return t > 0.0;
+//}
+//
+//bool RayRectIntersect(Ray ray, Rect rect, float& t)
+//{
+//	bool intersect = RayPlaneIntersect(ray, rect.plane, t);
+//	if (intersect)
+//	{
+//		vec3 pos = ray.origin + ray.dir*t;
+//		vec3 lpos = pos - rect.center;
+//
+//		float x = dot(lpos, rect.dirx);
+//		float y = dot(lpos, rect.diry);
+//
+//		if (abs(x) > rect.halfx || abs(y) > rect.halfy)
+//			intersect = false;
+//	}
+//
+//	return intersect;
+//}
 
 __device__ bool RayAABBIntersect(Ray ray, AABB box)
 {
@@ -269,11 +290,10 @@ __device__ bool IsQueueEmpty(const int front, const int rear)
 	return front == rear;
 }
 
-// 해당 점이 빛을 받고 있는지를 확인하는 함수
-__device__ bool IsLighted(
+__device__ float Radiance(
 	vec3 hitPoint,
 	Light light,
-	Material *materials,
+	Material* materials,
 	Triangle* triangles,
 	const int triangleNum,
 	const int nearestTriangleIdx,
@@ -281,92 +301,54 @@ __device__ bool IsLighted(
 	const int sphereNum,
 	const int nearestSphereIdx)
 {
+	float radiance = 3000.0f;
+
 	// shadow ray 생성, origin은 hit point, 방향은 hit point부터 광원까지의 방향
 	Ray shadowRay;
 	shadowRay.origin = hitPoint;
 	shadowRay.dir = normalize(light.pos - hitPoint);
+	float distance = glm::distance(light.pos, hitPoint);
 
-	//float distToTriangle;
+	float distToTriangle;
 
-	//for (int t_i = 0; t_i < triangleNum; ++t_i)
-	//{
-	//	// 처음 hit한 triangle은 제외
-	//	if (nearestTriangleIdx != t_i)
-	//	{
-	//		// shadow
-	//		if (RayTriangleIntersect(shadowRay, triangles[t_i], distToTriangle))
-	//		{
-	//			if (materials[triangles[t_i].materialId].refractivity == 0)
-	//			{
-	//				// 앞쪽의 dir만 봄
-	//				if (distToTriangle > 0.01f && distToTriangle < glm::distance(light.pos, hitPoint))
-	//				{
-	//					return false;
-	//				}
-	//			}
-	//		}
-	//	}
-	//}
+	for (int t_i = 0; t_i < triangleNum; ++t_i)
+	{
+		// 처음 hit한 triangle은 제외
+		if (nearestTriangleIdx != t_i)
+		{
+			// shadow
+			if (RayTriangleIntersect(shadowRay, triangles[t_i], distToTriangle))
+			{
+				// 앞쪽의 dir만 봄
+				if (distToTriangle > 0.01f && distToTriangle < glm::distance(light.pos, hitPoint))
+				{
+					radiance *= glm::clamp(materials[triangles[t_i].materialId].refractivity, 0.0f, 1.0f);
+				}
+			}
+		}
+	}
 
-	//float distToSphere;
+	float distToSphere;
 
-	//for (int s_i = 0; s_i < sphereNum; ++s_i)
-	//{
-	//	// 광원은 0임, 광원을 제외한 경우에만 그림자 생김
-	//	if (nearestSphereIdx != s_i && s_i != 0)
-	//	{
-	//		if (RaySphereIntersect(shadowRay, spheres[s_i], distToSphere))
-	//		{		
-	//			// 앞쪽의 dir만 봄
-	//			if (distToSphere > 0.01f && distToSphere < glm::distance(light.pos, hitPoint))
-	//			{
-	//				return false;
-	//			}
-	//		}
-	//	}
-	//}
+	for (int s_i = 0; s_i < sphereNum; ++s_i)
+	{
+		// 광원은 0임, 광원을 제외한 경우에만 그림자 생김
+		if (nearestSphereIdx != s_i && s_i != 0)
+		{
+			if (RaySphereIntersect(shadowRay, spheres[s_i], distToSphere))
+			{
+				// 앞쪽의 dir만 봄
+				if (distToSphere > 0.01f && distToSphere < glm::distance(light.pos, hitPoint))
+				{
+					radiance *= glm::clamp(materials[triangles[s_i].materialId].refractivity, 0.0f, 1.0f);
+				}
+			}
+		}
+	}
 
-	return true;
-}
+	radiance /= (distance*distance);
 
-// material 정보와 light의 정보를 이용해서 색깔을 결정하는 함수
-__device__ vec3 RayCastColor(
-	vec3 N,
-	vec3 L,
-	vec3 V,
-	Material material,
-	Light light)
-{
-	vec3 color = glm::vec3(0.0f, 0.0f, 0.0f);
-	
-	// material 정보 불러오기
-	glm::vec3 matAmbient = material.ambient;
-	glm::vec3 matDiffuse = material.diffuse;
-	glm::vec3 matSpecular = material.specular;
-
-	glm::vec3 ambient = glm::vec3(
-		matAmbient.r * light.color.r,
-		matAmbient.g * light.color.g,
-		matAmbient.b * light.color.b);
-
-	// N과 L을 이용해서 diffuse 계산
-	glm::vec3 diffuse = glm::vec3(
-		matDiffuse.r * light.color.r,
-		matDiffuse.g * light.color.g,
-		matDiffuse.b * light.color.b) *
-		glm::clamp(dot(N, L), 0.0f, 1.0f);
-
-	// N,L 과 V를 이용해서 specular 계산
-	glm::vec3 specular = glm::vec3(
-		matSpecular.r * light.color.r,
-		matSpecular.g * light.color.g,
-		matSpecular.b * light.color.b) *
-		glm::max(0.0f, pow(glm::max(dot(normalize(reflect(-L, N)), V), 0.0f), 16));
-
-	// ambient, diffuse, specular 모두 합침
-	color = glm::vec4(glm::vec3(ambient + diffuse + specular), 1.0f);
-
-	return color;
+	return radiance;
 }
 
 // ray가 hit 했다면 true를 리턴하고 hit한 곳의 정보를 가져오는 함수
@@ -380,15 +362,17 @@ __device__ bool GetHitPointInfo(
 	int& nearestSphereIdx,
 	vec3& hitPoint, 
 	int& materialId, 
-	vec3& N)
+	vec3& N,
+	vec2& uv)
 {
-	float distToTriangle, distToSphere;
+	float distToTriangle, distToSphere, distToAreaLight = 0.0f;
 	nearestTriangleIdx = FindNearestTriangleIdx(nowRay, triangles, triangleNum, distToTriangle);
 	nearestSphereIdx = FindNearestSphereIdx(nowRay, spheres, sphereNum, distToSphere);
 
 	// 아무곳도 intersect를 못했다거나 뒤쪽에 있다면
 	if ((nearestTriangleIdx == -1 || distToTriangle < 0.0f) &&
-		(nearestSphereIdx == -1 || distToSphere < 0.0f))
+		(nearestSphereIdx == -1 || distToSphere < 0.0f) &&
+		(distToAreaLight <= 0.0f))
 		return false;
 
 	if (distToSphere > distToTriangle)
@@ -396,7 +380,7 @@ __device__ bool GetHitPointInfo(
 		Triangle nearestTriangle = triangles[nearestTriangleIdx];
 		hitPoint = nowRay.origin + nowRay.dir * distToTriangle;
 		materialId = nearestTriangle.materialId;
-		N = NormalInterpolation(nearestTriangle, hitPoint);
+		Interpolation(nearestTriangle, hitPoint, N, uv);
 	}
 	else
 	{
@@ -404,6 +388,7 @@ __device__ bool GetHitPointInfo(
 		hitPoint = nowRay.origin + nowRay.dir * distToSphere;
 		materialId = nearestSphere.materialId;
 		N = glm::normalize(hitPoint - nearestSphere.origin);
+		// no uv...
 	}
 
 	return true;
@@ -422,6 +407,8 @@ __device__ vec4 RayTraceColor(
 	int lightNum,
 	Material* materials,
 	int matNum,
+	float* textures,
+	int texSize,
 	int depth)
 {
 	vec4 color = vec4(0.0f);
@@ -450,28 +437,90 @@ __device__ vec4 RayTraceColor(
 			// hit한 object의 material id
 			int materialId = 0;
 			// normal vector
-			vec3 N = glm::vec4(0.0f);
+			vec3 N = glm::vec3(0.0f);
+			vec2 uv = glm::vec2(0.0f);
 			int nearestTriangleIdx = 0;
 			int nearestSphereIdx = 0;
 
 			// hit point의 정보를 가져옴
-			if (GetHitPointInfo(nowRay, triangles, triangleNum, nearestTriangleIdx, spheres, sphereNum, nearestSphereIdx, hitPoint, materialId, N))
+			if (GetHitPointInfo(
+				nowRay, 
+				triangles, 
+				triangleNum, 
+				nearestTriangleIdx, 
+				spheres, 
+				sphereNum, 
+				nearestSphereIdx, 
+				hitPoint, 
+				materialId, 
+				N,
+				uv))
 			{
 				for (int k = 0; k < lightNum; k++)
 				{
-					vec3 L = glm::normalize(lights[k].pos - hitPoint);
+					// ∫Ω(kd c / π + ks DFG / 4(ωo⋅n)(ωi⋅n)) Li(p,ωi) n⋅ωi dωi
 
-					// hit point가 빛을 받고 있는지 검사
-					if (IsLighted(
-						hitPoint,
+					// radiance * (1.0f * textureColor/pi + 0.0f) * lightcolor * NdotL
+
+					float kd = 1.0f;
+					vec3 L = glm::normalize(lights[k].pos - hitPoint);
+					float NdotL = glm::clamp(glm::dot(N, L), 0.0f, 1.0f);
+
+					float radiance = Radiance(hitPoint,
 						lights[k],
 						materials,
 						triangles, triangleNum, nearestTriangleIdx,
-						spheres, sphereNum, nearestSphereIdx))
+						spheres, sphereNum, nearestSphereIdx);
+
+					vec3 ambientColor = materials[materialId].ambient;
+					vec3 diffuseColor;
+
+					if (materials[materialId].texWidth == 0)
+						diffuseColor = materials[materialId].diffuse;
+					else
 					{
-						// 빛을 받고 있다면 색을 더함
-						lightedColor += glm::vec4(RayCastColor(N, L, V, materials[materialId], lights[k]), 1.0f);
+						float u = uv.x * 2048.0f - 0.5f;
+						float v = uv.y * 2048.0f - 0.5f;
+						int uu = floor(u);
+						int vv = floor(v);
+						float uRatio = u - uu;
+						float vRatio = v - vv;
+						float uOpposite = 1 - uRatio;
+						float vOpposite = 1 - vRatio;
+						
+						int uu0 = uu * 2048;
+						int uu1 = glm::clamp(uu + 1, 0, 2047) * 2048;
+
+						int vv0 = 2047 - vv;
+						int vv1 = 2047 - glm::clamp(vv + 1, 0, 2047);
+
+						float texR =
+							(textures[(uu0 + vv0) * 4 + 0] * uOpposite +
+								textures[(uu1 + vv0) * 4 + 0] * uRatio) * vOpposite +
+								(textures[(uu0 + vv1) * 4 + 0] * uOpposite +
+									textures[(uu1 + vv1) * 4 + 0] * uRatio)*vRatio;
+
+						float texG =
+							(textures[(uu0 + vv0) * 4 + 1] * uOpposite +
+								textures[(uu1 + vv0) * 4 + 1] * uRatio) * vOpposite +
+								(textures[(uu0 + vv1) * 4 + 1] * uOpposite +
+									textures[(uu1 + vv1) * 4 + 1] * uRatio)*vRatio;
+
+						float texB =
+							(textures[(uu0 + vv0) * 4 + 2] * uOpposite +
+								textures[(uu1 + vv0) * 4 + 2] * uRatio) * vOpposite +
+								(textures[(uu0 + vv1) * 4 + 2] * uOpposite +
+									textures[(uu1 + vv1) * 4 + 2] * uRatio)*vRatio;
+
+						diffuseColor = glm::vec3(texR, texG, texB);
 					}
+
+					diffuseColor *= kd / glm::pi<float>();
+					diffuseColor = vec3(
+						diffuseColor.r * lights[k].color.r,
+						diffuseColor.g * lights[k].color.g,
+						diffuseColor.b * lights[k].color.b);
+					lightedColor += glm::vec4(ambientColor + radiance * NdotL * diffuseColor, 1.0f);
 				}
 
 				color += lightedColor * nowRay.decay;
@@ -522,25 +571,85 @@ __device__ vec4 RayTraceColor(
 		vec4 lightedColor = glm::vec4(0.0f);
 		vec3 hitPoint = glm::vec3(0.0f);
 		int materialId = 0;
-		vec3 N = glm::vec4(0.0f);
+		vec3 N = glm::vec3(0.0f);
+		vec2 uv = glm::vec2(0.0f);
 		int nearestTriangleIdx = 0;
 		int nearestSphereIdx = 0;
 
-		if (GetHitPointInfo(nowRay, triangles, triangleNum, nearestTriangleIdx, spheres, sphereNum, nearestSphereIdx, hitPoint, materialId, N))
+		if (GetHitPointInfo(
+			nowRay,
+			triangles,
+			triangleNum,
+			nearestTriangleIdx,
+			spheres,
+			sphereNum,
+			nearestSphereIdx,
+			hitPoint,
+			materialId,
+			N,
+			uv))
 		{
 			for (int k = 0; k < lightNum; k++)
 			{
+				float kd = 1.0f;
 				vec3 L = glm::normalize(lights[k].pos - hitPoint);
+				float NdotL = glm::clamp(glm::dot(N, L), 0.0f, 1.0f);
 
-				if (IsLighted(
-					hitPoint,
+				float radiance = Radiance(hitPoint,
 					lights[k],
 					materials,
 					triangles, triangleNum, nearestTriangleIdx,
-					spheres, sphereNum, nearestSphereIdx))
+					spheres, sphereNum, nearestSphereIdx);
+
+				vec3 ambientColor = materials[materialId].ambient;
+				vec3 diffuseColor;
+
+				if (materials[materialId].texWidth == 0)
+					diffuseColor = materials[materialId].diffuse;
+				else
 				{
-					lightedColor += glm::vec4(RayCastColor(N, L, V, materials[materialId], lights[k]), 1.0f);
+					float u = uv.x * 2048.0f - 0.5f;
+					float v = uv.y * 2048.0f - 0.5f;
+					int uu = floor(u);
+					int vv = floor(v);
+					float uRatio = u - uu;
+					float vRatio = v - vv;
+					float uOpposite = 1 - uRatio;
+					float vOpposite = 1 - vRatio;
+
+					int uu0 = uu * 2048;
+					int uu1 = glm::clamp(uu + 1, 0, 2047) * 2048;
+
+					int vv0 = 2047 - vv;
+					int vv1 = 2047 - glm::clamp(vv + 1, 0, 2047);
+
+					float texR =
+						(textures[(uu0 + vv0) * 4 + 0] * uOpposite +
+							textures[(uu1 + vv0) * 4 + 0] * uRatio) * vOpposite +
+							(textures[(uu0 + vv1) * 4 + 0] * uOpposite +
+								textures[(uu1 + vv1) * 4 + 0] * uRatio)*vRatio;
+
+					float texG =
+						(textures[(uu0 + vv0) * 4 + 1] * uOpposite +
+							textures[(uu1 + vv0) * 4 + 1] * uRatio) * vOpposite +
+							(textures[(uu0 + vv1) * 4 + 1] * uOpposite +
+								textures[(uu1 + vv1) * 4 + 1] * uRatio)*vRatio;
+
+					float texB =
+						(textures[(uu0 + vv0) * 4 + 2] * uOpposite +
+							textures[(uu1 + vv0) * 4 + 2] * uRatio) * vOpposite +
+							(textures[(uu0 + vv1) * 4 + 2] * uOpposite +
+								textures[(uu1 + vv1) * 4 + 2] * uRatio)*vRatio;
+
+					diffuseColor = glm::vec3(texR, texG, texB);
 				}
+
+				diffuseColor *= kd / glm::pi<float>();
+				diffuseColor = vec3(
+					diffuseColor.r * lights[k].color.r,
+					diffuseColor.g * lights[k].color.g,
+					diffuseColor.b * lights[k].color.b);
+				lightedColor += glm::vec4(ambientColor + radiance * NdotL * diffuseColor, 1.0f);
 			}
 
 			color += lightedColor * nowRay.decay;
@@ -560,7 +669,8 @@ __global__ void RayTraceD(
 	Triangle* triangles, int triangleNum,
 	Sphere* spheres, int sphereNum,
 	Light* lights, int lightNum,
-	Material* materials, int matNum)
+	Material* materials, int matNum,
+	float* textures, int texSize)
 {
 	//unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
 	unsigned int x = (blockIdx.x + gridY * RAY_Y_NUM) * WINDOW_HEIGHT + (threadIdx.x + gridX * RAY_X_NUM);
@@ -586,7 +696,9 @@ __global__ void RayTraceD(
 		lightNum,
 		materials,
 		matNum, 
-		2);
+		textures,
+		texSize,
+		1);
 }
 
 void RayTrace(
@@ -607,6 +719,7 @@ void RayTrace(
 	thrust::device_vector<Sphere> s = spheres;
 	thrust::device_vector<Light> l = lights;
 	thrust::device_vector<Material> m = materials;
+	thrust::device_vector<float> tex = textures;
 
 	cudaDeviceSetLimit(cudaLimitMallocHeapSize, 5000000000 * sizeof(float));
 
@@ -628,6 +741,8 @@ void RayTrace(
 		l.data().get(),
 		l.size(),
 		m.data().get(),
-		m.size()
+		m.size(),
+		tex.data().get(),
+		tex.size()
 	);
 }

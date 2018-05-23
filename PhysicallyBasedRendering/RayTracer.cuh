@@ -10,6 +10,9 @@
 using glm::vec2;
 using glm::vec3;
 using glm::vec4;
+
+using glm::dvec2;
+
 using glm::normalize;
 using glm::cross;
 using glm::dot;
@@ -19,42 +22,42 @@ struct OctreeNode;
 
 struct Triangle
 {
-	glm::vec3 v0;
-	glm::vec3 v1;
-	glm::vec3 v2;
+	vec3 v0;
+	vec3 v1;
+	vec3 v2;
 
-	glm::vec3 normal;
+	vec3 normal;
 
-	glm::vec3 v0normal;
-	glm::vec3 v1normal;
-	glm::vec3 v2normal;
+	vec3 v0normal;
+	vec3 v1normal;
+	vec3 v2normal;
 	
-	glm::vec2 v0uv;
-	glm::vec2 v1uv;
-	glm::vec2 v2uv;
+	vec2 v0uv;
+	vec2 v1uv;
+	vec2 v2uv;
 
 	int materialId;
 	int meshId;
 
 	Triangle()
 	{
-		v0 = glm::vec3();
-		v1 = glm::vec3();
-		v2 = glm::vec3();
+		v0 = vec3();
+		v1 = vec3();
+		v2 = vec3();
 
-		normal = glm::vec3();
+		normal = vec3();
 
 		materialId = 0;
 		meshId = 0;
 	}
 
-	Triangle(glm::vec3 v0, glm::vec3 v1, glm::vec3 v2)
+	Triangle(vec3 v0, vec3 v1, vec3 v2)
 	{
 		this->v0 = v0;
 		this->v1 = v0;
 		this->v2 = v0;
 
-		normal = glm::vec3();
+		normal = vec3();
 
 		materialId = 0;
 		meshId = 0;
@@ -63,7 +66,7 @@ struct Triangle
 
 struct Sphere
 {
-	glm::vec3 origin;
+	vec3 origin;
 	float radius;
 
 	int materialId;
@@ -78,15 +81,29 @@ struct Sphere
 
 struct Light
 {
-	glm::vec3 pos;
-	glm::vec3 color;
+	vec3 pos;
+	vec3 color;
 };
+
+//struct Rect
+//{
+//	vec3  center;
+//	vec3  dirx;
+//	vec3  diry;
+//	float halfx;
+//	float halfy;
+//
+//	vec4  plane;
+//};
+
+
 
 struct Material
 {
-	glm::vec3 ambient;
-	glm::vec3 diffuse;
-	glm::vec3 specular;
+	vec3 ambient;
+	vec3 diffuse;
+	vec3 specular;
+	vec3 emission;
 
 	// alpha가 높으면 불투명
 	float refractivity;
@@ -95,11 +112,26 @@ struct Material
 	int texStartIdx;
 	int texWidth;
 	int texHeight;
+
+	Material()
+	{
+		ambient = vec3(0.0f);
+		diffuse = vec3(0.0f);
+		specular = vec3(0.0f);
+		emission = vec3(0.0f);
+		
+		refractivity = 0.0f;
+		reflectivity = 0.0f;
+
+		texStartIdx = 0;
+		texWidth = 0;
+		texHeight = 0;
+	}
 };
 
 struct AABB
 {
-	glm::vec3 bounds[2];
+	vec3 bounds[2];
 };
 
 DLLExport

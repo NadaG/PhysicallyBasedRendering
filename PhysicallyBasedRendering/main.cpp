@@ -1,6 +1,7 @@
 #include "RayTracingRenderer.h"
 #include "LectureSceneRenderer.h"
 #include "PBRRenderer.h"
+#include "LTCRenderer.h"
 
 #include "WindowManager.h"
 #include "Debug.h"
@@ -58,6 +59,12 @@ int main(int argc, char **argv)
 	{
 		sceneManager = new RayTracingSceneManager();
 		renderer = new RayTracingRenderer(sceneManager);
+		break;
+	}
+	case LTC_SCENE:
+	{
+		sceneManager = new LTCSceneManager();
+		renderer = new LTCRenderer(sceneManager);
 		break;
 	}
 	case PBR_SCENE:

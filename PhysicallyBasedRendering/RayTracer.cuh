@@ -33,7 +33,10 @@ struct Triangle
 	vec3 v0normal;
 	vec3 v1normal;
 	vec3 v2normal;
-	
+
+	vec3 tangent;
+	vec3 bitangent;
+
 	vec2 v0uv;
 	vec2 v1uv;
 	vec2 v2uv;

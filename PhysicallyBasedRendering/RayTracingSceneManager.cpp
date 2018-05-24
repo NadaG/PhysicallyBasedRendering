@@ -75,8 +75,9 @@ void RayTracingSceneManager::InitializeObjects()
 	spheres.push_back(sphere);*/
 
 	glm::mat4 sphereModel = glm::mat4();
-	sphereModel = glm::translate(sphereModel, glm::vec3(0.0f, 10.0f, 0.0f));
-	sphereModel = glm::scale(sphereModel, glm::vec3(20.0f, 20.0f, 20.0f));
+	sphereModel = glm::translate(sphereModel, glm::vec3(0.0f, 15.0f, 0.0f));
+	sphereModel = glm::rotate(sphereModel, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	sphereModel = glm::scale(sphereModel, glm::vec3(15.0f, 15.0f, 15.0f));
 	InsertTriangles(LoadMeshTriangles("Obj/Sphere.obj", sphereModel, 2));
 
 	glm::mat4 planeModel = glm::mat4();
@@ -333,6 +334,28 @@ vector<Triangle> RayTracingSceneManager::LoadMeshTriangles(const string meshfile
 		triangles[i].v0normal = glm::normalize(glm::vec3(model * glm::vec4(triangles[i].v0normal, 0.0f)));
 		triangles[i].v1normal = glm::normalize(glm::vec3(model * glm::vec4(triangles[i].v1normal, 0.0f)));
 		triangles[i].v2normal = glm::normalize(glm::vec3(model * glm::vec4(triangles[i].v2normal, 0.0f)));
+
+		glm::vec3 tangent, bitangent;
+
+		glm::vec3 edge1 = triangles[i].v1 - triangles[i].v0;
+		glm::vec3 edge2 = triangles[i].v2 - triangles[i].v0;
+		glm::vec2 deltaUV1 = triangles[i].v1uv - triangles[i].v0uv;
+		glm::vec2 deltaUV2 = triangles[i].v2uv - triangles[i].v0uv;
+
+		GLfloat f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+		tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+		tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+		tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+		tangent = glm::normalize(tangent);
+
+		bitangent.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+		bitangent.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+		bitangent.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+		bitangent = glm::normalize(bitangent);
+
+		triangles[i].tangent = tangent;
+		triangles[i].bitangent = bitangent;
 
 		triangles[i].materialId = materialId;
 		

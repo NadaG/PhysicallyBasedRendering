@@ -11,6 +11,8 @@ void RayTracingRenderer::InitializeRender()
 	debugQuadShader->Use();
 	debugQuadShader->BindTexture(&rayTracingTex, "map");
 
+	LoadCudaTextures();
+
 	rayTracingTex.LoadTexture(
 		GL_RGBA16F,
 		WindowManager::GetInstance()->width,
@@ -64,6 +66,7 @@ void RayTracingRenderer::InitializeRender()
 
 	objects.push_back(aabb);
 
+
 	/*char tmp[1024];
 	for (int i = 0; i < 500; i++)
 	{
@@ -103,7 +106,6 @@ void RayTracingRenderer::Render()
 	vector<Light> lights = dynamic_cast<RayTracingSceneManager*>(sceneManager)->lights;
 	vector<Material> materials = dynamic_cast<RayTracingSceneManager*>(sceneManager)->materials;
 	OctreeNode* root = dynamic_cast<RayTracingSceneManager*>(sceneManager)->root;
-	vector<float> textures = dynamic_cast<RayTracingSceneManager*>(sceneManager)->textures;
 
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 	UseDefaultFBO();
@@ -123,7 +125,7 @@ void RayTracingRenderer::Render()
 		for (int j = 0; j < gridX; j++)
 		{
 			// 여기서 render가 다 일어남
-			RayTrace(output, i, j, view, root, objects, triangles, spheres, lights, materials, textures);
+			RayTrace(output, i, j, view, root, objects, triangles, spheres, lights, materials);
 		}
 	}
 
@@ -162,7 +164,6 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	vector<Light> lights = dynamic_cast<RayTracingSceneManager*>(sceneManager)->lights;
 	vector<Material> materials = dynamic_cast<RayTracingSceneManager*>(sceneManager)->materials;
 	OctreeNode* root = dynamic_cast<RayTracingSceneManager*>(sceneManager)->root;
-	vector<float> textures = dynamic_cast<RayTracingSceneManager*>(sceneManager)->textures;
 
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 	UseDefaultFBO();
@@ -182,7 +183,7 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 		for (int j = 0; j < gridX; j++)
 		{
 			// 여기서 render가 다 일어남
-			RayTrace(output, i, j, view, root, objects, triangles, spheres, lights, materials, textures);
+			RayTrace(output, i, j, view, root, objects, triangles, spheres, lights, materials);
 		}
 	}
 

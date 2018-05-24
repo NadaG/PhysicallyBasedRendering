@@ -13,6 +13,11 @@
 #include <curand.h>
 #include <curand_kernel.h>
 
+texture<float4, 2, cudaReadModeElementType> cuTex;
+texture<float4, 2, cudaReadModeElementType> normalTex;
+
+const char* imageFileName = "Texture/Rock/albedo.png";
+
 struct Ray
 {
 	// Ray의 원점
@@ -31,11 +36,16 @@ const int WINDOW_WIDTH = 1024;
 const int RAY_X_NUM = 256;
 const int RAY_Y_NUM = 256;
 
-const int QUEUE_SIZE = 8;
+const int QUEUE_SIZE = 12;
 
 using std::cout;
 using std::endl;
 
+// TODO LIST
+// 1. normal mapping
+// 2. pbr shading
+// 3. refactoring
+// 4. path tracing
 
 __device__ vec3 CastRay(vec3 P, vec3 N) 
 {
@@ -407,8 +417,6 @@ __device__ vec4 RayTraceColor(
 	int lightNum,
 	Material* materials,
 	int matNum,
-	float* textures,
-	int texSize,
 	int depth)
 {
 	vec4 color = vec4(0.0f);
@@ -475,44 +483,13 @@ __device__ vec4 RayTraceColor(
 					vec3 ambientColor = materials[materialId].ambient;
 					vec3 diffuseColor;
 
-					if (materials[materialId].texWidth == 0)
+					if (materials[materialId].texId == -1)
 						diffuseColor = materials[materialId].diffuse;
 					else
 					{
-						float u = uv.x * 2048.0f - 0.5f;
-						float v = uv.y * 2048.0f - 0.5f;
-						int uu = floor(u);
-						int vv = floor(v);
-						float uRatio = u - uu;
-						float vRatio = v - vv;
-						float uOpposite = 1 - uRatio;
-						float vOpposite = 1 - vRatio;
-						
-						int uu0 = uu * 2048;
-						int uu1 = glm::clamp(uu + 1, 0, 2047) * 2048;
+						float4 texRGBA = tex2D(cuTex, uv.x, uv.y);
 
-						int vv0 = 2047 - vv;
-						int vv1 = 2047 - glm::clamp(vv + 1, 0, 2047);
-
-						float texR =
-							(textures[(uu0 + vv0) * 4 + 0] * uOpposite +
-								textures[(uu1 + vv0) * 4 + 0] * uRatio) * vOpposite +
-								(textures[(uu0 + vv1) * 4 + 0] * uOpposite +
-									textures[(uu1 + vv1) * 4 + 0] * uRatio)*vRatio;
-
-						float texG =
-							(textures[(uu0 + vv0) * 4 + 1] * uOpposite +
-								textures[(uu1 + vv0) * 4 + 1] * uRatio) * vOpposite +
-								(textures[(uu0 + vv1) * 4 + 1] * uOpposite +
-									textures[(uu1 + vv1) * 4 + 1] * uRatio)*vRatio;
-
-						float texB =
-							(textures[(uu0 + vv0) * 4 + 2] * uOpposite +
-								textures[(uu1 + vv0) * 4 + 2] * uRatio) * vOpposite +
-								(textures[(uu0 + vv1) * 4 + 2] * uOpposite +
-									textures[(uu1 + vv1) * 4 + 2] * uRatio)*vRatio;
-
-						diffuseColor = glm::vec3(texR, texG, texB);
+						diffuseColor = glm::vec3(texRGBA.x, texRGBA.y, texRGBA.z);
 					}
 
 					diffuseColor *= kd / glm::pi<float>();
@@ -604,44 +581,13 @@ __device__ vec4 RayTraceColor(
 				vec3 ambientColor = materials[materialId].ambient;
 				vec3 diffuseColor;
 
-				if (materials[materialId].texWidth == 0)
+				if (materials[materialId].texId == -1)
 					diffuseColor = materials[materialId].diffuse;
 				else
 				{
-					float u = uv.x * 2048.0f - 0.5f;
-					float v = uv.y * 2048.0f - 0.5f;
-					int uu = floor(u);
-					int vv = floor(v);
-					float uRatio = u - uu;
-					float vRatio = v - vv;
-					float uOpposite = 1 - uRatio;
-					float vOpposite = 1 - vRatio;
+					float4 texRGBA = tex2D(cuTex, uv.x, uv.y);
 
-					int uu0 = uu * 2048;
-					int uu1 = glm::clamp(uu + 1, 0, 2047) * 2048;
-
-					int vv0 = 2047 - vv;
-					int vv1 = 2047 - glm::clamp(vv + 1, 0, 2047);
-
-					float texR =
-						(textures[(uu0 + vv0) * 4 + 0] * uOpposite +
-							textures[(uu1 + vv0) * 4 + 0] * uRatio) * vOpposite +
-							(textures[(uu0 + vv1) * 4 + 0] * uOpposite +
-								textures[(uu1 + vv1) * 4 + 0] * uRatio)*vRatio;
-
-					float texG =
-						(textures[(uu0 + vv0) * 4 + 1] * uOpposite +
-							textures[(uu1 + vv0) * 4 + 1] * uRatio) * vOpposite +
-							(textures[(uu0 + vv1) * 4 + 1] * uOpposite +
-								textures[(uu1 + vv1) * 4 + 1] * uRatio)*vRatio;
-
-					float texB =
-						(textures[(uu0 + vv0) * 4 + 2] * uOpposite +
-							textures[(uu1 + vv0) * 4 + 2] * uRatio) * vOpposite +
-							(textures[(uu0 + vv1) * 4 + 2] * uOpposite +
-								textures[(uu1 + vv1) * 4 + 2] * uRatio)*vRatio;
-
-					diffuseColor = glm::vec3(texR, texG, texB);
+					diffuseColor = glm::vec3(texRGBA.x, texRGBA.y, texRGBA.z);
 				}
 
 				diffuseColor *= kd / glm::pi<float>();
@@ -669,8 +615,7 @@ __global__ void RayTraceD(
 	Triangle* triangles, int triangleNum,
 	Sphere* spheres, int sphereNum,
 	Light* lights, int lightNum,
-	Material* materials, int matNum,
-	float* textures, int texSize)
+	Material* materials, int matNum)
 {
 	//unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
 	unsigned int x = (blockIdx.x + gridY * RAY_Y_NUM) * WINDOW_HEIGHT + (threadIdx.x + gridX * RAY_X_NUM);
@@ -695,9 +640,7 @@ __global__ void RayTraceD(
 		lights,
 		lightNum,
 		materials,
-		matNum, 
-		textures,
-		texSize,
+		matNum,
 		1);
 }
 
@@ -711,15 +654,13 @@ void RayTrace(
 	const vector<Triangle>& triangles,
 	const vector<Sphere>& spheres,
 	const vector<Light>& lights,
-	const vector<Material>& materials,
-	const vector<float>& textures)
+	const vector<Material>& materials)
 {
 	thrust::device_vector<AABB> b = boundingboxes;
 	thrust::device_vector<Triangle> t = triangles;
 	thrust::device_vector<Sphere> s = spheres;
 	thrust::device_vector<Light> l = lights;
 	thrust::device_vector<Material> m = materials;
-	thrust::device_vector<float> tex = textures;
 
 	cudaDeviceSetLimit(cudaLimitMallocHeapSize, 5000000000 * sizeof(float));
 
@@ -741,8 +682,50 @@ void RayTrace(
 		l.data().get(),
 		l.size(),
 		m.data().get(),
-		m.size(),
-		tex.data().get(),
-		tex.size()
+		m.size()
 	);
+}
+
+void LoadCudaTextures()
+{
+	Texture2D albedoTex;
+	albedoTex.LoadTexture("Texture/Rock/albedo.png");
+	albedoTex.SetParameters(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
+	float* rockTexArray = albedoTex.GetTexImage(GL_RGBA);
+
+	unsigned int size = 2048 * 2048 * 4 * sizeof(float);
+
+	cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc(32, 32, 32, 32, cudaChannelFormatKindFloat);
+	cudaArray* cuArray;
+	cudaMallocArray(&cuArray, &channelDesc, 2048, 2048);
+
+	cudaMemcpyToArray(cuArray, 0, 0, rockTexArray, size, cudaMemcpyHostToDevice);
+
+	cuTex.addressMode[0] = cudaAddressModeWrap;
+	cuTex.addressMode[1] = cudaAddressModeWrap;
+	cuTex.filterMode = cudaFilterModeLinear;
+	cuTex.normalized = true;
+
+	cudaBindTextureToArray(cuTex, cuArray, channelDesc);
+
+
+	Texture2D rockNormalTex;
+	rockNormalTex.LoadTexture("Texture/Rock/normal.png");
+	rockNormalTex.SetParameters(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
+	float* rockNormalTexArray = rockNormalTex.GetTexImage(GL_RGBA);
+
+	unsigned int sizeNormal = 2048 * 2048 * 4 * sizeof(float);
+
+	cudaChannelFormatDesc channelDescNormal = cudaCreateChannelDesc(32, 32, 32, 32, cudaChannelFormatKindFloat);
+	cudaArray* cuArrayNormal;
+	cudaMallocArray(&cuArrayNormal, &channelDescNormal, 2048, 2048);
+
+	cudaMemcpyToArray(cuArrayNormal, 0, 0, rockNormalTexArray, sizeNormal, cudaMemcpyHostToDevice);
+
+	normalTex.addressMode[0] = cudaAddressModeWrap;
+	normalTex.addressMode[1] = cudaAddressModeWrap;
+	normalTex.filterMode = cudaFilterModeLinear;
+	normalTex.normalized = true;
+
+	cudaBindTextureToArray(normalTex, cuArrayNormal, channelDescNormal);
 }

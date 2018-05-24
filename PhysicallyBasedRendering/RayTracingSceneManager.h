@@ -17,7 +17,6 @@ public:
 	std::vector<Sphere> spheres;
 	std::vector<Light> lights;
 	std::vector<Material> materials;
-	std::vector<float> textures;
 
 	vector<Triangle> LoadPlaneTriangles(glm::mat4 model, const int materialId);
 	vector<Triangle> LoadMeshTriangles(const string meshfile, glm::mat4 model, const int materialId);

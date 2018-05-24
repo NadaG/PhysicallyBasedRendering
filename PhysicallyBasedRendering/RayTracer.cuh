@@ -6,6 +6,8 @@
 #include <cuda_runtime.h>
 #include <glm\gtc\matrix_transform.hpp>
 #include <vector>
+#include <curand_kernel.h>
+#include "Texture2D.h"
 
 using glm::vec2;
 using glm::vec3;
@@ -109,9 +111,7 @@ struct Material
 	float refractivity;
 	float reflectivity;
 
-	int texStartIdx;
-	int texWidth;
-	int texHeight;
+	int texId;
 
 	Material()
 	{
@@ -123,9 +123,7 @@ struct Material
 		refractivity = 0.0f;
 		reflectivity = 0.0f;
 
-		texStartIdx = 0;
-		texWidth = 0;
-		texHeight = 0;
+		texId = -1;
 	}
 };
 
@@ -145,6 +143,7 @@ void RayTrace(
 	const vector<Triangle>& triangles, 
 	const vector<Sphere>& spheres,
 	const vector<Light>& lights, 
-	const vector<Material>& materials,
-	const vector<float>& textures
+	const vector<Material>& materials
 );
+
+void LoadCudaTextures();

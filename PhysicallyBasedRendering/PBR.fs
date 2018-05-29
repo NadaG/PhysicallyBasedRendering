@@ -154,7 +154,8 @@ void main()
 		float denominator = 4 * max(dot(N,V), 0.0) * max(dot(N,L), 0.0) + 0.001;
 		vec3 specular = nominator / denominator;
 
-		// specular된 양은 F 함수가 리턴한 값과 같음 왜지?? 아직 잘 모르겠음
+		// specular된 양은 F 함수가 리턴한 값과 같음, F함수는 전체 중에 반사한 양과 같음
+		// 반사했다는 말은 kS이기 때문, 굴절 혹은 투과한 것이 kD이기 때문
 		// F 함수만을 이용해서 kS와 kD를 구함
 		// kD는 color와 곱해지고 PI로 나누어짐
 		vec3 kS = F;

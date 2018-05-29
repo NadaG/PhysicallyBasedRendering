@@ -35,8 +35,8 @@ struct Ray
 const int WINDOW_HEIGHT = 1024;
 const int WINDOW_WIDTH = 1024;
 
-const int RAY_X_NUM = 256;
-const int RAY_Y_NUM = 256;
+const int RAY_X_NUM = 64;
+const int RAY_Y_NUM = 64;
 
 const int QUEUE_SIZE = 12;
 
@@ -299,13 +299,17 @@ __device__ int FindNearestSphereIdx(Ray ray, Sphere* spheres, int sphereNum, flo
 }
 
 // window의 픽셀의 위치가 각각 x, y로 입력됨
-__device__ Ray GenerateCameraRay(int y, int x, glm::mat4 cameraModelMatrix)
+__device__ Ray GenerateCameraRay(int y, int x, glm::mat4 cameraModelMatrix, int rayX, int rayY)
 {
 	Ray ray;
 
 	// 각 픽셀의 중앙을 가르키는 값 생성, 0~1의 값으로 Normalizing
-	float NDCy = (y + 0.5f) / WINDOW_HEIGHT;
-	float NDCx = (x + 0.5f) / WINDOW_WIDTH;
+	// antialiasing
+	float NDCy = (y + 0.33333f + 0.33333f*rayY) / WINDOW_HEIGHT;
+	float NDCx = (x + 0.33333f + 0.33333f*rayX) / WINDOW_WIDTH;
+
+	/*float NDCy = (y + 0.5f) / WINDOW_HEIGHT;
+	float NDCx = (x + 0.5f) / WINDOW_WIDTH;*/
 
 	// window 종횡비
 	float aspectRatio = WINDOW_WIDTH / WINDOW_HEIGHT;
@@ -513,52 +517,97 @@ __device__ vec4 RayTraceColor(
 			{
 				// ∫Ω(kd c / π + ks DFG / 4(ωo⋅n)(ωi⋅n)) Li(p,ωi) n⋅ωi dωi
 				// radiance * (1.0f * textureColor/pi + 0.0f) * lightcolor * NdotL
-				for (int k = 0; k < lightNum; k++)
+				vec3 ambientColor;
+				vec3 diffuseColor;
+
+				if (materials[materialId].texId != -1)
 				{
-					vec3 ambientColor = materials[materialId].ambient;
-					vec3 diffuseColor;
+					float4 texRGBA = tex2D(albedoTex, uv.x, uv.y);
+					float4 texNormal = tex2D(normalTex, uv.x, uv.y);
+					float4 texAO = tex2D(aoTex, uv.x, uv.y);
+					float4 texMetallic = tex2D(metallicTex, uv.x, uv.y);
+					float4 texRoughness = tex2D(roughnessTex, uv.x, uv.y);
 
-					if (materials[materialId].texId == -1)
-						diffuseColor = materials[materialId].diffuse;
-					else
+					glm::vec3 texNormalVec = glm::vec3(
+						texNormal.x * 2.0f - 1.0f,
+						texNormal.y * 2.0f - 1.0f,
+						texNormal.z * 2.0f - 1.0f);
+
+					glm::mat3 TBN = glm::mat3(
+						triangles[nearestTriangleIdx].tangent,
+						triangles[nearestTriangleIdx].bitangent,
+						N);
+
+					N = glm::normalize(texNormalVec);
+
+					vec3 albedo = glm::pow(glm::vec3(texRGBA.x, texRGBA.y, texRGBA.z), vec3(2.2));
+
+					vec3 F0 = vec3(0.04f);
+					F0 = glm::mix(F0, albedo, texMetallic.x);
+
+					vec3 Lo = vec3(0.0f);
+					for (int k = 0; k < lightNum; k++)
 					{
-						float4 texRGBA = tex2D(albedoTex, uv.x, uv.y);
-						float4 texNormal = tex2D(normalTex, uv.x, uv.y);
-						float4 texAO = tex2D(aoTex, uv.x, uv.y);
+						float kd = 1.0f;
+						vec3 L = glm::normalize(lights[k].pos - hitPoint);
+						vec3 H = glm::normalize(V + L);
 
-						glm::vec3 texNormalVec = glm::vec3(
-							texNormal.x * 2.0f - 1.0f,
-							texNormal.y * 2.0f - 1.0f,
-							texNormal.z * 2.0f - 1.0f);
+						float distance = glm::distance(lights[k].pos, hitPoint);
+						float attenuation = 1.0 / (distance*distance);
 
-						glm::mat3 TBN = glm::mat3(
-							triangles[nearestTriangleIdx].tangent,
-							triangles[nearestTriangleIdx].bitangent,
-							N);
+						vec3 radiance = lights[k].color * attenuation;
 
-						N = glm::normalize(TBN * texNormalVec);
+						float NDF = DistributionGGX(N, H, texRoughness.x);
+						float G = GeometrySmith(N, V, L, texRoughness.x);
+						vec3 F = fresnelSchlick(glm::max(glm::dot(H, V), 0.0f), F0);
 
-						ambientColor = glm::vec3(texAO.x, texAO.x, texAO.x) * 0.02f;
-						diffuseColor = glm::vec3(texRGBA.x, texRGBA.y, texRGBA.z);
+						vec3 nominator = NDF * G * F;
+						float denominator = 4 * glm::max(glm::dot(N, V), 0.0f) * glm::max(glm::dot(N, L), 0.0f) + 0.001f;
+						vec3 specular = nominator / denominator;
+
+						vec3 kS = F;
+						vec3 kD = vec3(1.0) - kS;
+						kD *= 1.0f - texMetallic.x;
+
+						float NdotL = glm::clamp(glm::dot(N, L), 0.0f, 1.0f);
+
+						Lo += (kD*albedo / glm::pi<float>() + specular) * radiance * NdotL;
 					}
 
-					float kd = 1.0f;
-					vec3 L = glm::normalize(lights[k].pos - hitPoint);
-					float NdotL = glm::clamp(glm::dot(N, L), 0.0f, 1.0f);
+					vec3 ambient = vec3(0.03) * albedo * texAO.x;
 
-					float radiance = Radiance(hitPoint,
-						lights[k],
-						materials,
-						triangles, triangleNum, nearestTriangleIdx,
-						spheres, sphereNum, nearestSphereIdx);
+					vec3 tmpColor = ambient + Lo;
 
+					tmpColor = tmpColor / (tmpColor + vec3(1.0));
+					tmpColor = glm::pow(tmpColor, vec3(1.0 / 2.2));
 
-					diffuseColor *= kd / glm::pi<float>();
-					diffuseColor = vec3(
-						diffuseColor.r * lights[k].color.r,
-						diffuseColor.g * lights[k].color.g,
-						diffuseColor.b * lights[k].color.b);
-					lightedColor += glm::vec4(ambientColor + radiance * NdotL * diffuseColor, 1.0f);
+					lightedColor += glm::vec4(tmpColor, 1.0f);
+				}
+				else
+				{
+					ambientColor = materials[materialId].ambient;
+					diffuseColor = materials[materialId].diffuse;
+
+					for (int k = 0; k < lightNum; k++)
+					{
+						float kd = 1.0f;
+						vec3 L = glm::normalize(lights[k].pos - hitPoint);
+						vec3 H = glm::normalize(V + L);
+						float NdotL = glm::clamp(glm::dot(N, L), 0.0f, 1.0f);
+
+						float radiance = Radiance(hitPoint,
+							lights[k],
+							materials,
+							triangles, triangleNum, nearestTriangleIdx,
+							spheres, sphereNum, nearestSphereIdx);
+
+						diffuseColor *= kd / glm::pi<float>();
+						diffuseColor = vec3(
+							diffuseColor.r * lights[k].color.r,
+							diffuseColor.g * lights[k].color.g,
+							diffuseColor.b * lights[k].color.b);
+						lightedColor += glm::vec4(ambientColor + radiance * NdotL * diffuseColor, 1.0f);
+					}
 				}
 
 				color += lightedColor * nowRay.decay;
@@ -627,52 +676,99 @@ __device__ vec4 RayTraceColor(
 			N,
 			uv))
 		{
-			for (int k = 0; k < lightNum; k++)
+			vec3 ambientColor;
+			vec3 diffuseColor;
+
+			if (materials[materialId].texId != -1)
 			{
-				vec3 ambientColor = materials[materialId].ambient;
-				vec3 diffuseColor;
+				float4 texRGBA = tex2D(albedoTex, uv.x, uv.y);
+				float4 texNormal = tex2D(normalTex, uv.x, uv.y);
+				float4 texAO = tex2D(aoTex, uv.x, uv.y);
+				float4 texMetallic = tex2D(metallicTex, uv.x, uv.y);
+				float4 texRoughness = tex2D(roughnessTex, uv.x, uv.y);
 
-				if (materials[materialId].texId == -1)
-					diffuseColor = materials[materialId].diffuse;
-				else
+				glm::vec3 texNormalVec = glm::vec3(
+					texNormal.x * 2.0f - 1.0f,
+					texNormal.y * 2.0f - 1.0f,
+					texNormal.z * 2.0f - 1.0f);
+
+				glm::mat3 TBN = glm::mat3(
+					triangles[nearestTriangleIdx].tangent,
+					triangles[nearestTriangleIdx].bitangent,
+					N);
+
+				N = glm::normalize(texNormalVec);
+
+				vec3 albedo = glm::pow(glm::vec3(texRGBA.x, texRGBA.y, texRGBA.z), vec3(2.2));
+
+				vec3 F0 = vec3(0.04f);
+				F0 = glm::mix(F0, albedo, texMetallic.x);
+
+				vec3 Lo = vec3(0.0f);
+				for (int k = 0; k < lightNum; k++)
 				{
-					float4 texRGBA = tex2D(albedoTex, uv.x, uv.y);
-					float4 texNormal = tex2D(normalTex, uv.x, uv.y);
-					float4 texAO = tex2D(aoTex, uv.x, uv.y);
+					float kd = 1.0f;
+					vec3 L = glm::normalize(lights[k].pos - hitPoint);
+					vec3 H = glm::normalize(V + L);
 
-					glm::vec3 texNormalVec = glm::vec3(
-						texNormal.x * 2.0f - 1.0f, 
-						texNormal.y * 2.0f - 1.0f, 
-						texNormal.z * 2.0f - 1.0f);
+					float distance = glm::distance(lights[k].pos, hitPoint);
+					float attenuation = 1.0 / (distance*distance);
 
-					glm::mat3 TBN = glm::mat3(
-						triangles[nearestTriangleIdx].tangent,
-						triangles[nearestTriangleIdx].bitangent,
-						N);
+					vec3 radiance = lights[k].color * attenuation;
 
-					N = glm::normalize(TBN * texNormalVec);
+					float NDF = DistributionGGX(N, H, texRoughness.x);
+					float G = GeometrySmith(N, V, L, texRoughness.x);
+					vec3 F = fresnelSchlick(glm::max(glm::dot(H, V), 0.0f), F0);
 
-					ambientColor = glm::vec3(texAO.x, texAO.x, texAO.x) * 0.02f;
-					diffuseColor = glm::vec3(texRGBA.x, texRGBA.y, texRGBA.z);
+					vec3 nominator = NDF*G*F;
+					float denominator = 4 * glm::max(glm::dot(N, V), 0.0f) * glm::max(glm::dot(N, L), 0.0f) + 0.001f;
+					vec3 specular = nominator / denominator;
+
+					vec3 kS = F;
+					vec3 kD = vec3(1.0) - kS;
+					kD *= 1.0f - texMetallic.x;
+
+					float NdotL = glm::clamp(glm::dot(N, L), 0.0f, 1.0f);
+
+					Lo += (kD*albedo / glm::pi<float>() + specular) * radiance * NdotL;
 				}
 
-				float kd = 1.0f;
-				vec3 L = glm::normalize(lights[k].pos - hitPoint);
-				float NdotL = glm::clamp(glm::dot(N, L), 0.0f, 1.0f);
-
-				float radiance = Radiance(hitPoint,
-					lights[k],
-					materials,
-					triangles, triangleNum, nearestTriangleIdx,
-					spheres, sphereNum, nearestSphereIdx);
+				vec3 ambient = vec3(0.03) * albedo * texAO.x;
 				
+				vec3 tmpColor = ambient + Lo;
 
-				diffuseColor *= kd / glm::pi<float>();
-				diffuseColor = vec3(
-					diffuseColor.r * lights[k].color.r,
-					diffuseColor.g * lights[k].color.g,
-					diffuseColor.b * lights[k].color.b);
-				lightedColor += glm::vec4(ambientColor + radiance * NdotL * diffuseColor, 1.0f);
+				tmpColor = tmpColor / (tmpColor + vec3(1.0));
+				tmpColor = glm::pow(tmpColor, vec3(1.0 / 2.2));
+
+				lightedColor += glm::vec4(tmpColor, 1.0f);
+				/*lightedColor += glm::vec4(albedo, 1.0f);
+				lightedColor += glm::vec4(texAO.x);*/
+			}
+			else
+			{
+				ambientColor = materials[materialId].ambient;
+				diffuseColor = materials[materialId].diffuse;
+
+				for (int k = 0; k < lightNum; k++)
+				{
+					float kd = 1.0f;
+					vec3 L = glm::normalize(lights[k].pos - hitPoint);
+					vec3 H = glm::normalize(V + L);
+					float NdotL = glm::clamp(glm::dot(N, L), 0.0f, 1.0f);
+
+					float radiance = Radiance(hitPoint,
+						lights[k],
+						materials,
+						triangles, triangleNum, nearestTriangleIdx,
+						spheres, sphereNum, nearestSphereIdx);
+
+					diffuseColor *= kd / glm::pi<float>();
+					diffuseColor = vec3(
+						diffuseColor.r * lights[k].color.r,
+						diffuseColor.g * lights[k].color.g,
+						diffuseColor.b * lights[k].color.b);
+					lightedColor += glm::vec4(ambientColor + radiance * NdotL * diffuseColor, 1.0f);
+				}
 			}
 
 			color += lightedColor * nowRay.decay;
@@ -696,29 +792,39 @@ __global__ void RayTraceD(
 {
 	//unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
 	unsigned int x = (blockIdx.x + gridY * RAY_Y_NUM) * WINDOW_HEIGHT + (threadIdx.x + gridX * RAY_X_NUM);
-
-	Ray ray = GenerateCameraRay(blockIdx.x + gridY * RAY_Y_NUM, threadIdx.x + gridX * RAY_X_NUM, view);
-	ray.rayType = 0;
-	ray.decay = 1.0f;
+	glm::vec4 color = glm::vec4(0.0f);
 
 	Ray rayQueue[QUEUE_SIZE];
-	// NOTICE for문을 돌릴 때 iter를 변수로 하니까 검은 화면이 나옴
-	// y, x로 들어가고
-	// 0, 0 좌표는 좌하단
-	data[x] = RayTraceColor(
-		ray,
-		rayQueue,
-		boundingboxes,
-		boxNum,
-		triangles,
-		triangleNum,
-		spheres,
-		sphereNum,
-		lights,
-		lightNum,
-		materials,
-		matNum,
-		2);
+	
+	for (int i = 0; i < 2; i++)
+	{
+		for (int j = 0; j < 2; j++)
+		{
+			Ray ray = GenerateCameraRay(blockIdx.x + gridY * RAY_Y_NUM, threadIdx.x + gridX * RAY_X_NUM, view, i, j);
+
+			ray.rayType = 0;
+			ray.decay = 1.0f;
+
+			// NOTICE for문을 돌릴 때 iter를 변수로 하니까 검은 화면이 나옴
+			// y, x로 들어가고
+			// 0, 0 좌표는 좌하단
+			color += RayTraceColor(
+				ray,
+				rayQueue,
+				boundingboxes,
+				boxNum,
+				triangles,
+				triangleNum,
+				spheres,
+				sphereNum,
+				lights,
+				lightNum,
+				materials,
+				matNum,
+				1);
+		}
+	}
+	data[x] = color / 4.0f;
 }
 
 void RayTrace(

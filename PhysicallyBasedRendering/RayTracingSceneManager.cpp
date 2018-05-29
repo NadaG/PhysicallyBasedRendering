@@ -6,8 +6,8 @@ void RayTracingSceneManager::InitializeObjects()
 	movingCamera->WorldTranslate(glm::vec3(0.0f, 20.0f, 110.0f));
 
 	Light light;
-	light.pos = glm::vec3(0.0f, 30.0f, 50.0f);
-	light.color = glm::vec3(1.0f, 1.0f, 1.0f);
+	light.pos = glm::vec3(0.0f, 20.0f, 30.0f);
+	light.color = glm::vec3(200.0f, 200.0f, 200.0f);
 	lights.push_back(light);
 
 	Material fluidMat, planeMat, sphereMat, lightMat, areaLightMat, planeMat2;

@@ -3,54 +3,61 @@
 void RayTracingSceneManager::InitializeObjects()
 {
 	quadObj.LoadModel(QUAD);
-	movingCamera->WorldTranslate(glm::vec3(0.0f, 20.0f, 110.0f));
+	movingCamera->WorldTranslate(glm::vec3(10.0f, 20.0f, 110.0f));
 
 	Light light;
-	light.pos = glm::vec3(0.0f, 20.0f, 30.0f);
-	light.color = glm::vec3(200.0f, 200.0f, 200.0f);
+	light.pos = glm::vec3(10.0f, 20.0f, 20.0f);
+	light.color = glm::vec3(500.0f, 500.0f, 500.0f);
 	lights.push_back(light);
 
 	Material fluidMat, planeMat, sphereMat, lightMat, areaLightMat, planeMat2;
-	fluidMat.ambient = glm::vec3(0.0f, 0.0f, 0.0f);
-	fluidMat.diffuse = glm::vec3(0.2f, 0.2f, 0.3f);
-	fluidMat.specular = glm::vec3(0.2f, 0.2f, 0.3f);
-	fluidMat.refractivity = 0.8f;
+	fluidMat.ambient = 1.0f;
+	fluidMat.albedo = glm::vec3(0.0f, 0.0f, 0.0f);
+	fluidMat.refractiveIndex = 1.3f;
+	fluidMat.metallic = 0.0f;
+	fluidMat.roughness = 0.2f;
+	fluidMat.refractivity = 0.0f;
 	fluidMat.reflectivity = 0.0f;
 	materials.push_back(fluidMat);
 
-	planeMat.ambient = glm::vec3(0.1f, 0.1f, 0.1f);
-	planeMat.diffuse = glm::vec3(0.5f, 0.5f, 0.5f);
-	planeMat.specular = glm::vec3(0.2f, 0.2f, 0.2f);
+	planeMat.ambient = 1.0f;
+	planeMat.albedo = glm::vec3(0.4f, 0.4f, 0.4f);
+	planeMat.metallic = 0.0f;
+	planeMat.roughness = 0.5f;
 	planeMat.refractivity = 0.0f;
 	planeMat.reflectivity = 0.8f;
+	planeMat.texId = 1;
 	materials.push_back(planeMat);
 
-	sphereMat.ambient = glm::vec3(0.1f, 0.1f, 0.1f);
-	sphereMat.diffuse = glm::vec3(0.2f, 0.3f, 0.9f);
-	sphereMat.specular = glm::vec3(0.9f, 0.2f, 0.2f);
+	sphereMat.ambient = 1.0f;
+	sphereMat.albedo = glm::vec3(0.1f, 0.1f, 0.1f);
+	sphereMat.metallic = 0.0f;
+	sphereMat.roughness = 0.2f;
 	sphereMat.refractivity = 0.0f;
 	sphereMat.reflectivity = 0.0f;
 	sphereMat.texId = 0;
 	materials.push_back(sphereMat);
 
-	lightMat.ambient = glm::vec3(1.0f, 1.0f, 0.0f);
-	lightMat.diffuse = glm::vec3(0.0f, 0.0f, 0.0f);
-	lightMat.specular = glm::vec3(0.0f, 0.0f, 0.0f);
+	lightMat.ambient = 1.0f;
+	lightMat.albedo = glm::vec3(1.0f, 1.0f, 0.0f);
+	lightMat.emission = glm::vec3(1.0f, 1.0f, 0.0f);
+	lightMat.metallic = 0.2f;
+	lightMat.roughness = 0.2f;
 	lightMat.refractivity = 0.0f;
 	lightMat.reflectivity = 0.0f;
 	materials.push_back(lightMat);
 
-	areaLightMat.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
-	areaLightMat.diffuse = glm::vec3(0.0f, 0.0f, 0.0f);
-	areaLightMat.specular = glm::vec3(0.0f, 0.0f, 0.0f);
+	areaLightMat.ambient = 1.0f;
+	areaLightMat.albedo = glm::vec3(0.2f, 0.2f, 0.2f);
 	areaLightMat.emission = glm::vec3(1.0f, 1.0f, 1.0f);
 	areaLightMat.refractivity = 0.0f;
 	areaLightMat.reflectivity = 0.0f;
 	materials.push_back(areaLightMat);
 
-	planeMat2.ambient = glm::vec3(0.1f, 0.5f, 0.1f);
-	planeMat2.diffuse = glm::vec3(0.5f, 0.7f, 0.5f);
-	planeMat2.specular = glm::vec3(0.2f, 0.2f, 0.2f);
+	planeMat2.ambient = 1.0f;
+	planeMat2.albedo = glm::vec3(0.1f, 0.8f, 0.1f);
+	planeMat2.metallic = 0.4f;
+	planeMat2.roughness = 0.3f;
 	planeMat2.refractivity = 0.0f;
 	planeMat2.reflectivity = 0.8f;
 	materials.push_back(planeMat2);
@@ -74,13 +81,13 @@ void RayTracingSceneManager::InitializeObjects()
 	sphere.materialId = 2;
 	spheres.push_back(sphere);*/
 
-	glm::mat4 sphereModel = glm::mat4();
+	/*glm::mat4 sphereModel = glm::mat4();
 	sphereModel = glm::translate(sphereModel, glm::vec3(0.0f, 15.0f, 0.0f));
 	sphereModel = glm::rotate(sphereModel, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	sphereModel = glm::scale(sphereModel, glm::vec3(15.0f, 15.0f, 15.0f));
-	InsertTriangles(LoadMeshTriangles("Obj/Sphere.obj", sphereModel, 2));
+	InsertTriangles(LoadMeshTriangles("Obj/Sphere.obj", sphereModel, 2));*/
 
-	glm::mat4 planeModel = glm::mat4();
+	/*glm::mat4 planeModel = glm::mat4();
 	planeModel = glm::translate(planeModel, glm::vec3(0.0f, -5.0f, 0.0f));
 	planeModel = glm::scale(planeModel, glm::vec3(100.0f, 1.0f, 100.0f));
 	InsertTriangles(LoadPlaneTriangles(planeModel, 1));
@@ -89,7 +96,9 @@ void RayTracingSceneManager::InitializeObjects()
 	planeModel = glm::translate(planeModel, glm::vec3(0.0f, 0.0f, -50.0f));
 	planeModel = glm::rotate(planeModel, 1.57079f, glm::vec3(1.0f, 0.0f, 0.0f));
 	planeModel = glm::scale(planeModel, glm::vec3(50.0f, 1.0f, 50.0f));
-	InsertTriangles(LoadPlaneTriangles(planeModel, 5));
+	InsertTriangles(LoadPlaneTriangles(planeModel, 5));*/
+
+	LoadFluidScene("Obj/PouringFluid/0220.obj");
 
 	/*planeModel = glm::mat4();
 	planeModel = glm::translate(planeModel, glm::vec3(0.0f, 10.0f, -40.0f));
@@ -249,7 +258,6 @@ void RayTracingSceneManager::Update()
 }
 
 
-
 vector<Triangle> RayTracingSceneManager::LoadPlaneTriangles(glm::mat4 model, const int materialId)
 {
 	// πÿø° ±Ú∏∞ plane¿”
@@ -295,12 +303,12 @@ void RayTracingSceneManager::LoadFluidScene(const string meshfile)
 	triangles.clear();
 
 	glm::mat4 planeModel = glm::mat4();
-	planeModel = glm::translate(planeModel, glm::vec3(0.0f, -5.0f, 0.0f));
+	planeModel = glm::translate(planeModel, glm::vec3(0.0f, 1.0f, 0.0f));
 	planeModel = glm::scale(planeModel, glm::vec3(100.0f, 1.0f, 100.0f));
 	InsertTriangles(LoadPlaneTriangles(planeModel, 1));
 
 	planeModel = glm::mat4();
-	planeModel = glm::translate(planeModel, glm::vec3(0.0f, 0.0f, -50.0f));
+	planeModel = glm::translate(planeModel, glm::vec3(0.0f, 1.0f, -50.0f));
 	planeModel = glm::rotate(planeModel, 1.57079f, glm::vec3(1.0f, 0.0f, 0.0f));
 	planeModel = glm::scale(planeModel, glm::vec3(100.0f, 1.0f, 100.0f));
 	InsertTriangles(LoadPlaneTriangles(planeModel, 1));

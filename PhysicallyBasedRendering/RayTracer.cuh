@@ -75,13 +75,6 @@ struct Sphere
 	float radius;
 
 	int materialId;
-
-	//Sphere()
-	//{
-	//	origin = vec3();
-	//	radius = 1.0f;
-	//	materialId = 0;
-	//}
 };
 
 struct Light
@@ -101,14 +94,16 @@ struct Light
 //	vec4  plane;
 //};
 
-
-
 struct Material
 {
-	vec3 ambient;
-	vec3 diffuse;
-	vec3 specular;
+	vec3 albedo;
 	vec3 emission;
+	
+	float ambient;
+	float roughness;
+	float metallic;
+
+	float refractiveIndex;
 
 	// alpha가 높으면 불투명
 	float refractivity;
@@ -118,11 +113,15 @@ struct Material
 
 	Material()
 	{
-		ambient = vec3(0.0f);
-		diffuse = vec3(0.0f);
-		specular = vec3(0.0f);
+		albedo = vec3(0.0f);
 		emission = vec3(0.0f);
 		
+		ambient = 0.0f;
+		roughness = 0.0f;
+		metallic = 0.0f;
+
+		refractiveIndex = 0.0f;
+
 		refractivity = 0.0f;
 		reflectivity = 0.0f;
 

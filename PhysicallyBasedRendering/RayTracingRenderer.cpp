@@ -66,8 +66,7 @@ void RayTracingRenderer::InitializeRender()
 
 	objects.push_back(aabb);
 
-
-	/*char tmp[1024];
+	char tmp[1024];
 	for (int i = 0; i < 500; i++)
 	{
 		sprintf(tmp, "%04d", i);
@@ -78,13 +77,13 @@ void RayTracingRenderer::InitializeRender()
 		infile += ".obj";
 		dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadFluidScene(infile);
 
-		outfile += "fluid_raytracing/new";
+		outfile += "fluid_raytracing3/";
 		outfile += tmp;
 		outfile += ".png";
 		OfflineRender(outfile);
 		cout << i << "번째 프레임 그리는 중" << endl;
 		Sleep(5000.0f);
-	}*/
+	}
 
 
 	/*dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadMesh("Obj/PouringFluid/0250.obj");
@@ -95,7 +94,7 @@ void RayTracingRenderer::InitializeRender()
 // glm의 cross(a, b)는 오른손으로 a방향에서 b방향으로 감싸쥘 때의 엄지방향이다.
 void RayTracingRenderer::Render()
 {
-	//return;
+	return;
 
 	milliseconds bms = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 

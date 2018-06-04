@@ -5,7 +5,7 @@
 
 Texture::Texture(char const * path)
 {
-	LoadTexture(path);
+	LoadFixedTexture(path);
 }
 
 // internal format은 gpu 내부에서 사용될 포맷을 말하고
@@ -18,12 +18,15 @@ void Texture::LoadTexture(const GLint& internalformat, const GLsizei& width, con
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height, 0, format, type, 0);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	this->texture = texture;
 	this->internalformat = internalformat;
 	this->width = width;
 	this->height = height;
 }
 
-void Texture::LoadTexture(const string& s)
+void Texture::LoadFixedTexture(const string& s)
 {
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
@@ -51,6 +54,49 @@ void Texture::LoadTexture(const string& s)
 		}
 		
 		// 보통 이미지의 경우 unsigned byte로 저장하고
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		this->width = width;
+		this->height = height;
+
+		stbi_image_free(data);
+	}
+	else
+	{
+		cout << "Texture failed to load at path: " << s << endl;
+		cout << stbi_failure_reason();
+		stbi_image_free(data);
+	}
+}
+
+void Texture::LoadTexture(const string & s)
+{
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	int width, height, nrComponents;
+	unsigned char* data = stbi_load(s.c_str(), &width, &height, &nrComponents, 0);
+
+	if (data)
+	{
+		// input할 데이터의 format, 혹은 output할 데이터의 format
+		// input할 데이터의 type은 GL_UNSIGNED_BYTE임
+		GLenum format;
+		if (nrComponents == 1)
+		{
+			format = GL_RED;
+		}
+		else if (nrComponents == 3)
+		{
+			format = GL_RGB;
+		}
+		else if (nrComponents == 4)
+		{
+			format = GL_RGBA;
+		}
+
+		// tgba32f 타입의 변수로 텍스쳐 메모리에 저장
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 

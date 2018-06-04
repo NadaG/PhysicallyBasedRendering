@@ -1,5 +1,10 @@
 #include "FluidSimulationImporter.h"
 
+#include <iostream>
+
+using std::cout;
+using std::endl;
+
 struct float3
 {
 	float x;
@@ -38,6 +43,7 @@ struct SimulationParam
 };
 
 SimulationParam sparam;
+HMODULE handle;
 
 struct FluidCube
 {
@@ -63,7 +69,6 @@ void(*quit)();
 
 void FluidSimulationImporter::Initialize()
 {
-	HMODULE handle;
 	handle = LoadLibrary(SOLUTION_DIR L"\\x64\\Release\\FLing.dll");
 
 	initialize = (int(*)(SimulationParam, FluidCube*, ObstacleCube*))GetProcAddress(handle, "initialize");
@@ -73,9 +78,9 @@ void FluidSimulationImporter::Initialize()
 	sparam.boundaryPos.x = 0.0f;
 	sparam.boundaryPos.y = 2.5f;
 	sparam.boundaryPos.z = 0.0f;
-	sparam.boundarySize.x = 10.0f;
+	sparam.boundarySize.x = 15.0f;
 	sparam.boundarySize.y = 15.0f;
-	sparam.boundarySize.z = 10.0f;
+	sparam.boundarySize.z = 15.0f;
 	sparam.objNum = 1;
 	sparam.obsobjNum = 0;
 
@@ -93,9 +98,9 @@ void FluidSimulationImporter::Initialize()
 	sparam.yMaxValue = 10000.0f;
 
 	FluidCube* cubes = new FluidCube[sparam.objNum];
-	cubes[0].size.x = 15;
-	cubes[0].size.y = 15;
-	cubes[0].size.z = 15;
+	cubes[0].size.x = 20;
+	cubes[0].size.y = 20;
+	cubes[0].size.z = 20;
 	cubes[0].pos.x = 0.0f;
 	cubes[0].pos.y = 5.0f;
 	cubes[0].pos.z = 0.0f;
@@ -150,8 +155,10 @@ void FluidSimulationImporter::Update(GLfloat* v)
 
 void FluidSimulationImporter::Quit()
 {
+	quit();
+	FreeLibrary(handle);
+	delete[] stopFramePos;
 	delete[] pos;
 	delete[] vel;
 	delete[] issur;
-	quit();
 }

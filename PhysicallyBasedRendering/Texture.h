@@ -29,6 +29,8 @@ public:
 	Texture() {};
 	Texture(char const* path);
 
+	// rgba32f로 된 텍스쳐만 불러오는 함수
+	void LoadFixedTexture(const string& s);
 	void LoadTexture(const string& s);
 	void LoadTextureDDS(const string& s);
 	void LoadTexture(

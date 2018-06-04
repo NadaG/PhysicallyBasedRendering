@@ -54,6 +54,13 @@ float LinearizeDepth(float depth)
 
 void main()
 {
+	//float tmpDepth = texture(debugMap, outUV).r;
+	//tmpDepth = LinearizeDepth(tmpDepth) / far;
+	//color = vec3(tmpDepth, tmpDepth, tmpDepth);
+
+	//color = texture(debugMap, outUV).rgb;
+	//return;
+
 	vec3 depth = texture(bluredDepthMap, outUV).rgb;
 	vec3 worldColor = texture(worldMap, outUV).rgb;
 	float worldDepth = texture(worldDepthMap, outUV).r;
@@ -102,5 +109,5 @@ void main()
 	color = ambient + diffuse + specular * fresnel(n, eyeDir) + worldColor * I;
 	//color = ambient + diffuse + specular;
 	//color = n;
-	//color = texture(debugMap, outUV).rgb;
+	//color = n;
 }

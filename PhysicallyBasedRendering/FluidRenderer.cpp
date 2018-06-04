@@ -2,7 +2,7 @@
 
 void FluidRenderer::InitializeRender()
 {
-	backgroundColor = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
+	backgroundColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	pbrShader = new ShaderProgram("PBR.vs", "PBR.fs");
 	pbrShader->Use();
@@ -30,6 +30,9 @@ void FluidRenderer::InitializeRender()
 	surfaceShader->SetUniform1f("far", depthFar);
 	surfaceShader->SetUniformVector4f("backgroundColor", backgroundColor);
 
+	normalShader = new ShaderProgram("Basic.vs", "Basic.fs");
+	normalShader->Use();
+
 	///////////////////
 	floorAlbedoTex.LoadTexture("Texture/Floor/albedo.png");
 	floorAlbedoTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER);
@@ -42,7 +45,7 @@ void FluidRenderer::InitializeRender()
 	colorTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
 	depthTex.LoadTexture(GL_RGBA32F, depthWidth, depthHeight, GL_RGBA, GL_FLOAT);
-	depthTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_REPEAT, GL_REPEAT);
+	depthTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
 	thicknessTex.LoadTexture(GL_RGBA32F, depthWidth, depthHeight, GL_RGBA, GL_FLOAT);
 	thicknessTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_REPEAT, GL_REPEAT);
@@ -51,7 +54,11 @@ void FluidRenderer::InitializeRender()
 	worldDepthTex.LoadDepthTexture(depthWidth, depthHeight);
 	worldDepthTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_REPEAT, GL_REPEAT);
 
-	worldColorTex.LoadTexture(GL_RGBA32F, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height, GL_RGBA, GL_FLOAT);
+	worldColorTex.LoadTexture(GL_RGBA32F, 
+		WindowManager::GetInstance()->width, 
+		WindowManager::GetInstance()->height, 
+		GL_RGBA, 
+		GL_FLOAT);
 	worldColorTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
 	depthThicknessFBO.GenFrameBufferObject();
@@ -72,6 +79,11 @@ void FluidRenderer::InitializeRender()
 	pbrFBO.BindTexture(GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, &worldDepthTex);
 	pbrFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &worldColorTex);
 	pbrFBO.DrawBuffers();
+
+	if (pbrFBO.CheckStatus() == GL_FRAMEBUFFER_COMPLETE)
+	{
+		cout << "pbr fbo complete" << endl;
+	}
 
 	for (int i = 0; i < 2; i++)
 	{
@@ -100,17 +112,29 @@ void FluidRenderer::InitializeRender()
 	fluidVAO.VertexAttribPointer(3, 6);
 	// color
 	fluidVAO.VertexAttribPointer(3, 6);
+
+	currentFrame = 0;
 }
 
 void FluidRenderer::Render()
 {
+	importer.Update(fluidVertices);
+	fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
+
+	currentFrame++;
+
+	if (currentFrame > 10)
+	{
+		//ScreenSpaceFluidRender();
+		MarchingCubeRender();
+	}
+}
+
+void FluidRenderer::ScreenSpaceFluidRender()
+{
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	importer.Update(fluidVertices);
-
-	fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
 
 	Object* camera = sceneManager->movingCamera;
 	SceneObject& quad = sceneManager->quadObj;
@@ -135,7 +159,7 @@ void FluidRenderer::Render()
 	pbrFBO.Use();
 	pbrFBO.Clear(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
 	pbrShader->Use();
-	
+
 	pbrShader->SetUniformMatrix4f("view", view);
 	pbrShader->SetUniformMatrix4f("projection", projection);
 
@@ -167,19 +191,20 @@ void FluidRenderer::Render()
 	DrawFluids(glm::distance(camera->GetPosition(), glm::vec3(0.0f, camera->GetPosition().y, 0.0f)));
 	// 파티클들 depth map 그리기 끝
 
-	// 파티클들 thickness map 그리기
-	glEnable(GL_BLEND);
-	glDisable(GL_DEPTH_TEST);
-	glBlendFunc(GL_ONE, GL_ONE);
+	//// 왜인지 thickness map이 제대로 안됨
+	//// 파티클들 thickness map 그리기
+	//glEnable(GL_BLEND);
+	//glDisable(GL_DEPTH_TEST);
+	//glBlendFunc(GL_ONE, GL_ONE);
 
-	particleThicknessShader->Use();
-	particleThicknessShader->SetUniformMatrix4f("view", view);
-	particleThicknessShader->SetUniformMatrix4f("projection", projection);
-	
-	DrawFluids(glm::distance(camera->GetPosition(), glm::vec3(0.0f, camera->GetPosition().y, 0.0f)));
-	glDisable(GL_BLEND);
-	glEnable(GL_DEPTH_TEST);
-	// 파티클들 thickness map 그리기 끝
+	//particleThicknessShader->Use();
+	//particleThicknessShader->SetUniformMatrix4f("view", view);
+	//particleThicknessShader->SetUniformMatrix4f("projection", projection);
+	//
+	//DrawFluids(glm::distance(camera->GetPosition(), glm::vec3(0.0f, camera->GetPosition().y, 0.0f)));
+	//glEnable(GL_DEPTH_TEST);
+	//glDisable(GL_BLEND);
+	//// 파티클들 thickness map 그리기 끝
 
 	// depth, thickness blur 시작
 	blurShader->Use();
@@ -223,9 +248,54 @@ void FluidRenderer::Render()
 	colorTex.Bind(GL_TEXTURE3);
 	worldDepthTex.Bind(GL_TEXTURE4);
 
-	thicknessBlurTex[0].Bind(GL_TEXTURE5);
+	depthTex.Bind(GL_TEXTURE5);
 
 	quad.DrawModel();
+}
+
+void FluidRenderer::MarchingCubeRender()
+{
+	// 1. normal map을 뽑는 코드 작성
+	// 2. vertices를 marching cube로 보냄
+	// 3. triangles 정보를 받아옴
+	// 4. 받아온 정보를 이용해서 일반적인 shading을 함
+
+	glEnable(GL_DEPTH_TEST);
+	glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	SceneObject fluidObj = dynamic_cast<FluidSceneManager*>(sceneManager)->fluidObj;
+	SceneObject quadObj = sceneManager->quadObj;
+	Object* camera = sceneManager->movingCamera;
+
+	glm::mat4 projection = glm::perspective(
+		glm::radians(45.0f),
+		WindowManager::GetInstance()->width / WindowManager::GetInstance()->height,
+		sceneNaer,
+		sceneFar);
+
+	/*glm::mat4 view = glm::lookAt(
+		camera->GetWorldPosition(),
+		glm::vec3(0.0f, camera->GetPosition().y, 0.0f),
+		glm::vec3(0.0f, 1.0f, 0.0f)
+	);*/
+
+	glm::mat4 view = glm::inverse(camera->GetModelMatrix());
+
+	glm::mat4 model = glm::mat4();
+
+	glViewport(0, 0, depthWidth, depthHeight);
+	UseDefaultFBO();
+	ClearDefaultFBO();
+
+	normalShader->Use();
+	normalShader->SetUniformMatrix4f("model", model);
+	normalShader->SetUniformMatrix4f("view", view);
+	normalShader->SetUniformMatrix4f("projection", projection);
+
+	fluidObj.DrawModel();
+
+	quadObj.DrawModel();
 }
 
 void FluidRenderer::TerminateRender()

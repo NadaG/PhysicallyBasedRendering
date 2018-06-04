@@ -29,9 +29,7 @@ struct Ray
 	vec3 origin;
 	// Ray의 방향
 	vec3 dir;
-	// 0: primary, 1: reflect, 2: refract
-	int rayType;
-
+	
 	float decay;
 };
 
@@ -109,16 +107,6 @@ __device__ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 __device__ vec3 calculateEta(float refractiveIndex)
 {
 	return vec3(powf(1.0f - (1.0f / refractiveIndex), 2.0f) / powf(1.0f + (1.0f / refractiveIndex), 2.0f));
-}
-
-__device__ vec3 fresnelSchlick(float cosTheta, vec3 F0, float fresnelPower)
-{
-	return F0 + (1.0f - F0) * pow(1.0f - cosTheta, fresnelPower);
-}
-
-__device__ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
-{
-	return F0 + (max(vec3(1.0f - roughness), F0) - F0) * pow(1.0f - cosTheta, 5.0f);
 }
 
 __device__ vec3 Interpolation(Triangle triangle, vec3 position, vec3& N, vec2& uv)
@@ -661,12 +649,10 @@ __device__ vec4 RayTraceColor(
 
 					Ray reflectRay;
 					// reflect ray의 시작점은 hit point
-					reflectRay.origin = hitPoint - nowRay.dir;
+					reflectRay.origin = hitPoint;
 					//reflectRay.dir = normalize(randomVec);
 					reflectRay.dir = normalize(reflect(nowRay.dir, N));
 
-					// reflect ray
-					reflectRay.rayType = 1;
 					// 현재 빛의 감쇠 정도와 물체의 재질에 따라 reflect ray의 감쇠 정도가 정해짐 
 					reflectRay.decay = kS.r * ray.decay / SAMPLE_NUM;
 
@@ -676,52 +662,12 @@ __device__ vec4 RayTraceColor(
 				// refract는 ray tracing
 				Ray refractRay;
 				// refract ray의 시작점은 hit point
-				refractRay.origin = hitPoint + nowRay.dir;
+				refractRay.origin = hitPoint;
 				refractRay.dir = normalize(refract(nowRay.dir, N, 1.0f / materials[materialId].refractiveIndex));
-				// refract ray
-				refractRay.rayType = 2;
 				// 현재 빛의 감쇠 정도와 물체의 재질에 따라 refract ray의 감쇠 정도가 정해짐
 				refractRay.decay = kD.r * ray.decay;
 
 				Enqueue(rayQueue, refractRay, rear);
-
-				//for (int j = 0; j < SAMPLE_NUM; ++j)
-				//{
-				//	Ray refractRay;
-				//	// refract ray의 시작점은 hit point
-				//	refractRay.origin = hitPoint;
-				//	refractRay.dir = normalize(refract(nowRay.dir, N, 1.0f / materials[materialId].refractiveIndex));
-				//	// refract ray
-				//	refractRay.rayType = 2;
-				//	// 현재 빛의 감쇠 정도와 물체의 재질에 따라 refract ray의 감쇠 정도가 정해짐
-				//	refractRay.decay = kD.r * ray.decay / SAMPLE_NUM;
-
-				//	Enqueue(rayQueue, refractRay, rear);
-				//}
-
-				//for (int j = 0; j < 1; ++j)
-				//{
-				//	Ray reflectRay;
-				//	// reflect ray의 시작점은 hit point
-				//	reflectRay.origin = hitPoint;
-				//	reflectRay.dir = normalize(reflect(nowRay.dir, N));
-				//	// reflect ray
-				//	reflectRay.rayType = 1;
-				//	// 현재 빛의 감쇠 정도와 물체의 재질에 따라 reflect ray의 감쇠 정도가 정해짐 
-				//	reflectRay.decay = kS.r * ray.decay;
-
-				//	Ray refractRay;
-				//	// refract ray의 시작점은 hit point
-				//	refractRay.origin = hitPoint;
-				//	refractRay.dir = normalize(refract(nowRay.dir, N, 1.0f / materials[materialId].refractiveIndex));
-				//	// refract ray
-				//	refractRay.rayType = 2;
-				//	// 현재 빛의 감쇠 정도와 물체의 재질에 따라 refract ray의 감쇠 정도가 정해짐
-				//	refractRay.decay = kD.r * ray.decay;
-
-				//	Enqueue(rayQueue, reflectRay, rear);
-				//	Enqueue(rayQueue, refractRay, rear);
-				//}
 			}
 		}
 
@@ -852,7 +798,7 @@ __device__ vec4 RayTraceColor(
 
 				kS = F;
 				kD = vec3(1.0) - kS;
-				kD *= 1.0f - metallic;
+				kD *= (1.0f - metallic);
 
 				float NdotL = glm::clamp(glm::dot(N, L), 0.0f, 1.0f);
 
@@ -902,7 +848,6 @@ __global__ void RayTraceD(
 		{
 			Ray ray = GenerateCameraRay(blockIdx.x + gridY * RAY_Y_NUM, threadIdx.x + gridX * RAY_X_NUM, view, i, j);
 
-			ray.rayType = 0;
 			ray.decay = 1.0f;
 
 			// NOTICE for문을 돌릴 때 iter를 변수로 하니까 검은 화면이 나옴
@@ -1000,7 +945,7 @@ void RayTrace(
 void LoadCudaTextures()
 {
 	Texture2D texFile;
-	texFile.LoadTexture("Texture/RustedIron/albedo.png");
+	texFile.LoadFixedTexture("Texture/RustedIron/albedo.png");
 	texFile.SetParameters(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
 	float* texArray = texFile.GetTexImage(GL_RGBA);
 
@@ -1022,7 +967,7 @@ void LoadCudaTextures()
 
 	//////////////////////////////////////////////////////////////////////////////
 
-	texFile.LoadTexture("Texture/RustedIron/normal.png");
+	texFile.LoadFixedTexture("Texture/RustedIron/normal.png");
 	texFile.SetParameters(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
 	texArray = texFile.GetTexImage(GL_RGBA);
 
@@ -1044,7 +989,7 @@ void LoadCudaTextures()
 	//////////////////////////////////////////////////////////////////////////////
 	//channelDesc = cudaCreateChannelDesc(32, 0, 0, 0, cudaChannelFormatKindFloat);
 
-	texFile.LoadTexture("Texture/RustedIron/ao.png");
+	texFile.LoadFixedTexture("Texture/RustedIron/ao.png");
 	texFile.SetParameters(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
 	texArray = texFile.GetTexImage(GL_RGBA);
 
@@ -1065,7 +1010,7 @@ void LoadCudaTextures()
 
 	//////////////////////////////////////////////////////////////////////////////
 
-	texFile.LoadTexture("Texture/RustedIron/metallic.png");
+	texFile.LoadFixedTexture("Texture/RustedIron/metallic.png");
 	texFile.SetParameters(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
 	texArray = texFile.GetTexImage(GL_RGBA);
 
@@ -1086,7 +1031,7 @@ void LoadCudaTextures()
 
 	//////////////////////////////////////////////////////////////////////////////
 
-	texFile.LoadTexture("Texture/RustedIron/roughness.png");
+	texFile.LoadFixedTexture("Texture/RustedIron/roughness.png");
 	texFile.SetParameters(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
 	texArray = texFile.GetTexImage(GL_RGBA);
 
@@ -1107,7 +1052,7 @@ void LoadCudaTextures()
 
 	//////////////////////////////////////////////////////////////////////////////
 
-	texFile.LoadTexture("Texture/Background/stripe.png");
+	texFile.LoadFixedTexture("Texture/Background/stripe.png");
 	texFile.SetParameters(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
 	texArray = texFile.GetTexImage(GL_RGBA);
 

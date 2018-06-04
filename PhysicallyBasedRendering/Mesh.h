@@ -51,6 +51,9 @@ public:
 	virtual ~Mesh();
 
 	void SetMesh(aiMesh* mesh);
+	void CaculateFaceNormal();
+	void CaculateVertexNormal();
+
 	
 	// file name을 통해 mesh를 생성
 	//void LoadMesh(const string& fileName);

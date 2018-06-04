@@ -14,6 +14,10 @@ public:
 
 	void InitializeRender();
 	void Render();
+
+	void ScreenSpaceFluidRender();
+	void MarchingCubeRender();
+
 	void TerminateRender(); 
 
 private:
@@ -24,6 +28,8 @@ private:
 
 	ShaderProgram* surfaceShader;
 	ShaderProgram* pbrShader;
+
+	ShaderProgram* normalShader;
 
 	// floor
 	Texture2D floorAlbedoTex;
@@ -52,6 +58,9 @@ private:
 	const float depthNear = 0.01f;
 	const float depthFar = 60.0;
 
+	const float sceneNaer = 0.01f;
+	const float sceneFar = 100.0f;
+
 	FrameBufferObject pbrFBO;
 	FrameBufferObject depthThicknessFBO;
 	FrameBufferObject depthBlurFBO[2];
@@ -61,6 +70,8 @@ private:
 
 	GLfloat* fluidVertices;
 	FluidSimulationImporter importer;
+
+	int currentFrame;
 
 private:
 

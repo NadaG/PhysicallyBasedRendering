@@ -2,6 +2,7 @@
 #include "LectureSceneRenderer.h"
 #include "PBRRenderer.h"
 #include "LTCRenderer.h"
+#include "FluidRenderer.h"
 
 #include "WindowManager.h"
 #include "Debug.h"
@@ -28,7 +29,7 @@ enum Scene
 // TODO shader 불러오고 사용하고 그리는 부분 중복되는 부분이 너무 많은데 그 부분들 수정하기
 int main(int argc, char **argv)
 {
-	Scene scene = RAYTRACING_SCENE;
+	Scene scene = FLUID_SCENE;
 
 	WindowManager::GetInstance()->Initialize();
 
@@ -59,6 +60,12 @@ int main(int argc, char **argv)
 	{
 		sceneManager = new RayTracingSceneManager();
 		renderer = new RayTracingRenderer(sceneManager);
+		break;
+	}
+	case FLUID_SCENE:
+	{
+		sceneManager = new FluidSceneManager();
+		renderer = new FluidRenderer(sceneManager);
 		break;
 	}
 	case LTC_SCENE:

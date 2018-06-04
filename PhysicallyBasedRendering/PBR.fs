@@ -202,11 +202,13 @@ void main()
 	color = color / (color + vec3(1.0));
 	// gamma correction
 	color = pow(color, vec3(1.0/2.2));
-
 	//ambient = ambient / (ambient + vec3(1.0));
 	//ambient = pow(ambient, vec3(1.0/2.2));
 	//color = ambient + Lo;
 
 	//color = texture(brdfLUT, outUV).ggg;
 	//color = texture(prefilterMap, outNormal).rgb;
+
+	// TODO fluid scene¿ë debug
+	color = texture(albedoMap, outUV).rgb;
 }

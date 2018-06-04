@@ -47,7 +47,7 @@ void PBRRenderer::InitializeRender()
 	captureRBO.RenderBufferStorage(GL_DEPTH_COMPONENT24, skyboxResolution, skyboxResolution);
 	captureFBO.BindRenderBuffer(GL_DEPTH_ATTACHMENT, captureRBO);
 
-	hdrTex.LoadTexture("Texture/Factory/BG.jpg");
+	hdrTex.LoadFixedTexture("Texture/Factory/BG.jpg");
 	hdrTex.SetParameters(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
 
 	hdrSkyboxTex.LoadTextureCubeMap(GL_RGB16F, skyboxResolution, skyboxResolution, GL_RGB, GL_FLOAT);
@@ -259,18 +259,18 @@ void PBRRenderer::TerminateRender()
 
 void PBRRenderer::SelectMaterialImage(const string& folder)
 {
-	aoTex.LoadTexture("Texture/" + folder + "/ao.png");
+	aoTex.LoadFixedTexture("Texture/" + folder + "/ao.png");
 	aoTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
-	albedoTex.LoadTexture("Texture/" + folder + "/albedo.png");
+	albedoTex.LoadFixedTexture("Texture/" + folder + "/albedo.png");
 	albedoTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
-	metallicTex.LoadTexture("Texture/" + folder + "/metallic.png");
+	metallicTex.LoadFixedTexture("Texture/" + folder + "/metallic.png");
 	metallicTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
-	normalTex.LoadTexture("Texture/" + folder + "/normal.png");
+	normalTex.LoadFixedTexture("Texture/" + folder + "/normal.png");
 	normalTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
-	roughnessTex.LoadTexture("Texture/" + folder + "/roughness.png");
+	roughnessTex.LoadFixedTexture("Texture/" + folder + "/roughness.png");
 	roughnessTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 }

@@ -16,22 +16,22 @@ void StarBurstRenderer::InitializeRender()
 	pbrShader->BindTexture(&roughnessTex, "roughnessMap");
 
 	string folder = "StreetLight";
-	aoTex.LoadTexture("Texture/" + folder + "/ao.png");
+	aoTex.LoadFixedTexture("Texture/" + folder + "/ao.png");
 	aoTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
-	albedoTex.LoadTexture("Texture/" + folder + "/albedo.png");
+	albedoTex.LoadFixedTexture("Texture/" + folder + "/albedo.png");
 	albedoTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
-	emissionTex.LoadTexture("Texture/" + folder + "/emission.jpg");
+	emissionTex.LoadFixedTexture("Texture/" + folder + "/emission.jpg");
 	emissionTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
-	metallicTex.LoadTexture("Texture/" + folder + "/metallic.png");
+	metallicTex.LoadFixedTexture("Texture/" + folder + "/metallic.png");
 	metallicTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
-	normalTex.LoadTexture("Texture/" + folder + "/normal.png");
+	normalTex.LoadFixedTexture("Texture/" + folder + "/normal.png");
 	normalTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
-	roughnessTex.LoadTexture("Texture/" + folder + "/roughness.png");
+	roughnessTex.LoadFixedTexture("Texture/" + folder + "/roughness.png");
 	roughnessTex.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
 
 	brightShader = new ShaderProgram("Quad.vs", "Brightness.fs");

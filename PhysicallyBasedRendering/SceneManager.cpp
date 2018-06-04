@@ -16,6 +16,7 @@ void SceneManager::TerminateObjects()
 {
 	for (int i = 0; i < sceneObjs.size(); i++)
 		sceneObjs[i].Delete();
+	
 	movingCamera->Delete();
 
 	for (int i = 0; i < lightObjs.size(); ++i)

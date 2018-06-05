@@ -103,6 +103,9 @@
     <Filter Include="Source Files\PixelBufferObject">
       <UniqueIdentifier>{098a2370-dfc9-444a-8133-a1e54713bdee}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\MarchingCube">
+      <UniqueIdentifier>{21c4e3dc-06e7-4f1b-b6c1-f7f7cb4f8978}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -236,6 +239,12 @@
     </ClCompile>
     <ClCompile Include="PixelBufferObject.cpp">
       <Filter>Source Files\PixelBufferObject</Filter>
+    </ClCompile>
+    <ClCompile Include="MarchingCube.cpp">
+      <Filter>Source Files\MarchingCube</Filter>
+    </ClCompile>
+    <ClCompile Include="MarchingMesh.cpp">
+      <Filter>Source Files\MarchingCube</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -380,6 +389,9 @@
     </None>
     <None Include="Cos.fs">
       <Filter>Shader Files\Debug</Filter>
+    </None>
+    <None Include="MarchingCubeFluid.fs">
+      <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -544,6 +556,15 @@
     </ClInclude>
     <ClInclude Include="Octree.cuh">
       <Filter>Source Files\Cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="MarchingCube.h">
+      <Filter>Source Files\MarchingCube</Filter>
+    </ClInclude>
+    <ClInclude Include="MCTable.h">
+      <Filter>Source Files\MarchingCube</Filter>
+    </ClInclude>
+    <ClInclude Include="MarchingMesh.h">
+      <Filter>Source Files\MarchingCube</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

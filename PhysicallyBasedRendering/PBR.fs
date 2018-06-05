@@ -210,5 +210,5 @@ void main()
 	//color = texture(prefilterMap, outNormal).rgb;
 
 	// TODO fluid scene¿ë debug
-	color = texture(albedoMap, outUV).rgb;
+	//color = texture(albedoMap, outUV).rgb;
 }

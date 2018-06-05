@@ -41,7 +41,7 @@ const int RAY_Y_NUM = 64;
 
 const int QUEUE_SIZE = 30;
 
-const int DEPTH = 3;
+const int DEPTH = 2;
 
 const int SAMPLE_NUM = 1;
 

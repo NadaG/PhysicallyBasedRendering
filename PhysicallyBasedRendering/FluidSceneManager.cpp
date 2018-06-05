@@ -5,8 +5,6 @@ void FluidSceneManager::InitializeObjects()
 	quadObj.LoadModel(QUAD);
 	skyboxObj.LoadModel(CUBE);
 
-	fluidObj.LoadModel("Obj/Fluid/0250.obj");
-
 	sceneObjs.push_back(quadObj);
 	sceneObjs[0].Scale(glm::vec3(15.0));
 	sceneObjs[0].ModelRotate(glm::vec3(1.0f, 0.0f, 0.0f), glm::radians(90.0f));
@@ -15,10 +13,8 @@ void FluidSceneManager::InitializeObjects()
 	sceneObjs.push_back(skyboxObj);
 	sceneObjs[1].Scale(glm::vec3(10.0f));
 
-	// fluid Ãß°¡ÇÔ
-	sceneObjs.push_back(fluidObj);
-
-	movingCamera->WorldTranslate(glm::vec3(0.0f, 0.0f, 0.0f));
+	movingCamera->WorldTranslate(glm::vec3(0.0f, 20.0f, 50.0f));
+	movingCamera->ModelRotate(glm::vec3(1.0f, 0.0f, 0.0f), -0.4f);
 }
 
 void FluidSceneManager::Update()

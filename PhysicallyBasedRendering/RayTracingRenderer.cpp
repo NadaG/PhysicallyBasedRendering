@@ -87,7 +87,6 @@ void RayTracingRenderer::InitializeRender()
 	//	Sleep(5000.0f);
 	//}
 
-
 	dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadFluidScene("Obj/PouringFluid/0250.obj");
 	OfflineRender("0000000.png");
 	Sleep(1000.0f);

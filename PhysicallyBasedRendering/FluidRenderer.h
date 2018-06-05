@@ -3,6 +3,7 @@
 #include "Renderer.h"
 #include "FluidSimulationImporter.h"
 #include "FluidSceneManager.h"
+#include "MarchingCube.h"
 
 class FluidRenderer : public Renderer
 {
@@ -29,7 +30,11 @@ private:
 	ShaderProgram* surfaceShader;
 	ShaderProgram* pbrShader;
 
-	ShaderProgram* normalShader;
+	ShaderProgram* marchingCubeFluidShader;
+
+	////debugøÎ¿”
+	//ShaderProgram* textureShader;
+	//Texture2D tmpTex;
 
 	// floor
 	Texture2D floorAlbedoTex;
@@ -56,7 +61,7 @@ private:
 	const int blurNum = 2;
 
 	const float depthNear = 0.01f;
-	const float depthFar = 60.0;
+	const float depthFar = 100.0;
 
 	const float sceneNaer = 0.01f;
 	const float sceneFar = 100.0f;
@@ -66,6 +71,8 @@ private:
 	FrameBufferObject depthBlurFBO[2];
 	FrameBufferObject thicknessBlurFBO[2];
 
+	FrameBufferObject pngFBO;
+
 	VertexArrayObject fluidVAO;
 
 	GLfloat* fluidVertices;
@@ -73,7 +80,17 @@ private:
 
 	int currentFrame;
 
+	MarchingCube mc;
+
+	PNGExporter pngExporter;
+
+	Texture2D pngTex;
+
 private:
+
+	glm::vec3 boundarySize;
+
+	Mesh* fluidMesh;
 
 	void DrawFluids(const float& dist);
 };

@@ -107,7 +107,6 @@ void main()
 	float I = 1 / (exp(1 * thickness));
 	
 	color = ambient + diffuse + specular * fresnel(n, eyeDir) + worldColor * I;
-	//color = ambient + diffuse + specular;
-	//color = n;
-	//color = n;
+
+	color = n * 0.5f + vec3(0.5f);
 }

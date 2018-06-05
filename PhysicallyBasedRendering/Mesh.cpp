@@ -82,46 +82,49 @@ void Mesh::SetMesh(aiMesh* mesh)
 	// vertex에 normal 정보가 없다면 vertex position 정보를 이용해 vertex normal을 구함
 	if (!mesh->HasNormals())
 	{
+		// TODO Fluid Scene
 		CaculateFaceNormal();
 		CaculateVertexNormal();
 
-		/*vector<vector<int> > neighborFaceMap;
-		for (int i = 0; i < mesh->mNumVertices; ++i)
-		{
-			vector<int> neighborFaces;
-			for (int j = 0; j < mesh->mNumFaces; ++j)
-			{
-				if (i == mesh->mFaces[j].mIndices[0] ||
-					i == mesh->mFaces[j].mIndices[1] ||
-					i == mesh->mFaces[j].mIndices[2])
-					neighborFaces.push_back(j);
-			}
-			neighborFaceMap.push_back(neighborFaces);
-		}
 
-		for (int i = 0; i < mesh->mNumFaces; ++i)
-		{
-			triangles[i].v0normal = glm::vec3();
-			for (int k = 0; k < neighborFaceMap[indices[i * 3 + 0]].size(); k++)
-			{
-				triangles[i].v0normal += triangles[neighborFaceMap[indices[i * 3 + 0]][k]].normal;
-			}
-			triangles[i].v0normal /= neighborFaceMap[indices[i * 3 + 0]].size();
+		//// TODO RayTracing Scene
+		//vector<vector<int> > neighborFaceMap;
+		//for (int i = 0; i < mesh->mNumVertices; ++i)
+		//{
+		//	vector<int> neighborFaces;
+		//	for (int j = 0; j < mesh->mNumFaces; ++j)
+		//	{
+		//		if (i == mesh->mFaces[j].mIndices[0] ||
+		//			i == mesh->mFaces[j].mIndices[1] ||
+		//			i == mesh->mFaces[j].mIndices[2])
+		//			neighborFaces.push_back(j);
+		//	}
+		//	neighborFaceMap.push_back(neighborFaces);
+		//}
 
-			triangles[i].v1normal = glm::vec3();
-			for (int k = 0; k < neighborFaceMap[indices[i * 3 + 1]].size(); k++)
-			{
-				triangles[i].v1normal += triangles[neighborFaceMap[indices[i * 3 + 1]][k]].normal;
-			}
-			triangles[i].v1normal /= neighborFaceMap[indices[i * 3 + 1]].size();
+		//for (int i = 0; i < mesh->mNumFaces; ++i)
+		//{
+		//	triangles[i].v0normal = glm::vec3();
+		//	for (int k = 0; k < neighborFaceMap[indices[i * 3 + 0]].size(); k++)
+		//	{
+		//		triangles[i].v0normal += triangles[neighborFaceMap[indices[i * 3 + 0]][k]].normal;
+		//	}
+		//	triangles[i].v0normal /= neighborFaceMap[indices[i * 3 + 0]].size();
 
-			triangles[i].v2normal = glm::vec3();
-			for (int k = 0; k < neighborFaceMap[indices[i * 3 + 2]].size(); k++)
-			{
-				triangles[i].v2normal += triangles[neighborFaceMap[indices[i * 3 + 2]][k]].normal;
-			}
-			triangles[i].v2normal /= neighborFaceMap[indices[i * 3 + 2]].size();
-		}*/
+		//	triangles[i].v1normal = glm::vec3();
+		//	for (int k = 0; k < neighborFaceMap[indices[i * 3 + 1]].size(); k++)
+		//	{
+		//		triangles[i].v1normal += triangles[neighborFaceMap[indices[i * 3 + 1]][k]].normal;
+		//	}
+		//	triangles[i].v1normal /= neighborFaceMap[indices[i * 3 + 1]].size();
+
+		//	triangles[i].v2normal = glm::vec3();
+		//	for (int k = 0; k < neighborFaceMap[indices[i * 3 + 2]].size(); k++)
+		//	{
+		//		triangles[i].v2normal += triangles[neighborFaceMap[indices[i * 3 + 2]][k]].normal;
+		//	}
+		//	triangles[i].v2normal /= neighborFaceMap[indices[i * 3 + 2]].size();
+		//}
 	}
 }
 
@@ -129,9 +132,9 @@ void Mesh::CaculateFaceNormal()
 {
 	for (int i = 0; i < vertexNum; i += 3)
 	{
-		vertices[i].normal = glm::cross(
-			vertices[i + 2].position - vertices[i].position,
-			vertices[i + 1].position - vertices[i].position);
+		vertices[i].normal = glm::normalize(glm::cross(
+			vertices[i + 1].position - vertices[i].position,
+			vertices[i + 2].position - vertices[i].position));
 		vertices[i + 1].normal = vertices[i].normal;
 		vertices[i + 2].normal = vertices[i].normal;
 	}
@@ -139,6 +142,16 @@ void Mesh::CaculateFaceNormal()
 
 void Mesh::CaculateVertexNormal()
 {
+	for (int i = 0; i < vertexNum; i++)
+	{
+		for (int j = 0; j < i; j++)
+		{
+			if (vertices[i].position == vertices[j].position)
+			{
+				indices[j] = i;
+			}
+		}
+	}
 }
 
 std::vector<Triangle> Mesh::GetTriangles() const

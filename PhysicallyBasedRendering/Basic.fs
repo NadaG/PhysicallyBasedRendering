@@ -8,7 +8,13 @@ in vec2 outUV;
 
 uniform vec3 inColor;
 
+uniform sampler2D tex;
+
 void main()
 {
-	color = outNormal;
+	// -1 ~ 1
+	vec3 normal = outNormal * 0.5f + vec3(0.5f);
+	color = normal;
+
+	color = texture(tex, outUV).rgb;
 }

@@ -3,6 +3,7 @@
 #include<GL\glew.h>
 #include<vector>
 #include<Windows.h>
+#include<glm\common.hpp>
 
 using std::vector;
 
@@ -14,7 +15,7 @@ public:
 	FluidSimulationImporter(){}
 	~FluidSimulationImporter(){}
 
-	void Initialize();
+	void Initialize(const glm::vec3 boundarySize);
 	void Update(GLfloat* v);
 	void Quit();
 

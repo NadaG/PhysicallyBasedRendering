@@ -366,7 +366,6 @@ vector<Triangle> RayTracingSceneManager::LoadMeshTriangles(const string meshfile
 		triangles[i].bitangent = bitangent;
 
 		triangles[i].materialId = materialId;
-		
 	}
 
 	return triangles;

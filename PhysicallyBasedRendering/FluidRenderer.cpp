@@ -30,8 +30,17 @@ void FluidRenderer::InitializeRender()
 	surfaceShader->SetUniform1f("far", depthFar);
 	surfaceShader->SetUniformVector4f("backgroundColor", backgroundColor);
 
-	normalShader = new ShaderProgram("Basic.vs", "Basic.fs");
-	normalShader->Use();
+	marchingCubeFluidShader = new ShaderProgram("Basic.vs", "MarchingCubeFluid.fs");
+	marchingCubeFluidShader->Use();
+
+	////////////////////////???
+	//textureShader = new ShaderProgram("Basic.vs", "Basic.fs");
+	//textureShader->Use();
+	//textureShader->SetUniform1i("map", 0);
+
+	//tmpTex.LoadTexture("ExportData/tmp.png");
+	//tmpTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_REPEAT, GL_REPEAT);
+	////////////////////////???
 
 	///////////////////
 	floorAlbedoTex.LoadTexture("Texture/Floor/albedo.png");
@@ -61,6 +70,14 @@ void FluidRenderer::InitializeRender()
 		GL_FLOAT);
 	worldColorTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
+	pngTex.LoadTexture(
+		GL_RGBA32F,
+		WindowManager::GetInstance()->width,
+		WindowManager::GetInstance()->height,
+		GL_RGBA,
+		GL_FLOAT);
+	pngTex.SetParameters(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
 	depthThicknessFBO.GenFrameBufferObject();
 	// rbo는 texture로 쓰이지 않을 것이라는 것을 뜻함
 	// 이 힌트를 미리 줌으로써 가속화를 할 수 있음
@@ -85,6 +102,11 @@ void FluidRenderer::InitializeRender()
 		cout << "pbr fbo complete" << endl;
 	}
 
+	pngFBO.GenFrameBufferObject();
+	pngFBO.BindDefaultDepthBuffer(depthWidth, depthHeight);
+	pngFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &pngTex);
+	pngFBO.DrawBuffers();
+
 	for (int i = 0; i < 2; i++)
 	{
 		depthBlurTex[i].LoadTexture(GL_RGBA32F, depthWidth, depthHeight, GL_RGBA, GL_FLOAT);
@@ -102,7 +124,8 @@ void FluidRenderer::InitializeRender()
 		thicknessBlurFBO[i].BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &thicknessBlurTex[i]);
 	}
 
-	importer.Initialize();
+	boundarySize = glm::vec3(20.0f, 25.0f, 20.0f);
+	importer.Initialize(boundarySize);
 	fluidVertices = new GLfloat[importer.particleNum * 6];
 
 	fluidVAO.GenVAOVBOIBO();
@@ -114,20 +137,75 @@ void FluidRenderer::InitializeRender()
 	fluidVAO.VertexAttribPointer(3, 6);
 
 	currentFrame = 0;
+	float resolutionRatio = 1.0f;
+	mc.BuildingGird(
+		boundarySize.x,
+		boundarySize.y,
+		boundarySize.z,
+		boundarySize.x*resolutionRatio,
+		boundarySize.y*resolutionRatio,
+		boundarySize.z*resolutionRatio,
+		0.001f);
+
 }
 
 void FluidRenderer::Render()
 {
+	/*glEnable(GL_DEPTH_TEST);
+	glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	SceneObject& quad = sceneManager->quadObj;
+	glViewport(0, 0, depthWidth, depthHeight);
+	
+	UseDefaultFBO();
+	ClearDefaultFBO();
+
+	textureShader->Use();
+
+	tmpTex.Bind(GL_TEXTURE0);
+	textureShader->SetUniformMatrix4f("model", glm::mat4());
+	textureShader->SetUniformMatrix4f("view", glm::mat4());
+	textureShader->SetUniformMatrix4f("projection", glm::mat4());
+
+	quad.DrawModel();
+
+	return;*/
+
+	if (currentFrame >= 520)
+		return;
+
 	importer.Update(fluidVertices);
 	fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
 
-	currentFrame++;
+	char tmp[1024];
+	sprintf(tmp, "%04d", currentFrame);
+	string outfile = "";
+	
+	ScreenSpaceFluidRender();
 
-	if (currentFrame > 10)
-	{
-		//ScreenSpaceFluidRender();
-		MarchingCubeRender();
-	}
+	outfile += "fluid_screenspace/";
+	outfile += tmp;
+	outfile += ".png";
+	pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
+	cout << currentFrame << "번째 screen space 프레임 그리는 중" << endl;
+	Sleep(5000.0f);
+
+	mc.ComputeDensity(fluidVertices, importer.particleNum);
+	fluidMesh = mc.ExcuteMarchingCube();
+	MarchingCubeRender();
+
+	outfile = "";
+	outfile += "fluid_marchingcube/";
+	outfile += tmp;
+	outfile += ".png";
+	pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
+	cout << currentFrame << "번째 marching cube 프레임 그리는 중" << endl;
+	Sleep(5000.0f);
+
+	delete fluidMesh;
+
+	currentFrame++;
 }
 
 void FluidRenderer::ScreenSpaceFluidRender()
@@ -147,12 +225,7 @@ void FluidRenderer::ScreenSpaceFluidRender()
 		depthNear,
 		depthFar);
 
-	glm::mat4 view = glm::lookAt(
-		camera->GetWorldPosition(),
-		glm::vec3(0.0f, camera->GetPosition().y, 0.0f),
-		glm::vec3(0.0f, 1.0f, 0.0f)
-	);
-
+	glm::mat4 view = glm::inverse(camera->GetModelMatrix());
 	// world 그리기
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 
@@ -168,12 +241,12 @@ void FluidRenderer::ScreenSpaceFluidRender()
 	pbrShader->SetUniformVector3f("lightColor", glm::vec3(0.8f, 0.8f, 0.8f));
 	floorAlbedoTex.Bind(GL_TEXTURE1);
 
-	for (int i = 0; i < 1; i++)
+	/*for (int i = 0; i < 1; i++)
 	{
 		glm::mat4 model = objs[i].GetModelMatrix();
 		pbrShader->SetUniformMatrix4f("model", model);
 		objs[i].DrawModel();
-	}
+	}*/
 	// world 그리기 끝
 
 	// 파티클들 depth map 그리기
@@ -188,7 +261,7 @@ void FluidRenderer::ScreenSpaceFluidRender()
 	particleDepthShader->SetUniform1f("near", depthNear);
 	particleDepthShader->SetUniform1f("far", depthFar);
 
-	DrawFluids(glm::distance(camera->GetPosition(), glm::vec3(0.0f, camera->GetPosition().y, 0.0f)));
+	DrawFluids(28.0f);
 	// 파티클들 depth map 그리기 끝
 
 	//// 왜인지 thickness map이 제대로 안됨
@@ -232,8 +305,11 @@ void FluidRenderer::ScreenSpaceFluidRender()
 	// depth, thickness blur 끝
 
 	// quad 그리기
-	UseDefaultFBO();
-	ClearDefaultFBO();
+	/*UseDefaultFBO();
+	ClearDefaultFBO();*/
+	pngFBO.Use();
+	pngFBO.Clear(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
+
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 
 	surfaceShader->Use();
@@ -255,16 +331,10 @@ void FluidRenderer::ScreenSpaceFluidRender()
 
 void FluidRenderer::MarchingCubeRender()
 {
-	// 1. normal map을 뽑는 코드 작성
-	// 2. vertices를 marching cube로 보냄
-	// 3. triangles 정보를 받아옴
-	// 4. 받아온 정보를 이용해서 일반적인 shading을 함
-
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	SceneObject fluidObj = dynamic_cast<FluidSceneManager*>(sceneManager)->fluidObj;
 	SceneObject quadObj = sceneManager->quadObj;
 	Object* camera = sceneManager->movingCamera;
 
@@ -273,29 +343,24 @@ void FluidRenderer::MarchingCubeRender()
 		WindowManager::GetInstance()->width / WindowManager::GetInstance()->height,
 		sceneNaer,
 		sceneFar);
-
-	/*glm::mat4 view = glm::lookAt(
-		camera->GetWorldPosition(),
-		glm::vec3(0.0f, camera->GetPosition().y, 0.0f),
-		glm::vec3(0.0f, 1.0f, 0.0f)
-	);*/
-
 	glm::mat4 view = glm::inverse(camera->GetModelMatrix());
-
 	glm::mat4 model = glm::mat4();
 
 	glViewport(0, 0, depthWidth, depthHeight);
-	UseDefaultFBO();
-	ClearDefaultFBO();
+	/*UseDefaultFBO();
+	ClearDefaultFBO();*/
+	pngFBO.Use();
+	pngFBO.Clear(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
 
-	normalShader->Use();
-	normalShader->SetUniformMatrix4f("model", model);
-	normalShader->SetUniformMatrix4f("view", view);
-	normalShader->SetUniformMatrix4f("projection", projection);
+	marchingCubeFluidShader->Use();
+	marchingCubeFluidShader->SetUniformMatrix4f("model", model);
+	marchingCubeFluidShader->SetUniformMatrix4f("view", view);
+	marchingCubeFluidShader->SetUniformMatrix4f("projection", projection);
 
-	fluidObj.DrawModel();
+	marchingCubeFluidShader->SetUniformVector3f("L", glm::vec3(0.0f, 100.0f, -10.0f));
+	marchingCubeFluidShader->SetUniformVector3f("eyePos", camera->GetWorldPosition());
 
-	quadObj.DrawModel();
+	fluidMesh->Draw();
 }
 
 void FluidRenderer::TerminateRender()

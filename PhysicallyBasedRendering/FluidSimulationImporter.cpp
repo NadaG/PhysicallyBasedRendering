@@ -67,7 +67,7 @@ int(*initialize)(SimulationParam param, FluidCube* cubes, ObstacleCube* obsobjs)
 void(*update)(float* pos, float* vel, int* issur, ObstacleSphere *spheres, int n_spheres);
 void(*quit)();
 
-void FluidSimulationImporter::Initialize()
+void FluidSimulationImporter::Initialize(const glm::vec3 boundarySize)
 {
 	handle = LoadLibrary(SOLUTION_DIR L"\\x64\\Release\\FLing.dll");
 
@@ -76,11 +76,11 @@ void FluidSimulationImporter::Initialize()
 	quit = (void(*)())GetProcAddress(handle, "quit");
 
 	sparam.boundaryPos.x = 0.0f;
-	sparam.boundaryPos.y = 2.5f;
+	sparam.boundaryPos.y = 0.0f;
 	sparam.boundaryPos.z = 0.0f;
-	sparam.boundarySize.x = 15.0f;
-	sparam.boundarySize.y = 15.0f;
-	sparam.boundarySize.z = 15.0f;
+	sparam.boundarySize.x = boundarySize.x;
+	sparam.boundarySize.y = boundarySize.y;
+	sparam.boundarySize.z = boundarySize.z;
 	sparam.objNum = 1;
 	sparam.obsobjNum = 0;
 
@@ -98,11 +98,11 @@ void FluidSimulationImporter::Initialize()
 	sparam.yMaxValue = 10000.0f;
 
 	FluidCube* cubes = new FluidCube[sparam.objNum];
-	cubes[0].size.x = 20;
-	cubes[0].size.y = 20;
-	cubes[0].size.z = 20;
+	cubes[0].size.x = 24;
+	cubes[0].size.y = 24;
+	cubes[0].size.z = 24;
 	cubes[0].pos.x = 0.0f;
-	cubes[0].pos.y = 5.0f;
+	cubes[0].pos.y = 0.0f;
 	cubes[0].pos.z = 0.0f;
 
 	particleNum = initialize(sparam, cubes, nullptr);
@@ -113,6 +113,7 @@ void FluidSimulationImporter::Initialize()
 	issur = new int[particleNum];
 }
 
+// pos와 velocity를 담음
 void FluidSimulationImporter::Update(GLfloat* v)
 {
 	nowFrame++;
@@ -122,9 +123,9 @@ void FluidSimulationImporter::Update(GLfloat* v)
 	{
 		for (int i = 0; i < particleNum; i++)
 		{
-			stopFramePos[i * 3 + 0] = pos[i * 3 + 0];
-			stopFramePos[i * 3 + 1] = pos[i * 3 + 1];
-			stopFramePos[i * 3 + 2] = pos[i * 3 + 2];
+			stopFramePos[i * 3 + 0] = pos[i * 3 + 0] * 0.8f;
+			stopFramePos[i * 3 + 1] = pos[i * 3 + 1] * 0.8f;
+			stopFramePos[i * 3 + 2] = pos[i * 3 + 2] * 0.8f;
 		}
 	}
 	else if(nowFrame > toStopFrame)
@@ -143,12 +144,12 @@ void FluidSimulationImporter::Update(GLfloat* v)
 	{
 		for (int i = 0; i < particleNum; i++)
 		{
-			v[i * 6 + 0] = pos[i * 3 + 0];
-			v[i * 6 + 1] = pos[i * 3 + 1];
-			v[i * 6 + 2] = pos[i * 3 + 2];
-			v[i * 6 + 4] = vel[i * 3 + 0];
-			v[i * 6 + 5] = vel[i * 3 + 1];
-			v[i * 6 + 6] = vel[i * 3 + 2];
+			v[i * 6 + 0] = pos[i * 3 + 0] * 0.8f;
+			v[i * 6 + 1] = pos[i * 3 + 1] * 0.8f;
+			v[i * 6 + 2] = pos[i * 3 + 2] * 0.8f;
+			v[i * 6 + 4] = vel[i * 3 + 0] * 0.8f;
+			v[i * 6 + 5] = vel[i * 3 + 1] * 0.8f;
+			v[i * 6 + 6] = vel[i * 3 + 2] * 0.8f;
 		}
 	}
 }

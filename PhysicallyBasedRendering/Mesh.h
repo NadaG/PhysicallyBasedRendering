@@ -53,8 +53,10 @@ public:
 	void SetMesh(aiMesh* mesh);
 	void CaculateFaceNormal();
 	void CaculateVertexNormal();
-
 	
+	void SetVertices(Vertex* vertices, const int vertexNum) { this->vertices = vertices; this->vertexNum = vertexNum; }
+	void SetIndices(GLuint* indices, const int indexNum) { this->indices = indices; this->indexNum = indexNum; }
+
 	// file name을 통해 mesh를 생성
 	//void LoadMesh(const string& fileName);
 	void LoadMesh(MeshType meshType);

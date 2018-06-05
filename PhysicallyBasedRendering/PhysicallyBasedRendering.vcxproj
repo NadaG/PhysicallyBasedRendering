@@ -167,6 +167,8 @@
     <ClCompile Include="LightMovement.cpp" />
     <ClCompile Include="LTCRenderer.cpp" />
     <ClCompile Include="LTCSceneManager.cpp" />
+    <ClCompile Include="MarchingCube.cpp" />
+    <ClCompile Include="MarchingMesh.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
@@ -204,6 +206,7 @@
     <None Include="Basic.vs" />
     <None Include="Cos.fs" />
     <None Include="FresnelDiffraction.fs" />
+    <None Include="MarchingCubeFluid.fs" />
     <None Include="Multiply.fs" />
     <None Include="Primitive.fs" />
     <None Include="Primitive.vs" />
@@ -266,6 +269,9 @@
     <ClInclude Include="FluidSimulationImporter.h" />
     <ClInclude Include="FourierTransform.h" />
     <ClInclude Include="FrameBufferObject.h" />
+    <ClInclude Include="MarchingCube.h" />
+    <ClInclude Include="MarchingMesh.h" />
+    <ClInclude Include="MCTable.h" />
     <ClInclude Include="Octree.cuh" />
     <ClInclude Include="PixelBufferObject.h" />
     <ClInclude Include="LightMovement.h" />

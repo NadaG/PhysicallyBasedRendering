@@ -12,7 +12,5 @@ public:
 	void InitializeObjects();
 	void Update();
 
-	SceneObject fluidObj;
-
 private:
 };

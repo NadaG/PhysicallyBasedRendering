@@ -285,9 +285,6 @@
     <None Include="ParticleSphere.vs">
       <Filter>Shader Files</Filter>
     </None>
-    <None Include="Blur.fs">
-      <Filter>Shader Files</Filter>
-    </None>
     <None Include="Cubemap.vs">
       <Filter>Shader Files</Filter>
     </None>
@@ -391,6 +388,9 @@
       <Filter>Shader Files\Debug</Filter>
     </None>
     <None Include="MarchingCubeFluid.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="DepthBlur.fs">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>

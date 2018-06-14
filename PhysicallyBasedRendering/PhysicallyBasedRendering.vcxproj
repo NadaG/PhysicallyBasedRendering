@@ -234,7 +234,7 @@
     <None Include="Quad.vs" />
     <None Include="Depth.fs" />
     <None Include="Depth.vs" />
-    <None Include="Blur.fs" />
+    <None Include="DepthBlur.fs" />
     <None Include="Light.fs" />
     <None Include="Light.vs" />
     <None Include="RayTracing.fs" />

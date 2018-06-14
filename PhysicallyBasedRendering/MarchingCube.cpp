@@ -94,8 +94,6 @@ void MarchingCube::ComputeDensity(GLfloat* particlePoses, const int particleNum)
 
 	for (int itr = 0; itr < particleNum; itr += 6)
 	{
-		float weightedDensity = 0.0f;
-
 		glm::vec3 vecPos = glm::vec3(
 			particlePoses[itr * 6 + 0], 
 			particlePoses[itr * 6 + 1], 

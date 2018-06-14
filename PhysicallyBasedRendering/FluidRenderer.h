@@ -5,6 +5,13 @@
 #include "FluidSceneManager.h"
 #include "MarchingCube.h"
 
+
+// screen space TODO
+// 논문 구현
+// 알고리즘 가속
+// 다양한 씬 이미지 뽑기
+// auto encoder 수정
+
 class FluidRenderer : public Renderer
 {
 public:

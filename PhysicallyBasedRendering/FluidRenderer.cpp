@@ -14,9 +14,12 @@ void FluidRenderer::InitializeRender()
 	particleThicknessShader = new ShaderProgram("ParticleSphere.vs", "particleThickness.fs");
 	particleThicknessShader->Use();
 
-	blurShader = new ShaderProgram("Quad.vs", "Blur.fs");
+	blurShader = new ShaderProgram("Quad.vs", "DepthBlur.fs");
 	blurShader->Use();
 	blurShader->SetUniform1i("map", 0);
+	blurShader->SetUniform1i("neighborNum", 6);
+	blurShader->SetUniform1f("blurScale", 0.1f);
+	blurShader->SetUniform1f("blurDepthFalloff", 50.0f);
 
 	surfaceShader = new ShaderProgram("Quad.vs", "Surface.fs");
 	surfaceShader->Use();
@@ -124,7 +127,7 @@ void FluidRenderer::InitializeRender()
 		thicknessBlurFBO[i].BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &thicknessBlurTex[i]);
 	}
 
-	boundarySize = glm::vec3(20.0f, 25.0f, 20.0f);
+	boundarySize = glm::vec3(50.0f, 50.0f, 50.0f);
 	importer.Initialize(boundarySize);
 	fluidVertices = new GLfloat[importer.particleNum * 6];
 
@@ -172,7 +175,12 @@ void FluidRenderer::Render()
 
 	return;*/
 
-	if (currentFrame >= 520)
+	importer.Update(fluidVertices);
+	fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
+
+	ScreenSpaceFluidRender();
+
+	/*if (currentFrame >= 520)
 		return;
 
 	importer.Update(fluidVertices);
@@ -205,7 +213,7 @@ void FluidRenderer::Render()
 
 	delete fluidMesh;
 
-	currentFrame++;
+	currentFrame++;*/
 }
 
 void FluidRenderer::ScreenSpaceFluidRender()
@@ -305,10 +313,10 @@ void FluidRenderer::ScreenSpaceFluidRender()
 	// depth, thickness blur 끝
 
 	// quad 그리기
-	/*UseDefaultFBO();
-	ClearDefaultFBO();*/
-	pngFBO.Use();
-	pngFBO.Clear(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
+	UseDefaultFBO();
+	ClearDefaultFBO();
+	/*pngFBO.Use();
+	pngFBO.Clear(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);*/
 
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 
@@ -387,6 +395,7 @@ void FluidRenderer::TerminateRender()
 void FluidRenderer::DrawFluids(const float& dist)
 {
 	fluidVAO.Bind();
-	glPointSize(15000 / (dist*dist));
+	//glPointSize(15000 / (dist*dist));
+	glPointSize(20.0f);
 	glDrawArrays(GL_POINTS, 0, importer.particleNum);
 }

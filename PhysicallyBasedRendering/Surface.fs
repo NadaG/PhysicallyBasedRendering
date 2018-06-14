@@ -108,5 +108,6 @@ void main()
 	
 	color = ambient + diffuse + specular * fresnel(n, eyeDir) + worldColor * I;
 
-	color = n * 0.5f + vec3(0.5f);
+	// normal rendering
+	// color = n * 0.5f + vec3(0.5f);
 }

@@ -85,11 +85,11 @@ void FluidSimulationImporter::Initialize(const glm::vec3 boundarySize)
 	sparam.obsobjNum = 0;
 
 	sparam.viscosity = 0.002f;
-	sparam.restDensity = 2000.0f;
+	sparam.restDensity = 1000.0f;
 	sparam.pressure = 0.1f;
 	sparam.surfacetension = 0.002f;
 	sparam.threshold = 1.0f;
-	sparam.surfaceThreshold = 0.005f;
+	sparam.surfaceThreshold = 0.0f;
 	sparam.vAtten = 1.0f;
 
 	sparam.box2d = 0;
@@ -98,11 +98,11 @@ void FluidSimulationImporter::Initialize(const glm::vec3 boundarySize)
 	sparam.yMaxValue = 10000.0f;
 
 	FluidCube* cubes = new FluidCube[sparam.objNum];
-	cubes[0].size.x = 24;
-	cubes[0].size.y = 24;
-	cubes[0].size.z = 24;
+	cubes[0].size.x = 40;
+	cubes[0].size.y = 40;
+	cubes[0].size.z = 40;
 	cubes[0].pos.x = 0.0f;
-	cubes[0].pos.y = 0.0f;
+	cubes[0].pos.y = -15.0f;
 	cubes[0].pos.z = 0.0f;
 
 	particleNum = initialize(sparam, cubes, nullptr);

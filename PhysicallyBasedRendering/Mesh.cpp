@@ -86,7 +86,6 @@ void Mesh::SetMesh(aiMesh* mesh)
 		CaculateFaceNormal();
 		CaculateVertexNormal();
 
-
 		//// TODO RayTracing Scene
 		//vector<vector<int> > neighborFaceMap;
 		//for (int i = 0; i < mesh->mNumVertices; ++i)

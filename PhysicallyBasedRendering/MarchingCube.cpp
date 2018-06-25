@@ -16,24 +16,13 @@ MarchingCube::MarchingCube(void)
 	m_nNodeResX = 0;
 	m_nNodeResY = 0;
 	m_nNodeResZ = 0;
-	m_fCellSpacing = 0.0f;
 
-	m_stlNodeList.clear();
+	m_DensityThres = 1.0f;
+	m_KernelDistThres = 2.0f;
 }
 
 MarchingCube::~MarchingCube(void)
 {
-	m_nWidth = 0;
-	m_nHeight = 0;
-	m_nDepth = 0;
-	m_nResX = 0;
-	m_nResY = 0;
-	m_nResZ = 0;
-	m_nNodeResX = 0;
-	m_nNodeResY = 0;
-	m_nNodeResZ = 0;
-	m_fCellSpacing = 0.0f;
-
 	m_stlNodeList.clear();
 }
 
@@ -50,11 +39,14 @@ void MarchingCube::BuildingGird(int nWidth, int nHeight, int nDepth, int nResX, 
 	m_nNodeResY = m_nResY + 1;
 	m_nNodeResZ = m_nResZ + 1;
 
-	mMarchingThres = thres;
+	m_DensityThres = thres;
 	//mMarchingThres = 0.04f;
 	//mMarchingThres = 0.29f;
+
 	//Calculate Cell Spacing
-	m_fCellSpacing = (float)m_nWidth / (float)m_nResX;
+	float widthSpacing = (float)m_nWidth / (float)m_nResX;
+	float heightSpacing = (float)m_nHeight / (float)m_nResY;
+	float depthSpacing = (float)m_nDepth / (float)m_nResZ;
 
 	float dx = 0.0f;
 	float dy = 0.0f;
@@ -70,16 +62,17 @@ void MarchingCube::BuildingGird(int nWidth, int nHeight, int nDepth, int nResX, 
 			for (int k = 0; k < m_nNodeResX; k++)
 			{
 				Node node;
-				node.mNodePosition = glm::vec3(dx, dy, dz);
+				// node의 world position
+				node.mNodePosition = glm::vec3(dx - m_nWidth * 0.5f, dy - m_nHeight * 0.5f, dz - m_nDepth * 0.5f);
 				node.mDensity = 0.0f;
 
 				m_stlNodeList.push_back(node);
-				dx += m_fCellSpacing;
+				dx += widthSpacing;
 			}
-			dy += m_fCellSpacing;
+			dy += heightSpacing;
 			dx = 0.0f;
 		}
-		dz += m_fCellSpacing;
+		dz += depthSpacing;
 		dy = 0.0f;
 	}
 }
@@ -94,18 +87,22 @@ void MarchingCube::ComputeDensity(GLfloat* particlePoses, const int particleNum)
 
 	for (int itr = 0; itr < particleNum; itr += 6)
 	{
-		glm::vec3 vecPos = glm::vec3(
+		// particle의 world coordinate의 위치
+		glm::vec3 particlePos = glm::vec3(
 			particlePoses[itr * 6 + 0], 
 			particlePoses[itr * 6 + 1], 
 			particlePoses[itr * 6 + 2]);
 
-		vecPos += glm::vec3(m_nWidth * 0.5f, m_nHeight * 0.5f, m_nDepth * 0.5f);
+		// width의 반을 중간으로 설정
+		//vecPos += glm::vec3(m_nWidth * 0.5f, m_nHeight * 0.5f, m_nDepth * 0.5f);
 
-		int k = vecPos.x / ((float)m_nWidth / (float)m_nResX);
-		int j = vecPos.y / ((float)m_nHeight / (float)m_nResY);
-		int i = vecPos.z / ((float)m_nDepth / (float)m_nResZ);
-		int nCellIndex = FindCellIndex(k, j, i);
+		vec3 translatedParticlePos = particlePos + glm::vec3(m_nWidth * 0.5f, m_nHeight * 0.5f, m_nDepth * 0.5f);
 
+		int k = translatedParticlePos.x / ((float)m_nWidth / (float)m_nResX);
+		int j = translatedParticlePos.y / ((float)m_nHeight / (float)m_nResY);
+		int i = translatedParticlePos.z / ((float)m_nDepth / (float)m_nResZ);
+
+		//cout << particlePos.x << endl;
 		//cout << vecPos.x << endl << vecPos.y << endl << vecPos.z << endl;
 		//cout << i << endl << j << endl << k << endl;
 
@@ -127,12 +124,11 @@ void MarchingCube::ComputeDensity(GLfloat* particlePoses, const int particleNum)
 			// 이것을 고려할 것
 			glm::vec3 nodePos = m_stlNodeList[nNodes[node]].mNodePosition;
 			
-			glm::vec3 dist = vecPos - nodePos;
-			float h = glm::length(dist);
+			float h = glm::distance(particlePos, nodePos);
 
-			if (h < m_fCellSpacing)
+			if (h < m_KernelDistThres)
 			{
-				float kernel = ComputePoly6(h, m_fCellSpacing);
+				float kernel = ComputePoly6(h, m_KernelDistThres);
 				m_stlNodeList[nNodes[node]].mDensity += 1.0 * -kernel;
 			}
 		}
@@ -145,9 +141,6 @@ Mesh* MarchingCube::ExcuteMarchingCube()
 	
 	Vertex* verts;
 	GLuint* inds;
-	/*pMesh->nList.clear();
-	pMesh->vList.clear();
-	pMesh->fList.clear();*/
 
 	std::vector<Vertex> vertsVec;
 	std::vector<GLuint> indsVec;
@@ -175,14 +168,15 @@ Mesh* MarchingCube::ExcuteMarchingCube()
 				nNodes[6] = FindNodeIndex(k + 1, j + 1, i + 1);
 				nNodes[7] = FindNodeIndex(k, j + 1, i + 1);
 
-				if (m_stlNodeList[nNodes[0]].mDensity <= mMarchingThres) cubeIdx |= 1;		//LBB
-				if (m_stlNodeList[nNodes[1]].mDensity <= mMarchingThres) cubeIdx |= 2;		//RBB
-				if (m_stlNodeList[nNodes[2]].mDensity <= mMarchingThres) cubeIdx |= 4;		//RBF
-				if (m_stlNodeList[nNodes[3]].mDensity <= mMarchingThres) cubeIdx |= 8;		//LBF
-				if (m_stlNodeList[nNodes[4]].mDensity <= mMarchingThres) cubeIdx |= 16;		//LTB
-				if (m_stlNodeList[nNodes[5]].mDensity <= mMarchingThres) cubeIdx |= 32;		//RTB
-				if (m_stlNodeList[nNodes[6]].mDensity <= mMarchingThres) cubeIdx |= 64;		//RTF
-				if (m_stlNodeList[nNodes[7]].mDensity <= mMarchingThres) cubeIdx |= 128;	//LTF
+				//cout << m_stlNodeList[nNodes[0]].mDensity << endl;
+				if (m_stlNodeList[nNodes[0]].mDensity <= m_DensityThres) cubeIdx |= 1;		//LBB
+				if (m_stlNodeList[nNodes[1]].mDensity <= m_DensityThres) cubeIdx |= 2;		//RBB
+				if (m_stlNodeList[nNodes[2]].mDensity <= m_DensityThres) cubeIdx |= 4;		//RBF
+				if (m_stlNodeList[nNodes[3]].mDensity <= m_DensityThres) cubeIdx |= 8;		//LBF
+				if (m_stlNodeList[nNodes[4]].mDensity <= m_DensityThres) cubeIdx |= 16;		//LTB
+				if (m_stlNodeList[nNodes[5]].mDensity <= m_DensityThres) cubeIdx |= 32;		//RTB
+				if (m_stlNodeList[nNodes[6]].mDensity <= m_DensityThres) cubeIdx |= 64;		//RTF
+				if (m_stlNodeList[nNodes[7]].mDensity <= m_DensityThres) cubeIdx |= 128;	//LTF
 
 				if (edgeTable[cubeIdx] == 0) continue;
 
@@ -214,20 +208,17 @@ Mesh* MarchingCube::ExcuteMarchingCube()
 						glm::vec3(
 							verList[triTable[cubeIdx][n + 2]].x, 
 							verList[triTable[cubeIdx][n + 2]].y, 
-							verList[triTable[cubeIdx][n + 2]].z) - 
-						glm::vec3(m_nWidth * 0.5f, m_nHeight * 0.5f, m_nDepth * 0.5f);
+							verList[triTable[cubeIdx][n + 2]].z);
 					verts[1].position = 
 						glm::vec3(
 							verList[triTable[cubeIdx][n + 1]].x, 
 							verList[triTable[cubeIdx][n + 1]].y, 
-							verList[triTable[cubeIdx][n + 1]].z) -
-						glm::vec3(m_nWidth * 0.5f, m_nHeight * 0.5f, m_nDepth * 0.5f);
+							verList[triTable[cubeIdx][n + 1]].z);
 					verts[2].position = 
 						glm::vec3(
 							verList[triTable[cubeIdx][n]].x, 
 							verList[triTable[cubeIdx][n]].y, 
-							verList[triTable[cubeIdx][n]].z) -
-						glm::vec3(m_nWidth * 0.5f, m_nHeight * 0.5f, m_nDepth * 0.5f);
+							verList[triTable[cubeIdx][n]].z);
 
 					indsVec.push_back(nVID);
 					nVID++;
@@ -239,37 +230,10 @@ Mesh* MarchingCube::ExcuteMarchingCube()
 					vertsVec.push_back(verts[0]);
 					vertsVec.push_back(verts[1]);
 					vertsVec.push_back(verts[2]);
-
-					//Vertex verts[3];
-
-					/*Vertex* verts = new Vertex[3];
-					GLuint* inds = new GLuint[3];
-
-					verts[0].position = glm::vec3(verList[triTable[cubeIdx][n + 2]].x, verList[triTable[cubeIdx][n + 2]].y, verList[triTable[cubeIdx][n + 2]].z);
-					verts[1].position = glm::vec3(verList[triTable[cubeIdx][n + 1]].x, verList[triTable[cubeIdx][n + 1]].y, verList[triTable[cubeIdx][n + 1]].z);
-					verts[2].position = glm::vec3(verList[triTable[cubeIdx][n]].x, verList[triTable[cubeIdx][n]].y, verList[triTable[cubeIdx][n]].z);
-
-					inds[0] = 0;
-					inds[1] = 1;
-					inds[2] = 2;
-					*/
-
-					/*pMesh->fList.push_back(nVID);
-					nVID++;
-					pMesh->fList.push_back(nVID);
-					nVID++;
-					pMesh->fList.push_back(nVID);
-					nVID++;
-
-					pMesh->vList.push_back(verts[0]);
-					pMesh->vList.push_back(verts[1]);
-					pMesh->vList.push_back(verts[2]);*/
 				}
 			}
 		}
 	}
-
-	/*pMesh->ComputeFaceNormal();*/
 
 	verts = new Vertex[vertsVec.size()];
 	inds = new GLuint[indsVec.size()];
@@ -296,16 +260,16 @@ Mesh* MarchingCube::ExcuteMarchingCube()
 glm::vec3 MarchingCube::Interpolation(Node* p1, Node* p2)
 {
 	glm::vec3 p = glm::vec3(0.0f, 0.0f, 0.0f);
-	float scalar = 0.0000f;
+	float scalar = 0.0f;
 
-	if (abs(mMarchingThres - p1->mDensity) < scalar)
+	if (abs(m_DensityThres - p1->mDensity) < scalar)
 		return p1->mNodePosition;
-	if (abs(mMarchingThres - p2->mDensity) < scalar)
+	if (abs(m_DensityThres - p2->mDensity) < scalar)
 		return p2->mNodePosition;
 	if (abs(p2->mDensity - p1->mDensity) < scalar)
 		return p1->mNodePosition;
 
-	float mu = (mMarchingThres - p1->mDensity) / (p2->mDensity - p1->mDensity);
+	float mu = (m_DensityThres - p1->mDensity) / (p2->mDensity - p1->mDensity);
 
 	p.x = p1->mNodePosition.x + mu * (p2->mNodePosition.x - p1->mNodePosition.x);
 	p.y = p1->mNodePosition.y + mu * (p2->mNodePosition.y - p1->mNodePosition.y);

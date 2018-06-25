@@ -316,13 +316,14 @@ void RayTracingSceneManager::LoadFluidScene(const string meshfile)
 	glm::mat4 sphereModel = glm::mat4();
 	sphereModel = glm::translate(sphereModel, glm::vec3(10.0f, 20.0f, 0.0f));
 	sphereModel = glm::scale(sphereModel, glm::vec3(10.0f, 10.0f, 10.0f));
-	InsertTriangles(LoadMeshTriangles("Obj/sphere.obj", sphereModel, 2));
+	InsertTriangles(LoadMeshTriangles("Obj/Sphere.obj", sphereModel, 2));
 
 	sphereModel = glm::mat4();
 	sphereModel = glm::translate(sphereModel, glm::vec3(25.0f, 25.0f, 0.0f));
 	sphereModel = glm::scale(sphereModel, glm::vec3(5.0f, 5.0f, 5.0f));
-	InsertTriangles(LoadMeshTriangles("Obj/sphere.obj", sphereModel, 2));
+	InsertTriangles(LoadMeshTriangles("Obj/Sphere.obj", sphereModel, 2));
 
+	cout << meshfile << endl;
 	InsertTriangles(LoadMeshTriangles(meshfile, glm::mat4(), 0));
 }
 

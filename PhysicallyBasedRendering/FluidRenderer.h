@@ -26,6 +26,9 @@ public:
 	void ScreenSpaceFluidRender();
 	void MarchingCubeRender();
 
+	void ScreenSpaceFluidOfflineRender();
+	void MartchingCubeOfflineRender();
+
 	void TerminateRender(); 
 
 private:
@@ -94,6 +97,8 @@ private:
 	Texture2D pngTex;
 
 private:
+
+	bool isRenderOnDefaultFBO;
 
 	glm::vec3 boundarySize;
 

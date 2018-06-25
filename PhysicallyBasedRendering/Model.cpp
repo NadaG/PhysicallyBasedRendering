@@ -31,11 +31,11 @@ void Model::Load(const string& fileName)
 			meshes.push_back(mesh);
 		}
 
-		for (int i = 0; i < scene->mNumMaterials; i++)
+		/*for (int i = 0; i < scene->mNumMaterials; i++)
 		{
 			aiString textureStr;
 			scene->mMaterials[i]->GetTexture(aiTextureType_DIFFUSE, 0, &textureStr);
-		}
+		}*/
 	}
 }
 

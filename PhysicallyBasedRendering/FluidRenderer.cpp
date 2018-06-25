@@ -127,7 +127,8 @@ void FluidRenderer::InitializeRender()
 		thicknessBlurFBO[i].BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &thicknessBlurTex[i]);
 	}
 
-	boundarySize = glm::vec3(50.0f, 50.0f, 50.0f);
+	boundarySize = glm::vec3(30.0f, 50.0f, 30.0f);
+	
 	importer.Initialize(boundarySize);
 	fluidVertices = new GLfloat[importer.particleNum * 6];
 
@@ -140,7 +141,7 @@ void FluidRenderer::InitializeRender()
 	fluidVAO.VertexAttribPointer(3, 6);
 
 	currentFrame = 0;
-	float resolutionRatio = 1.0f;
+	float resolutionRatio = 2.0f;
 	mc.BuildingGird(
 		boundarySize.x,
 		boundarySize.y,
@@ -148,72 +149,53 @@ void FluidRenderer::InitializeRender()
 		boundarySize.x*resolutionRatio,
 		boundarySize.y*resolutionRatio,
 		boundarySize.z*resolutionRatio,
-		0.001f);
+		200.0f);
 
+	isRenderOnDefaultFBO = true;
 }
 
 void FluidRenderer::Render()
 {
-	/*glEnable(GL_DEPTH_TEST);
-	glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	SceneObject& quad = sceneManager->quadObj;
-	glViewport(0, 0, depthWidth, depthHeight);
-	
-	UseDefaultFBO();
-	ClearDefaultFBO();
-
-	textureShader->Use();
-
-	tmpTex.Bind(GL_TEXTURE0);
-	textureShader->SetUniformMatrix4f("model", glm::mat4());
-	textureShader->SetUniformMatrix4f("view", glm::mat4());
-	textureShader->SetUniformMatrix4f("projection", glm::mat4());
-
-	quad.DrawModel();
-
-	return;*/
-
-	importer.Update(fluidVertices);
-	fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
-
-	ScreenSpaceFluidRender();
-
-	/*if (currentFrame >= 520)
+	if (currentFrame >= 520 && !isRenderOnDefaultFBO)
 		return;
 
 	importer.Update(fluidVertices);
 	fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
 
-	char tmp[1024];
-	sprintf(tmp, "%04d", currentFrame);
-	string outfile = "";
-	
-	ScreenSpaceFluidRender();
+	if (isRenderOnDefaultFBO)
+	{
+		MarchingCubeRender();
+		//ScreenSpaceFluidRender();
+	}
+	else
+	{
+		char tmp[1024];
+		sprintf(tmp, "%04d", currentFrame);
+		string outfile = "";
 
-	outfile += "fluid_screenspace/";
-	outfile += tmp;
-	outfile += ".png";
-	pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
-	cout << currentFrame << "번째 screen space 프레임 그리는 중" << endl;
-	Sleep(5000.0f);
+		ScreenSpaceFluidRender();
 
-	mc.ComputeDensity(fluidVertices, importer.particleNum);
-	fluidMesh = mc.ExcuteMarchingCube();
-	MarchingCubeRender();
+		outfile += "fluid_screenspace/";
+		outfile += tmp;
+		outfile += ".png";
+		pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
+		cout << currentFrame << "번째 screen space 프레임 그리는 중" << endl;
+		Sleep(5000.0f);
 
-	outfile = "";
-	outfile += "fluid_marchingcube/";
-	outfile += tmp;
-	outfile += ".png";
-	pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
-	cout << currentFrame << "번째 marching cube 프레임 그리는 중" << endl;
-	Sleep(5000.0f);
+		MarchingCubeRender();
 
-	delete fluidMesh;
+		outfile = "";
+		outfile += "fluid_marchingcube/";
+		outfile += tmp;
+		outfile += ".png";
+		pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
+		cout << currentFrame << "번째 marching cube 프레임 그리는 중" << endl;
+		Sleep(5000.0f);
 
-	currentFrame++;*/
+		delete fluidMesh;
+	}
+
+	currentFrame++;
 }
 
 void FluidRenderer::ScreenSpaceFluidRender()
@@ -313,10 +295,16 @@ void FluidRenderer::ScreenSpaceFluidRender()
 	// depth, thickness blur 끝
 
 	// quad 그리기
-	UseDefaultFBO();
-	ClearDefaultFBO();
-	/*pngFBO.Use();
-	pngFBO.Clear(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);*/
+	if (isRenderOnDefaultFBO)
+	{
+		UseDefaultFBO();
+		ClearDefaultFBO();
+	}
+	else
+	{
+		pngFBO.Use();
+		pngFBO.Clear(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
+	}
 
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 
@@ -339,6 +327,9 @@ void FluidRenderer::ScreenSpaceFluidRender()
 
 void FluidRenderer::MarchingCubeRender()
 {
+	mc.ComputeDensity(fluidVertices, importer.particleNum);
+	fluidMesh = mc.ExcuteMarchingCube();
+
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -355,10 +346,16 @@ void FluidRenderer::MarchingCubeRender()
 	glm::mat4 model = glm::mat4();
 
 	glViewport(0, 0, depthWidth, depthHeight);
-	/*UseDefaultFBO();
-	ClearDefaultFBO();*/
-	pngFBO.Use();
-	pngFBO.Clear(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
+	if (isRenderOnDefaultFBO)
+	{
+		UseDefaultFBO();
+		ClearDefaultFBO();
+	}
+	else
+	{
+		pngFBO.Use();
+		pngFBO.Clear(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
+	}
 
 	marchingCubeFluidShader->Use();
 	marchingCubeFluidShader->SetUniformMatrix4f("model", model);
@@ -369,6 +366,24 @@ void FluidRenderer::MarchingCubeRender()
 	marchingCubeFluidShader->SetUniformVector3f("eyePos", camera->GetWorldPosition());
 
 	fluidMesh->Draw();
+}
+
+void FluidRenderer::ScreenSpaceFluidOfflineRender()
+{
+	importer.Update(fluidVertices);
+	fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
+
+	ScreenSpaceFluidRender();
+}
+
+void FluidRenderer::MartchingCubeOfflineRender()
+{
+	importer.Update(fluidVertices);
+	fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
+
+	mc.ComputeDensity(fluidVertices, importer.particleNum);
+	fluidMesh = mc.ExcuteMarchingCube();
+	MarchingCubeRender();
 }
 
 void FluidRenderer::TerminateRender()

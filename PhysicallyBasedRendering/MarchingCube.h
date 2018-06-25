@@ -36,9 +36,10 @@ public:
 	int		m_nNodeResX;
 	int		m_nNodeResY;
 	int		m_nNodeResZ;
-	float	m_fCellSpacing;
 
-	float		mMarchingThres;
+	float m_DensityThres;
+	float m_KernelDistThres;
+
 	std::vector<Node>		m_stlNodeList;
 
 

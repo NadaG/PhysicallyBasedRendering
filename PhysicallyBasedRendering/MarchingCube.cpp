@@ -18,7 +18,7 @@ MarchingCube::MarchingCube(void)
 	m_nNodeResZ = 0;
 
 	m_DensityThres = 1.0f;
-	m_KernelDistThres = 2.0f;
+	m_KernelDistThres = 3.0f;
 }
 
 MarchingCube::~MarchingCube(void)
@@ -106,22 +106,26 @@ void MarchingCube::ComputeDensity(GLfloat* particlePoses, const int particleNum)
 		//cout << vecPos.x << endl << vecPos.y << endl << vecPos.z << endl;
 		//cout << i << endl << j << endl << k << endl;
 
-		int nNodes[8];
+		int nNodes[27];
 
-		nNodes[0] = FindNodeIndex(k, j, i);
-		nNodes[1] = FindNodeIndex(k + 1, j, i);
-		nNodes[2] = FindNodeIndex(k + 1, j, i + 1);
-		nNodes[3] = FindNodeIndex(k, j, i + 1);
-
-		nNodes[4] = FindNodeIndex(k, j + 1, i);
-		nNodes[5] = FindNodeIndex(k + 1, j + 1, i);
-		nNodes[6] = FindNodeIndex(k + 1, j + 1, i + 1);
-		nNodes[7] = FindNodeIndex(k, j + 1, i + 1);
-
-		for (int node = 0; node < 8; node++)
+		for (int ii = -1; ii <= 1; ii++)
 		{
-			// TODO x, y, z 좌표가 마이너스일 수도 있는데 지금은 고려안됨
-			// 이것을 고려할 것
+			for (int jj = -1; jj <= 1; jj++)
+			{
+				for (int kk = -1; kk <= 1; kk++)
+				{
+					int index = (ii + 1)*9 + (jj + 1) * 3 + (kk + 1);
+					nNodes[index] = FindNodeIndex(kk + k, jj + j, ii + i);
+				}
+			}
+		}
+
+		for (int node = 0; node < 27; node++)
+		{
+			// 공간 밖의 node
+			if (nNodes[node] == -1.0f)
+				continue;
+
 			glm::vec3 nodePos = m_stlNodeList[nNodes[node]].mNodePosition;
 			
 			float h = glm::distance(particlePos, nodePos);
@@ -169,6 +173,7 @@ Mesh* MarchingCube::ExcuteMarchingCube()
 				nNodes[7] = FindNodeIndex(k, j + 1, i + 1);
 
 				//cout << m_stlNodeList[nNodes[0]].mDensity << endl;
+				
 				if (m_stlNodeList[nNodes[0]].mDensity <= m_DensityThres) cubeIdx |= 1;		//LBB
 				if (m_stlNodeList[nNodes[1]].mDensity <= m_DensityThres) cubeIdx |= 2;		//RBB
 				if (m_stlNodeList[nNodes[2]].mDensity <= m_DensityThres) cubeIdx |= 4;		//RBF
@@ -292,6 +297,9 @@ int	MarchingCube::FindCellIndex(int nX, int nY, int nZ)
 
 int	MarchingCube::FindNodeIndex(int nX, int nY, int nZ)
 {
+	if (nX < 0 || nX >= m_nNodeResX || nY < 0 || nY >= m_nNodeResY || nZ < 0 || nZ >= m_nNodeResZ)
+		return -1.0f;
+
 	return (nZ * m_nNodeResY * m_nNodeResX) + (nY * m_nNodeResX) + nX;
 }
 

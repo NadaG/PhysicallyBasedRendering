@@ -149,7 +149,7 @@ void FluidRenderer::InitializeRender()
 		boundarySize.x*resolutionRatio,
 		boundarySize.y*resolutionRatio,
 		boundarySize.z*resolutionRatio,
-		200.0f);
+		800.0f);
 
 	isRenderOnDefaultFBO = true;
 }

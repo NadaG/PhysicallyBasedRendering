@@ -98,11 +98,11 @@ void FluidSimulationImporter::Initialize(const glm::vec3 boundarySize)
 	sparam.yMaxValue = 10000.0f;
 
 	FluidCube* cubes = new FluidCube[sparam.objNum];
-	cubes[0].size.x = 40;
-	cubes[0].size.y = 40;
-	cubes[0].size.z = 40;
+	cubes[0].size.x = 20;
+	cubes[0].size.y = 60;
+	cubes[0].size.z = 20;
 	cubes[0].pos.x = 0.0f;
-	cubes[0].pos.y = -15.0f;
+	cubes[0].pos.y = 0.0f;
 	cubes[0].pos.z = 0.0f;
 
 	particleNum = initialize(sparam, cubes, nullptr);

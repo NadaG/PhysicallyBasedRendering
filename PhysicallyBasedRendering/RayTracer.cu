@@ -41,9 +41,10 @@ const int RAY_Y_NUM = 64;
 
 const int QUEUE_SIZE = 30;
 
-const int DEPTH = 2;
+const int DEPTH = 3;
 
 const int SAMPLE_NUM = 1;
+
 
 using std::cout;
 using std::endl;
@@ -134,7 +135,6 @@ __device__ vec3 Interpolation(Triangle triangle, vec3 position, vec3& N, vec2& u
 __device__ bool RaySphereIntersect(Ray ray, Sphere sphere, float& dist)
 {
 	glm::vec3 s = ray.origin - sphere.origin;
-	float minDist = 0.001f;
 
 	float a = dot(ray.dir, ray.dir);
 	float bPrime = dot(s, ray.dir);
@@ -146,7 +146,7 @@ __device__ bool RaySphereIntersect(Ray ray, Sphere sphere, float& dist)
 		float t1 = (-bPrime + sqrt(D)) / a;
 		float t2 = (-bPrime - sqrt(D)) / a;
 		dist = t1 > t2 ? t2 : t1;
-		return dist > minDist;
+		return dist > 0.0001f;
 	}
 	else
 		return false;
@@ -162,7 +162,7 @@ __device__ bool RayTriangleIntersect(Ray ray, Triangle triangle, float& dist)
 	float det = dot(v0v1, pvec);
 
 	// back face culling
-	if (det < 0.01f)
+	if (det < 0.001f)
 		return false;
 
 	/*if (fabsf(det) < 0.01f)
@@ -182,7 +182,7 @@ __device__ bool RayTriangleIntersect(Ray ray, Triangle triangle, float& dist)
 
 	dist = dot(v0v2, qvec) * invDet;
 
-	return true;
+	return dist > 0.01f;
 }
 
 //bool RayPlaneIntersect(Ray ray, vec4 plane, float& t)
@@ -311,6 +311,7 @@ __device__ Ray GenerateCameraRay(int y, int x, glm::mat4 cameraModelMatrix, int 
 	float NDCy = (y + 0.33333f + 0.33333f*rayY) / WINDOW_HEIGHT;
 	float NDCx = (x + 0.33333f + 0.33333f*rayX) / WINDOW_WIDTH;
 
+	// no antialiasing
 	/*float NDCy = (y + 0.5f) / WINDOW_HEIGHT;
 	float NDCx = (x + 0.5f) / WINDOW_WIDTH;*/
 
@@ -327,6 +328,7 @@ __device__ Ray GenerateCameraRay(int y, int x, glm::mat4 cameraModelMatrix, int 
 	// world space에서의 ray 정보를 계산
 	ray.origin = glm::vec3(cameraModelMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 	ray.dir = normalize(vec3(cameraModelMatrix * vec4(glm::vec3(xx, yy, -1.0), 0.0f)));
+	ray.decay = 1.0f;
 
 	// 만들어진 ray를 return
 	return ray;
@@ -470,6 +472,7 @@ __device__ vec4 RayTraceColor(
 	int depth)
 {
 	vec4 color = vec4(0.0f);
+	vec3 sumLo = vec3(0.0f);
 	int front = 0, rear = 0;
 
 	Enqueue(rayQueue, ray, rear);
@@ -528,6 +531,7 @@ __device__ vec4 RayTraceColor(
 				vec3 kS;
 				vec3 kD;
 
+				// sphere
 				if (materials[materialId].texId == 0)
 				{
 					float4 texRGBA;
@@ -554,6 +558,7 @@ __device__ vec4 RayTraceColor(
 
 					N = TBN * N;
 				}
+				// plane
 				else if (materials[materialId].texId == 1)
 				{
 					float4 texRGBA;
@@ -565,6 +570,7 @@ __device__ vec4 RayTraceColor(
 					roughness = materials[materialId].roughness;
 					emission = materials[materialId].emission;
 				}
+				// fluid
 				else
 				{
 					albedo = materials[materialId].albedo;
@@ -574,6 +580,7 @@ __device__ vec4 RayTraceColor(
 					emission = materials[materialId].emission;
 				}
 
+				// fluid라면
 				if (materials[materialId].refractiveIndex != 0.0f)
 				{
 					F0 = calculateEta(materials[materialId].refractiveIndex);
@@ -610,26 +617,16 @@ __device__ vec4 RayTraceColor(
 
 					kS = F;
 					kD = vec3(1.0) - kS;
-					kD *= 1.0f - metallic;
+					kD *= (1.0f - metallic);
 
 					float NdotL = glm::clamp(glm::dot(N, L), 0.0f, 1.0f);
 
-					Lo += (kD*albedo / glm::pi<float>() + specular) * radiance * NdotL;
+					Lo += (kD * albedo / glm::pi<float>() + specular) * radiance * NdotL;
 				}
 
 				vec3 ambient = vec3(0.03) * albedo * ao;
 
-				vec3 tmpColor = ambient + Lo + emission;
-
-				// hdr
-				tmpColor = tmpColor / (tmpColor + vec3(1.0));
-				// gamma correction
-				tmpColor = glm::pow(tmpColor, vec3(1.0 / 2.2));
-
-				lightedColor += glm::vec4(tmpColor, 1.0f);
-
-				color += lightedColor * nowRay.decay;
-
+				sumLo += (ambient + Lo + emission) * nowRay.decay;
 				//////////////////////////////////////////////////////////////////////////////////////////분리선
 
 				for (int j = 0; j < SAMPLE_NUM; ++j)
@@ -644,16 +641,19 @@ __device__ vec4 RayTraceColor(
 						triangles[nearestTriangleIdx].tangent,
 						N,
 						triangles[nearestTriangleIdx].bitangent);
-					randomVec = randomVec * TNB;
+					randomVec = normalize(randomVec) * TNB;
 
 
 					Ray reflectRay;
-					// reflect ray의 시작점은 hit point
-					reflectRay.origin = hitPoint;
+					// Path Tracing
 					//reflectRay.dir = normalize(randomVec);
+					
 					reflectRay.dir = normalize(reflect(nowRay.dir, N));
+					
+					// reflect ray의 시작점은 hit point
+					reflectRay.origin = hitPoint + reflectRay.dir * 0.01f;
+					// 현재 빛의 감쇠 정도와 물체의 재질에 따라 reflect ray의 감쇠 정도가 정해짐
 
-					// 현재 빛의 감쇠 정도와 물체의 재질에 따라 reflect ray의 감쇠 정도가 정해짐 
 					reflectRay.decay = kS.r * ray.decay / SAMPLE_NUM;
 
 					Enqueue(rayQueue, reflectRay, rear);
@@ -661,9 +661,9 @@ __device__ vec4 RayTraceColor(
 
 				// refract는 ray tracing
 				Ray refractRay;
-				// refract ray의 시작점은 hit point
-				refractRay.origin = hitPoint;
 				refractRay.dir = normalize(refract(nowRay.dir, N, 1.0f / materials[materialId].refractiveIndex));
+				// refract ray의 시작점은 hit point
+				refractRay.origin = hitPoint + refractRay.dir * 0.01f;
 				// 현재 빛의 감쇠 정도와 물체의 재질에 따라 refract ray의 감쇠 정도가 정해짐
 				refractRay.decay = kD.r * ray.decay;
 
@@ -807,18 +807,16 @@ __device__ vec4 RayTraceColor(
 
 			vec3 ambient = vec3(0.03) * albedo * ao;
 
-			vec3 tmpColor = ambient + Lo + emission;
-
-			// hdr
-			tmpColor = tmpColor / (tmpColor + vec3(1.0));
-			// gamma correction
-			tmpColor = glm::pow(tmpColor, vec3(1.0 / 2.2));
-
-			lightedColor += glm::vec4(tmpColor, 1.0f);
-
-			color += lightedColor * nowRay.decay;
+			sumLo += (ambient + Lo + emission) * nowRay.decay;
 		}
 	}
+
+	// hdr
+	sumLo = sumLo / (sumLo + vec3(1.0));
+	// gamma correction
+	sumLo = glm::pow(sumLo, vec3(1.0 / 2.2));
+
+	color = glm::vec4(sumLo, 1.0f);
 
 	return color;
 }
@@ -847,8 +845,6 @@ __global__ void RayTraceD(
 		for (int j = 0; j < 2; j++)
 		{
 			Ray ray = GenerateCameraRay(blockIdx.x + gridY * RAY_Y_NUM, threadIdx.x + gridX * RAY_X_NUM, view, i, j);
-
-			ray.decay = 1.0f;
 
 			// NOTICE for문을 돌릴 때 iter를 변수로 하니까 검은 화면이 나옴
 			// y, x로 들어가고
@@ -946,13 +942,15 @@ void LoadCudaTextures()
 {
 	Texture2D texFile;
 	texFile.LoadFixedTexture("Texture/RustedIron/albedo.png");
-	texFile.SetParameters(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
+	texFile.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 	float* texArray = texFile.GetTexImage(GL_RGBA);
 
 	unsigned int size = 2048 * 2048 * 4 * sizeof(float);
 
 	cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc(32, 32, 32, 32, cudaChannelFormatKindFloat);
 	cudaArray* cuArray;
+	cudaMipmappedArray* cuMipmappedArray;
+
 	cudaMallocArray(&cuArray, &channelDesc, 2048, 2048);
 
 	cudaMemcpyToArray(cuArray, 0, 0, texArray, size, cudaMemcpyHostToDevice);
@@ -968,7 +966,7 @@ void LoadCudaTextures()
 	//////////////////////////////////////////////////////////////////////////////
 
 	texFile.LoadFixedTexture("Texture/RustedIron/normal.png");
-	texFile.SetParameters(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
+	texFile.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 	texArray = texFile.GetTexImage(GL_RGBA);
 
 	size = 2048 * 2048 * 4 * sizeof(float);
@@ -990,7 +988,7 @@ void LoadCudaTextures()
 	//channelDesc = cudaCreateChannelDesc(32, 0, 0, 0, cudaChannelFormatKindFloat);
 
 	texFile.LoadFixedTexture("Texture/RustedIron/ao.png");
-	texFile.SetParameters(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
+	texFile.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 	texArray = texFile.GetTexImage(GL_RGBA);
 
 	size = 2048 * 2048 * 4 * sizeof(float);
@@ -1011,7 +1009,7 @@ void LoadCudaTextures()
 	//////////////////////////////////////////////////////////////////////////////
 
 	texFile.LoadFixedTexture("Texture/RustedIron/metallic.png");
-	texFile.SetParameters(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
+	texFile.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 	texArray = texFile.GetTexImage(GL_RGBA);
 
 	size = 2048 * 2048 * 4 * sizeof(float);
@@ -1032,7 +1030,7 @@ void LoadCudaTextures()
 	//////////////////////////////////////////////////////////////////////////////
 
 	texFile.LoadFixedTexture("Texture/RustedIron/roughness.png");
-	texFile.SetParameters(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
+	texFile.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 	texArray = texFile.GetTexImage(GL_RGBA);
 
 	size = 2048 * 2048 * 4 * sizeof(float);
@@ -1053,7 +1051,7 @@ void LoadCudaTextures()
 	//////////////////////////////////////////////////////////////////////////////
 
 	texFile.LoadFixedTexture("Texture/Background/stripe.png");
-	texFile.SetParameters(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
+	texFile.SetParameters(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 	texArray = texFile.GetTexImage(GL_RGBA);
 
 	size = 2048 * 2048 * 4 * sizeof(float);

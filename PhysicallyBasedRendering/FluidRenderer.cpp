@@ -149,9 +149,9 @@ void FluidRenderer::InitializeRender()
 		boundarySize.x*resolutionRatio,
 		boundarySize.y*resolutionRatio,
 		boundarySize.z*resolutionRatio,
-		800.0f);
+		100.0f);
 
-	isRenderOnDefaultFBO = true;
+	isRenderOnDefaultFBO = false;
 }
 
 void FluidRenderer::Render()
@@ -162,12 +162,12 @@ void FluidRenderer::Render()
 	importer.Update(fluidVertices);
 	fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
 
-	if (isRenderOnDefaultFBO)
+	if (isRenderOnDefaultFBO/* && currentFrame == 300*/)
 	{
-		MarchingCubeRender();
-		//ScreenSpaceFluidRender();
+		//MarchingCubeRender();
+		ScreenSpaceFluidRender();
 	}
-	else
+	else if(!isRenderOnDefaultFBO)
 	{
 		char tmp[1024];
 		sprintf(tmp, "%04d", currentFrame);
@@ -175,7 +175,7 @@ void FluidRenderer::Render()
 
 		ScreenSpaceFluidRender();
 
-		outfile += "fluid_screenspace/";
+		outfile += "fluid_screenspace4/";
 		outfile += tmp;
 		outfile += ".png";
 		pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
@@ -185,7 +185,7 @@ void FluidRenderer::Render()
 		MarchingCubeRender();
 
 		outfile = "";
-		outfile += "fluid_marchingcube/";
+		outfile += "fluid_marchingcube4/";
 		outfile += tmp;
 		outfile += ".png";
 		pngExporter.WritePngFile(outfile, pngTex, GL_RGB);

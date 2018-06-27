@@ -10,6 +10,7 @@ uniform vec3 L;
 uniform vec3 lightColor;
 uniform vec3 eyePos;
 
+
 void main()
 {
 	// -1 ~ 1

@@ -83,47 +83,47 @@ void Mesh::SetMesh(aiMesh* mesh)
 	if (!mesh->HasNormals())
 	{
 		// TODO Fluid Scene
-		CaculateFaceNormal();
-		CaculateVertexNormal();
+		/*CaculateFaceNormal();
+		CaculateVertexNormal();*/
 
-		//// TODO RayTracing Scene
-		//vector<vector<int> > neighborFaceMap;
-		//for (int i = 0; i < mesh->mNumVertices; ++i)
-		//{
-		//	vector<int> neighborFaces;
-		//	for (int j = 0; j < mesh->mNumFaces; ++j)
-		//	{
-		//		if (i == mesh->mFaces[j].mIndices[0] ||
-		//			i == mesh->mFaces[j].mIndices[1] ||
-		//			i == mesh->mFaces[j].mIndices[2])
-		//			neighborFaces.push_back(j);
-		//	}
-		//	neighborFaceMap.push_back(neighborFaces);
-		//}
+		// TODO RayTracing Scene
+		vector<vector<int> > neighborFaceMap;
+		for (int i = 0; i < mesh->mNumVertices; ++i)
+		{
+			vector<int> neighborFaces;
+			for (int j = 0; j < mesh->mNumFaces; ++j)
+			{
+				if (i == mesh->mFaces[j].mIndices[0] ||
+					i == mesh->mFaces[j].mIndices[1] ||
+					i == mesh->mFaces[j].mIndices[2])
+					neighborFaces.push_back(j);
+			}
+			neighborFaceMap.push_back(neighborFaces);
+		}
 
-		//for (int i = 0; i < mesh->mNumFaces; ++i)
-		//{
-		//	triangles[i].v0normal = glm::vec3();
-		//	for (int k = 0; k < neighborFaceMap[indices[i * 3 + 0]].size(); k++)
-		//	{
-		//		triangles[i].v0normal += triangles[neighborFaceMap[indices[i * 3 + 0]][k]].normal;
-		//	}
-		//	triangles[i].v0normal /= neighborFaceMap[indices[i * 3 + 0]].size();
+		for (int i = 0; i < mesh->mNumFaces; ++i)
+		{
+			triangles[i].v0normal = glm::vec3();
+			for (int k = 0; k < neighborFaceMap[indices[i * 3 + 0]].size(); k++)
+			{
+				triangles[i].v0normal += triangles[neighborFaceMap[indices[i * 3 + 0]][k]].normal;
+			}
+			triangles[i].v0normal /= neighborFaceMap[indices[i * 3 + 0]].size();
 
-		//	triangles[i].v1normal = glm::vec3();
-		//	for (int k = 0; k < neighborFaceMap[indices[i * 3 + 1]].size(); k++)
-		//	{
-		//		triangles[i].v1normal += triangles[neighborFaceMap[indices[i * 3 + 1]][k]].normal;
-		//	}
-		//	triangles[i].v1normal /= neighborFaceMap[indices[i * 3 + 1]].size();
+			triangles[i].v1normal = glm::vec3();
+			for (int k = 0; k < neighborFaceMap[indices[i * 3 + 1]].size(); k++)
+			{
+				triangles[i].v1normal += triangles[neighborFaceMap[indices[i * 3 + 1]][k]].normal;
+			}
+			triangles[i].v1normal /= neighborFaceMap[indices[i * 3 + 1]].size();
 
-		//	triangles[i].v2normal = glm::vec3();
-		//	for (int k = 0; k < neighborFaceMap[indices[i * 3 + 2]].size(); k++)
-		//	{
-		//		triangles[i].v2normal += triangles[neighborFaceMap[indices[i * 3 + 2]][k]].normal;
-		//	}
-		//	triangles[i].v2normal /= neighborFaceMap[indices[i * 3 + 2]].size();
-		//}
+			triangles[i].v2normal = glm::vec3();
+			for (int k = 0; k < neighborFaceMap[indices[i * 3 + 2]].size(); k++)
+			{
+				triangles[i].v2normal += triangles[neighborFaceMap[indices[i * 3 + 2]][k]].normal;
+			}
+			triangles[i].v2normal /= neighborFaceMap[indices[i * 3 + 2]].size();
+		}
 	}
 }
 

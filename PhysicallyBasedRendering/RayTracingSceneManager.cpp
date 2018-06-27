@@ -13,10 +13,10 @@ void RayTracingSceneManager::InitializeObjects()
 	Material fluidMat, planeMat, sphereMat, lightMat, areaLightMat, planeMat2;
 	fluidMat.ambient = 1.0f;
 	fluidMat.albedo = glm::vec3(0.0f, 0.0f, 0.0f);
-	fluidMat.refractiveIndex = 1.3f;
+	fluidMat.refractiveIndex = 1.2f;
 	fluidMat.metallic = 0.0f;
 	fluidMat.roughness = 0.2f;
-	fluidMat.refractivity = 0.0f;
+	fluidMat.refractivity = 0.9f;
 	fluidMat.reflectivity = 0.0f;
 	materials.push_back(fluidMat);
 
@@ -25,7 +25,7 @@ void RayTracingSceneManager::InitializeObjects()
 	planeMat.metallic = 0.0f;
 	planeMat.roughness = 0.5f;
 	planeMat.refractivity = 0.0f;
-	planeMat.reflectivity = 0.8f;
+	planeMat.reflectivity = 0.1f;
 	planeMat.texId = 1;
 	materials.push_back(planeMat);
 

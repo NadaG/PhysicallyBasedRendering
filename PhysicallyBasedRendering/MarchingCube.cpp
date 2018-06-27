@@ -5,6 +5,12 @@
 using std::cout;
 using std::endl;
 
+// TODO1 marching Thres값은 얼마로 하는게 가장 적당한가요?
+// TODO2 node가 각 복셀이 아니라 voxel의 끝 점이라고 생각하고 하는 것 같은데 맞나요?
+// TODO3 for particle for node로 도는데, 각 particle마다 8개 정도의 node만 보는 거 같은데 27개 혹은
+// 그 이상을 봐야할 거 같은데 아닌가요?
+// for node for particle로 보는게 더 정확하지 않나요?
+
 MarchingCube::MarchingCube(void)
 {
 	m_nWidth = 0;
@@ -18,7 +24,7 @@ MarchingCube::MarchingCube(void)
 	m_nNodeResZ = 0;
 
 	m_DensityThres = 1.0f;
-	m_KernelDistThres = 3.0f;
+	m_KernelDistThres = 2.0f;
 }
 
 MarchingCube::~MarchingCube(void)
@@ -61,6 +67,7 @@ void MarchingCube::BuildingGird(int nWidth, int nHeight, int nDepth, int nResX, 
 		{
 			for (int k = 0; k < m_nNodeResX; k++)
 			{
+				// 각 node는 voxel로 보지말고 voxel의 끝 점이라고 생각할 것
 				Node node;
 				// node의 world position
 				node.mNodePosition = glm::vec3(dx - m_nWidth * 0.5f, dy - m_nHeight * 0.5f, dz - m_nDepth * 0.5f);
@@ -96,7 +103,10 @@ void MarchingCube::ComputeDensity(GLfloat* particlePoses, const int particleNum)
 		// width의 반을 중간으로 설정
 		//vecPos += glm::vec3(m_nWidth * 0.5f, m_nHeight * 0.5f, m_nDepth * 0.5f);
 
-		vec3 translatedParticlePos = particlePos + glm::vec3(m_nWidth * 0.5f, m_nHeight * 0.5f, m_nDepth * 0.5f);
+		vec3 translatedParticlePos = particlePos + glm::vec3(
+			m_nWidth * 0.5f, 
+			m_nHeight * 0.5f, 
+			m_nDepth * 0.5f);
 
 		int k = translatedParticlePos.x / ((float)m_nWidth / (float)m_nResX);
 		int j = translatedParticlePos.y / ((float)m_nHeight / (float)m_nResY);
@@ -106,21 +116,39 @@ void MarchingCube::ComputeDensity(GLfloat* particlePoses, const int particleNum)
 		//cout << vecPos.x << endl << vecPos.y << endl << vecPos.z << endl;
 		//cout << i << endl << j << endl << k << endl;
 
-		int nNodes[27];
+		const int halfWidth = 3;
+		const int nodeNum = (halfWidth * 2 + 1) * (halfWidth * 2 + 1) * (halfWidth * 2 + 1);
 
-		for (int ii = -1; ii <= 1; ii++)
+		int nNodes[nodeNum];
+
+		for (int ii = -halfWidth; ii <= halfWidth; ii++)
 		{
-			for (int jj = -1; jj <= 1; jj++)
+			for (int jj = -halfWidth; jj <= halfWidth; jj++)
 			{
-				for (int kk = -1; kk <= 1; kk++)
+				for (int kk = -halfWidth; kk <= halfWidth; kk++)
 				{
-					int index = (ii + 1)*9 + (jj + 1) * 3 + (kk + 1);
+					int index = 
+						(ii + halfWidth) * (halfWidth * 2 + 1) * (halfWidth * 2 + 1) + 
+						(jj + halfWidth) * (halfWidth * 2 + 1) +
+						(kk + halfWidth);
+					//cout << "index:" << index << endl;
 					nNodes[index] = FindNodeIndex(kk + k, jj + j, ii + i);
 				}
 			}
 		}
 
-		for (int node = 0; node < 27; node++)
+		/*nNodes[0] = FindNodeIndex(k, j, i);
+		nNodes[1] = FindNodeIndex(k, j, i + 1);
+		nNodes[2] = FindNodeIndex(k, j + 1, i);
+		nNodes[3] = FindNodeIndex(k + 1, j, i);
+
+		nNodes[4] = FindNodeIndex(k, j + 1, i + 1);
+		nNodes[5] = FindNodeIndex(k + 1, j, i + 1);
+		nNodes[6] = FindNodeIndex(k + 1, j + 1, i);
+		nNodes[7] = FindNodeIndex(k + 1, j + 1, i + 1);*/
+
+
+		for (int node = 0; node < nodeNum; node++)
 		{
 			// 공간 밖의 node
 			if (nNodes[node] == -1.0f)
@@ -205,8 +233,6 @@ Mesh* MarchingCube::ExcuteMarchingCube()
 				//Generate Vertex
 				for (int n = 0; triTable[cubeIdx][n] != -1; n += 3)
 				{
-					int loop = triTable[cubeIdx][n];
-
 					Vertex verts[3];
 
 					verts[0].position = 

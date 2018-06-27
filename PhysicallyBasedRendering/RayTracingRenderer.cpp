@@ -67,29 +67,40 @@ void RayTracingRenderer::InitializeRender()
 	}*/
 
 
-	//char tmp[1024];
-	//for (int i = 382; i < 500; i++)
-	//{
-	//	sprintf(tmp, "%04d", i);
-	//	string infile = "";
-	//	string outfile = "";
-	//	infile += "Obj/PouringFluid/";
-	//	//infile += tmp;
-	//	infile += "0220";
-	//	infile += ".obj";
-	//	dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadFluidScene(infile);
+	char tmp[1024];
+	for (int i = 0; i < 500; i++)
+	{
+		sprintf(tmp, "%04d", i);
+		string infile = "";
+		string outfile = "";
+		infile += "Obj/PouringFluid/";
+		infile += tmp;
+		//infile += "0220";
+		infile += ".obj";
+		dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadFluidScene(infile);
 
-	//	outfile += "fluid_raytracing_test/";
-	//	outfile += tmp;
-	//	outfile += ".png";
-	//	OfflineRender(outfile);
-	//	cout << i << "번째 프레임 그리는 중" << endl;
-	//	Sleep(5000.0f);
-	//}
+		outfile += "fluid_raytracing3/";
+		outfile += tmp;
+		outfile += ".png";
+		OfflineRender(outfile);
+		cout << i << "번째 프레임 그리는 중" << endl;
+		Sleep(5000.0f);
+	}
 
-	dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadFluidScene("Obj/PouringFluid/0250.obj");
-	OfflineRender("0000000.png");
-	Sleep(1000.0f);
+	time_t rawtime;
+	struct tm* timeinfo;
+	char buffer[80];
+
+	time(&rawtime);
+	timeinfo = localtime(&rawtime);
+
+	strftime(buffer, sizeof(buffer), "%d-%m-%Y %I:%M:%S", timeinfo);
+	std::string str(buffer);
+
+
+	/*dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadFluidScene("Obj/PouringFluid/0250.obj");
+	OfflineRender("00000012.png");
+	Sleep(1000.0f);*/
 }
 
 // glm의 cross(a, b)는 오른손으로 a방향에서 b방향으로 감싸쥘 때의 엄지방향이다.

@@ -105,10 +105,6 @@ struct Material
 
 	float refractiveIndex;
 
-	// alpha가 높으면 불투명
-	float refractivity;
-	float reflectivity;
-
 	int texId;
 
 	Material()
@@ -122,9 +118,6 @@ struct Material
 
 		refractiveIndex = 0.0f;
 
-		refractivity = 0.0f;
-		reflectivity = 0.0f;
-
 		texId = -1;
 	}
 };
@@ -136,16 +129,16 @@ struct AABB
 
 DLLExport
 void RayTrace(
-	glm::vec4* data, 
+	glm::vec4* data,
 	const int gridX,
 	const int gridY,
 	glm::mat4 view,
-	OctreeNode* root,
 	const vector<AABB>& objects,
 	const vector<Triangle>& triangles, 
 	const vector<Sphere>& spheres,
 	const vector<Light>& lights, 
-	const vector<Material>& materials
+	const vector<Material>& materials,
+	const vector<float>& randomThetaPi
 );
 
 void LoadCudaTextures();

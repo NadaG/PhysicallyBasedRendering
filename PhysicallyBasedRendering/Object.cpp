@@ -38,8 +38,7 @@ void Object::ModelTranslate(const glm::vec3& vec)
 	WorldTranslate(glm::vec3(dir));
 }
 
-// radians
-// z y x
+// radians, z y x
 void Object::ModelRotate(const glm::vec3& vec, float angle)
 {
 	// 현재 축을 기준으로 rotate

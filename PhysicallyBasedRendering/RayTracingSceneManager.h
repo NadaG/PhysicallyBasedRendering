@@ -24,6 +24,7 @@ public:
 	void InsertTriangles(vector<Triangle> triangles);
 
 	void LoadFluidScene(const string meshfile);
+	void LoadPathTracingScene();
 
 	OctreeNode* root;
 

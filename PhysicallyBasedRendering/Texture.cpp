@@ -188,6 +188,33 @@ float* Texture::GetTexImage(GLenum format) const
 	return data;
 }
 
+float * Texture::GetTexImage(GLenum format, const int lod) const
+{
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	float* data;
+	int channel = 0;
+	// glGetTexImage는 한 픽셀에 대해 internal four-component에 상관없이 4개의 value를 반환함
+
+	switch (format)
+	{
+	case GL_R:
+		channel = 1;
+		break;
+	case GL_RGB:
+		channel = 3;
+		break;
+	case GL_RGBA:
+		channel = 4;
+		break;
+	}
+	data = new float[width * height * channel];
+
+	glGetTexImage(GL_TEXTURE_2D, lod, format, GL_FLOAT, data);
+
+	return data;
+}
+
 unsigned char* Texture::GetTexImage(const GLenum& format, const GLenum& type) const
 {
 	glBindTexture(GL_TEXTURE_2D, texture);

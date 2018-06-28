@@ -6,7 +6,7 @@ void RayTracingSceneManager::InitializeObjects()
 	// fluid
 	//movingCamera->WorldTranslate(glm::vec3(10.0f, 20.0f, 110.0f));
 	// path tracing
-	movingCamera->WorldTranslate(glm::vec3(0.0f, 20.0f, 160.0f));
+	movingCamera->WorldTranslate(glm::vec3(0.0f, 20.0f, 120.0f));
 	//movingCamera->ModelRotate(glm::vec3(0.0f, 1.0f, 0.0f), 3.141592f);
 
 	// 0, 1, 2, 3, 4
@@ -72,7 +72,7 @@ void RayTracingSceneManager::InitializeObjects()
 	materials.push_back(bluePlaneMat);
 
 	//LoadFluidScene("Obj/PouringFluid/0220.obj");
-	LoadPathTracingScene();
+	//LoadPathTracingScene();
 }
 
 void RayTracingSceneManager::Update()
@@ -223,10 +223,12 @@ void RayTracingSceneManager::InsertTriangles(vector<Triangle> triangles)
 void RayTracingSceneManager::LoadFluidScene(const string meshfile)
 {
 	triangles.clear();
+	lights.clear();
+	spheres.clear();
 
 	// light
 	Light light;
-	light.pos = glm::vec3(10.0f, 20.0f, 20.0f);
+	light.pos = glm::vec3(0.0f, 20.0f, 20.0f);
 	light.color = glm::vec3(500.0f, 500.0f, 500.0f);
 	lights.push_back(light);
 
@@ -263,6 +265,8 @@ void RayTracingSceneManager::LoadFluidScene(const string meshfile)
 void RayTracingSceneManager::LoadPathTracingScene()
 {
 	triangles.clear();
+	lights.clear();
+	spheres.clear();
 
 	const float planeSize = 50.0f;
 

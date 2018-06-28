@@ -37,14 +37,14 @@ struct Ray
 const int WINDOW_HEIGHT = 1024;
 const int WINDOW_WIDTH = 1024;
 
-const int RAY_X_NUM = 32;
-const int RAY_Y_NUM = 32;
+const int RAY_X_NUM = 64;
+const int RAY_Y_NUM = 64;
 
 const int QUEUE_SIZE = 128;
 
-const int DEPTH = 2;
+const int DEPTH = 3;
 
-const int SAMPLE_NUM = 16;
+const int SAMPLE_NUM = 1;
 
 using std::cout;
 using std::endl;
@@ -611,9 +611,6 @@ __device__ vec4 RayTraceColor(
 					vec3 specular = nominator / denominator;
 
 					kS = F;
-					
-					// Path Tracing
-					// kS = glm::vec3(1.0f);
 
 					kD = vec3(1.0) - kS;
 					kD *= (1.0f - metallic);
@@ -638,16 +635,16 @@ __device__ vec4 RayTraceColor(
 				vec3 ambient = vec3(0.03) * albedo * ao;
 
 				// Light Sampling
-				//sumLo += (ambient + Lo + emission) * nowRay.decay;
+				sumLo += (ambient + Lo + emission) * nowRay.decay;
 				
 				// Path Tracing, BRDF Sampling
-				sumLo += (ambient * 0.5f + emission) * nowRay.decay;
+				// sumLo += (ambient * 0.5f + emission) * nowRay.decay;
 				
 				//////////////////////////////////////////////////////////////////////////////////////////분리선
 
 				for (int j = 0; j < SAMPLE_NUM; ++j)
 				{
-					float r = sqrtf(1.0f - 
+					/*float r = sqrtf(1.0f - 
 						randomNums[(rayIndex * SAMPLE_NUM + j) * 2] * 
 						randomNums[(rayIndex * SAMPLE_NUM + j) * 2]);
 					float phi = 2 * glm::pi<float>() * randomNums[(rayIndex * SAMPLE_NUM + j) * 2 +1];
@@ -661,37 +658,35 @@ __device__ vec4 RayTraceColor(
 						triangles[nearestTriangleIdx].tangent,
 						N,
 						triangles[nearestTriangleIdx].bitangent);
-					randomVec = TNB * normalize(randomVec);
+					randomVec = TNB * normalize(randomVec);*/
 
 					Ray reflectRay;
-					// Path Tracing
-					reflectRay.dir = normalize(randomVec);
-					
-					// Ray Tracing
-					// reflectRay.dir = normalize(reflect(nowRay.dir, N));
-					
+
 					// reflect ray의 시작점은 hit point
 					reflectRay.origin = hitPoint + reflectRay.dir * 0.01f;
-					// 현재 빛의 감쇠 정도와 물체의 재질에 따라 reflect ray의 감쇠 정도가 정해짐
 
-					//reflectRay.decay = kS.r * ray.decay / SAMPLE_NUM;
 					// Path Tracing
-					reflectRay.decay = ray.decay / SAMPLE_NUM;
-
+					// reflectRay.dir = normalize(randomVec);
+					// reflectRay.decay = ray.decay / SAMPLE_NUM;
+					
+					// Ray Tracing
+					reflectRay.dir = normalize(reflect(nowRay.dir, N));
+					reflectRay.decay = kS.r * ray.decay / SAMPLE_NUM;
+					
 					Enqueue(rayQueue, reflectRay, rear);
 				}
 
-				//// refract는 ray tracing
-				//Ray refractRay;
-				//refractRay.dir = normalize(refract(nowRay.dir, N, 1.0f / materials[materialId].refractiveIndex));
-				//// refract ray의 시작점은 hit point
-				//refractRay.origin = hitPoint + refractRay.dir * 0.01f;
-				//// 현재 빛의 감쇠 정도와 물체의 재질에 따라 refract ray의 감쇠 정도가 정해짐
+				// refract는 ray tracing
+				Ray refractRay;
+				refractRay.dir = normalize(refract(nowRay.dir, N, 1.0f / materials[materialId].refractiveIndex));
+				// refract ray의 시작점은 hit point
+				refractRay.origin = hitPoint + refractRay.dir * 0.01f;
+				// 현재 빛의 감쇠 정도와 물체의 재질에 따라 refract ray의 감쇠 정도가 정해짐
 
-				//// 투명한 Object이기 때문에 kD가 refract decay로 들어간 거임
-				//refractRay.decay = kD.r * ray.decay;
+				// 투명한 Object이기 때문에 kD가 refract decay로 들어간 거임
+				refractRay.decay = kD.r * ray.decay;
 
-				//Enqueue(rayQueue, refractRay, rear);
+				Enqueue(rayQueue, refractRay, rear);
 			}
 		}
 
@@ -841,10 +836,10 @@ __device__ vec4 RayTraceColor(
 			vec3 ambient = vec3(0.03) * albedo * ao;
 
 			// Light Sampling
-			//sumLo += (ambient + Lo + emission) * nowRay.decay;
+			sumLo += (ambient + Lo + emission) * nowRay.decay;
 
 			// Path Tracing, BRDF Sampling
-			sumLo += (ambient * 0.5f + emission) * nowRay.decay;
+			// sumLo += (ambient * 0.5f + emission) * nowRay.decay;
 		}
 	}
 

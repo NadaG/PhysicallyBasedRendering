@@ -72,29 +72,7 @@ void RayTracingRenderer::InitializeRender()
 		aabb.bounds[1].x = max(spheres[i].origin.x + spheres[i].radius, aabb.bounds[1].x);
 		aabb.bounds[1].y = max(spheres[i].origin.y + spheres[i].radius, aabb.bounds[1].y);
 		aabb.bounds[1].z = max(spheres[i].origin.z + spheres[i].radius, aabb.bounds[1].z);
-	}*/
-
-
-	//char tmp[1024];
-	//for (int i = 0; i < 500; i++)
-	//{
-	//	sprintf(tmp, "%04d", i);
-	//	string infile = "";
-	//	string outfile = "";
-	//	infile += "Obj/PouringFluid/";
-	//	infile += tmp;
-	//	//infile += "0220";
-	//	infile += ".obj";
-	//	dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadFluidScene(infile);
-
-	//	outfile += "fluid_raytracing3/";
-	//	outfile += tmp;
-	//	outfile += ".png";
-	//	OfflineRender(outfile);
-	//	cout << i << "번째 프레임 그리는 중" << endl;
-	//	Sleep(5000.0f);
-	//}
-
+	}
 	time_t rawtime;
 	struct tm* timeinfo;
 	char buffer[80];
@@ -104,8 +82,30 @@ void RayTracingRenderer::InitializeRender()
 
 	strftime(buffer, sizeof(buffer), "%d-%m-%Y %I:%M:%S", timeinfo);
 	std::string str(buffer);
+	
+	*/
 
-	OfflineRender("0002.png");
+	char tmp[1024];
+	for (int i = 0; i < 500; i++)
+	{
+		sprintf(tmp, "%04d", i);
+		string infile = "";
+		string outfile = "";
+		infile += "Obj/PouringFluid/";
+		infile += tmp;
+		//infile += "0220";
+		infile += ".obj";
+		dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadFluidScene(infile);
+
+		outfile += "fluid_raytracing3/";
+		outfile += tmp;
+		outfile += ".png";
+		OfflineRender(outfile);
+		cout << i << "번째 프레임 그리는 중" << endl;
+		Sleep(5000.0f);
+	}
+
+	//OfflineRender("0002.png");
 
 	/*dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadFluidScene("Obj/PouringFluid/0250.obj");
 	OfflineRender("0001.png");
@@ -144,13 +144,14 @@ void RayTracingRenderer::Render()
 	{
 		for (int j = 0; j < gridX; j++)
 		{
-			std::random_device rd;
-			std::mt19937 mersenne_engine(rd());
-			std::uniform_real_distribution<> dis(0.0, 1.0);
+			//// Path Tracing
+			//std::random_device rd;
+			//std::mt19937 mersenne_engine(rd());
+			//std::uniform_real_distribution<> dis(0.0, 1.0);
 
-			auto gen = [&dis, &mersenne_engine]() {return dis(mersenne_engine); };
-			generate(begin(vec), end(vec), gen);
-			// 여기서 render가 다 일어남
+			//auto gen = [&dis, &mersenne_engine]() {return dis(mersenne_engine); };
+			//generate(begin(vec), end(vec), gen);
+
 			RayTrace(output, i, j, view, objects, triangles, spheres, lights, materials, vec);
 		}
 	}
@@ -208,14 +209,14 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	{
 		for (int j = 0; j < gridX; j++)
 		{
-			std::random_device rd;
-			std::mt19937 mersenne_engine(rd());
-			std::uniform_real_distribution<> dis(0.0, 1.0);
+			//// Path Tracing
+			//std::random_device rd;
+			//std::mt19937 mersenne_engine(rd());
+			//std::uniform_real_distribution<> dis(0.0, 1.0);
 
-			auto gen = [&dis, &mersenne_engine]() {return dis(mersenne_engine); };
-			generate(begin(vec), end(vec), gen);
+			//auto gen = [&dis, &mersenne_engine]() {return dis(mersenne_engine); };
+			//generate(begin(vec), end(vec), gen);
 
-			// 여기서 render가 다 일어남
 			RayTrace(output, i, j, view, objects, triangles, spheres, lights, materials, vec);
 		}
 	}

@@ -298,11 +298,10 @@ __device__ int FindNearestTriangleIdx(Ray ray, Triangle* triangles, int triangle
 //		return 0;
 //	}
 //};
-
-__device__ int FindNearestTriangleIdx(Ray ray, Octree *tree, float& dist)
-{
-	return tree->FindNearest(ray, dist);
-}
+//__device__ int FindNearestTriangleIdx(Ray ray, Octree *tree, float& dist)
+//{
+//	return tree->FindNearest(ray, dist);
+//}
 
 // ray의 원점과 가장 가까운 곳에서 intersect하는 sphere의 id를 가져오는 함수
 __device__ int FindNearestSphereIdx(Ray ray, Sphere* spheres, int sphereNum, float& dist)

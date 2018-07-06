@@ -24,7 +24,6 @@ void main()
 	float sum = 0;
 	float wsum = 0;
 
-	
 	for(float x = -neighborNum; x <= neighborNum; x++)
 	{
 		for(float y = -neighborNum; y <= neighborNum; y++)

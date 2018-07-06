@@ -71,10 +71,12 @@ private:
 	const int blurNum = 2;
 
 	const float depthNear = 0.01f;
-	const float depthFar = 100.0;
+	const float depthFar = 200.0;
 
 	const float sceneNaer = 0.01f;
-	const float sceneFar = 100.0f;
+	const float sceneFar = 200.0f;
+
+	const float pointSize = 800.0f;
 
 	FrameBufferObject pbrFBO;
 	FrameBufferObject depthThicknessFBO;
@@ -99,10 +101,11 @@ private:
 private:
 
 	bool isRenderOnDefaultFBO;
+	int targetFrame;
 
 	glm::vec3 boundarySize;
 
 	Mesh* fluidMesh;
 
-	void DrawFluids(const float& dist);
+	void DrawFluids(const float cameraDist);
 };

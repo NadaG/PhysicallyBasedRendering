@@ -17,9 +17,9 @@ void FluidRenderer::InitializeRender()
 	blurShader = new ShaderProgram("Quad.vs", "DepthBlur.fs");
 	blurShader->Use();
 	blurShader->SetUniform1i("map", 0);
-	blurShader->SetUniform1i("neighborNum", 6);
+	blurShader->SetUniform1i("neighborNum", 4);
 	blurShader->SetUniform1f("blurScale", 0.1f);
-	blurShader->SetUniform1f("blurDepthFalloff", 50.0f);
+	blurShader->SetUniform1f("blurDepthFalloff", 100.0f);
 
 	surfaceShader = new ShaderProgram("Quad.vs", "Surface.fs");
 	surfaceShader->Use();
@@ -149,25 +149,26 @@ void FluidRenderer::InitializeRender()
 		boundarySize.x*resolutionRatio,
 		boundarySize.y*resolutionRatio,
 		boundarySize.z*resolutionRatio,
-		100.0f);
+		200.0f);
 
 	isRenderOnDefaultFBO = false;
+	targetFrame = 400;
 }
 
 void FluidRenderer::Render()
 {
-	if (currentFrame >= 520 && !isRenderOnDefaultFBO)
+	if (currentFrame >= 1000 && !isRenderOnDefaultFBO)
 		return;
 
 	importer.Update(fluidVertices);
 	fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
 
-	if (isRenderOnDefaultFBO/* && currentFrame == 300*/)
+	if (isRenderOnDefaultFBO && currentFrame == targetFrame)
 	{
-		//MarchingCubeRender();
-		ScreenSpaceFluidRender();
+		MarchingCubeRender();
+		//ScreenSpaceFluidRender();
 	}
-	else if(!isRenderOnDefaultFBO)
+	else if (!isRenderOnDefaultFBO)
 	{
 		char tmp[1024];
 		sprintf(tmp, "%04d", currentFrame);
@@ -175,22 +176,22 @@ void FluidRenderer::Render()
 
 		ScreenSpaceFluidRender();
 
-		outfile += "fluid_screenspace4/";
+		outfile += "fluid_screenspace1/";
 		outfile += tmp;
 		outfile += ".png";
 		pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
 		cout << currentFrame << "번째 screen space 프레임 그리는 중" << endl;
-		Sleep(5000.0f);
+		Sleep(2000.0f);
 
 		MarchingCubeRender();
 
 		outfile = "";
-		outfile += "fluid_marchingcube4/";
+		outfile += "fluid_marchingcube1/";
 		outfile += tmp;
 		outfile += ".png";
 		pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
 		cout << currentFrame << "번째 marching cube 프레임 그리는 중" << endl;
-		Sleep(5000.0f);
+		Sleep(2000.0f);
 
 		delete fluidMesh;
 	}
@@ -251,7 +252,7 @@ void FluidRenderer::ScreenSpaceFluidRender()
 	particleDepthShader->SetUniform1f("near", depthNear);
 	particleDepthShader->SetUniform1f("far", depthFar);
 
-	DrawFluids(28.0f);
+	DrawFluids(glm::distance(camera->GetPosition(), glm::vec3()));
 	// 파티클들 depth map 그리기 끝
 
 	//// 왜인지 thickness map이 제대로 안됨
@@ -327,7 +328,7 @@ void FluidRenderer::ScreenSpaceFluidRender()
 
 void FluidRenderer::MarchingCubeRender()
 {
-	mc.ComputeDensity(fluidVertices, importer.particleNum);
+	mc.ComputeIsotropicSmoothingDensity(fluidVertices, importer.particleNum);
 	fluidMesh = mc.ExcuteMarchingCube();
 
 	glEnable(GL_DEPTH_TEST);
@@ -407,10 +408,9 @@ void FluidRenderer::TerminateRender()
 	importer.Quit();
 }
 
-void FluidRenderer::DrawFluids(const float& dist)
+void FluidRenderer::DrawFluids(const float cameraDist)
 {
 	fluidVAO.Bind();
-	//glPointSize(15000 / (dist*dist));
-	glPointSize(20.0f);
+	glPointSize(pointSize / cameraDist);
 	glDrawArrays(GL_POINTS, 0, importer.particleNum);
 }

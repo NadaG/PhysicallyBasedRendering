@@ -5,12 +5,6 @@
 using std::cout;
 using std::endl;
 
-// TODO1 marching Thres값은 얼마로 하는게 가장 적당한가요?
-// TODO2 node가 각 복셀이 아니라 voxel의 끝 점이라고 생각하고 하는 것 같은데 맞나요?
-// TODO3 for particle for node로 도는데, 각 particle마다 8개 정도의 node만 보는 거 같은데 27개 혹은
-// 그 이상을 봐야할 거 같은데 아닌가요?
-// for node for particle로 보는게 더 정확하지 않나요?
-
 MarchingCube::MarchingCube(void)
 {
 	m_nWidth = 0;
@@ -154,10 +148,144 @@ void MarchingCube::ComputeDensity(GLfloat* particlePoses, const int particleNum)
 			if (nNodes[node] == -1.0f)
 				continue;
 
+			// node pos가 곧 node의 각 꼭짓점
 			glm::vec3 nodePos = m_stlNodeList[nNodes[node]].mNodePosition;
 			
 			float h = glm::distance(particlePos, nodePos);
 
+			// 파티클과 node의 거리가 thresh hold 값보다 작으면 
+			if (h < m_KernelDistThres)
+			{
+				float kernel = ComputePoly6(h, m_KernelDistThres);
+				m_stlNodeList[nNodes[node]].mDensity += 1.0 * -kernel;
+			}
+		}
+	}
+}
+
+void MarchingCube::ComputeIsotropicSmoothingDensity(GLfloat * particlePoses, const int particleNum)
+{
+	for (int i = 0; i < m_stlNodeList.size(); i++)
+	{
+		m_stlNodeList[i].mDensity = 0.0f;
+	}
+
+	for (int itr = 0; itr < particleNum; itr += 6)
+	{
+		// particle의 world coordinate의 위치
+		glm::vec3 particlePos = glm::vec3(
+			particlePoses[itr * 6 + 0],
+			particlePoses[itr * 6 + 1],
+			particlePoses[itr * 6 + 2]);
+		
+		// 논문에서는 0.9~1.0을 사용했다 함
+		float lambda = 0.9f;
+		vec3 weightPosSum = glm::vec3();
+		float weightSum = 0.0f;
+
+		for (int jtr = 0; jtr < particleNum; jtr += 6)
+		{
+			if (itr == jtr)
+				continue;
+
+			glm::vec3 particlePos2 = glm::vec3(
+				particlePoses[jtr * 6 + 0],
+				particlePoses[jtr * 6 + 1],
+				particlePoses[jtr * 6 + 2]);
+
+			float weight = WeightFunc(particlePos - particlePos2, h * 2);
+			weightSum += weight;
+			weightPosSum += weight * particlePos2;
+		}
+
+		glm::vec3 averagedPos = (1.0f - lambda) * particlePos + lambda * weightPosSum / weightSum;
+
+		glm::mat3 c;
+
+		for (int jtr = 0; jtr < particleNum; jtr += 6)
+		{
+			if (itr == jtr)
+				continue;
+
+			glm::vec3 particlePos2 = glm::vec3(
+				particlePoses[jtr * 6 + 0],
+				particlePoses[jtr * 6 + 1],
+				particlePoses[jtr * 6 + 2]);
+
+			float weight = WeightFunc(particlePos - particlePos2, h * 2);
+
+			c[0][0] += weight * (particlePos2.x - averagedPos.x) * (particlePos2.x - averagedPos.x);
+			c[0][1] += weight * (particlePos2.x - averagedPos.x) * (particlePos2.y - averagedPos.y);
+			c[0][2] += weight * (particlePos2.x - averagedPos.x) * (particlePos2.z - averagedPos.z);
+			c[1][1] += weight * (particlePos2.y - averagedPos.y) * (particlePos2.y - averagedPos.y);
+			c[1][2] += weight * (particlePos2.y - averagedPos.y) * (particlePos2.z - averagedPos.z);
+			c[2][2] += weight * (particlePos2.z - averagedPos.z) * (particlePos2.z - averagedPos.z);
+		}
+
+		c[1][0] = c[0][1];
+		c[2][0] = c[0][2];
+		c[2][1] = c[1][2];
+
+
+		// width의 반을 중간으로 설정
+		//vecPos += glm::vec3(m_nWidth * 0.5f, m_nHeight * 0.5f, m_nDepth * 0.5f);
+
+		vec3 translatedParticlePos = averagedPos + glm::vec3(
+			m_nWidth * 0.5f,
+			m_nHeight * 0.5f,
+			m_nDepth * 0.5f);
+
+		int k = translatedParticlePos.x / ((float)m_nWidth / (float)m_nResX);
+		int j = translatedParticlePos.y / ((float)m_nHeight / (float)m_nResY);
+		int i = translatedParticlePos.z / ((float)m_nDepth / (float)m_nResZ);
+
+		//cout << particlePos.x << endl;
+		//cout << vecPos.x << endl << vecPos.y << endl << vecPos.z << endl;
+		//cout << i << endl << j << endl << k << endl;
+
+		const int halfWidth = 3;
+		const int nodeNum = (halfWidth * 2 + 1) * (halfWidth * 2 + 1) * (halfWidth * 2 + 1);
+
+		int nNodes[nodeNum];
+
+		for (int ii = -halfWidth; ii <= halfWidth; ii++)
+		{
+			for (int jj = -halfWidth; jj <= halfWidth; jj++)
+			{
+				for (int kk = -halfWidth; kk <= halfWidth; kk++)
+				{
+					int index =
+						(ii + halfWidth) * (halfWidth * 2 + 1) * (halfWidth * 2 + 1) +
+						(jj + halfWidth) * (halfWidth * 2 + 1) +
+						(kk + halfWidth);
+					//cout << "index:" << index << endl;
+					nNodes[index] = FindNodeIndex(kk + k, jj + j, ii + i);
+				}
+			}
+		}
+
+		/*nNodes[0] = FindNodeIndex(k, j, i);
+		nNodes[1] = FindNodeIndex(k, j, i + 1);
+		nNodes[2] = FindNodeIndex(k, j + 1, i);
+		nNodes[3] = FindNodeIndex(k + 1, j, i);
+
+		nNodes[4] = FindNodeIndex(k, j + 1, i + 1);
+		nNodes[5] = FindNodeIndex(k + 1, j, i + 1);
+		nNodes[6] = FindNodeIndex(k + 1, j + 1, i);
+		nNodes[7] = FindNodeIndex(k + 1, j + 1, i + 1);*/
+
+		for (int node = 0; node < nodeNum; node++)
+		{
+			// 공간 밖의 node
+			if (nNodes[node] == -1.0f)
+				continue;
+
+			// node pos가 곧 node의 각 꼭짓점
+			glm::vec3 nodePos = m_stlNodeList[nNodes[node]].mNodePosition;
+
+			float h = glm::distance(particlePos, nodePos);
+
+			// 파티클과 node의 거리가 thresh hold 값보다 작으면 
 			if (h < m_KernelDistThres)
 			{
 				float kernel = ComputePoly6(h, m_KernelDistThres);
@@ -314,6 +442,21 @@ float MarchingCube::ComputePoly6(float h, float r)
 	float a = h*h - r*r;
 
 	return 1.56668f * a * a * a;
+}
+
+float MarchingCube::WeightFunc(vec3 relativePos, float r)
+{
+	float len = glm::length(relativePos);
+
+	if (len > r)
+		return 0.0f;
+
+	return 1.0f - (len / r)*(len / r)*(len / r);
+}
+
+float MarchingCube::IsotropicSmoothingKernel(glm::vec3 r, glm::mat3 G)
+{
+	return 0.0f;
 }
 
 int	MarchingCube::FindCellIndex(int nX, int nY, int nZ)

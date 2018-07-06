@@ -110,4 +110,7 @@ void main()
 
 	// normal rendering
 	color = n * 0.5f + vec3(0.5f);
+
+	// point rendering
+	//color = vec3(0.0, 0.0, 1.0);
 }

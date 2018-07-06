@@ -85,31 +85,31 @@ void RayTracingRenderer::InitializeRender()
 	
 	*/
 
-	char tmp[1024];
-	for (int i = 0; i < 500; i++)
-	{
-		sprintf(tmp, "%04d", i);
-		string infile = "";
-		string outfile = "";
-		infile += "Obj/PouringFluid/";
-		infile += tmp;
-		//infile += "0220";
-		infile += ".obj";
-		dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadFluidScene(infile);
+	//char tmp[1024];
+	//for (int i = 0; i < 500; i++)
+	//{
+	//	sprintf(tmp, "%04d", i);
+	//	string infile = "";
+	//	string outfile = "";
+	//	infile += "Obj/PouringFluid/";
+	//	infile += tmp;
+	//	//infile += "0220";
+	//	infile += ".obj";
+	//	dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadFluidScene(infile);
 
-		outfile += "fluid_raytracing3/";
-		outfile += tmp;
-		outfile += ".png";
-		OfflineRender(outfile);
-		cout << i << "번째 프레임 그리는 중" << endl;
-		Sleep(5000.0f);
-	}
+	//	outfile += "fluid_raytracing3/";
+	//	outfile += tmp;
+	//	outfile += ".png";
+	//	OfflineRender(outfile);
+	//	cout << i << "번째 프레임 그리는 중" << endl;
+	//	Sleep(5000.0f);
+	//}
 
 	//OfflineRender("0002.png");
 
-	/*dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadFluidScene("Obj/PouringFluid/0250.obj");
-	OfflineRender("0001.png");
-	Sleep(1000.0f);*/
+	dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadFluidScene("Obj/PouringFluid/0250.obj");
+	OfflineRender("0002.png");
+	Sleep(1000.0f);
 }
 
 // glm의 cross(a, b)는 오른손으로 a방향에서 b방향으로 감싸쥘 때의 엄지방향이다.
@@ -209,13 +209,13 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	{
 		for (int j = 0; j < gridX; j++)
 		{
-			//// Path Tracing
-			//std::random_device rd;
-			//std::mt19937 mersenne_engine(rd());
-			//std::uniform_real_distribution<> dis(0.0, 1.0);
+			// Path Tracing
+			/*std::random_device rd;
+			std::mt19937 mersenne_engine(rd());
+			std::uniform_real_distribution<> dis(0.0, 1.0);
 
-			//auto gen = [&dis, &mersenne_engine]() {return dis(mersenne_engine); };
-			//generate(begin(vec), end(vec), gen);
+			auto gen = [&dis, &mersenne_engine]() {return dis(mersenne_engine); };
+			generate(begin(vec), end(vec), gen);*/
 
 			RayTrace(output, i, j, view, objects, triangles, spheres, lights, materials, vec);
 		}

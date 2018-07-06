@@ -42,14 +42,31 @@ public:
 
 	std::vector<Node>		m_stlNodeList;
 
+	// isotropic
+
+	// smoothing radius
+	const float h = 1.0f;
+	
+	float Kr = 4.0f;
+	float Ks = 1400.0f;
+	float Kn = 0.5f;
+	int Ne = 25;
 
 public:
 	void BuildingGird(int nWidth, int nHeight, int nDepth, int nResX, int nResY, int nResZ, float thres);
 
 	void ComputeDensity(GLfloat* particlePoses, const int particleNum);
+	void ComputeIsotropicSmoothingDensity(GLfloat* particlePoses, const int particleNum);
 	Mesh* ExcuteMarchingCube();
 
 	float ComputePoly6(float h, float r);
+
+	float WeightFunc(vec3 relativePos, float r);
+
+	// relative pos와 matrix를 인풋으로 받아 float을 return하는 함수
+	float IsotropicSmoothingKernel(glm::vec3 r, glm::mat3 G);
+
+
 	glm::vec3 Interpolation(Node* p1, Node* p2);
 
 	int	FindCellIndex(int nX, int nY, int nZ);

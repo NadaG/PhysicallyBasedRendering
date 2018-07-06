@@ -42,7 +42,7 @@ const int RAY_Y_NUM = 64;
 
 const int QUEUE_SIZE = 128;
 
-const int DEPTH = 3;
+const int DEPTH = 2;
 
 const int SAMPLE_NUM = 1;
 
@@ -279,6 +279,31 @@ __device__ int FindNearestTriangleIdx(Ray ray, Triangle* triangles, int triangle
 	return minIdx;
 }
 
+// TODO 승우
+//class Octree {
+//	Octree *children[8];
+//
+//	static Octree *generate(Triangle *triangles, int numTriangles)
+//	{
+//
+//	}
+//
+//	static void cleanup(Octree *tree)
+//	{
+//	}
+//
+//	__host__ __device__
+//	int FindNearest(Ray ray, float &dist)
+//	{
+//		return 0;
+//	}
+//};
+
+__device__ int FindNearestTriangleIdx(Ray ray, Octree *tree, float& dist)
+{
+	return tree->FindNearest(ray, dist);
+}
+
 // ray의 원점과 가장 가까운 곳에서 intersect하는 sphere의 id를 가져오는 함수
 __device__ int FindNearestSphereIdx(Ray ray, Sphere* spheres, int sphereNum, float& dist)
 {
@@ -479,7 +504,6 @@ __device__ vec4 RayTraceColor(
 
 	Enqueue(rayQueue, ray, rear);
 
-	int nowDepth = 1;
 	vec3 V = -ray.dir;
 
 	for (int i = 1; i < depth; ++i)
@@ -638,13 +662,13 @@ __device__ vec4 RayTraceColor(
 				sumLo += (ambient + Lo + emission) * nowRay.decay;
 				
 				// Path Tracing, BRDF Sampling
-				// sumLo += (ambient * 0.5f + emission) * nowRay.decay;
+				// sumLo += (emission) * nowRay.decay;
 				
 				//////////////////////////////////////////////////////////////////////////////////////////분리선
 
 				for (int j = 0; j < SAMPLE_NUM; ++j)
 				{
-					/*float r = sqrtf(1.0f - 
+					float r = sqrtf(1.0f - 
 						randomNums[(rayIndex * SAMPLE_NUM + j) * 2] * 
 						randomNums[(rayIndex * SAMPLE_NUM + j) * 2]);
 					float phi = 2 * glm::pi<float>() * randomNums[(rayIndex * SAMPLE_NUM + j) * 2 +1];
@@ -658,7 +682,7 @@ __device__ vec4 RayTraceColor(
 						triangles[nearestTriangleIdx].tangent,
 						N,
 						triangles[nearestTriangleIdx].bitangent);
-					randomVec = TNB * normalize(randomVec);*/
+					randomVec = TNB * normalize(randomVec);
 
 					Ray reflectRay;
 
@@ -667,7 +691,7 @@ __device__ vec4 RayTraceColor(
 
 					// Path Tracing
 					// reflectRay.dir = normalize(randomVec);
-					// reflectRay.decay = ray.decay / SAMPLE_NUM;
+					// reflectRay.decay = ray.decay / SAMPLE_NUM * glm::clamp(dot(N, randomVec), 0.0f, 1.0f);
 					
 					// Ray Tracing
 					reflectRay.dir = normalize(reflect(nowRay.dir, N));
@@ -689,8 +713,6 @@ __device__ vec4 RayTraceColor(
 				Enqueue(rayQueue, refractRay, rear);
 			}
 		}
-
-		nowDepth++;
 	}
 
 	// 나오지 못한 queue들 나오게 하기
@@ -839,7 +861,7 @@ __device__ vec4 RayTraceColor(
 			sumLo += (ambient + Lo + emission) * nowRay.decay;
 
 			// Path Tracing, BRDF Sampling
-			// sumLo += (ambient * 0.5f + emission) * nowRay.decay;
+			// sumLo += (emission) * nowRay.decay;
 		}
 	}
 

@@ -9,7 +9,7 @@ class RayTracingRenderer : public Renderer
 {
 public:
 	RayTracingRenderer(SceneManager* sceneManager)
-		:Renderer(sceneManager), gridX(16), gridY(16), sampleNum(16)
+		:Renderer(sceneManager), gridX(16), gridY(16), sampleNum(64)
 	{}
 	virtual ~RayTracingRenderer() {};
 

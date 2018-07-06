@@ -6,7 +6,7 @@ void RayTracingSceneManager::InitializeObjects()
 	// fluid
 	//movingCamera->WorldTranslate(glm::vec3(10.0f, 20.0f, 110.0f));
 	// path tracing
-	movingCamera->WorldTranslate(glm::vec3(0.0f, 20.0f, 120.0f));
+	movingCamera->WorldTranslate(glm::vec3(0.0f, 20.0f, 150.0f));
 	//movingCamera->ModelRotate(glm::vec3(0.0f, 1.0f, 0.0f), 3.141592f);
 
 	// 0, 1, 2, 3, 4
@@ -21,6 +21,7 @@ void RayTracingSceneManager::InitializeObjects()
 	// 줄무늬 텍스쳐
 	planeMat.ambient = 1.0f;
 	planeMat.albedo = glm::vec3(1.0f, 1.0f, 1.0f);
+	//planeMat.emission = glm::vec3(1.0f, 1.0f, 1.0f);
 	planeMat.metallic = 0.0f;
 	planeMat.roughness = 0.5f;
 	planeMat.texId = 1;
@@ -71,8 +72,7 @@ void RayTracingSceneManager::InitializeObjects()
 	bluePlaneMat.roughness = 0.8f;
 	materials.push_back(bluePlaneMat);
 
-	//LoadFluidScene("Obj/PouringFluid/0220.obj");
-	//LoadPathTracingScene();
+	LoadPathTracingScene();
 }
 
 void RayTracingSceneManager::Update()

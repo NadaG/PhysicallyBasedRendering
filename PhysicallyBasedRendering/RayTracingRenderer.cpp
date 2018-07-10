@@ -108,7 +108,7 @@ void RayTracingRenderer::InitializeRender()
 	//OfflineRender("0002.png");
 
 	dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadFluidScene("Obj/PouringFluid/0250.obj");
-	OfflineRender("0002.png");
+	OfflineRender("04.png");
 	Sleep(1000.0f);
 }
 
@@ -144,13 +144,13 @@ void RayTracingRenderer::Render()
 	{
 		for (int j = 0; j < gridX; j++)
 		{
-			//// Path Tracing
-			//std::random_device rd;
-			//std::mt19937 mersenne_engine(rd());
-			//std::uniform_real_distribution<> dis(0.0, 1.0);
+			// Path Tracing
+			std::random_device rd;
+			std::mt19937 mersenne_engine(rd());
+			std::uniform_real_distribution<> dis(0.0, 1.0);
 
-			//auto gen = [&dis, &mersenne_engine]() {return dis(mersenne_engine); };
-			//generate(begin(vec), end(vec), gen);
+			auto gen = [&dis, &mersenne_engine]() {return dis(mersenne_engine); };
+			generate(begin(vec), end(vec), gen);
 
 			RayTrace(output, i, j, view, objects, triangles, spheres, lights, materials, vec);
 		}
@@ -210,12 +210,12 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 		for (int j = 0; j < gridX; j++)
 		{
 			// Path Tracing
-			/*std::random_device rd;
+			std::random_device rd;
 			std::mt19937 mersenne_engine(rd());
 			std::uniform_real_distribution<> dis(0.0, 1.0);
 
 			auto gen = [&dis, &mersenne_engine]() {return dis(mersenne_engine); };
-			generate(begin(vec), end(vec), gen);*/
+			generate(begin(vec), end(vec), gen);
 
 			RayTrace(output, i, j, view, objects, triangles, spheres, lights, materials, vec);
 		}

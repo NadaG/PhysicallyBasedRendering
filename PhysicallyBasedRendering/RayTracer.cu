@@ -31,20 +31,21 @@ struct Ray
 	// Ray의 방향
 	vec3 dir;
 	
+	int depth;
 	float decay;
 };
 
 const int WINDOW_HEIGHT = 1024;
 const int WINDOW_WIDTH = 1024;
 
-const int RAY_X_NUM = 64;
-const int RAY_Y_NUM = 64;
+const int RAY_X_NUM = 32;
+const int RAY_Y_NUM = 32;
 
-const int QUEUE_SIZE = 128;
+const int QUEUE_SIZE = 32;
 
 const int DEPTH = 2;
 
-const int SAMPLE_NUM = 1;
+const int SAMPLE_NUM = 16;
 
 using std::cout;
 using std::endl;
@@ -355,6 +356,7 @@ __device__ Ray GenerateCameraRay(int y, int x, glm::mat4 cameraModelMatrix, int 
 	ray.origin = glm::vec3(cameraModelMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 	ray.dir = normalize(vec3(cameraModelMatrix * vec4(glm::vec3(xx, yy, -1.0), 0.0f)));
 	ray.decay = 1.0f;
+	ray.depth = 1;
 
 	// 만들어진 ray를 return
 	return ray;
@@ -362,19 +364,18 @@ __device__ Ray GenerateCameraRay(int y, int x, glm::mat4 cameraModelMatrix, int 
 
 __device__ void Enqueue(Ray* rayQueue, Ray ray, int& rear)
 {
-	rear = (rear + 1) % QUEUE_SIZE;
 	rayQueue[rear] = ray;
+	rear = (rear + 1) % QUEUE_SIZE;
 }
 
 __device__ void Dequeue(Ray* rayQueue, int& front)
 {
-	Ray ray = rayQueue[front];
 	front = (front + 1) % QUEUE_SIZE;
 }
 
 __device__ Ray GetQueueFront(Ray* rayQueue, const int front)
 {
-	return rayQueue[(front + 1) % QUEUE_SIZE];
+	return rayQueue[front];
 }
 
 __device__ bool IsQueueEmpty(const int front, const int rear)
@@ -505,216 +506,6 @@ __device__ vec4 RayTraceColor(
 
 	vec3 V = -ray.dir;
 
-	for (int i = 1; i < depth; ++i)
-	{
-		int target = rear;
-
-		while (!IsQueueEmpty(target, front))
-		{
-			Ray nowRay;
-			nowRay = GetQueueFront(rayQueue, front);
-			Dequeue(rayQueue, front);
-
-			if (!RayAABBsIntersect(nowRay, objects, objNum))
-				continue;
-
-			vec3 hitPoint = glm::vec3(0.0f);
-			// hit한 object의 material id
-			int materialId = 0;
-			// normal vector
-			vec3 N = glm::vec3(0.0f);
-			vec2 uv = glm::vec2(0.0f);
-			int nearestTriangleIdx = 0;
-			int nearestSphereIdx = 0;
-
-			// hit point의 정보를 가져옴
-			if (GetHitPointInfo(
-				nowRay,
-				triangles,
-				triangleNum,
-				nearestTriangleIdx,
-				spheres,
-				sphereNum,
-				nearestSphereIdx,
-				hitPoint,
-				materialId,
-				N,
-				uv))
-			{
-
-				// ∫Ω(kd c / π + ks DFG / 4(ωo⋅n)(ωi⋅n)) Li(p,ωi) n⋅ωi dωi
-				// radiance * (1.0f * textureColor/pi + 0.0f) * lightcolor * NdotL
-				vec3 albedo;
-				vec3 emission;
-				vec3 F0;
-				float4 texNormal;
-				float ao;
-				float metallic;
-				float roughness;
-
-				vec3 kS;
-				vec3 kD;
-
-				// sphere
-				if (materials[materialId].texId == 0)
-				{
-					float4 texRGBA;
-					texRGBA = tex2D(albedoTex, uv.x, uv.y);
-					albedo = glm::pow(glm::vec3(texRGBA.x, texRGBA.y, texRGBA.z), vec3(2.2));
-
-					texNormal = tex2D(normalTex, uv.x, uv.y);
-					ao = tex2D(aoTex, uv.x, uv.y).x;
-					metallic = tex2D(metallicTex, uv.x, uv.y).x;
-					roughness = tex2D(roughnessTex, uv.x, uv.y).x;
-
-					glm::vec3 texNormalVec = glm::vec3(
-						texNormal.x * 2.0f - 1.0f,
-						texNormal.y * 2.0f - 1.0f,
-						texNormal.z * 2.0f - 1.0f);
-
-					glm::mat3 TBN = glm::mat3(
-						triangles[nearestTriangleIdx].tangent,
-						triangles[nearestTriangleIdx].bitangent,
-						N);
-
-					// TBN의 inverse
-					N = glm::normalize(texNormalVec);
-
-					N = TBN * N;
-				}
-				// plane
-				else if (materials[materialId].texId == 1)
-				{
-					float4 texRGBA;
-					texRGBA = tex2D(backgroundTex, uv.x, uv.y);
-					albedo = glm::pow(glm::vec3(texRGBA.x, texRGBA.y, texRGBA.z), vec3(2.2));
-
-					ao = materials[materialId].ambient;
-					metallic = materials[materialId].metallic;
-					roughness = materials[materialId].roughness;
-					emission = materials[materialId].emission;
-				}
-				// fluid
-				else
-				{
-					albedo = materials[materialId].albedo;
-					ao = materials[materialId].ambient;
-					metallic = materials[materialId].metallic;
-					roughness = materials[materialId].roughness;
-					emission = materials[materialId].emission;
-				}
-
-				// fluid라면
-				if (materials[materialId].refractiveIndex != 0.0f)
-				{
-					F0 = calculateEta(materials[materialId].refractiveIndex);
-				}
-				else
-				{
-					F0 = glm::mix(vec3(0.04f), albedo, metallic);
-				}
-
-				vec3 Lo = vec3(0.0f);
-				for (int k = 0; k < lightNum; k++)
-				{
-					vec3 L = glm::normalize(lights[k].pos - hitPoint);
-					vec3 H = glm::normalize(V + L);
-
-					float distance = glm::distance(lights[k].pos, hitPoint);
-					float attenuation = 1.0 / (distance*distance);
-
-					vec3 radiance = lights[k].color * attenuation;
-
-					float NDF = DistributionGGX(N, H, roughness);
-					float G = GeometrySmith(N, V, L, roughness);
-					vec3 F = fresnelSchlick(glm::max(glm::dot(H, V), 0.0f), F0);
-
-					vec3 nominator = NDF * G * F;
-					float denominator = 4 * glm::max(glm::dot(N, V), 0.0f) * glm::max(glm::dot(N, L), 0.0f) + 0.001f;
-					vec3 specular = nominator / denominator;
-
-					kS = F;
-
-					kD = vec3(1.0) - kS;
-					kD *= (1.0f - metallic);
-
-					vec3 diffuse = kD * albedo / glm::pi<float>();
-
-					float NdotL = glm::clamp(glm::dot(N, L), 0.0f, 1.0f);
-
-					if (!IsLighted(hitPoint, lights[k], triangles, triangleNum, nearestTriangleIdx,
-						spheres, sphereNum, nearestSphereIdx))
-					{
-						// brdf * radiance * NdotL
-						Lo += (diffuse + specular) * radiance * NdotL * 0.1f;
-					}
-					else
-					{
-						// brdf * radiance * NdotL
-						Lo += (diffuse + specular) * radiance * NdotL;
-					}
-				}
-
-				vec3 ambient = vec3(0.03) * albedo * ao;
-
-				// Light Sampling
-				sumLo += (ambient + Lo + emission) * nowRay.decay;
-				
-				// Path Tracing, BRDF Sampling
-				// sumLo += (emission) * nowRay.decay;
-				
-				//////////////////////////////////////////////////////////////////////////////////////////분리선
-
-				for (int j = 0; j < SAMPLE_NUM; ++j)
-				{
-					float r = sqrtf(1.0f - 
-						randomNums[(rayIndex * SAMPLE_NUM + j) * 2] * 
-						randomNums[(rayIndex * SAMPLE_NUM + j) * 2]);
-					float phi = 2 * glm::pi<float>() * randomNums[(rayIndex * SAMPLE_NUM + j) * 2 +1];
-
-					vec3 randomVec = vec3(
-						cosf(phi)*r,
-						randomNums[(rayIndex * SAMPLE_NUM + j) * 2],
-						sinf(phi)*r);
-					
-					glm::mat3 TNB = glm::mat3(
-						triangles[nearestTriangleIdx].tangent,
-						N,
-						triangles[nearestTriangleIdx].bitangent);
-					randomVec = TNB * normalize(randomVec);
-
-					Ray reflectRay;
-
-					// reflect ray의 시작점은 hit point
-					reflectRay.origin = hitPoint + reflectRay.dir * 0.01f;
-
-					// Path Tracing
-					// reflectRay.dir = normalize(randomVec);
-					// reflectRay.decay = ray.decay / SAMPLE_NUM * glm::clamp(dot(N, randomVec), 0.0f, 1.0f);
-					
-					// Ray Tracing
-					reflectRay.dir = normalize(reflect(nowRay.dir, N));
-					reflectRay.decay = kS.r * ray.decay / SAMPLE_NUM;
-					
-					Enqueue(rayQueue, reflectRay, rear);
-				}
-
-				// refract는 ray tracing
-				Ray refractRay;
-				refractRay.dir = normalize(refract(nowRay.dir, N, 1.0f / materials[materialId].refractiveIndex));
-				// refract ray의 시작점은 hit point
-				refractRay.origin = hitPoint + refractRay.dir * 0.01f;
-				// 현재 빛의 감쇠 정도와 물체의 재질에 따라 refract ray의 감쇠 정도가 정해짐
-
-				// 투명한 Object이기 때문에 kD가 refract decay로 들어간 거임
-				refractRay.decay = kD.r * ray.decay;
-
-				Enqueue(rayQueue, refractRay, rear);
-			}
-		}
-	}
-
-	// 나오지 못한 queue들 나오게 하기
 	while (!IsQueueEmpty(front, rear))
 	{
 		Ray nowRay;
@@ -725,12 +516,15 @@ __device__ vec4 RayTraceColor(
 			continue;
 
 		vec3 hitPoint = glm::vec3(0.0f);
+		// hit한 object의 material id
 		int materialId = 0;
+		// normal vector
 		vec3 N = glm::vec3(0.0f);
 		vec2 uv = glm::vec2(0.0f);
 		int nearestTriangleIdx = 0;
 		int nearestSphereIdx = 0;
 
+		// hit point의 정보를 가져옴
 		if (GetHitPointInfo(
 			nowRay,
 			triangles,
@@ -744,6 +538,9 @@ __device__ vec4 RayTraceColor(
 			N,
 			uv))
 		{
+
+			// ∫Ω(kd c / π + ks DFG / 4(ωo⋅n)(ωi⋅n)) Li(p,ωi) n⋅ωi dωi
+			// radiance * (1.0f * textureColor/pi + 0.0f) * lightcolor * NdotL
 			vec3 albedo;
 			vec3 emission;
 			vec3 F0;
@@ -811,6 +608,7 @@ __device__ vec4 RayTraceColor(
 			}
 			else
 			{
+				// metallic이면 F0가 큼, 아니면 작음
 				F0 = glm::mix(vec3(0.04f), albedo, metallic);
 			}
 
@@ -834,6 +632,7 @@ __device__ vec4 RayTraceColor(
 				vec3 specular = nominator / denominator;
 
 				kS = F;
+
 				kD = vec3(1.0) - kS;
 				kD *= (1.0f - metallic);
 
@@ -845,7 +644,7 @@ __device__ vec4 RayTraceColor(
 					spheres, sphereNum, nearestSphereIdx))
 				{
 					// brdf * radiance * NdotL
-					Lo += (diffuse + specular) * radiance * NdotL * 0.2f;
+					Lo += (diffuse + specular) * radiance * NdotL * 0.1f;
 				}
 				else
 				{
@@ -857,10 +656,73 @@ __device__ vec4 RayTraceColor(
 			vec3 ambient = vec3(0.03) * albedo * ao;
 
 			// Light Sampling
-			sumLo += (ambient + Lo + emission) * nowRay.decay;
+			// sumLo += (ambient + Lo + emission) * nowRay.decay;
 
 			// Path Tracing, BRDF Sampling
-			// sumLo += (emission) * nowRay.decay;
+			if (nowRay.depth == 1)
+			{
+				sumLo += (emission);
+			}
+			else
+			{
+				// 원래 attenuation은 1.0 / (distance * distance)임
+				float distance = glm::distance(hitPoint, nowRay.origin);
+				float attenuation = 1.0 / (distance);
+				sumLo += (emission * attenuation) * nowRay.decay;
+			}
+
+			//////////////////////////////////////////////////////////////////////////////////////////분리선
+
+			if (nowRay.depth < DEPTH)
+			{
+				for (int j = 0; j < SAMPLE_NUM; ++j)
+				{
+					float r = sqrtf(1.0f -
+						randomNums[(rayIndex * SAMPLE_NUM + j) * 2] *
+						randomNums[(rayIndex * SAMPLE_NUM + j) * 2]);
+					float phi = 2 * glm::pi<float>() * randomNums[(rayIndex * SAMPLE_NUM + j) * 2 + 1];
+
+					vec3 randomVec = vec3(
+						cosf(phi)*r,
+						randomNums[(rayIndex * SAMPLE_NUM + j) * 2],
+						sinf(phi)*r);
+
+					glm::mat3 TNB = glm::mat3(
+						triangles[nearestTriangleIdx].tangent,
+						N,
+						triangles[nearestTriangleIdx].bitangent);
+					randomVec = TNB * normalize(randomVec);
+
+					Ray reflectRay;
+
+					// reflect ray의 시작점은 hit point
+					reflectRay.origin = hitPoint + reflectRay.dir * 0.01f;
+					reflectRay.depth = nowRay.depth + 1;
+
+					// Path Tracing
+					reflectRay.dir = normalize(randomVec);
+					reflectRay.decay = ray.decay / SAMPLE_NUM * glm::clamp(dot(N, randomVec), 0.0f, 1.0f);
+
+					// Ray Tracing
+					// reflectRay.dir = normalize(reflect(nowRay.dir, N));
+					// reflectRay.decay = kS.r * nowRay.decay / SAMPLE_NUM;
+
+					Enqueue(rayQueue, reflectRay, rear);
+				}
+
+				// refract는 ray tracing
+				Ray refractRay;
+				refractRay.dir = normalize(refract(nowRay.dir, N, 1.0f / materials[materialId].refractiveIndex));
+				// refract ray의 시작점은 hit point
+				refractRay.origin = hitPoint + refractRay.dir * 0.01f;
+				// 현재 빛의 감쇠 정도와 물체의 재질에 따라 refract ray의 감쇠 정도가 정해짐
+
+				// 투명한 Object이기 때문에 kD가 refract decay로 들어간 거임
+				refractRay.decay = kD.r * nowRay.decay;
+				refractRay.depth = nowRay.depth + 1;
+
+				Enqueue(rayQueue, refractRay, rear);
+			}
 		}
 	}
 

@@ -13,19 +13,21 @@ void FluidSceneManager::InitializeObjects()
 	sceneObjs.push_back(skyboxObj);
 	sceneObjs[1].Scale(glm::vec3(10.0f));
 
-	movingCamera->WorldTranslate(glm::vec3(0.0f, 40.0f, 40.0f));
-	movingCamera->ModelRotate(glm::vec3(1.0f, 0.0f, 0.0f), -0.9f);
+	//movingCamera->WorldTranslate(glm::vec3(0.0f, 0.0f, 60.0f));
+
+
 }
 
 void FluidSceneManager::Update()
 {
 	movingCamera->Update();
 
-	//movingCamera->ModelTranslate(glm::vec3(0.0f, 0.01f, 0.01f));
+	//movingCamera->ModelTranslate(glm::vec3(-0.55f, 0.0f, 0.0f));
+	//movingCamera->ModelRotate(glm::vec3(0.0f, 1.0f, 0.0f), -0.008f);
 
-	/*movingCamera->ModelTranslate(glm::vec3(0.0f, -10.0f, -50.0f));
-	movingCamera->ModelRotate(glm::vec3(0.0f, 1.0f, 0.0f), -0.01f);
-	movingCamera->ModelTranslate(glm::vec3(0.0f, 10.0f, 50.0f));*/
+	movingCamera->SetPosition(glm::vec3());
+	movingCamera->ModelRotate(glm::vec3(0.0f, 1.0f, 0.0f), 0.01f);
+	movingCamera->ModelTranslate(glm::vec3(0.0f, 0.0f, 67.0f));
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_A))
 	{

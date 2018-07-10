@@ -26,6 +26,7 @@ public:
 	void Log(const double dnum);
 	void Log(const unsigned char& c);
 	void Log(const string& str);
+	void Log(const glm::mat3 mat);
 	void Log(const glm::mat4 mat);
 	void Log(const glm::vec3 vec);
 	void Log(const glm::vec2 vec);

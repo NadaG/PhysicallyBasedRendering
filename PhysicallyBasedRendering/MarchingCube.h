@@ -10,7 +10,10 @@
 #include <vector>
 #include <unordered_map>
 
-#include "MarchingMesh.h"
+#include <Eigen/Dense>
+#include <Eigen/SVD>
+
+#include "Model.h"
 #include "MCTable.h"
 #include "Mesh.h"
 
@@ -38,19 +41,22 @@ public:
 	int		m_nNodeResZ;
 
 	float m_DensityThres;
-	float m_KernelDistThres;
 
 	std::vector<Node>		m_stlNodeList;
 
 	// isotropic
 
-	// smoothing radius
-	const float h = 1.0f;
+	// density radius
+	float h;
+	// neighbor radius (average position radius)
+	float r;
 	
-	float Kr = 4.0f;
-	float Ks = 1400.0f;
-	float Kn = 0.5f;
-	int Ne = 25;
+	float Kr;
+	float Ks;
+	float Kn;
+	int Ne;
+
+	float sigma;
 
 public:
 	void BuildingGird(int nWidth, int nHeight, int nDepth, int nResX, int nResY, int nResZ, float thres);
@@ -59,7 +65,7 @@ public:
 	void ComputeIsotropicSmoothingDensity(GLfloat* particlePoses, const int particleNum);
 	Mesh* ExcuteMarchingCube();
 
-	float ComputePoly6(float h, float r);
+	float ComputePoly6(float r);
 
 	float WeightFunc(vec3 relativePos, float r);
 
@@ -71,5 +77,7 @@ public:
 
 	int	FindCellIndex(int nX, int nY, int nZ);
 	int	FindNodeIndex(int nX, int nY, int nZ);
+
+	void PrintDensity();
 };
 

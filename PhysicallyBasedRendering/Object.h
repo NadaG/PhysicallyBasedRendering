@@ -21,6 +21,8 @@ public:
 	// world 좌표계에서의 위치가 translate
 	void ModelTranslate(const glm::vec3& vec);
 
+	void SetPosition(const glm::vec3& vec) { this->positionVector = vec; }
+
 	void ModelRotate(const glm::vec3& vec, float angle);
 	// world 좌표계에서 정의된 axis를 따라서 rotate
 	void WorldRotate(const glm::vec3& vec, float angle);

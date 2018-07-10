@@ -4,6 +4,12 @@ Mesh::Mesh()
 {
 }
 
+Mesh::Mesh(const Mesh & mesh)
+{
+	this->vertices = new Vertex[mesh.vertexNum];
+	//this->indices = new Vertex[mesh.vertexNum];
+}
+
 Mesh::~Mesh()
 {
 }
@@ -109,6 +115,7 @@ void Mesh::SetMesh(aiMesh* mesh)
 				triangles[i].v0normal += triangles[neighborFaceMap[indices[i * 3 + 0]][k]].normal;
 			}
 			triangles[i].v0normal /= neighborFaceMap[indices[i * 3 + 0]].size();
+			vertices[indices[i * 3 + 0]].normal = triangles[i].v0normal;
 
 			triangles[i].v1normal = glm::vec3();
 			for (int k = 0; k < neighborFaceMap[indices[i * 3 + 1]].size(); k++)
@@ -116,6 +123,7 @@ void Mesh::SetMesh(aiMesh* mesh)
 				triangles[i].v1normal += triangles[neighborFaceMap[indices[i * 3 + 1]][k]].normal;
 			}
 			triangles[i].v1normal /= neighborFaceMap[indices[i * 3 + 1]].size();
+			vertices[indices[i * 3 + 1]].normal = triangles[i].v1normal;
 
 			triangles[i].v2normal = glm::vec3();
 			for (int k = 0; k < neighborFaceMap[indices[i * 3 + 2]].size(); k++)
@@ -123,6 +131,7 @@ void Mesh::SetMesh(aiMesh* mesh)
 				triangles[i].v2normal += triangles[neighborFaceMap[indices[i * 3 + 2]][k]].normal;
 			}
 			triangles[i].v2normal /= neighborFaceMap[indices[i * 3 + 2]].size();
+			vertices[indices[i * 3 + 2]].normal = triangles[i].v2normal;
 		}
 	}
 }
@@ -280,6 +289,8 @@ void Mesh::GenerateAndSetVAO()
 {
 	vao.GenVAOVBOIBO();
 
+	Debug::GetInstance()->Log(vertices[0].normal);
+
 	vao.VertexBufferData(sizeof(Vertex) * vertexNum, vertices);
 	vao.IndexBufferData(sizeof(GLuint) * indexNum, indices);
 
@@ -309,9 +320,33 @@ void Mesh::Draw()
 	glDrawElements(GL_TRIANGLES, indexNum, GL_UNSIGNED_INT, 0);
 }
 
+void Mesh::Export(const string mesh)
+{
+	FILE *pFile;
+	char fileName[255];
+
+	sprintf_s(fileName, size_t(fileName), mesh.c_str());
+
+	fopen_s(&pFile, fileName, "w+t");
+
+	for (int i = 0; i < vertexNum; i++)
+	{
+		fprintf(pFile, "v %f %f %f\n", vertices[i].position.x, vertices[i].position.y, vertices[i].position.z);
+	}
+
+	for (int i = 0; i < indexNum; i+=3)
+	{
+		fprintf(pFile, "f %d %d %d\n", indices[i] + 1, indices[i+1] + 1, indices[i+2] + 1);
+	}
+
+	fclose(pFile);
+}
+
 void Mesh::Delete()
 {
 	delete[] vertices;
 	delete[] indices;
 }
+
+
 

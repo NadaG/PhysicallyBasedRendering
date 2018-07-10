@@ -48,6 +48,9 @@ private:
 
 public:
 	Mesh();
+
+	Mesh(const Mesh& mesh);
+
 	virtual ~Mesh();
 
 	void SetMesh(aiMesh* mesh);
@@ -66,6 +69,8 @@ public:
 
 	void Draw();
 	void Delete();
+
+	void Export(const string mesh);
 
 	const glm::vec3& GetAlbedo() { return albedo; }
 

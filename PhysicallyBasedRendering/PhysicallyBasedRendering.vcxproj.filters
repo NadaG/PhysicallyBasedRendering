@@ -243,9 +243,6 @@
     <ClCompile Include="MarchingCube.cpp">
       <Filter>Source Files\MarchingCube</Filter>
     </ClCompile>
-    <ClCompile Include="MarchingMesh.cpp">
-      <Filter>Source Files\MarchingCube</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -561,9 +558,6 @@
       <Filter>Source Files\MarchingCube</Filter>
     </ClInclude>
     <ClInclude Include="MCTable.h">
-      <Filter>Source Files\MarchingCube</Filter>
-    </ClInclude>
-    <ClInclude Include="MarchingMesh.h">
       <Filter>Source Files\MarchingCube</Filter>
     </ClInclude>
   </ItemGroup>

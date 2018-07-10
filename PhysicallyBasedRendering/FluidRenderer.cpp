@@ -149,10 +149,10 @@ void FluidRenderer::InitializeRender()
 		boundarySize.x*resolutionRatio,
 		boundarySize.y*resolutionRatio,
 		boundarySize.z*resolutionRatio,
-		200.0f);
+		1.0f);
 
-	isRenderOnDefaultFBO = false;
-	targetFrame = 400;
+	isRenderOnDefaultFBO = true;
+	targetFrame = 270;
 }
 
 void FluidRenderer::Render()
@@ -176,7 +176,7 @@ void FluidRenderer::Render()
 
 		ScreenSpaceFluidRender();
 
-		outfile += "fluid_screenspace1/";
+		outfile += "fluid_screenspace3/";
 		outfile += tmp;
 		outfile += ".png";
 		pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
@@ -186,7 +186,7 @@ void FluidRenderer::Render()
 		MarchingCubeRender();
 
 		outfile = "";
-		outfile += "fluid_marchingcube1/";
+		outfile += "fluid_marchingcube3/";
 		outfile += tmp;
 		outfile += ".png";
 		pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
@@ -328,7 +328,10 @@ void FluidRenderer::ScreenSpaceFluidRender()
 
 void FluidRenderer::MarchingCubeRender()
 {
+	cout << importer.particleNum << endl;
 	mc.ComputeIsotropicSmoothingDensity(fluidVertices, importer.particleNum);
+	mc.ComputeDensity(fluidVertices, importer.particleNum);
+	
 	fluidMesh = mc.ExcuteMarchingCube();
 
 	glEnable(GL_DEPTH_TEST);
@@ -365,6 +368,12 @@ void FluidRenderer::MarchingCubeRender()
 
 	marchingCubeFluidShader->SetUniformVector3f("L", glm::vec3(0.0f, 100.0f, -10.0f));
 	marchingCubeFluidShader->SetUniformVector3f("eyePos", camera->GetWorldPosition());
+
+	/*Model m;
+	m.Load("mesh_export.obj");
+	m.Draw();*/
+	//Mesh mm = m.GetMesh(0);
+	//mm.Draw();
 
 	fluidMesh->Draw();
 }

@@ -14,8 +14,6 @@ void FluidSceneManager::InitializeObjects()
 	sceneObjs[1].Scale(glm::vec3(10.0f));
 
 	//movingCamera->WorldTranslate(glm::vec3(0.0f, 0.0f, 60.0f));
-
-
 }
 
 void FluidSceneManager::Update()

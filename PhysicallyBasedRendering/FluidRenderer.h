@@ -24,7 +24,7 @@ public:
 	void Render();
 
 	void ScreenSpaceFluidRender();
-	void MarchingCubeRender();
+	void MarchingCubeRender(const string& meshfile);
 
 	void ScreenSpaceFluidOfflineRender();
 	void MartchingCubeOfflineRender();
@@ -104,8 +104,6 @@ private:
 	int targetFrame;
 
 	glm::vec3 boundarySize;
-
-	Mesh* fluidMesh;
 
 	void DrawFluids(const float cameraDist);
 };

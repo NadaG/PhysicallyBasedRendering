@@ -332,7 +332,7 @@ void MarchingCube::ComputeIsotropicSmoothingDensity(GLfloat * particlePoses, con
 	//PrintDensity();
 }
 
-Mesh* MarchingCube::ExcuteMarchingCube()
+void MarchingCube::ExcuteMarchingCube(const string& meshfile)
 {
 	Mesh* mesh = new Mesh;
 	
@@ -450,14 +450,9 @@ Mesh* MarchingCube::ExcuteMarchingCube()
 	mesh->CaculateFaceNormal();
 
 	mesh->GenerateAndSetVAO();
-	mesh->Export("tmp_mesh.obj");
+	mesh->Export(meshfile);
 
-	Model tmpModel;
-	tmpModel.Load("tmp_mesh.obj");
-	Mesh tmpMesh;
-	tmpMesh = tmpModel.GetMesh(0);
-
-	return tmpModel.GetMesh(0);
+	delete mesh;
 }
 
 glm::vec3 MarchingCube::Interpolation(Node* p1, Node* p2)

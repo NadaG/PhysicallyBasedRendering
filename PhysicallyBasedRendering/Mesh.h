@@ -48,9 +48,6 @@ private:
 
 public:
 	Mesh();
-
-	Mesh(const Mesh& mesh);
-
 	virtual ~Mesh();
 
 	void SetMesh(aiMesh* mesh);

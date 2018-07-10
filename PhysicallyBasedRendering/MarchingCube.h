@@ -63,7 +63,7 @@ public:
 
 	void ComputeDensity(GLfloat* particlePoses, const int particleNum);
 	void ComputeIsotropicSmoothingDensity(GLfloat* particlePoses, const int particleNum);
-	Mesh* ExcuteMarchingCube();
+	void ExcuteMarchingCube(const string& meshfile);
 
 	float ComputePoly6(float r);
 

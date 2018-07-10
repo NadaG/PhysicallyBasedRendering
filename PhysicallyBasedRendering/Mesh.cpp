@@ -4,12 +4,6 @@ Mesh::Mesh()
 {
 }
 
-Mesh::Mesh(const Mesh & mesh)
-{
-	this->vertices = new Vertex[mesh.vertexNum];
-	//this->indices = new Vertex[mesh.vertexNum];
-}
-
 Mesh::~Mesh()
 {
 }
@@ -88,11 +82,6 @@ void Mesh::SetMesh(aiMesh* mesh)
 	// vertex에 normal 정보가 없다면 vertex position 정보를 이용해 vertex normal을 구함
 	if (!mesh->HasNormals())
 	{
-		// TODO Fluid Scene
-		/*CaculateFaceNormal();
-		CaculateVertexNormal();*/
-
-		// TODO RayTracing Scene
 		vector<vector<int> > neighborFaceMap;
 		for (int i = 0; i < mesh->mNumVertices; ++i)
 		{
@@ -148,6 +137,7 @@ void Mesh::CaculateFaceNormal()
 	}
 }
 
+// TODO vertex normal을 가져올 수 있도록 duplicate한 vertex들 합치기
 void Mesh::CaculateVertexNormal()
 {
 	for (int i = 0; i < vertexNum; i++)
@@ -288,8 +278,6 @@ void Mesh::LoadMesh(MeshType meshType)
 void Mesh::GenerateAndSetVAO()
 {
 	vao.GenVAOVBOIBO();
-
-	Debug::GetInstance()->Log(vertices[0].normal);
 
 	vao.VertexBufferData(sizeof(Vertex) * vertexNum, vertices);
 	vao.IndexBufferData(sizeof(GLuint) * indexNum, indices);

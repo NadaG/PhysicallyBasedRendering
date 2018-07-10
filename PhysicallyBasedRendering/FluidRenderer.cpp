@@ -151,8 +151,8 @@ void FluidRenderer::InitializeRender()
 		boundarySize.z*resolutionRatio,
 		1.0f);
 
-	isRenderOnDefaultFBO = true;
-	targetFrame = 270;
+	isRenderOnDefaultFBO = false;
+	targetFrame = 150;
 }
 
 void FluidRenderer::Render()
@@ -163,12 +163,12 @@ void FluidRenderer::Render()
 	importer.Update(fluidVertices);
 	fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
 
-	if (isRenderOnDefaultFBO && currentFrame == targetFrame)
+	if (isRenderOnDefaultFBO/* && currentFrame == targetFrame*/)
 	{
-		MarchingCubeRender();
+		MarchingCubeRender("tmp.obj");
 		//ScreenSpaceFluidRender();
 	}
-	else if (!isRenderOnDefaultFBO)
+	else if (!isRenderOnDefaultFBO/* && currentFrame == targetFrame*/)
 	{
 		char tmp[1024];
 		sprintf(tmp, "%04d", currentFrame);
@@ -183,7 +183,11 @@ void FluidRenderer::Render()
 		cout << currentFrame << "번째 screen space 프레임 그리는 중" << endl;
 		Sleep(2000.0f);
 
-		MarchingCubeRender();
+		outfile = "";
+		outfile += "Obj/DroppingFluid/";
+		outfile += tmp;
+		outfile += ".obj";
+		MarchingCubeRender(outfile);
 
 		outfile = "";
 		outfile += "fluid_marchingcube3/";
@@ -192,8 +196,6 @@ void FluidRenderer::Render()
 		pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
 		cout << currentFrame << "번째 marching cube 프레임 그리는 중" << endl;
 		Sleep(2000.0f);
-
-		delete fluidMesh;
 	}
 
 	currentFrame++;
@@ -326,13 +328,11 @@ void FluidRenderer::ScreenSpaceFluidRender()
 	quad.DrawModel();
 }
 
-void FluidRenderer::MarchingCubeRender()
+void FluidRenderer::MarchingCubeRender(const string& meshfile)
 {
 	cout << importer.particleNum << endl;
 	mc.ComputeIsotropicSmoothingDensity(fluidVertices, importer.particleNum);
-	mc.ComputeDensity(fluidVertices, importer.particleNum);
-	
-	fluidMesh = mc.ExcuteMarchingCube();
+	mc.ExcuteMarchingCube(meshfile);
 
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
@@ -369,13 +369,9 @@ void FluidRenderer::MarchingCubeRender()
 	marchingCubeFluidShader->SetUniformVector3f("L", glm::vec3(0.0f, 100.0f, -10.0f));
 	marchingCubeFluidShader->SetUniformVector3f("eyePos", camera->GetWorldPosition());
 
-	/*Model m;
-	m.Load("mesh_export.obj");
-	m.Draw();*/
-	//Mesh mm = m.GetMesh(0);
-	//mm.Draw();
-
-	fluidMesh->Draw();
+	Model m;
+	m.Load(meshfile);
+	m.Draw();
 }
 
 void FluidRenderer::ScreenSpaceFluidOfflineRender()
@@ -392,8 +388,8 @@ void FluidRenderer::MartchingCubeOfflineRender()
 	fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
 
 	mc.ComputeDensity(fluidVertices, importer.particleNum);
-	fluidMesh = mc.ExcuteMarchingCube();
-	MarchingCubeRender();
+	mc.ExcuteMarchingCube("mesh_export.obj");
+	MarchingCubeRender("tmp.obj");
 }
 
 void FluidRenderer::TerminateRender()

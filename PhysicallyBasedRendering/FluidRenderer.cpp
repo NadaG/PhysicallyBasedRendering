@@ -2,7 +2,7 @@
 
 void FluidRenderer::InitializeRender()
 {
-	backgroundColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	backgroundColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 	pbrShader = new ShaderProgram("PBR.vs", "PBR.fs");
 	pbrShader->Use();
@@ -127,9 +127,25 @@ void FluidRenderer::InitializeRender()
 		thicknessBlurFBO[i].BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &thicknessBlurTex[i]);
 	}
 
-	boundarySize = glm::vec3(30.0f, 50.0f, 30.0f);
+	boundarySize = glm::vec3(30.0f, 30.0f, 30.0f);
 	
-	importer.Initialize(boundarySize);
+	FluidCube* cubes = new FluidCube[2];
+
+	cubes[0].size.x = 20;
+	cubes[0].size.y = 20;
+	cubes[0].size.z = 25;
+	cubes[0].pos.x = -8.0f;
+	cubes[0].pos.y = 0.0f;
+	cubes[0].pos.z = -8.0f;
+
+	cubes[1].size.x = 20;
+	cubes[1].size.y = 30;
+	cubes[1].size.z = 25;
+	cubes[1].pos.x = 8.0f;
+	cubes[1].pos.y = 0.0f;
+	cubes[1].pos.z = 8.0f;
+
+	importer.Initialize(boundarySize, cubes, 2);
 	fluidVertices = new GLfloat[importer.particleNum * 6];
 
 	fluidVAO.GenVAOVBOIBO();
@@ -141,7 +157,7 @@ void FluidRenderer::InitializeRender()
 	fluidVAO.VertexAttribPointer(3, 6);
 
 	currentFrame = 0;
-	float resolutionRatio = 2.0f;
+	float resolutionRatio = 3.0f;
 	mc.BuildingGird(
 		boundarySize.x,
 		boundarySize.y,
@@ -149,7 +165,7 @@ void FluidRenderer::InitializeRender()
 		boundarySize.x*resolutionRatio,
 		boundarySize.y*resolutionRatio,
 		boundarySize.z*resolutionRatio,
-		1.0f);
+		1.5f);
 
 	isRenderOnDefaultFBO = false;
 	targetFrame = 150;
@@ -163,7 +179,7 @@ void FluidRenderer::Render()
 	importer.Update(fluidVertices);
 	fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
 
-	if (isRenderOnDefaultFBO/* && currentFrame == targetFrame*/)
+	if (isRenderOnDefaultFBO && currentFrame == targetFrame)
 	{
 		MarchingCubeRender("tmp.obj");
 		//ScreenSpaceFluidRender();
@@ -176,7 +192,7 @@ void FluidRenderer::Render()
 
 		ScreenSpaceFluidRender();
 
-		outfile += "fluid_screenspace3/";
+		outfile += "fluid_screenspace6/";
 		outfile += tmp;
 		outfile += ".png";
 		pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
@@ -190,7 +206,7 @@ void FluidRenderer::Render()
 		MarchingCubeRender(outfile);
 
 		outfile = "";
-		outfile += "fluid_marchingcube3/";
+		outfile += "fluid_marchingcube6/";
 		outfile += tmp;
 		outfile += ".png";
 		pngExporter.WritePngFile(outfile, pngTex, GL_RGB);

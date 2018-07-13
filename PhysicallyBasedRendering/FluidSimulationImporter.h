@@ -8,6 +8,7 @@
 using std::vector;
 
 struct ObstacleSphere;
+struct FluidCube;
 
 class FluidSimulationImporter
 {
@@ -15,7 +16,7 @@ public:
 	FluidSimulationImporter(){}
 	~FluidSimulationImporter(){}
 
-	void Initialize(const glm::vec3 boundarySize);
+	void Initialize(const glm::vec3 boundarySize, FluidCube* cubes, int cubeNum);
 	void Update(GLfloat* v);
 	void Quit();
 

@@ -24,7 +24,10 @@ MarchingCube::MarchingCube(void)
 
 	sigma = 1.0f;
 
-	h = 2.0f;
+	// ±¦ÂúÀº parameter
+	// h = 1.5, thres = 1.5, resolution = 3.0
+
+	h = 1.5f;
 	r = h * 2;
 }
 

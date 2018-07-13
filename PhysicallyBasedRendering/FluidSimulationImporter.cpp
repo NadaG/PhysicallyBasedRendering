@@ -45,11 +45,6 @@ struct SimulationParam
 SimulationParam sparam;
 HMODULE handle;
 
-struct FluidCube
-{
-	float3 pos;
-	int3 size;
-};
 
 struct ObstacleCube
 {
@@ -67,7 +62,7 @@ int(*initialize)(SimulationParam param, FluidCube* cubes, ObstacleCube* obsobjs)
 void(*update)(float* pos, float* vel, int* issur, ObstacleSphere *spheres, int n_spheres);
 void(*quit)();
 
-void FluidSimulationImporter::Initialize(const glm::vec3 boundarySize)
+void FluidSimulationImporter::Initialize(const glm::vec3 boundarySize, FluidCube* cubes, int cubeNum)
 {
 	handle = LoadLibrary(SOLUTION_DIR L"\\x64\\Release\\FLing.dll");
 
@@ -81,7 +76,7 @@ void FluidSimulationImporter::Initialize(const glm::vec3 boundarySize)
 	sparam.boundarySize.x = boundarySize.x;
 	sparam.boundarySize.y = boundarySize.y;
 	sparam.boundarySize.z = boundarySize.z;
-	sparam.objNum = 1;
+	sparam.objNum = cubeNum;
 	sparam.obsobjNum = 0;
 
 	sparam.viscosity = 0.02f;
@@ -97,13 +92,13 @@ void FluidSimulationImporter::Initialize(const glm::vec3 boundarySize)
 
 	sparam.yMaxValue = 10000.0f;
 
-	FluidCube* cubes = new FluidCube[sparam.objNum];
-	cubes[0].size.x = 40;
-	cubes[0].size.y = 40;
-	cubes[0].size.z = 40;
-	cubes[0].pos.x = 0.0f;
+	/*FluidCube* cubes = new FluidCube[sparam.objNum];
+	cubes[0].size.x = 21;
+	cubes[0].size.y = 50;
+	cubes[0].size.z = 50;
+	cubes[0].pos.x = -10.0f;
 	cubes[0].pos.y = 0.0f;
-	cubes[0].pos.z = 0.0f;
+	cubes[0].pos.z = 0.0f;*/
 
 	particleNum = initialize(sparam, cubes, nullptr);
 	

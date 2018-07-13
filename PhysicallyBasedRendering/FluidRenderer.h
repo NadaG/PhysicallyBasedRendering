@@ -12,6 +12,12 @@
 // 다양한 씬 이미지 뽑기
 // auto encoder 수정
 
+struct FluidCube
+{
+	float3 pos;
+	int3 size;
+};
+
 class FluidRenderer : public Renderer
 {
 public:

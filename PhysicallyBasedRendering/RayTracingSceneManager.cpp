@@ -21,10 +21,9 @@ void RayTracingSceneManager::InitializeObjects()
 	// 줄무늬 텍스쳐
 	planeMat.ambient = 1.0f;
 	planeMat.albedo = glm::vec3(1.0f, 1.0f, 1.0f);
-	//planeMat.emission = glm::vec3(1.0f, 1.0f, 1.0f);
 	planeMat.metallic = 0.0f;
 	planeMat.roughness = 0.5f;
-	planeMat.texId = 1;
+	//planeMat.texId = 1;
 	materials.push_back(planeMat);
 
 	// PBR 텍스쳐
@@ -52,22 +51,22 @@ void RayTracingSceneManager::InitializeObjects()
 	Material redPlaneMat, greenPlaneMat, bluePlaneMat;
 
 	redPlaneMat.ambient = 1.0f;
-	redPlaneMat.albedo = glm::vec3(1.0f, 0.0f, 0.0f);
-	redPlaneMat.emission = glm::vec3(1.0f, 0.0f, 0.0f);
+	redPlaneMat.albedo = glm::vec3(0.0f, 0.0f, 0.0f);
+	redPlaneMat.emission = glm::vec3(100.0f, 0.0f, 0.0f);
 	redPlaneMat.metallic = 0.1f;
 	redPlaneMat.roughness = 0.8f;
 	materials.push_back(redPlaneMat);
 
 	greenPlaneMat.ambient = 1.0f;
-	greenPlaneMat.albedo = glm::vec3(0.0f, 1.0f, 0.0f);
-	greenPlaneMat.emission = glm::vec3(0.0f, 1.0f, 0.0f);
+	greenPlaneMat.albedo = glm::vec3(0.0f, 0.0f, 0.0f);
+	greenPlaneMat.emission = glm::vec3(0.0f, 100.0f, 0.0f);
 	greenPlaneMat.metallic = 0.1f;
 	greenPlaneMat.roughness = 1.0f;
 	materials.push_back(greenPlaneMat);
 
 	bluePlaneMat.ambient = 1.0f;
-	bluePlaneMat.albedo = glm::vec3(0.0f, 0.0f, 1.0f);
-	bluePlaneMat.emission = glm::vec3(0.0f, 0.0f, 1.0f);
+	bluePlaneMat.albedo = glm::vec3(0.0f, 0.0f, 0.0f);
+	bluePlaneMat.emission = glm::vec3(0.0f, 0.0f, 100.0f);
 	bluePlaneMat.metallic = 0.1f;
 	bluePlaneMat.roughness = 0.8f;
 	materials.push_back(bluePlaneMat);
@@ -267,7 +266,7 @@ void RayTracingSceneManager::LoadFluidScene(const string meshfile)
 
 	// floor
 	glm::mat4 planeModel = glm::mat4();
-	planeModel = glm::translate(planeModel, glm::vec3(0.0f, -planeSize / 2, 0.0f));
+	planeModel = glm::translate(planeModel, glm::vec3(0.0f, 0.9f, 0.0f));
 	planeModel = glm::scale(planeModel, glm::vec3(planeSize, 1.0f, planeSize));
 	InsertTriangles(LoadPlaneTriangles(planeModel, 1));
 

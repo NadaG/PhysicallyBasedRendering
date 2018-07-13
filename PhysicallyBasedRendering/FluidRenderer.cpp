@@ -167,7 +167,7 @@ void FluidRenderer::InitializeRender()
 		boundarySize.z*resolutionRatio,
 		1.5f);
 
-	isRenderOnDefaultFBO = false;
+	isRenderOnDefaultFBO = true;
 	targetFrame = 150;
 }
 
@@ -179,10 +179,10 @@ void FluidRenderer::Render()
 	importer.Update(fluidVertices);
 	fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
 
-	if (isRenderOnDefaultFBO && currentFrame == targetFrame)
+	if (isRenderOnDefaultFBO /*&& currentFrame == targetFrame*/)
 	{
-		MarchingCubeRender("tmp.obj");
-		//ScreenSpaceFluidRender();
+		//MarchingCubeRender("tmp.obj");
+		ScreenSpaceFluidRender();
 	}
 	else if (!isRenderOnDefaultFBO/* && currentFrame == targetFrame*/)
 	{

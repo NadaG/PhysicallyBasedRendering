@@ -29,7 +29,7 @@ enum Scene
 // TODO shader 불러오고 사용하고 그리는 부분 중복되는 부분이 너무 많은데 그 부분들 수정하기
 int main(int argc, char **argv)
 {
-	Scene scene = FLUID_SCENE;
+	Scene scene = RAYTRACING_SCENE;
 
 	WindowManager::GetInstance()->Initialize();
 

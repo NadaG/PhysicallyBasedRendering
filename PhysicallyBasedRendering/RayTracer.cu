@@ -43,7 +43,7 @@ const int RAY_Y_NUM = 32;
 
 const int QUEUE_SIZE = 32;
 
-const int DEPTH = 2;
+const int DEPTH = 3;
 
 const int SAMPLE_NUM = 16;
 
@@ -280,28 +280,111 @@ __device__ int FindNearestTriangleIdx(Ray ray, Triangle* triangles, int triangle
 	return minIdx;
 }
 
-// TODO 승우
-//class Octree {
-//	Octree *children[8];
-//
-//	static Octree *generate(Triangle *triangles, int numTriangles)
-//	{
-//
-//	}
-//
-//	static void cleanup(Octree *tree)
-//	{
-//	}
-//
-//	__host__ __device__
-//	int FindNearest(Ray ray, float &dist)
-//	{
-//		return 0;
-//	}
-//};
-//__device__ int FindNearestTriangleIdx(Ray ray, Octree *tree, float& dist)
+//__device__ bool RayTraversal(OctreeNode* root, Ray ray)
 //{
-//	return tree->FindNearest(ray, dist);
+//	//return false;
+//
+//	if (ray.dir.x == 0)
+//		return true;
+//
+//	if (ray.dir.y == 0)
+//		return true;
+//
+//	if (ray.dir.z == 0)
+//		return true;
+//
+//	if (ray.dir.x < 0)
+//	{
+//		ray.origin.x = root->bnd.bounds[0].x + root->bnd.bounds[1].x - ray.origin.x;
+//		ray.dir.x = -ray.dir.x;
+//	}
+//	if (ray.dir.y < 0)
+//	{
+//		ray.origin.y = root->bnd.bounds[0].y + root->bnd.bounds[1].y - ray.origin.y;
+//		ray.dir.y = -ray.dir.y;
+//	}
+//	if (ray.dir.z < 0)
+//	{
+//		ray.origin.z = root->bnd.bounds[0].z + root->bnd.bounds[1].z - ray.origin.z;
+//		ray.dir.z = -ray.dir.z;
+//	}
+//
+//	double divx = 1 / ray.dir.x;
+//	double divy = 1 / ray.dir.y;
+//	double divz = 1 / ray.dir.z;
+//
+//	double tx0 = (root->bnd.bounds[0].x - ray.origin.x) * divx;
+//	double tx1 = (root->bnd.bounds[1].x - ray.origin.x) * divx;
+//	double ty0 = (root->bnd.bounds[0].y - ray.origin.y) * divy;
+//	double ty1 = (root->bnd.bounds[1].y - ray.origin.y) * divy;
+//	double tz0 = (root->bnd.bounds[0].z - ray.origin.z) * divz;
+//	double tz1 = (root->bnd.bounds[1].z - ray.origin.z) * divz;
+//
+//	if (max(max(tx0, ty0), tz0) <= min(min(tx1, ty1), tz1))
+//		return true;
+//	else
+//		return false;
+//
+//}
+//
+//__device__ void RayTreeTraversal(OctreeNode* root, Ray ray, int& minIdx, float& tmpDist, Triangle* triangles, const float& rayThreshold, float& minDist)
+//{
+//	if (RayTraversal(root, ray))
+//	{
+//		int a = 0;
+//
+//		for (int i = 0; i < 8; i++)
+//		{
+//			if (root->children[i] != nullptr)
+//			{
+//				RayTreeTraversal(root->children[i], ray, minIdx, tmpDist, triangles, rayThreshold, minDist);
+//				a++;
+//			}
+//		}
+//
+//		if (a == 0)
+//		{
+//			for (int i = 0; i < root->triangleIdx.size(); i++)
+//			{
+//				//idx->push_back(newIdx.operator[](i));
+//				if (RayTriangleIntersect(ray, triangles[root->triangleIdx.operator[](i)], tmpDist))
+//				{
+//					if (tmpDist > rayThreshold && tmpDist < minDist)
+//					{
+//						minDist = tmpDist;
+//						minIdx = root->triangleIdx.operator[](i);
+//					}
+//				}
+//			}
+//
+//		}
+//	}
+//}
+//
+//__device__ int FindNearestTriangleIdx(Ray ray, Triangle* triangles, OctreeNode* root, float& dist)
+//{
+//	const float rayThreshold = 0.01f;
+//	float minDist = 9999999.0f;
+//	int minIdx = -1;
+//	float tmpDist;
+//
+//
+//	RayTreeTraversal(root, ray, minIdx, tmpDist, triangles, rayThreshold, minDist);	//	전체 삼각형 중 해당 ray가 지나가는 node에 있는 것만 골라낸다.
+//
+//	/*for (int i = 0; i < idx->size(); ++i)
+//	{
+//		if (RayTriangleIntersect(ray, triangles[idx->operator[](i)], tmpDist))
+//		{
+//			if (tmpDist > rayThreshold && tmpDist < minDist)
+//			{
+//				minDist = tmpDist;
+//				minIdx = idx->operator[](i);
+//			}
+//		}
+//	}*/
+//
+//	dist = minDist;
+//	return minIdx;
 //}
 
 // ray의 원점과 가장 가까운 곳에서 intersect하는 sphere의 id를 가져오는 함수
@@ -451,10 +534,12 @@ __device__ bool GetHitPointInfo(
 	vec3& hitPoint, 
 	int& materialId, 
 	vec3& N,
-	vec2& uv)
+	vec2& uv,
+	OctreeNode* root)
 {
 	float distToTriangle, distToSphere, distToAreaLight = 0.0f;
 	nearestTriangleIdx = FindNearestTriangleIdx(nowRay, triangles, triangleNum, distToTriangle);
+	//nearestTriangleIdx = FindNearestTriangleIdx(nowRay, triangles, root, distToTriangle);
 	nearestSphereIdx = FindNearestSphereIdx(nowRay, spheres, sphereNum, distToSphere);
 
 	// 아무곳도 intersect를 못했다거나 뒤쪽에 있다면
@@ -497,7 +582,8 @@ __device__ vec4 RayTraceColor(
 	Material* materials,
 	int matNum,
 	float* randomNums,
-	int depth)
+	int depth,
+	OctreeNode* root)
 {
 	vec3 sumLo = vec3(0.0f, 0.0f, 0.0f);
 	int front = 0, rear = 0;
@@ -536,7 +622,8 @@ __device__ vec4 RayTraceColor(
 			hitPoint,
 			materialId,
 			N,
-			uv))
+			uv,
+			root))
 		{
 
 			// ∫Ω(kd c / π + ks DFG / 4(ωo⋅n)(ωi⋅n)) Li(p,ωi) n⋅ωi dωi
@@ -659,16 +746,23 @@ __device__ vec4 RayTraceColor(
 			// sumLo += (ambient + Lo + emission) * nowRay.decay;
 
 			// Path Tracing, BRDF Sampling
-			if (nowRay.depth == 1)
+			// 광원에 닿았으면
+			if (emission.x > 0.0f || emission.y > 0.0f || emission.z > 0.0f)
 			{
-				sumLo += (emission);
+				if (nowRay.depth == 1)
+				{
+					sumLo += emission * nowRay.decay;
+				}
+				else
+				{
+					float distance = glm::distance(hitPoint, nowRay.origin);
+					float attenuation = 1.0f / (distance * distance);
+					sumLo += emission * attenuation * nowRay.decay;
+				}
 			}
 			else
 			{
-				// 원래 attenuation은 1.0 / (distance * distance)임
-				float distance = glm::distance(hitPoint, nowRay.origin);
-				float attenuation = 1.0 / (distance);
-				sumLo += (emission * attenuation) * nowRay.decay;
+				sumLo += (ambient + Lo) * nowRay.decay;
 			}
 
 			//////////////////////////////////////////////////////////////////////////////////////////분리선
@@ -694,28 +788,29 @@ __device__ vec4 RayTraceColor(
 					randomVec = TNB * normalize(randomVec);
 
 					Ray reflectRay;
-
-					// reflect ray의 시작점은 hit point
-					reflectRay.origin = hitPoint + reflectRay.dir * 0.01f;
-					reflectRay.depth = nowRay.depth + 1;
-
-					// Path Tracing
-					reflectRay.dir = normalize(randomVec);
-					reflectRay.decay = ray.decay / SAMPLE_NUM * glm::clamp(dot(N, randomVec), 0.0f, 1.0f);
-
+					
+					// 여기서 kS.r을 쓴 이유는 reflect ray 하나만 쓰기 때문에 한 것
 					// Ray Tracing
 					// reflectRay.dir = normalize(reflect(nowRay.dir, N));
 					// reflectRay.decay = kS.r * nowRay.decay / SAMPLE_NUM;
+					
+					// Path Tracing
+					reflectRay.dir = normalize(randomVec);
+					reflectRay.decay = nowRay.decay * glm::clamp(dot(N, reflectRay.dir), 0.0f, 1.0f) / SAMPLE_NUM;
+					
+					// reflect ray의 시작점은 hit point
+					reflectRay.depth = nowRay.depth + 1;
+					reflectRay.origin = hitPoint + reflectRay.dir * 0.05f;
 
 					Enqueue(rayQueue, reflectRay, rear);
 				}
 
 				// refract는 ray tracing
 				Ray refractRay;
+				refractRay.origin = hitPoint + refractRay.dir * 0.05f;
+				// 현재 빛의 감쇠 정도와 물체의 재질에 따라 refract ray의 감쇠 정도가 정해짐
 				refractRay.dir = normalize(refract(nowRay.dir, N, 1.0f / materials[materialId].refractiveIndex));
 				// refract ray의 시작점은 hit point
-				refractRay.origin = hitPoint + refractRay.dir * 0.01f;
-				// 현재 빛의 감쇠 정도와 물체의 재질에 따라 refract ray의 감쇠 정도가 정해짐
 
 				// 투명한 Object이기 때문에 kD가 refract decay로 들어간 거임
 				refractRay.decay = kD.r * nowRay.decay;
@@ -746,7 +841,8 @@ __global__ void RayTraceD(
 	Sphere* spheres, int sphereNum,
 	Light* lights, int lightNum,
 	Material* materials, int matNum,
-	float* randomNums)
+	float* randomNums,
+	OctreeNode* root)
 {
 	//unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
 	unsigned int x = (blockIdx.x + gridY * RAY_Y_NUM) * WINDOW_HEIGHT + (threadIdx.x + gridX * RAY_X_NUM);
@@ -778,7 +874,8 @@ __global__ void RayTraceD(
 				materials,
 				matNum,
 				randomNums,
-				DEPTH);
+				DEPTH,
+				root);
 		}
 	}
 
@@ -820,6 +917,20 @@ void RayTrace(
 
 	cudaDeviceSetLimit(cudaLimitMallocHeapSize, 5000000000 * sizeof(float));
 
+	// 
+	vec3 min = vec3(-30, -30, -30);
+	vec3 max = vec3(30, 30, 30);
+
+	int tnum = t.size();
+
+	printf("Num Triangles: %d\n", tnum);
+
+	OctreeNode* root = BuildOctree((Triangle *)triangles.data(), tnum, 1000, min, max);
+
+	OctreeNode* octree = OTHostToDevice(root);
+
+	cout << "ray trace device start" << endl;
+
 	RayTraceD << <RAY_Y_NUM, RAY_X_NUM >> > (
 		data,
 		gridX,
@@ -835,8 +946,11 @@ void RayTrace(
 		l.size(),
 		m.data().get(),
 		m.size(),
-		rnums.data().get()
+		rnums.data().get(),
+		octree
 	);
+
+	cout << "ray trace device end" << endl;
 }
 
 void LoadCudaTextures()

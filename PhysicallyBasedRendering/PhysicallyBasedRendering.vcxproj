@@ -208,6 +208,7 @@
     <None Include="FresnelDiffraction.fs" />
     <None Include="MarchingCubeFluid.fs" />
     <None Include="Multiply.fs" />
+    <None Include="NormalPhong.fs" />
     <None Include="Primitive.fs" />
     <None Include="Primitive.vs" />
     <None Include="Pupil.fs" />

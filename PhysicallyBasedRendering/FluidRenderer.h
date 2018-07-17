@@ -29,11 +29,10 @@ public:
 	void InitializeRender();
 	void Render();
 
-	void ScreenSpaceFluidRender();
-	void MarchingCubeRender(const string& meshfile);
+	void ScreenSpaceFluidNormalRender();
+	void MarchingCubeFluidNormalRender(const string& meshfile);
 
-	void ScreenSpaceFluidOfflineRender();
-	void MartchingCubeOfflineRender();
+	void PhongRenderUsingNormalMap(const string& imgfile);
 
 	void TerminateRender(); 
 
@@ -47,6 +46,8 @@ private:
 	ShaderProgram* pbrShader;
 
 	ShaderProgram* marchingCubeFluidShader;
+
+	ShaderProgram* phongShader;
 
 	////debugøÎ¿”
 	//ShaderProgram* textureShader;
@@ -64,6 +65,8 @@ private:
 
 	Texture2D depthTex;
 	Texture2D thicknessTex;
+
+	Texture2D normalTex;
 	
 	RenderBufferObject tmpDepthRBO;
 	
@@ -85,7 +88,10 @@ private:
 	const float pointSize = 800.0f;
 
 	FrameBufferObject pbrFBO;
-	FrameBufferObject depthThicknessFBO;
+	
+	FrameBufferObject depthFBO;
+	FrameBufferObject thicknessFBO;
+
 	FrameBufferObject depthBlurFBO[2];
 	FrameBufferObject thicknessBlurFBO[2];
 

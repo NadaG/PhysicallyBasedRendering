@@ -155,6 +155,48 @@ void Texture::LoadDepthTexture(const float& width, const float& height)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 }
 
+void Texture::UpdateTexture(const string & s)
+{
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	int width, height, nrComponents;
+	unsigned char* data = stbi_load(s.c_str(), &width, &height, &nrComponents, 0);
+
+	if (data)
+	{
+		// input할 데이터의 format, 혹은 output할 데이터의 format
+		// input할 데이터의 type은 GL_UNSIGNED_BYTE임
+		GLenum format;
+		if (nrComponents == 1)
+		{
+			format = GL_RED;
+		}
+		else if (nrComponents == 3)
+		{
+			format = GL_RGB;
+		}
+		else if (nrComponents == 4)
+		{
+			format = GL_RGBA;
+		}
+
+		// tgba32f 타입의 변수로 텍스쳐 메모리에 저장
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		this->width = width;
+		this->height = height;
+
+		stbi_image_free(data);
+	}
+	else
+	{
+		cout << "Texture failed to load at path: " << s << endl;
+		cout << stbi_failure_reason();
+		stbi_image_free(data);
+	}
+}
+
 void Texture::UpdateTexture(float* data, GLenum format, GLenum type)
 {
 	glBindTexture(GL_TEXTURE_2D, texture);

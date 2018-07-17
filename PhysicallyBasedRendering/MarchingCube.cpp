@@ -27,7 +27,7 @@ MarchingCube::MarchingCube(void)
 	// ±¦ÂúÀº parameter
 	// h = 1.5, thres = 1.5, resolution = 3.0
 
-	h = 1.5f;
+	h = 2.0f;
 	r = h * 2;
 }
 
@@ -294,7 +294,7 @@ void MarchingCube::ComputeIsotropicSmoothingDensity(GLfloat * particlePoses, con
 		int j = translatedParticlePos.y / ((float)m_nHeight / (float)m_nResY);
 		int i = translatedParticlePos.z / ((float)m_nDepth / (float)m_nResZ);
 
-		const int halfWidth = 5;
+		const int halfWidth = 8;
 		const int nodeNum = (halfWidth * 2 + 1) * (halfWidth * 2 + 1) * (halfWidth * 2 + 1);
 
 		int nNodes[nodeNum];

@@ -118,9 +118,9 @@ void FluidSimulationImporter::Update(GLfloat* v)
 	{
 		for (int i = 0; i < particleNum; i++)
 		{
-			stopFramePos[i * 3 + 0] = pos[i * 3 + 0] * 0.8f;
-			stopFramePos[i * 3 + 1] = pos[i * 3 + 1] * 0.8f;
-			stopFramePos[i * 3 + 2] = pos[i * 3 + 2] * 0.8f;
+			stopFramePos[i * 3 + 0] = pos[i * 3 + 0];
+			stopFramePos[i * 3 + 1] = pos[i * 3 + 1];
+			stopFramePos[i * 3 + 2] = pos[i * 3 + 2];
 		}
 	}
 	else if(nowFrame > toStopFrame)
@@ -139,12 +139,12 @@ void FluidSimulationImporter::Update(GLfloat* v)
 	{
 		for (int i = 0; i < particleNum; i++)
 		{
-			v[i * 6 + 0] = pos[i * 3 + 0] * 0.8f;
-			v[i * 6 + 1] = pos[i * 3 + 1] * 0.8f;
-			v[i * 6 + 2] = pos[i * 3 + 2] * 0.8f;
-			v[i * 6 + 4] = vel[i * 3 + 0] * 0.8f;
-			v[i * 6 + 5] = vel[i * 3 + 1] * 0.8f;
-			v[i * 6 + 6] = vel[i * 3 + 2] * 0.8f;
+			v[i * 6 + 0] = pos[i * 3 + 0];
+			v[i * 6 + 1] = pos[i * 3 + 1];
+			v[i * 6 + 2] = pos[i * 3 + 2];
+			v[i * 6 + 4] = vel[i * 3 + 0];
+			v[i * 6 + 5] = vel[i * 3 + 1];
+			v[i * 6 + 6] = vel[i * 3 + 2];
 		}
 	}
 }

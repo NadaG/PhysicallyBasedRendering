@@ -23,7 +23,7 @@ void RayTracingSceneManager::InitializeObjects()
 	planeMat.albedo = glm::vec3(1.0f, 1.0f, 1.0f);
 	planeMat.metallic = 0.0f;
 	planeMat.roughness = 0.5f;
-	//planeMat.texId = 1;
+	planeMat.texId = 1;
 	materials.push_back(planeMat);
 
 	// PBR ÅØ½ºÃÄ
@@ -233,63 +233,63 @@ void RayTracingSceneManager::LoadFluidScene(const string meshfile)
 	light.color = glm::vec3(500.0f, 500.0f, 500.0f);
 	lights.push_back(light);
 
-	/*Sphere sphere;
+	Sphere sphere;
 	sphere.origin = light.pos;
 	sphere.radius = 1.0f;
 	sphere.materialId = 3;
-	spheres.push_back(sphere);*/
-
-	//// floor
-	//glm::mat4 planeModel = glm::mat4();
-	//planeModel = glm::translate(planeModel, glm::vec3(0.0f, 1.0f, 0.0f));
-	//planeModel = glm::scale(planeModel, glm::vec3(100.0f, 1.0f, 100.0f));
-	//InsertTriangles(LoadPlaneTriangles(planeModel, 1));
-
-	//// back
-	//planeModel = glm::mat4();
-	//planeModel = glm::translate(planeModel, glm::vec3(0.0f, 1.0f, -50.0f));
-	//planeModel = glm::rotate(planeModel, 1.57079f, glm::vec3(1.0f, 0.0f, 0.0f));
-	//planeModel = glm::scale(planeModel, glm::vec3(100.0f, 1.0f, 100.0f));
-	//InsertTriangles(LoadPlaneTriangles(planeModel, 1));
-
-	//// rusted iron sphere 1
-	//glm::mat4 sphereModel = glm::mat4();
-	//sphereModel = glm::translate(sphereModel, glm::vec3(10.0f, 20.0f, 0.0f));
-	//sphereModel = glm::scale(sphereModel, glm::vec3(10.0f, 10.0f, 10.0f));
-	//InsertTriangles(LoadMeshTriangles("Obj/Sphere.obj", sphereModel, 2));
-
-	//// rusted iron sphere 2
-	//sphereModel = glm::mat4();
-	//sphereModel = glm::translate(sphereModel, glm::vec3(25.0f, 25.0f, 0.0f));
-	//sphereModel = glm::scale(sphereModel, glm::vec3(5.0f, 5.0f, 5.0f));
-	//InsertTriangles(LoadMeshTriangles("Obj/Sphere.obj", sphereModel, 2));
+	spheres.push_back(sphere);
 
 	// floor
 	glm::mat4 planeModel = glm::mat4();
-	planeModel = glm::translate(planeModel, glm::vec3(0.0f, 0.9f, 0.0f));
-	planeModel = glm::scale(planeModel, glm::vec3(planeSize, 1.0f, planeSize));
+	planeModel = glm::translate(planeModel, glm::vec3(0.0f, 1.0f, 0.0f));
+	planeModel = glm::scale(planeModel, glm::vec3(100.0f, 1.0f, 100.0f));
 	InsertTriangles(LoadPlaneTriangles(planeModel, 1));
 
-	// g, back 
+	// back
 	planeModel = glm::mat4();
-	planeModel = glm::translate(planeModel, glm::vec3(0.0f, 0.0f, -50.0f));
+	planeModel = glm::translate(planeModel, glm::vec3(0.0f, 1.0f, -50.0f));
 	planeModel = glm::rotate(planeModel, 1.57079f, glm::vec3(1.0f, 0.0f, 0.0f));
-	planeModel = glm::scale(planeModel, glm::vec3(planeSize, 1.0f, planeSize));
-	InsertTriangles(LoadPlaneTriangles(planeModel, 6));
+	planeModel = glm::scale(planeModel, glm::vec3(100.0f, 1.0f, 100.0f));
+	InsertTriangles(LoadPlaneTriangles(planeModel, 1));
 
-	// r, left
-	planeModel = glm::mat4();
-	planeModel = glm::translate(planeModel, glm::vec3(45.0f, 0.0f, 0.0f));
-	planeModel = glm::rotate(planeModel, 1.57079f, glm::vec3(0.0f, 0.0f, 1.0f));
-	planeModel = glm::scale(planeModel, glm::vec3(planeSize, 1.0f, planeSize));
-	InsertTriangles(LoadPlaneTriangles(planeModel, 7));
+	// rusted iron sphere 1
+	glm::mat4 sphereModel = glm::mat4();
+	sphereModel = glm::translate(sphereModel, glm::vec3(10.0f, 20.0f, 0.0f));
+	sphereModel = glm::scale(sphereModel, glm::vec3(10.0f, 10.0f, 10.0f));
+	InsertTriangles(LoadMeshTriangles("Obj/Sphere.obj", sphereModel, 2));
 
-	// b, right
-	planeModel = glm::mat4();
-	planeModel = glm::translate(planeModel, glm::vec3(-45.0f, 0.0f, 0.0f));
-	planeModel = glm::rotate(planeModel, 1.57079f, glm::vec3(0.0f, 0.0f, -1.0f));
-	planeModel = glm::scale(planeModel, glm::vec3(planeSize, 1.0f, planeSize));
-	InsertTriangles(LoadPlaneTriangles(planeModel, 5));
+	// rusted iron sphere 2
+	sphereModel = glm::mat4();
+	sphereModel = glm::translate(sphereModel, glm::vec3(25.0f, 25.0f, 0.0f));
+	sphereModel = glm::scale(sphereModel, glm::vec3(5.0f, 5.0f, 5.0f));
+	InsertTriangles(LoadMeshTriangles("Obj/Sphere.obj", sphereModel, 2));
+
+	//// floor
+	//glm::mat4 planeModel = glm::mat4();
+	//planeModel = glm::translate(planeModel, glm::vec3(0.0f, 0.9f, 0.0f));
+	//planeModel = glm::scale(planeModel, glm::vec3(planeSize, 1.0f, planeSize));
+	//InsertTriangles(LoadPlaneTriangles(planeModel, 1));
+
+	//// g, back 
+	//planeModel = glm::mat4();
+	//planeModel = glm::translate(planeModel, glm::vec3(0.0f, 0.0f, -50.0f));
+	//planeModel = glm::rotate(planeModel, 1.57079f, glm::vec3(1.0f, 0.0f, 0.0f));
+	//planeModel = glm::scale(planeModel, glm::vec3(planeSize, 1.0f, planeSize));
+	//InsertTriangles(LoadPlaneTriangles(planeModel, 6));
+
+	//// r, left
+	//planeModel = glm::mat4();
+	//planeModel = glm::translate(planeModel, glm::vec3(45.0f, 0.0f, 0.0f));
+	//planeModel = glm::rotate(planeModel, 1.57079f, glm::vec3(0.0f, 0.0f, 1.0f));
+	//planeModel = glm::scale(planeModel, glm::vec3(planeSize, 1.0f, planeSize));
+	//InsertTriangles(LoadPlaneTriangles(planeModel, 7));
+
+	//// b, right
+	//planeModel = glm::mat4();
+	//planeModel = glm::translate(planeModel, glm::vec3(-45.0f, 0.0f, 0.0f));
+	//planeModel = glm::rotate(planeModel, 1.57079f, glm::vec3(0.0f, 0.0f, -1.0f));
+	//planeModel = glm::scale(planeModel, glm::vec3(planeSize, 1.0f, planeSize));
+	//InsertTriangles(LoadPlaneTriangles(planeModel, 5));
 
 	// fluid
 	InsertTriangles(LoadMeshTriangles(meshfile, glm::mat4(), 0));

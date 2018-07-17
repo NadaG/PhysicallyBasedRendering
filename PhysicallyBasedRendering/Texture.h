@@ -41,6 +41,7 @@ public:
 		const GLenum& type);
 
 
+	void UpdateTexture(const string& s);
 	void UpdateTexture(float* data, GLenum format, GLenum type);
 
 	// depth를 받는 texture, 포맷이 depth로 고정되어 있고, 타입은 float이다.

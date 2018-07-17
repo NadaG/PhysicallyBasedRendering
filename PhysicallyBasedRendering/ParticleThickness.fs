@@ -2,7 +2,7 @@
 
 in vec3 eyeSpacePos;
 
-layout(location = 2) out vec3 thickness;
+layout(location = 0) out vec3 thickness;
 
 void main()
 {

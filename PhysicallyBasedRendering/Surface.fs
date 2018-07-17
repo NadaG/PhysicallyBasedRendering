@@ -27,7 +27,7 @@ float fresnel(vec3 n, vec3 v)
 	float F0 = 0.0;
 	float cosTheta = dot(normalize(n), normalize(v));
 
-	return F0 + (1 - F0)*pow(1 - cosTheta, 5);
+	return F0 + (1 - F0) * pow(1 - cosTheta, 5);
 }
 
 vec3 getEyePos(sampler2D tex, vec2 uv)
@@ -98,15 +98,17 @@ void main()
 
 	vec3 eyeDir = normalize(posEye - vec3(view*vec4(eyePos, 1.0)));
 
-	vec3 ambient = vec3(0.1, 0.1, 0.5);
-	vec3 diffuse = vec3(0.3, 0.3, 0.7) * max(dot(-lightPosNorm, n), 0);
-	vec3 specular = vec3(0.1, 0.1, 0.1) * pow(max(dot(reflectDir, eyeDir), 0), 32);
+	vec3 ambient = vec3(0.15, 0.15, 0.2);
+	vec3 diffuse = vec3(0.2, 0.2, 0.5) * max(dot(-lightPosNorm, n), 0);
+	vec3 specular = vec3(0.2, 0.2, 0.6) * pow(max(dot(reflectDir, eyeDir), 0), 32);
 	
 	float thickness = texture(thicknessMap, outUV).r;
 	// 각 채널마다 thickness에 k를 곱해도 됨
 	float I = 1 / (exp(1 * thickness));
 	
 	//color = ambient + diffuse + specular * fresnel(n, eyeDir) + worldColor * I;
+
+	//color = vec3(thickness);
 
 	// normal rendering
 	color = n * 0.5f + vec3(0.5f);

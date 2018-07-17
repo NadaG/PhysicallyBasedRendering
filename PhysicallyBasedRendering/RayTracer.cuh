@@ -139,7 +139,8 @@ void RayTrace(
 	const vector<Sphere>& spheres,
 	const vector<Light>& lights, 
 	const vector<Material>& materials,
-	const vector<float>& randomThetaPi
+	const vector<float>& randomThetaPi,
+	OctreeNode* root
 );
 
 void LoadCudaTextures();

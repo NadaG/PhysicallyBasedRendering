@@ -125,7 +125,6 @@ void RayTracingRenderer::Render()
 	vector<Sphere> spheres = dynamic_cast<RayTracingSceneManager*>(sceneManager)->spheres;
 	vector<Light> lights = dynamic_cast<RayTracingSceneManager*>(sceneManager)->lights;
 	vector<Material> materials = dynamic_cast<RayTracingSceneManager*>(sceneManager)->materials;
-	OctreeNode* root = dynamic_cast<RayTracingSceneManager*>(sceneManager)->root;
 
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 	UseDefaultFBO();
@@ -140,6 +139,12 @@ void RayTracingRenderer::Render()
 	cudaGraphicsResourceGetMappedPointer((void**)&output, &num_bytes, cuda_pbo_resource);
 	glm::mat4 view = camera->GetModelMatrix();
 
+	vec3 min = vec3(-50, -50, -50);
+	vec3 max = vec3(50, 50, 50);
+
+	OctreeNode* root = BuildOctree((Triangle *)triangles.data(), triangles.size(), 4000, min, max);
+	OctreeNode* octree = OTHostToDevice(root);
+
 	for (int i = 0; i < gridY; i++)
 	{
 		for (int j = 0; j < gridX; j++)
@@ -152,7 +157,7 @@ void RayTracingRenderer::Render()
 			auto gen = [&dis, &mersenne_engine]() {return dis(mersenne_engine); };
 			generate(begin(vec), end(vec), gen);
 
-			RayTrace(output, i, j, view, objects, triangles, spheres, lights, materials, vec);
+			RayTrace(output, i, j, view, objects, triangles, spheres, lights, materials, vec, octree);
 		}
 	}
 
@@ -190,7 +195,6 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	vector<Sphere> spheres = dynamic_cast<RayTracingSceneManager*>(sceneManager)->spheres;
 	vector<Light> lights = dynamic_cast<RayTracingSceneManager*>(sceneManager)->lights;
 	vector<Material> materials = dynamic_cast<RayTracingSceneManager*>(sceneManager)->materials;
-	OctreeNode* root = dynamic_cast<RayTracingSceneManager*>(sceneManager)->root;
 
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 	UseDefaultFBO();
@@ -205,6 +209,12 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	cudaGraphicsResourceGetMappedPointer((void**)&output, &num_bytes, cuda_pbo_resource);
 	glm::mat4 view = camera->GetModelMatrix();
 
+	vec3 min = vec3(-50, -50, -50);
+	vec3 max = vec3(50, 50, 50);
+
+	OctreeNode* root = BuildOctree((Triangle *)triangles.data(), triangles.size(), 3500, min, max);
+	OctreeNode* octree = OTHostToDevice(root);
+
 	for (int i = 0; i < gridY; i++)
 	{
 		for (int j = 0; j < gridX; j++)
@@ -217,7 +227,7 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 			auto gen = [&dis, &mersenne_engine]() {return dis(mersenne_engine); };
 			generate(begin(vec), end(vec), gen);
 
-			RayTrace(output, i, j, view, objects, triangles, spheres, lights, materials, vec);
+			RayTrace(output, i, j, view, objects, triangles, spheres, lights, materials, vec, octree);
 		}
 	}
 

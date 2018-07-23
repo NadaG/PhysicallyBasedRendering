@@ -85,7 +85,7 @@ private:
 	const float sceneNaer = 0.01f;
 	const float sceneFar = 200.0f;
 
-	const float pointSize = 800.0f;
+	const float pointSize = 1000.0f;
 
 	FrameBufferObject pbrFBO;
 	

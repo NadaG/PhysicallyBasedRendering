@@ -106,6 +106,8 @@ void FluidSimulationImporter::Initialize(const glm::vec3 boundarySize, FluidCube
 	stopFramePos = new float[particleNum * 3];
 	vel = new float[particleNum * 3];
 	issur = new int[particleNum];
+
+	posScalingFactor = 0.5f;
 }
 
 // pos와 velocity를 담음
@@ -118,9 +120,9 @@ void FluidSimulationImporter::Update(GLfloat* v)
 	{
 		for (int i = 0; i < particleNum; i++)
 		{
-			stopFramePos[i * 3 + 0] = pos[i * 3 + 0];
-			stopFramePos[i * 3 + 1] = pos[i * 3 + 1];
-			stopFramePos[i * 3 + 2] = pos[i * 3 + 2];
+			stopFramePos[i * 3 + 0] = pos[i * 3 + 0] * posScalingFactor;
+			stopFramePos[i * 3 + 1] = pos[i * 3 + 1] * posScalingFactor;
+			stopFramePos[i * 3 + 2] = pos[i * 3 + 2] * posScalingFactor;
 		}
 	}
 	else if(nowFrame > toStopFrame)
@@ -139,9 +141,9 @@ void FluidSimulationImporter::Update(GLfloat* v)
 	{
 		for (int i = 0; i < particleNum; i++)
 		{
-			v[i * 6 + 0] = pos[i * 3 + 0];
-			v[i * 6 + 1] = pos[i * 3 + 1];
-			v[i * 6 + 2] = pos[i * 3 + 2];
+			v[i * 6 + 0] = pos[i * 3 + 0] * posScalingFactor;
+			v[i * 6 + 1] = pos[i * 3 + 1] * posScalingFactor;
+			v[i * 6 + 2] = pos[i * 3 + 2] * posScalingFactor;
 			v[i * 6 + 4] = vel[i * 3 + 0];
 			v[i * 6 + 5] = vel[i * 3 + 1];
 			v[i * 6 + 6] = vel[i * 3 + 2];

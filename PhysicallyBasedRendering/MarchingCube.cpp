@@ -20,6 +20,7 @@ MarchingCube::MarchingCube(void)
 	//Ks = 1400.0f;
 	Ks = 1.0f;
 	Kn = 0.5f;
+	//Kn = 5.0f;
 	Ne = 25;
 
 	sigma = 1.0f;
@@ -171,6 +172,8 @@ void MarchingCube::ComputeIsotropicSmoothingDensity(GLfloat * particlePoses, con
 			particlePoses[itr * 6 + 0],
 			particlePoses[itr * 6 + 1],
 			particlePoses[itr * 6 + 2]);
+
+		Debug::GetInstance()->Log(particlePos);
 		
 		// 논문에서는 0.9 ~ 1.0을 사용했다 함
 		float lambda = 0.9f;
@@ -249,7 +252,7 @@ void MarchingCube::ComputeIsotropicSmoothingDensity(GLfloat * particlePoses, con
 		//cout << c.determinant() << endl;
 		//cout << "covariance matrix: " << c << endl;
 
-		Eigen::JacobiSVD<Eigen::Matrix3f> decomposedC(c, Eigen::ComputeFullU | Eigen::ComputeFullV);
+		Eigen::JacobiSVD<Eigen::Matrix3f> decomposedC(c, Eigen::ComputeThinU | Eigen::ComputeThinV);
 
 		//cout << "sigular values:" << decomposedC.singularValues() << endl;
 		
@@ -258,6 +261,8 @@ void MarchingCube::ComputeIsotropicSmoothingDensity(GLfloat * particlePoses, con
 			decomposedC.singularValues()(1), 
 			decomposedC.singularValues()(2));
 		
+		//Debug::GetInstance()->Log(singularValues);
+
 		if (neighborNum > Ne)
 		{
 			singular = Ks * glm::mat3(
@@ -324,15 +329,15 @@ void MarchingCube::ComputeIsotropicSmoothingDensity(GLfloat * particlePoses, con
 			glm::vec3 nodePos = m_stlNodeList[nNodes[node]].mNodePosition;
 
 			// 파티클과 node의 거리가 thresh hold 값보다 작으면 
-			if (glm::distance(particlePos, nodePos) < this->h)
+			if (glm::distance(particlePos, nodePos) <= this->h)
 			{
-				float density = IsotropicSmoothingKernel(particlePos - nodePos, G);
+				float density = IsotropicSmoothingKernel(nodePos - particlePos, G);
 				m_stlNodeList[nNodes[node]].mDensity += density;
 			}
 		}
 	}
 
-	//PrintDensity();
+	PrintDensity();
 }
 
 void MarchingCube::ExcuteMarchingCube(const string& meshfile)

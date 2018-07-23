@@ -31,6 +31,8 @@ public:
 	const int toStopFrame = 1000;
 	int nowFrame = 0;
 
+	float posScalingFactor;
+
 private:
 
 };

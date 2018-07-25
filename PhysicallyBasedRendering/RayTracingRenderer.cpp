@@ -109,7 +109,7 @@ void RayTracingRenderer::InitializeRender()
 
 	dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadFluidScene("Obj/PouringFluid/0250.obj");
 	OfflineRender("0002.png");
-	Sleep(1000.0f);
+	//Sleep(1000.0f);
 }
 
 // glm의 cross(a, b)는 오른손으로 a방향에서 b방향으로 감싸쥘 때의 엄지방향이다.
@@ -140,6 +140,18 @@ void RayTracingRenderer::Render()
 	cudaGraphicsResourceGetMappedPointer((void**)&output, &num_bytes, cuda_pbo_resource);
 	glm::mat4 view = camera->GetModelMatrix();
 
+	///////////////////////////
+	// build octree
+	vec3 min = vec3(-30, -30, -30);
+	vec3 max = vec3(30, 30, 30);
+
+	OctreeNode* root2 = BuildOctree((Triangle *)triangles.data(), triangles.size(), 1000, min, max);
+
+	OctreeNode* octree = OTHostToDevice(root2);
+
+	cout << "build octree" << endl;
+	///////////////////////////
+
 	for (int i = 0; i < gridY; i++)
 	{
 		for (int j = 0; j < gridX; j++)
@@ -152,7 +164,8 @@ void RayTracingRenderer::Render()
 			//auto gen = [&dis, &mersenne_engine]() {return dis(mersenne_engine); };
 			//generate(begin(vec), end(vec), gen);
 
-			RayTrace(output, i, j, view, objects, triangles, spheres, lights, materials, vec);
+			RayTrace(output, i, j, view, objects, triangles, spheres, lights, materials, vec, octree);
+			cout << "ray trace 1 grid end";
 		}
 	}
 
@@ -205,6 +218,19 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	cudaGraphicsResourceGetMappedPointer((void**)&output, &num_bytes, cuda_pbo_resource);
 	glm::mat4 view = camera->GetModelMatrix();
 
+	///////////////////////////
+	// build octree
+	vec3 min = vec3(-50, -50, -50);
+	vec3 max = vec3(50, 60, 50);
+
+	OctreeNode* root1 = BuildOctree((Triangle *)triangles.data(), triangles.size(), 4000, min, max);
+
+	OctreeNode* octree = OTHostToDevice(root1);
+
+	cout << "triangles : "<<triangles.size() << endl;
+	cout << "build octree" << endl;
+	///////////////////////////
+
 	for (int i = 0; i < gridY; i++)
 	{
 		for (int j = 0; j < gridX; j++)
@@ -217,7 +243,9 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 			auto gen = [&dis, &mersenne_engine]() {return dis(mersenne_engine); };
 			generate(begin(vec), end(vec), gen);*/
 
-			RayTrace(output, i, j, view, objects, triangles, spheres, lights, materials, vec);
+			RayTrace(output, i, j, view, objects, triangles, spheres, lights, materials, vec, octree);
+
+			//cout << i << "   |   " << j << endl;
 		}
 	}
 

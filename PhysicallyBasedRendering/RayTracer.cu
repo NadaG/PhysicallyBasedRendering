@@ -37,8 +37,8 @@ struct Ray
 const int WINDOW_HEIGHT = 1024;
 const int WINDOW_WIDTH = 1024;
 
-const int RAY_X_NUM = 64;
-const int RAY_Y_NUM = 64;
+const int RAY_X_NUM = 32;
+const int RAY_Y_NUM = 32;
 
 const int QUEUE_SIZE = 128;
 
@@ -255,52 +255,213 @@ __device__ bool RayAABBsIntersect(Ray ray, AABB* boxes, int boxNum)
 	return isIntersect;
 }
 
-// ray의 원점과 가장 가까운 곳에서 intersect하는 triangle의 id를 가져오는 함수
-__device__ int FindNearestTriangleIdx(Ray ray, Triangle* triangles, int triangleNum, float& dist)
+
+
+__device__ bool RayTraversal(OctreeNode* root, Ray ray)
+{
+	if (root == nullptr)
+		return false;
+
+	//return false;
+
+	/*if (ray.dir.x == 0)
+		return true;*/
+	
+	/*if (ray.dir.y == 0)
+		return true;
+
+	if (ray.dir.z == 0)
+		return true;
+*/
+	if (ray.dir.x < 0)
+	{
+		ray.origin.x = root->bnd.bounds[0].x + root->bnd.bounds[1].x - ray.origin.x;
+		ray.dir.x = -ray.dir.x;
+	}
+	if (ray.dir.y < 0)
+	{
+		ray.origin.y = root->bnd.bounds[0].y + root->bnd.bounds[1].y - ray.origin.y;
+		ray.dir.y = -ray.dir.y;
+	}
+	if (ray.dir.z < 0)
+	{
+		ray.origin.z = root->bnd.bounds[0].z + root->bnd.bounds[1].z - ray.origin.z;
+		ray.dir.z = -ray.dir.z;
+	}
+
+	double divx = 1 / ray.dir.x;
+	double divy = 1 / ray.dir.y;
+	double divz = 1 / ray.dir.z;
+
+	double tx0 = (root->bnd.bounds[0].x - ray.origin.x) * divx;
+	double tx1 = (root->bnd.bounds[1].x - ray.origin.x) * divx;
+	double ty0 = (root->bnd.bounds[0].y - ray.origin.y) * divy;
+	double ty1 = (root->bnd.bounds[1].y - ray.origin.y) * divy;
+	double tz0 = (root->bnd.bounds[0].z - ray.origin.z) * divz;
+	double tz1 = (root->bnd.bounds[1].z - ray.origin.z) * divz;
+
+	if (max(max(tx0, ty0), tz0) <= min(min(tx1, ty1), tz1))
+		return true;
+	else
+		return false;
+
+}
+
+__device__ void RayTreeTraversal(OctreeNode* root, Ray ray, int& minIdx, float& tmpDist, Triangle* triangles, const float& rayThreshold, float& minDist)
+{
+	//// recursive
+	//if (RayTraversal(root, ray))
+	//{
+	//	//int a = 0;
+
+	//	if (root->children[0] != nullptr)
+	//	{
+	//		for (int i = 0; i < 8; i++)
+	//		{
+	//			if (root->children[i] != nullptr)
+	//			{
+	//				RayTreeTraversal(root->children[i], ray, minIdx, tmpDist, triangles, rayThreshold, minDist);
+	//				//a++;
+	//			}
+	//		}
+	//	}
+
+	//	else
+	//	{
+	//		for (int i = 0; i < root->triangleIdx.size(); i++)
+	//		{
+	//			//idx->push_back(newIdx.operator[](i));
+	//			if (RayTriangleIntersect(ray, triangles[root->triangleIdx.operator[](i)], tmpDist))
+	//			{
+	//				if (tmpDist > rayThreshold && tmpDist < minDist)
+	//				{
+	//					minDist = tmpDist;
+	//					minIdx = root->triangleIdx.operator[](i);
+	//				}
+	//			}
+	//		}
+	//		
+	//	}
+	//}
+	//return;
+
+	OctreeNode* stack[64];
+	OctreeNode** stackPtr = stack;
+	*stackPtr++ = NULL;
+
+	OctreeNode* node = root;
+	do
+	{
+		OctreeNode* children[8];
+		for (int i = 0; i < 8; i++)
+			children[i] = node->children[i];
+
+		bool intersect[8];
+		for (int i = 0; i < 8; i++)
+			intersect[i] = RayTraversal(children[i], ray);
+
+		for (int i = 0; i < 8; i++)
+		{
+			if (intersect[i] && children[i]->children[0] == nullptr)
+			{
+				for (int j = 0; j < children[i]->triangleIdx.size(); j++)
+				{
+					if (RayTriangleIntersect(ray, triangles[children[i]->triangleIdx.operator[](j)], tmpDist))
+					{
+						if (tmpDist > rayThreshold && tmpDist < minDist)
+						{
+							minDist = tmpDist;
+							minIdx = children[i]->triangleIdx.operator[](j);
+						}
+					}			
+				}
+			}
+		}
+
+		bool traverse[8];
+		for (int i = 0; i < 8; i++)
+			traverse[i] = intersect[i] && children[i]->children[0] != nullptr;
+
+
+		if (!traverse[0] && !traverse[1] && !traverse[2] && !traverse[3] && !traverse[4] && !traverse[5] && !traverse[6] && !traverse[7])
+			node = *--stackPtr;
+		else
+		{
+			int a = 0;
+			for (int i = 0; i < 8; i++)
+			{
+				if (traverse[i])
+				{
+					node = children[i];
+					a = i;
+					break;
+				}
+			}
+
+			for (int i = a+1; i < 8; i++)
+			{
+				if (traverse[i])
+				{
+					*stackPtr++ = children[i];
+				}
+			}
+		}
+	
+	} while (node != NULL);
+
+}
+
+__device__ int FindNearestTriangleIdx(Ray ray, Triangle* triangles, OctreeNode* root, float& dist)
 {
 	const float rayThreshold = 0.01f;
 	float minDist = 9999999.0f;
 	int minIdx = -1;
 	float tmpDist;
 
-	for (int i = 0; i < triangleNum; ++i)
+
+	RayTreeTraversal(root, ray, minIdx, tmpDist, triangles, rayThreshold, minDist);	//	전체 삼각형 중 해당 ray가 지나가는 node에 있는 것만 골라낸다.
+
+	/*for (int i = 0; i < idx->size(); ++i)
 	{
-		if (RayTriangleIntersect(ray, triangles[i], tmpDist))
+		if (RayTriangleIntersect(ray, triangles[idx->operator[](i)], tmpDist))
 		{
 			if (tmpDist > rayThreshold && tmpDist < minDist)
 			{
 				minDist = tmpDist;
-				minIdx = i;
+				minIdx = idx->operator[](i);
 			}
 		}
-	}
+	}*/
+
+
 
 	dist = minDist;
 	return minIdx;
 }
 
-// TODO 승우
-//class Octree {
-//	Octree *children[8];
-//
-//	static Octree *generate(Triangle *triangles, int numTriangles)
-//	{
-//
-//	}
-//
-//	static void cleanup(Octree *tree)
-//	{
-//	}
-//
-//	__host__ __device__
-//	int FindNearest(Ray ray, float &dist)
-//	{
-//		return 0;
-//	}
-//};
-//__device__ int FindNearestTriangleIdx(Ray ray, Octree *tree, float& dist)
+// //ray의 원점과 가장 가까운 곳에서 intersect하는 triangle의 id를 가져오는 함수
+// __device__ int FindNearestTriangleIdx(Ray ray, Triangle* triangles, int triangleNum, float& dist)
 //{
-//	return tree->FindNearest(ray, dist);
+//
+//	const float rayThreshold = 0.01f;
+//	float minDist = 9999999.0f;
+//	int minIdx = -1;
+//	float tmpDist;
+//
+//	for (int i = 0; i < triangleNum; ++i)
+//	{
+//		if (RayTriangleIntersect(ray, triangles[i], tmpDist))
+//		{
+//			if (tmpDist > rayThreshold && tmpDist < minDist)
+//			{
+//				minDist = tmpDist;
+//				minIdx = i;
+//			}
+//		}
+//	}
+//
+//	dist = minDist;
+//	return minIdx;
 //}
 
 // ray의 원점과 가장 가까운 곳에서 intersect하는 sphere의 id를 가져오는 함수
@@ -450,10 +611,13 @@ __device__ bool GetHitPointInfo(
 	vec3& hitPoint, 
 	int& materialId, 
 	vec3& N,
-	vec2& uv)
+	vec2& uv,
+	OctreeNode* root)
 {
 	float distToTriangle, distToSphere, distToAreaLight = 0.0f;
-	nearestTriangleIdx = FindNearestTriangleIdx(nowRay, triangles, triangleNum, distToTriangle);
+//옥트리
+	nearestTriangleIdx = FindNearestTriangleIdx(nowRay, triangles, root, distToTriangle);
+	//nearestTriangleIdx = FindNearestTriangleIdx(nowRay, triangles, triangleNum, distToTriangle);
 	nearestSphereIdx = FindNearestSphereIdx(nowRay, spheres, sphereNum, distToSphere);
 
 	// 아무곳도 intersect를 못했다거나 뒤쪽에 있다면
@@ -496,7 +660,8 @@ __device__ vec4 RayTraceColor(
 	Material* materials,
 	int matNum,
 	float* randomNums,
-	int depth)
+	int depth,
+	OctreeNode* root)
 {
 	vec3 sumLo = vec3(0.0f, 0.0f, 0.0f);
 	int front = 0, rear = 0;
@@ -539,7 +704,8 @@ __device__ vec4 RayTraceColor(
 				hitPoint,
 				materialId,
 				N,
-				uv))
+				uv,
+				root))
 			{
 
 				// ∫Ω(kd c / π + ks DFG / 4(ωo⋅n)(ωi⋅n)) Li(p,ωi) n⋅ωi dωi
@@ -742,7 +908,8 @@ __device__ vec4 RayTraceColor(
 			hitPoint,
 			materialId,
 			N,
-			uv))
+			uv,
+			root))
 		{
 			vec3 albedo;
 			vec3 emission;
@@ -874,6 +1041,8 @@ __device__ vec4 RayTraceColor(
 	return color;
 }
 
+
+
 __global__ void RayTraceD(
 	glm::vec4* data,
 	const int gridX,
@@ -884,7 +1053,8 @@ __global__ void RayTraceD(
 	Sphere* spheres, int sphereNum,
 	Light* lights, int lightNum,
 	Material* materials, int matNum,
-	float* randomNums)
+	float* randomNums,
+	OctreeNode* root)
 {
 	//unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
 	unsigned int x = (blockIdx.x + gridY * RAY_Y_NUM) * WINDOW_HEIGHT + (threadIdx.x + gridX * RAY_X_NUM);
@@ -916,7 +1086,8 @@ __global__ void RayTraceD(
 				materials,
 				matNum,
 				randomNums,
-				DEPTH);
+				DEPTH,
+				root);
 		}
 	}
 
@@ -947,7 +1118,8 @@ void RayTrace(
 	const vector<Sphere>& spheres,
 	const vector<Light>& lights,
 	const vector<Material>& materials,
-	const vector<float>& randomThetaPi)
+	const vector<float>& randomThetaPi,
+	OctreeNode* root)
 {
 	thrust::device_vector<AABB> b = boundingboxes;
 	thrust::device_vector<Triangle> t = triangles;
@@ -957,6 +1129,21 @@ void RayTrace(
 	thrust::device_vector<float> rnums = randomThetaPi;
 
 	cudaDeviceSetLimit(cudaLimitMallocHeapSize, 5000000000 * sizeof(float));
+
+
+	/*vec3 min = vec3(-30, -30, -30);
+	vec3 max = vec3(30, 30, 30);
+
+	
+	int tnum = t.size();
+
+	printf("Num Triangles: %d\n", tnum);
+
+	OctreeNode* root = BuildOctree((Triangle *)triangles.data(), tnum, 1000, min, max);
+
+	OctreeNode* octree = OTHostToDevice(root);*/
+
+	//cout << "ray trace device start" << endl;
 
 	RayTraceD << <RAY_Y_NUM, RAY_X_NUM >> > (
 		data,
@@ -973,8 +1160,11 @@ void RayTrace(
 		l.size(),
 		m.data().get(),
 		m.size(),
-		rnums.data().get()
+		rnums.data().get(),
+		root
 	);
+
+	//cout << "ray trace device end" << endl;
 }
 
 void LoadCudaTextures()

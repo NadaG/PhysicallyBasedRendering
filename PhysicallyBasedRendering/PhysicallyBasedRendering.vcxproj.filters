@@ -94,9 +94,6 @@
     <Filter Include="Source Files\MyMath">
       <UniqueIdentifier>{5938992f-0d03-4106-bd4e-94c832d9de5c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\FourierTransform">
-      <UniqueIdentifier>{12817b2d-33d3-4d70-8ffa-82eab3cbc5cc}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shader Files\Debug">
       <UniqueIdentifier>{a5cd879a-26b4-4fd5-992b-10cfa62a6d95}</UniqueIdentifier>
     </Filter>
@@ -108,9 +105,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ShaderProgram.cpp">
       <Filter>Source Files\ShaderProgram</Filter>
     </ClCompile>
@@ -228,15 +222,6 @@
     <ClCompile Include="Exporter.cpp">
       <Filter>Source Files\Exporter</Filter>
     </ClCompile>
-    <ClCompile Include="FourierTransform.cpp">
-      <Filter>Source Files\FourierTransform</Filter>
-    </ClCompile>
-    <ClCompile Include="TemporalGlareRenderer.cpp">
-      <Filter>Source Files\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="TemporalGlareSceneManager.cpp">
-      <Filter>Source Files\SceneManager</Filter>
-    </ClCompile>
     <ClCompile Include="PixelBufferObject.cpp">
       <Filter>Source Files\PixelBufferObject</Filter>
     </ClCompile>
@@ -245,6 +230,9 @@
     </ClCompile>
     <ClCompile Include="MarchingMesh.cpp">
       <Filter>Source Files\MarchingCube</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cu">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -542,15 +530,6 @@
     <ClInclude Include="MyMath.h">
       <Filter>Source Files\MyMath</Filter>
     </ClInclude>
-    <ClInclude Include="FourierTransform.h">
-      <Filter>Source Files\FourierTransform</Filter>
-    </ClInclude>
-    <ClInclude Include="TemporalGlareRenderer.h">
-      <Filter>Source Files\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="TemporalGlareSceneManager.h">
-      <Filter>Source Files\SceneManager</Filter>
-    </ClInclude>
     <ClInclude Include="PixelBufferObject.h">
       <Filter>Source Files\PixelBufferObject</Filter>
     </ClInclude>
@@ -573,6 +552,9 @@
     </CudaCompile>
     <CudaCompile Include="Octree.cu">
       <Filter>Source Files\Cuda</Filter>
+    </CudaCompile>
+    <CudaCompile Include="tmp.cu">
+      <Filter>Source Files</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

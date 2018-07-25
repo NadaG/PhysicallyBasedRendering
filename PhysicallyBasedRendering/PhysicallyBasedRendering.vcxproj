@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\soil.1.16.0\build\native\soil.props" Condition="Exists('..\packages\soil.1.16.0\build\native\soil.props')" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -54,7 +53,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 8.0.props" />
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 9.0.props" />
   </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
@@ -105,13 +104,14 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;SOLUTION_DIR=LR"($(SolutionDir))";_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\RENDER4\Desktop\Files\OpenGL\GL64;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\RENDER4\Desktop\Files\OpenGL\GL64;C:\Users\KUCG_ROG\Desktop\2018_1_GraphicsLecture\OpenGL\GL64;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\RENDER4\Desktop\Files\OpenGL\GL64;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\lib\x64;C:\Users\RENDER4\Documents\Visual Studio 2015\Projects\PhysicallyBasedRendering\packages\libfftw.3.3.4\build\native\lib\x64;C:\Users\RENDER4\Documents\Visual Studio 2015\Projects\PhysicallyBasedRendering\packages\soil.1.16.0\build\native\lib\x64\Release</AdditionalLibraryDirectories>
-      <AdditionalDependencies>freeglut.lib;freeglutd.lib;glew32.lib;glfw3.lib;glfw3dll.lib;cudart.lib;libfftw3f-3.lib;libfftw3-3.lib;libfftw3l-3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\RENDER4\Desktop\Files\OpenGL\GL64;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\lib\x64;C:\Users\RENDER4\Documents\Visual Studio 2015\Projects\PhysicallyBasedRendering\packages\libfftw.3.3.4\build\native\lib\x64;C:\Users\RENDER4\Documents\Visual Studio 2015\Projects\PhysicallyBasedRendering\packages\soil.1.16.0\build\native\lib\x64\Release;C:\Users\KUCG_ROG\Desktop\2018_1_GraphicsLecture\OpenGL\GL64;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.0\lib\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>freeglut.lib;freeglutd.lib;glew32.lib;glfw3.lib;glfw3dll.lib;cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <StackReserveSize>10485760</StackReserveSize>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -142,15 +142,16 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;SOLUTION_DIR=LR"($(SolutionDir))";_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\RENDER4\Desktop\Files\OpenGL\GL64;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\KUCG_ROG\Desktop\2018_1_GraphicsLecture\OpenGL\GL64;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\RENDER4\Desktop\Files\OpenGL\GL64;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\lib\x64;C:\Users\RENDER4\Documents\Visual Studio 2015\Projects\PhysicallyBasedRendering\packages\libfftw.3.3.4\build\native\lib\x64;C:\Users\RENDER4\Documents\Visual Studio 2015\Projects\PhysicallyBasedRendering\packages\soil.1.16.0\build\native\lib\x64\Release</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3dll.lib;glfw3.lib;glew32.lib;freeglutd.lib;freeglut.lib;cudart.lib;libfftw3f-3.lib;libfftw3-3.lib;libfftw3l-3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\KUCG_ROG\Desktop\2018_1_GraphicsLecture\OpenGL\GL64;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.0\lib\x64;C:\Users\RENDER4\Documents\Visual Studio 2015\Projects\PhysicallyBasedRendering\packages\libfftw.3.3.4\build\native\lib\x64;C:\Users\RENDER4\Documents\Visual Studio 2015\Projects\PhysicallyBasedRendering\packages\soil.1.16.0\build\native\lib\x64\Release</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3dll.lib;glfw3.lib;glew32.lib;freeglutd.lib;freeglut.lib;cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <StackReserveSize>10485760</StackReserveSize>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -162,7 +163,6 @@
     <ClCompile Include="FluidSceneManager.cpp" />
     <ClCompile Include="FluidRenderer.cpp" />
     <ClCompile Include="FluidSimulationImporter.cpp" />
-    <ClCompile Include="FourierTransform.cpp" />
     <ClCompile Include="FrameBufferObject.cpp" />
     <ClCompile Include="LightMovement.cpp" />
     <ClCompile Include="LTCRenderer.cpp" />
@@ -185,15 +185,13 @@
     <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="InputManager.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="main.cu" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="SmokeSceneManager.cpp" />
     <ClCompile Include="SmokeSimulationImporter.cpp" />
     <ClCompile Include="StarBurstRenderer.cpp" />
     <ClCompile Include="StarBurstSceneManager.cpp" />
-    <ClCompile Include="TemporalGlareRenderer.cpp" />
-    <ClCompile Include="TemporalGlareSceneManager.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Texture2D.cpp" />
     <ClCompile Include="TextureCube.cpp" />
@@ -267,7 +265,6 @@
     <ClInclude Include="FluidRenderer.h" />
     <ClInclude Include="FluidSceneManager.h" />
     <ClInclude Include="FluidSimulationImporter.h" />
-    <ClInclude Include="FourierTransform.h" />
     <ClInclude Include="FrameBufferObject.h" />
     <ClInclude Include="MarchingCube.h" />
     <ClInclude Include="MarchingMesh.h" />
@@ -302,8 +299,6 @@
     <ClInclude Include="StarBurstRenderer.h" />
     <ClInclude Include="StarBurstSceneManager.h" />
     <ClInclude Include="RayTracer.cuh" />
-    <ClInclude Include="TemporalGlareRenderer.h" />
-    <ClInclude Include="TemporalGlareSceneManager.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Texture2D.h" />
     <ClInclude Include="TextureCube.h" />
@@ -314,19 +309,18 @@
   <ItemGroup>
     <CudaCompile Include="Octree.cu" />
     <CudaCompile Include="RayTracer.cu" />
+    <CudaCompile Include="tmp.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets" Condition="Exists('..\packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets')" />
     <Import Project="..\packages\Assimp.3.0.0\build\native\Assimp.targets" Condition="Exists('..\packages\Assimp.3.0.0\build\native\Assimp.targets')" />
     <Import Project="..\packages\glm.0.9.8.4\build\native\glm.targets" Condition="Exists('..\packages\glm.0.9.8.4\build\native\glm.targets')" />
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 8.0.targets" />
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 9.0.targets" />
     <Import Project="..\packages\libpng.redist.1.6.28.1\build\native\libpng.redist.targets" Condition="Exists('..\packages\libpng.redist.1.6.28.1\build\native\libpng.redist.targets')" />
     <Import Project="..\packages\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.targets" Condition="Exists('..\packages\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.targets')" />
     <Import Project="..\packages\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.targets" Condition="Exists('..\packages\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.targets')" />
     <Import Project="..\packages\libpng.1.6.28.1\build\native\libpng.targets" Condition="Exists('..\packages\libpng.1.6.28.1\build\native\libpng.targets')" />
-    <Import Project="..\packages\libfftw.redist.3.3.4\build\native\libfftw.redist.targets" Condition="Exists('..\packages\libfftw.redist.3.3.4\build\native\libfftw.redist.targets')" />
-    <Import Project="..\packages\libfftw.3.3.4\build\native\libfftw.targets" Condition="Exists('..\packages\libfftw.3.3.4\build\native\libfftw.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -335,7 +329,6 @@
     <Error Condition="!Exists('..\packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets'))" />
     <Error Condition="!Exists('..\packages\Assimp.3.0.0\build\native\Assimp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Assimp.3.0.0\build\native\Assimp.targets'))" />
     <Error Condition="!Exists('..\packages\glm.0.9.8.4\build\native\glm.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\glm.0.9.8.4\build\native\glm.targets'))" />
-    <Error Condition="!Exists('..\packages\soil.1.16.0\build\native\soil.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\soil.1.16.0\build\native\soil.props'))" />
     <Error Condition="!Exists('..\packages\libpng.redist.1.6.28.1\build\native\libpng.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\libpng.redist.1.6.28.1\build\native\libpng.redist.targets'))" />
     <Error Condition="!Exists('..\packages\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.targets'))" />
     <Error Condition="!Exists('..\packages\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.targets'))" />

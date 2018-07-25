@@ -14,11 +14,7 @@ public:
 	int capacity, sz;
 
 	__host__ __device__
-<<<<<<< HEAD
 	Ovector(int initSize = 2)
-=======
-		Ovector(int initSize = 2)
->>>>>>> 75f980fb391e4045d90d82579a06b61f1bc0076b
 	{
 		data = new int[initSize];
 		capacity = initSize;
@@ -26,24 +22,15 @@ public:
 		for (int i = 0; i < initSize; i++) data[i] = 0;
 	}
 	__host__ __device__
-<<<<<<< HEAD
-	~Ovector()
-=======
+	
 		~Ovector()
->>>>>>> 75f980fb391e4045d90d82579a06b61f1bc0076b
 	{
 		delete[] data;
 	}
 	__host__ __device__
-<<<<<<< HEAD
 	int &operator[](int i) { return data[i]; }
 	__host__ __device__
 	void push_back(int value)
-=======
-		int &operator[](int i) { return data[i]; }
-	__host__ __device__
-		void push_back(int value)
->>>>>>> 75f980fb391e4045d90d82579a06b61f1bc0076b
 	{
 		if (full())
 		{
@@ -59,19 +46,11 @@ public:
 		data[sz++] = value;
 	}
 	__host__ __device__
-<<<<<<< HEAD
 	int size() { return sz; }
 	__host__ __device__
 	bool empty() { return !sz; }
 	__host__ __device__
 	bool full() { return capacity == sz; }
-=======
-		int size() { return sz; }
-	__host__ __device__
-		bool empty() { return !sz; }
-	__host__ __device__
-		bool full() { return capacity == sz; }
->>>>>>> 75f980fb391e4045d90d82579a06b61f1bc0076b
 };
 
 

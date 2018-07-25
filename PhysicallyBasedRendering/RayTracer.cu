@@ -256,43 +256,6 @@ __device__ bool RayAABBsIntersect(Ray ray, AABB* boxes, int boxNum)
 	return isIntersect;
 }
 
-<<<<<<< HEAD
-
-
-__device__ bool RayTraversal(OctreeNode* root, Ray ray)
-{
-	if (root == nullptr)
-		return false;
-
-	//return false;
-
-	/*if (ray.dir.x == 0)
-		return true;*/
-	
-=======
-//// ray의 원점과 가장 가까운 곳에서 intersect하는 triangle의 id를 가져오는 함수
-//__device__ int FindNearestTriangleIdx(Ray ray, Triangle* triangles, int triangleNum, float& dist)
-//{
-//	const float rayThreshold = 0.01f;
-//	float minDist = 9999999.0f;
-//	int minIdx = -1;
-//	float tmpDist;
-//
-//	for (int i = 0; i < triangleNum; ++i)
-//	{
-//		if (RayTriangleIntersect(ray, triangles[i], tmpDist))
-//		{
-//			if (tmpDist > rayThreshold && tmpDist < minDist)
-//			{
-//				minDist = tmpDist;
-//				minIdx = i;
-//			}
-//		}
-//	}
-//
-//	dist = minDist;
-//	return minIdx;
-//}
 
 __device__ bool RayTraversal(OctreeNode* root, Ray ray)
 {
@@ -300,18 +263,6 @@ __device__ bool RayTraversal(OctreeNode* root, Ray ray)
 	if (ray.dir.x == 0)
 		return true;
 
->>>>>>> 75f980fb391e4045d90d82579a06b61f1bc0076b
-	/*if (ray.dir.y == 0)
-		return true;
-
-	if (ray.dir.z == 0)
-<<<<<<< HEAD
-		return true;
-*/
-=======
-		return true;*/
-
->>>>>>> 75f980fb391e4045d90d82579a06b61f1bc0076b
 	if (ray.dir.x < 0)
 	{
 		ray.origin.x = root->bnd.bounds[0].x + root->bnd.bounds[1].x - ray.origin.x;
@@ -348,7 +299,6 @@ __device__ bool RayTraversal(OctreeNode* root, Ray ray)
 
 __device__ void RayTreeTraversal(OctreeNode* root, Ray ray, int& minIdx, float& tmpDist, Triangle* triangles, const float& rayThreshold, float& minDist)
 {
-<<<<<<< HEAD
 	//// recursive
 	//if (RayTraversal(root, ray))
 	//{
@@ -448,41 +398,11 @@ __device__ void RayTreeTraversal(OctreeNode* root, Ray ray, int& minIdx, float& 
 		}
 	
 	} while (node != NULL);
-
-=======
-	if (RayTraversal(root, ray))
-	{
-		int a = 0;
-
-		for (int i = 0; i < 8; i++)
-		{
-			if (root->children[i] != nullptr)
-			{
-				RayTreeTraversal(root->children[i], ray, minIdx, tmpDist, triangles, rayThreshold, minDist);
-				a++;
-			}
-		}
-
-		if (a == 0)
-		{
-			for (int i = 0; i < root->triangleIdx.size(); i++)
-			{
-				//idx->push_back(newIdx.operator[](i));
-				if (RayTriangleIntersect(ray, triangles[root->triangleIdx.operator[](i)], tmpDist))
-				{
-					if (tmpDist > rayThreshold && tmpDist < minDist)
-					{
-						minDist = tmpDist;
-						minIdx = root->triangleIdx.operator[](i);
-					}
-				}
-			}
-
-		}
-	}
->>>>>>> 75f980fb391e4045d90d82579a06b61f1bc0076b
 }
 
+
+//ray의 원점과 가장 가까운 곳에서 intersect하는 triangle의 id를 가져오는 함수
+//octree 사용
 __device__ int FindNearestTriangleIdx(Ray ray, Triangle* triangles, OctreeNode* root, float& dist)
 {
 	const float rayThreshold = 0.01f;
@@ -490,32 +410,13 @@ __device__ int FindNearestTriangleIdx(Ray ray, Triangle* triangles, OctreeNode* 
 	int minIdx = -1;
 	float tmpDist;
 
-
 	RayTreeTraversal(root, ray, minIdx, tmpDist, triangles, rayThreshold, minDist);	//	전체 삼각형 중 해당 ray가 지나가는 node에 있는 것만 골라낸다.
-
-	/*for (int i = 0; i < idx->size(); ++i)
-	{
-		if (RayTriangleIntersect(ray, triangles[idx->operator[](i)], tmpDist))
-		{
-			if (tmpDist > rayThreshold && tmpDist < minDist)
-			{
-				minDist = tmpDist;
-				minIdx = idx->operator[](i);
-			}
-		}
-	}*/
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 75f980fb391e4045d90d82579a06b61f1bc0076b
 
 	dist = minDist;
 	return minIdx;
 }
 
-<<<<<<< HEAD
-// //ray의 원점과 가장 가까운 곳에서 intersect하는 triangle의 id를 가져오는 함수
+
 // __device__ int FindNearestTriangleIdx(Ray ray, Triangle* triangles, int triangleNum, float& dist)
 //{
 //
@@ -540,8 +441,6 @@ __device__ int FindNearestTriangleIdx(Ray ray, Triangle* triangles, OctreeNode* 
 //	return minIdx;
 //}
 
-=======
->>>>>>> 75f980fb391e4045d90d82579a06b61f1bc0076b
 // ray의 원점과 가장 가까운 곳에서 intersect하는 sphere의 id를 가져오는 함수
 __device__ int FindNearestSphereIdx(Ray ray, Sphere* spheres, int sphereNum, float& dist)
 {
@@ -693,14 +592,10 @@ __device__ bool GetHitPointInfo(
 	OctreeNode* root)
 {
 	float distToTriangle, distToSphere, distToAreaLight = 0.0f;
-<<<<<<< HEAD
-//옥트리
+	
+	//옥트리
 	nearestTriangleIdx = FindNearestTriangleIdx(nowRay, triangles, root, distToTriangle);
 	//nearestTriangleIdx = FindNearestTriangleIdx(nowRay, triangles, triangleNum, distToTriangle);
-=======
-	//nearestTriangleIdx = FindNearestTriangleIdx(nowRay, triangles, triangleNum, distToTriangle);
-	nearestTriangleIdx = FindNearestTriangleIdx(nowRay, triangles, root, distToTriangle);
->>>>>>> 75f980fb391e4045d90d82579a06b61f1bc0076b
 	nearestSphereIdx = FindNearestSphereIdx(nowRay, spheres, sphereNum, distToSphere);
 
 	// 아무곳도 intersect를 못했다거나 뒤쪽에 있다면
@@ -753,220 +648,6 @@ __device__ vec4 RayTraceColor(
 
 	vec3 V = -ray.dir;
 
-<<<<<<< HEAD
-	for (int i = 1; i < depth; ++i)
-	{
-		int target = rear;
-
-		while (!IsQueueEmpty(target, front))
-		{
-			Ray nowRay;
-			nowRay = GetQueueFront(rayQueue, front);
-			Dequeue(rayQueue, front);
-
-			if (!RayAABBsIntersect(nowRay, objects, objNum))
-				continue;
-
-			vec3 hitPoint = glm::vec3(0.0f);
-			// hit한 object의 material id
-			int materialId = 0;
-			// normal vector
-			vec3 N = glm::vec3(0.0f);
-			vec2 uv = glm::vec2(0.0f);
-			int nearestTriangleIdx = 0;
-			int nearestSphereIdx = 0;
-
-			// hit point의 정보를 가져옴
-			if (GetHitPointInfo(
-				nowRay,
-				triangles,
-				triangleNum,
-				nearestTriangleIdx,
-				spheres,
-				sphereNum,
-				nearestSphereIdx,
-				hitPoint,
-				materialId,
-				N,
-				uv,
-				root))
-			{
-
-				// ∫Ω(kd c / π + ks DFG / 4(ωo⋅n)(ωi⋅n)) Li(p,ωi) n⋅ωi dωi
-				// radiance * (1.0f * textureColor/pi + 0.0f) * lightcolor * NdotL
-				vec3 albedo;
-				vec3 emission;
-				vec3 F0;
-				float4 texNormal;
-				float ao;
-				float metallic;
-				float roughness;
-
-				vec3 kS;
-				vec3 kD;
-
-				// sphere
-				if (materials[materialId].texId == 0)
-				{
-					float4 texRGBA;
-					texRGBA = tex2D(albedoTex, uv.x, uv.y);
-					albedo = glm::pow(glm::vec3(texRGBA.x, texRGBA.y, texRGBA.z), vec3(2.2));
-
-					texNormal = tex2D(normalTex, uv.x, uv.y);
-					ao = tex2D(aoTex, uv.x, uv.y).x;
-					metallic = tex2D(metallicTex, uv.x, uv.y).x;
-					roughness = tex2D(roughnessTex, uv.x, uv.y).x;
-
-					glm::vec3 texNormalVec = glm::vec3(
-						texNormal.x * 2.0f - 1.0f,
-						texNormal.y * 2.0f - 1.0f,
-						texNormal.z * 2.0f - 1.0f);
-
-					glm::mat3 TBN = glm::mat3(
-						triangles[nearestTriangleIdx].tangent,
-						triangles[nearestTriangleIdx].bitangent,
-						N);
-
-					// TBN의 inverse
-					N = glm::normalize(texNormalVec);
-
-					N = TBN * N;
-				}
-				// plane
-				else if (materials[materialId].texId == 1)
-				{
-					float4 texRGBA;
-					texRGBA = tex2D(backgroundTex, uv.x, uv.y);
-					albedo = glm::pow(glm::vec3(texRGBA.x, texRGBA.y, texRGBA.z), vec3(2.2));
-
-					ao = materials[materialId].ambient;
-					metallic = materials[materialId].metallic;
-					roughness = materials[materialId].roughness;
-					emission = materials[materialId].emission;
-				}
-				// fluid
-				else
-				{
-					albedo = materials[materialId].albedo;
-					ao = materials[materialId].ambient;
-					metallic = materials[materialId].metallic;
-					roughness = materials[materialId].roughness;
-					emission = materials[materialId].emission;
-				}
-
-				// fluid라면
-				if (materials[materialId].refractiveIndex != 0.0f)
-				{
-					F0 = calculateEta(materials[materialId].refractiveIndex);
-				}
-				else
-				{
-					F0 = glm::mix(vec3(0.04f), albedo, metallic);
-				}
-
-				vec3 Lo = vec3(0.0f);
-				for (int k = 0; k < lightNum; k++)
-				{
-					vec3 L = glm::normalize(lights[k].pos - hitPoint);
-					vec3 H = glm::normalize(V + L);
-
-					float distance = glm::distance(lights[k].pos, hitPoint);
-					float attenuation = 1.0 / (distance*distance);
-
-					vec3 radiance = lights[k].color * attenuation;
-
-					float NDF = DistributionGGX(N, H, roughness);
-					float G = GeometrySmith(N, V, L, roughness);
-					vec3 F = fresnelSchlick(glm::max(glm::dot(H, V), 0.0f), F0);
-
-					vec3 nominator = NDF * G * F;
-					float denominator = 4 * glm::max(glm::dot(N, V), 0.0f) * glm::max(glm::dot(N, L), 0.0f) + 0.001f;
-					vec3 specular = nominator / denominator;
-
-					kS = F;
-
-					kD = vec3(1.0) - kS;
-					kD *= (1.0f - metallic);
-
-					vec3 diffuse = kD * albedo / glm::pi<float>();
-
-					float NdotL = glm::clamp(glm::dot(N, L), 0.0f, 1.0f);
-
-					if (!IsLighted(hitPoint, lights[k], triangles, triangleNum, nearestTriangleIdx,
-						spheres, sphereNum, nearestSphereIdx))
-					{
-						// brdf * radiance * NdotL
-						Lo += (diffuse + specular) * radiance * NdotL * 0.1f;
-					}
-					else
-					{
-						// brdf * radiance * NdotL
-						Lo += (diffuse + specular) * radiance * NdotL;
-					}
-				}
-
-				vec3 ambient = vec3(0.03) * albedo * ao;
-
-				// Light Sampling
-				sumLo += (ambient + Lo + emission) * nowRay.decay;
-				
-				// Path Tracing, BRDF Sampling
-				// sumLo += (emission) * nowRay.decay;
-				
-				//////////////////////////////////////////////////////////////////////////////////////////분리선
-
-				for (int j = 0; j < SAMPLE_NUM; ++j)
-				{
-					float r = sqrtf(1.0f - 
-						randomNums[(rayIndex * SAMPLE_NUM + j) * 2] * 
-						randomNums[(rayIndex * SAMPLE_NUM + j) * 2]);
-					float phi = 2 * glm::pi<float>() * randomNums[(rayIndex * SAMPLE_NUM + j) * 2 +1];
-
-					vec3 randomVec = vec3(
-						cosf(phi)*r,
-						randomNums[(rayIndex * SAMPLE_NUM + j) * 2],
-						sinf(phi)*r);
-					
-					glm::mat3 TNB = glm::mat3(
-						triangles[nearestTriangleIdx].tangent,
-						N,
-						triangles[nearestTriangleIdx].bitangent);
-					randomVec = TNB * normalize(randomVec);
-
-					Ray reflectRay;
-
-					// reflect ray의 시작점은 hit point
-					reflectRay.origin = hitPoint + reflectRay.dir * 0.01f;
-
-					// Path Tracing
-					// reflectRay.dir = normalize(randomVec);
-					// reflectRay.decay = ray.decay / SAMPLE_NUM * glm::clamp(dot(N, randomVec), 0.0f, 1.0f);
-					
-					// Ray Tracing
-					reflectRay.dir = normalize(reflect(nowRay.dir, N));
-					reflectRay.decay = kS.r * ray.decay / SAMPLE_NUM;
-					
-					Enqueue(rayQueue, reflectRay, rear);
-				}
-
-				// refract는 ray tracing
-				Ray refractRay;
-				refractRay.dir = normalize(refract(nowRay.dir, N, 1.0f / materials[materialId].refractiveIndex));
-				// refract ray의 시작점은 hit point
-				refractRay.origin = hitPoint + refractRay.dir * 0.01f;
-				// 현재 빛의 감쇠 정도와 물체의 재질에 따라 refract ray의 감쇠 정도가 정해짐
-
-				// 투명한 Object이기 때문에 kD가 refract decay로 들어간 거임
-				refractRay.decay = kD.r * ray.decay;
-
-				Enqueue(rayQueue, refractRay, rear);
-			}
-		}
-	}
-
-	// 나오지 못한 queue들 나오게 하기
-=======
->>>>>>> 75f980fb391e4045d90d82579a06b61f1bc0076b
 	while (!IsQueueEmpty(front, rear))
 	{
 		Ray nowRay;
@@ -1295,13 +976,6 @@ void RayTrace(
 
 	cudaDeviceSetLimit(cudaLimitMallocHeapSize, 5000000000 * sizeof(float));
 	
-	int tnum = t.size();
-
-	printf("Num Triangles: %d\n", tnum);
-
-	cout << "ray trace device start" << endl;
-
-
 	/*vec3 min = vec3(-30, -30, -30);
 	vec3 max = vec3(30, 30, 30);
 
@@ -1334,12 +1008,6 @@ void RayTrace(
 		rnums.data().get(),
 		root
 	);
-
-<<<<<<< HEAD
-	//cout << "ray trace device end" << endl;
-=======
-	cout << "ray trace device end" << endl;
->>>>>>> 75f980fb391e4045d90d82579a06b61f1bc0076b
 }
 
 void LoadCudaTextures()

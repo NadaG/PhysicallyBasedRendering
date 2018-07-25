@@ -81,6 +81,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>C:\Users\RENDER4\Desktop\Files\OpenGL\eigen;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -143,6 +144,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;SOLUTION_DIR=LR"($(SolutionDir))";_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>C:\Users\KUCG_ROG\Desktop\2018_1_GraphicsLecture\OpenGL\GL64;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\RENDER4\Desktop\Files\OpenGL\GL64;C:\Users\RENDER4\Desktop\Files\OpenGL\eigen;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -168,7 +170,6 @@
     <ClCompile Include="LTCRenderer.cpp" />
     <ClCompile Include="LTCSceneManager.cpp" />
     <ClCompile Include="MarchingCube.cpp" />
-    <ClCompile Include="MarchingMesh.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
@@ -206,6 +207,7 @@
     <None Include="FresnelDiffraction.fs" />
     <None Include="MarchingCubeFluid.fs" />
     <None Include="Multiply.fs" />
+    <None Include="NormalPhong.fs" />
     <None Include="Primitive.fs" />
     <None Include="Primitive.vs" />
     <None Include="Pupil.fs" />
@@ -267,7 +269,6 @@
     <ClInclude Include="FluidSimulationImporter.h" />
     <ClInclude Include="FrameBufferObject.h" />
     <ClInclude Include="MarchingCube.h" />
-    <ClInclude Include="MarchingMesh.h" />
     <ClInclude Include="MCTable.h" />
     <ClInclude Include="Octree.cuh" />
     <ClInclude Include="PixelBufferObject.h" />

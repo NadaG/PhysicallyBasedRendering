@@ -12,6 +12,12 @@
 // 다양한 씬 이미지 뽑기
 // auto encoder 수정
 
+struct FluidCube
+{
+	float3 pos;
+	int3 size;
+};
+
 class FluidRenderer : public Renderer
 {
 public:
@@ -23,11 +29,10 @@ public:
 	void InitializeRender();
 	void Render();
 
-	void ScreenSpaceFluidRender();
-	void MarchingCubeRender();
+	void ScreenSpaceFluidNormalRender();
+	void MarchingCubeFluidNormalRender(const string& meshfile);
 
-	void ScreenSpaceFluidOfflineRender();
-	void MartchingCubeOfflineRender();
+	void PhongRenderUsingNormalMap(const string& imgfile);
 
 	void TerminateRender(); 
 
@@ -41,6 +46,8 @@ private:
 	ShaderProgram* pbrShader;
 
 	ShaderProgram* marchingCubeFluidShader;
+
+	ShaderProgram* phongShader;
 
 	////debug용임
 	//ShaderProgram* textureShader;
@@ -58,6 +65,8 @@ private:
 
 	Texture2D depthTex;
 	Texture2D thicknessTex;
+
+	Texture2D normalTex;
 	
 	RenderBufferObject tmpDepthRBO;
 	
@@ -76,10 +85,13 @@ private:
 	const float sceneNaer = 0.01f;
 	const float sceneFar = 200.0f;
 
-	const float pointSize = 800.0f;
+	const float pointSize = 1000.0f;
 
 	FrameBufferObject pbrFBO;
-	FrameBufferObject depthThicknessFBO;
+	
+	FrameBufferObject depthFBO;
+	FrameBufferObject thicknessFBO;
+
 	FrameBufferObject depthBlurFBO[2];
 	FrameBufferObject thicknessBlurFBO[2];
 
@@ -104,8 +116,6 @@ private:
 	int targetFrame;
 
 	glm::vec3 boundarySize;
-
-	Mesh* fluidMesh;
 
 	void DrawFluids(const float cameraDist);
 };

@@ -108,8 +108,13 @@ void RayTracingRenderer::InitializeRender()
 	//OfflineRender("0002.png");
 
 	dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadFluidScene("Obj/PouringFluid/0250.obj");
+<<<<<<< HEAD
 	OfflineRender("0002.png");
 	//Sleep(1000.0f);
+=======
+	OfflineRender("04.png");
+	Sleep(1000.0f);
+>>>>>>> 75f980fb391e4045d90d82579a06b61f1bc0076b
 }
 
 // glm의 cross(a, b)는 오른손으로 a방향에서 b방향으로 감싸쥘 때의 엄지방향이다.
@@ -125,7 +130,6 @@ void RayTracingRenderer::Render()
 	vector<Sphere> spheres = dynamic_cast<RayTracingSceneManager*>(sceneManager)->spheres;
 	vector<Light> lights = dynamic_cast<RayTracingSceneManager*>(sceneManager)->lights;
 	vector<Material> materials = dynamic_cast<RayTracingSceneManager*>(sceneManager)->materials;
-	OctreeNode* root = dynamic_cast<RayTracingSceneManager*>(sceneManager)->root;
 
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 	UseDefaultFBO();
@@ -140,6 +144,7 @@ void RayTracingRenderer::Render()
 	cudaGraphicsResourceGetMappedPointer((void**)&output, &num_bytes, cuda_pbo_resource);
 	glm::mat4 view = camera->GetModelMatrix();
 
+<<<<<<< HEAD
 	///////////////////////////
 	// build octree
 	vec3 min = vec3(-30, -30, -30);
@@ -151,21 +156,31 @@ void RayTracingRenderer::Render()
 
 	cout << "build octree" << endl;
 	///////////////////////////
+=======
+	vec3 min = vec3(-50, -50, -50);
+	vec3 max = vec3(50, 50, 50);
+
+	OctreeNode* root = BuildOctree((Triangle *)triangles.data(), triangles.size(), 4000, min, max);
+	OctreeNode* octree = OTHostToDevice(root);
+>>>>>>> 75f980fb391e4045d90d82579a06b61f1bc0076b
 
 	for (int i = 0; i < gridY; i++)
 	{
 		for (int j = 0; j < gridX; j++)
 		{
-			//// Path Tracing
-			//std::random_device rd;
-			//std::mt19937 mersenne_engine(rd());
-			//std::uniform_real_distribution<> dis(0.0, 1.0);
+			// Path Tracing
+			std::random_device rd;
+			std::mt19937 mersenne_engine(rd());
+			std::uniform_real_distribution<> dis(0.0, 1.0);
 
-			//auto gen = [&dis, &mersenne_engine]() {return dis(mersenne_engine); };
-			//generate(begin(vec), end(vec), gen);
+			auto gen = [&dis, &mersenne_engine]() {return dis(mersenne_engine); };
+			generate(begin(vec), end(vec), gen);
 
 			RayTrace(output, i, j, view, objects, triangles, spheres, lights, materials, vec, octree);
+<<<<<<< HEAD
 			cout << "ray trace 1 grid end";
+=======
+>>>>>>> 75f980fb391e4045d90d82579a06b61f1bc0076b
 		}
 	}
 
@@ -203,7 +218,6 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	vector<Sphere> spheres = dynamic_cast<RayTracingSceneManager*>(sceneManager)->spheres;
 	vector<Light> lights = dynamic_cast<RayTracingSceneManager*>(sceneManager)->lights;
 	vector<Material> materials = dynamic_cast<RayTracingSceneManager*>(sceneManager)->materials;
-	OctreeNode* root = dynamic_cast<RayTracingSceneManager*>(sceneManager)->root;
 
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 	UseDefaultFBO();
@@ -218,6 +232,7 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	cudaGraphicsResourceGetMappedPointer((void**)&output, &num_bytes, cuda_pbo_resource);
 	glm::mat4 view = camera->GetModelMatrix();
 
+<<<<<<< HEAD
 	///////////////////////////
 	// build octree
 	vec3 min = vec3(-50, -50, -50);
@@ -230,22 +245,32 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	cout << "triangles : "<<triangles.size() << endl;
 	cout << "build octree" << endl;
 	///////////////////////////
+=======
+	vec3 min = vec3(-50, -50, -50);
+	vec3 max = vec3(50, 50, 50);
+
+	OctreeNode* root = BuildOctree((Triangle *)triangles.data(), triangles.size(), 3500, min, max);
+	OctreeNode* octree = OTHostToDevice(root);
+>>>>>>> 75f980fb391e4045d90d82579a06b61f1bc0076b
 
 	for (int i = 0; i < gridY; i++)
 	{
 		for (int j = 0; j < gridX; j++)
 		{
 			// Path Tracing
-			/*std::random_device rd;
+			std::random_device rd;
 			std::mt19937 mersenne_engine(rd());
 			std::uniform_real_distribution<> dis(0.0, 1.0);
 
 			auto gen = [&dis, &mersenne_engine]() {return dis(mersenne_engine); };
-			generate(begin(vec), end(vec), gen);*/
+			generate(begin(vec), end(vec), gen);
 
 			RayTrace(output, i, j, view, objects, triangles, spheres, lights, materials, vec, octree);
+<<<<<<< HEAD
 
 			//cout << i << "   |   " << j << endl;
+=======
+>>>>>>> 75f980fb391e4045d90d82579a06b61f1bc0076b
 		}
 	}
 

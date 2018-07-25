@@ -49,6 +49,7 @@ void Object::ModelRotate(const glm::vec3& vec, float angle)
 
 void Object::WorldRotate(const glm::vec3 &vec, float angle)
 {
+	
 }
 
 void Object::RotateX(const float angle)

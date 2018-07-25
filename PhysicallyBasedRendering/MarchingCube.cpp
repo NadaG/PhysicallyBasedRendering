@@ -1,5 +1,4 @@
 #include "MarchingCube.h"
-
 #include <iostream>
 
 using std::cout;
@@ -17,8 +16,20 @@ MarchingCube::MarchingCube(void)
 	m_nNodeResY = 0;
 	m_nNodeResZ = 0;
 
-	m_DensityThres = 1.0f;
-	m_KernelDistThres = 2.0f;
+	Kr = 4.0f;
+	//Ks = 1400.0f;
+	Ks = 1.0f;
+	Kn = 0.5f;
+	//Kn = 5.0f;
+	Ne = 25;
+
+	sigma = 1.0f;
+
+	// 괜찮은 parameter
+	// h = 1.5, thres = 1.5, resolution = 3.0
+
+	h = 2.0f;
+	r = h * 2;
 }
 
 MarchingCube::~MarchingCube(void)
@@ -86,7 +97,7 @@ void MarchingCube::ComputeDensity(GLfloat* particlePoses, const int particleNum)
 		m_stlNodeList[i].mDensity = 0.0f;
 	}
 
-	for (int itr = 0; itr < particleNum; itr += 6)
+	for (int itr = 0; itr < particleNum; itr++)
 	{
 		// particle의 world coordinate의 위치
 		glm::vec3 particlePos = glm::vec3(
@@ -95,8 +106,6 @@ void MarchingCube::ComputeDensity(GLfloat* particlePoses, const int particleNum)
 			particlePoses[itr * 6 + 2]);
 
 		// width의 반을 중간으로 설정
-		//vecPos += glm::vec3(m_nWidth * 0.5f, m_nHeight * 0.5f, m_nDepth * 0.5f);
-
 		vec3 translatedParticlePos = particlePos + glm::vec3(
 			m_nWidth * 0.5f, 
 			m_nHeight * 0.5f, 
@@ -106,11 +115,7 @@ void MarchingCube::ComputeDensity(GLfloat* particlePoses, const int particleNum)
 		int j = translatedParticlePos.y / ((float)m_nHeight / (float)m_nResY);
 		int i = translatedParticlePos.z / ((float)m_nDepth / (float)m_nResZ);
 
-		//cout << particlePos.x << endl;
-		//cout << vecPos.x << endl << vecPos.y << endl << vecPos.z << endl;
-		//cout << i << endl << j << endl << k << endl;
-
-		const int halfWidth = 3;
+		const int halfWidth = 4;
 		const int nodeNum = (halfWidth * 2 + 1) * (halfWidth * 2 + 1) * (halfWidth * 2 + 1);
 
 		int nNodes[nodeNum];
@@ -125,22 +130,10 @@ void MarchingCube::ComputeDensity(GLfloat* particlePoses, const int particleNum)
 						(ii + halfWidth) * (halfWidth * 2 + 1) * (halfWidth * 2 + 1) + 
 						(jj + halfWidth) * (halfWidth * 2 + 1) +
 						(kk + halfWidth);
-					//cout << "index:" << index << endl;
 					nNodes[index] = FindNodeIndex(kk + k, jj + j, ii + i);
 				}
 			}
 		}
-
-		/*nNodes[0] = FindNodeIndex(k, j, i);
-		nNodes[1] = FindNodeIndex(k, j, i + 1);
-		nNodes[2] = FindNodeIndex(k, j + 1, i);
-		nNodes[3] = FindNodeIndex(k + 1, j, i);
-
-		nNodes[4] = FindNodeIndex(k, j + 1, i + 1);
-		nNodes[5] = FindNodeIndex(k + 1, j, i + 1);
-		nNodes[6] = FindNodeIndex(k + 1, j + 1, i);
-		nNodes[7] = FindNodeIndex(k + 1, j + 1, i + 1);*/
-
 
 		for (int node = 0; node < nodeNum; node++)
 		{
@@ -151,16 +144,18 @@ void MarchingCube::ComputeDensity(GLfloat* particlePoses, const int particleNum)
 			// node pos가 곧 node의 각 꼭짓점
 			glm::vec3 nodePos = m_stlNodeList[nNodes[node]].mNodePosition;
 			
-			float h = glm::distance(particlePos, nodePos);
+			float r = glm::distance(particlePos, nodePos);
 
 			// 파티클과 node의 거리가 thresh hold 값보다 작으면 
-			if (h < m_KernelDistThres)
+			if (r < this->h)
 			{
-				float kernel = ComputePoly6(h, m_KernelDistThres);
-				m_stlNodeList[nNodes[node]].mDensity += 1.0 * -kernel;
+				float kernel = ComputePoly6(r / this->h);
+				m_stlNodeList[nNodes[node]].mDensity += 1.0 * kernel;
 			}
 		}
 	}
+
+	//PrintDensity();
 }
 
 void MarchingCube::ComputeIsotropicSmoothingDensity(GLfloat * particlePoses, const int particleNum)
@@ -170,20 +165,24 @@ void MarchingCube::ComputeIsotropicSmoothingDensity(GLfloat * particlePoses, con
 		m_stlNodeList[i].mDensity = 0.0f;
 	}
 
-	for (int itr = 0; itr < particleNum; itr += 6)
+	for (int itr = 0; itr < particleNum; itr++)
 	{
 		// particle의 world coordinate의 위치
 		glm::vec3 particlePos = glm::vec3(
 			particlePoses[itr * 6 + 0],
 			particlePoses[itr * 6 + 1],
 			particlePoses[itr * 6 + 2]);
+
+		Debug::GetInstance()->Log(particlePos);
 		
-		// 논문에서는 0.9~1.0을 사용했다 함
+		// 논문에서는 0.9 ~ 1.0을 사용했다 함
 		float lambda = 0.9f;
 		vec3 weightPosSum = glm::vec3();
 		float weightSum = 0.0f;
 
-		for (int jtr = 0; jtr < particleNum; jtr += 6)
+		int neighborNum = 0;
+
+		for (int jtr = 0; jtr < particleNum; jtr++)
 		{
 			if (itr == jtr)
 				continue;
@@ -193,16 +192,35 @@ void MarchingCube::ComputeIsotropicSmoothingDensity(GLfloat * particlePoses, con
 				particlePoses[jtr * 6 + 1],
 				particlePoses[jtr * 6 + 2]);
 
-			float weight = WeightFunc(particlePos - particlePos2, h * 2);
+			if (glm::distance(particlePos, particlePos2) < r)
+			{
+				neighborNum++;
+			}
+
+			float weight = WeightFunc(particlePos - particlePos2, r);
 			weightSum += weight;
 			weightPosSum += weight * particlePos2;
 		}
 
-		glm::vec3 averagedPos = (1.0f - lambda) * particlePos + lambda * weightPosSum / weightSum;
+		vec3 weightPosMean = particlePos;
+		vec3 averagedPos = particlePos;
+		if (neighborNum > 0)
+		{
+			weightPosMean = weightPosSum / weightSum;
+			averagedPos = (1.0f - lambda) * particlePos + lambda * weightPosMean;
+		}
 
-		glm::mat3 c;
+		Eigen::Matrix3f c;
+		glm::mat3 G, singular;
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				c(i, j) = 0.0f;
+			}
+		}
 
-		for (int jtr = 0; jtr < particleNum; jtr += 6)
+		for (int jtr = 0; jtr < particleNum; jtr++)
 		{
 			if (itr == jtr)
 				continue;
@@ -212,24 +230,66 @@ void MarchingCube::ComputeIsotropicSmoothingDensity(GLfloat * particlePoses, con
 				particlePoses[jtr * 6 + 1],
 				particlePoses[jtr * 6 + 2]);
 
-			float weight = WeightFunc(particlePos - particlePos2, h * 2);
+			float weight = WeightFunc(particlePos - particlePos2, r);
 
-			c[0][0] += weight * (particlePos2.x - averagedPos.x) * (particlePos2.x - averagedPos.x);
-			c[0][1] += weight * (particlePos2.x - averagedPos.x) * (particlePos2.y - averagedPos.y);
-			c[0][2] += weight * (particlePos2.x - averagedPos.x) * (particlePos2.z - averagedPos.z);
-			c[1][1] += weight * (particlePos2.y - averagedPos.y) * (particlePos2.y - averagedPos.y);
-			c[1][2] += weight * (particlePos2.y - averagedPos.y) * (particlePos2.z - averagedPos.z);
-			c[2][2] += weight * (particlePos2.z - averagedPos.z) * (particlePos2.z - averagedPos.z);
+			c(0, 0) += weight * (particlePos2.x - weightPosMean.x) * (particlePos2.x - weightPosMean.x);
+			c(0, 1) += weight * (particlePos2.x - weightPosMean.x) * (particlePos2.y - weightPosMean.y);
+			c(0, 2) += weight * (particlePos2.x - weightPosMean.x) * (particlePos2.z - weightPosMean.z);
+			c(1, 1) += weight * (particlePos2.y - weightPosMean.y) * (particlePos2.y - weightPosMean.y);
+			c(1, 2) += weight * (particlePos2.y - weightPosMean.y) * (particlePos2.z - weightPosMean.z);
+			c(2, 2) += weight * (particlePos2.z - weightPosMean.z) * (particlePos2.z - weightPosMean.z);
+		}
+		c(1, 0) = c(0, 1);
+		c(2, 0) = c(0, 2);
+		c(2, 1) = c(1, 2);
+
+		/*cout << "c:" << endl;
+		cout << c << endl << endl << endl;*/
+
+		if (neighborNum > 0)
+			c /= weightSum;
+
+		//cout << c.determinant() << endl;
+		//cout << "covariance matrix: " << c << endl;
+
+		Eigen::JacobiSVD<Eigen::Matrix3f> decomposedC(c, Eigen::ComputeThinU | Eigen::ComputeThinV);
+
+		//cout << "sigular values:" << decomposedC.singularValues() << endl;
+		
+		glm::vec3 singularValues = glm::vec3(
+			decomposedC.singularValues()(0), 
+			decomposedC.singularValues()(1), 
+			decomposedC.singularValues()(2));
+		
+		//Debug::GetInstance()->Log(singularValues);
+
+		if (neighborNum > Ne)
+		{
+			singular = Ks * glm::mat3(
+				singularValues.x, 0.0f, 0.0f, 
+				0.0f, glm::max(singularValues.y, singularValues.x / Kr), 0.0f,
+				0.0f, 0.0f, glm::max(singularValues.z, singularValues.x / Kr));
+		}
+		else
+		{
+			// identity matrix
+			singular = Kn * glm::mat3();
 		}
 
-		c[1][0] = c[0][1];
-		c[2][0] = c[0][2];
-		c[2][1] = c[1][2];
+		glm::mat3 R = glm::mat3(
+			decomposedC.matrixU()(0, 0), decomposedC.matrixU()(0, 1), decomposedC.matrixU()(0, 2),
+			decomposedC.matrixU()(1, 0), decomposedC.matrixU()(1, 1), decomposedC.matrixU()(1, 2),
+			decomposedC.matrixU()(2, 0), decomposedC.matrixU()(2, 1), decomposedC.matrixU()(2, 2));
 
+	/*	cout << "singular" << endl;
+		Debug::GetInstance()->Log(singular);*/
+
+		G = R * glm::inverse(singular) * glm::transpose(R) / this->h;
+
+	/*	cout << "G " << endl;
+		Debug::GetInstance()->Log(G);*/
 
 		// width의 반을 중간으로 설정
-		//vecPos += glm::vec3(m_nWidth * 0.5f, m_nHeight * 0.5f, m_nDepth * 0.5f);
-
 		vec3 translatedParticlePos = averagedPos + glm::vec3(
 			m_nWidth * 0.5f,
 			m_nHeight * 0.5f,
@@ -239,11 +299,7 @@ void MarchingCube::ComputeIsotropicSmoothingDensity(GLfloat * particlePoses, con
 		int j = translatedParticlePos.y / ((float)m_nHeight / (float)m_nResY);
 		int i = translatedParticlePos.z / ((float)m_nDepth / (float)m_nResZ);
 
-		//cout << particlePos.x << endl;
-		//cout << vecPos.x << endl << vecPos.y << endl << vecPos.z << endl;
-		//cout << i << endl << j << endl << k << endl;
-
-		const int halfWidth = 3;
+		const int halfWidth = 8;
 		const int nodeNum = (halfWidth * 2 + 1) * (halfWidth * 2 + 1) * (halfWidth * 2 + 1);
 
 		int nNodes[nodeNum];
@@ -258,21 +314,10 @@ void MarchingCube::ComputeIsotropicSmoothingDensity(GLfloat * particlePoses, con
 						(ii + halfWidth) * (halfWidth * 2 + 1) * (halfWidth * 2 + 1) +
 						(jj + halfWidth) * (halfWidth * 2 + 1) +
 						(kk + halfWidth);
-					//cout << "index:" << index << endl;
 					nNodes[index] = FindNodeIndex(kk + k, jj + j, ii + i);
 				}
 			}
 		}
-
-		/*nNodes[0] = FindNodeIndex(k, j, i);
-		nNodes[1] = FindNodeIndex(k, j, i + 1);
-		nNodes[2] = FindNodeIndex(k, j + 1, i);
-		nNodes[3] = FindNodeIndex(k + 1, j, i);
-
-		nNodes[4] = FindNodeIndex(k, j + 1, i + 1);
-		nNodes[5] = FindNodeIndex(k + 1, j, i + 1);
-		nNodes[6] = FindNodeIndex(k + 1, j + 1, i);
-		nNodes[7] = FindNodeIndex(k + 1, j + 1, i + 1);*/
 
 		for (int node = 0; node < nodeNum; node++)
 		{
@@ -283,19 +328,19 @@ void MarchingCube::ComputeIsotropicSmoothingDensity(GLfloat * particlePoses, con
 			// node pos가 곧 node의 각 꼭짓점
 			glm::vec3 nodePos = m_stlNodeList[nNodes[node]].mNodePosition;
 
-			float h = glm::distance(particlePos, nodePos);
-
 			// 파티클과 node의 거리가 thresh hold 값보다 작으면 
-			if (h < m_KernelDistThres)
+			if (glm::distance(particlePos, nodePos) <= this->h)
 			{
-				float kernel = ComputePoly6(h, m_KernelDistThres);
-				m_stlNodeList[nNodes[node]].mDensity += 1.0 * -kernel;
+				float density = IsotropicSmoothingKernel(nodePos - particlePos, G);
+				m_stlNodeList[nNodes[node]].mDensity += density;
 			}
 		}
 	}
+
+	PrintDensity();
 }
 
-Mesh* MarchingCube::ExcuteMarchingCube()
+void MarchingCube::ExcuteMarchingCube(const string& meshfile)
 {
 	Mesh* mesh = new Mesh;
 	
@@ -413,7 +458,9 @@ Mesh* MarchingCube::ExcuteMarchingCube()
 	mesh->CaculateFaceNormal();
 
 	mesh->GenerateAndSetVAO();
-	return mesh;
+	mesh->Export(meshfile);
+
+	delete mesh;
 }
 
 glm::vec3 MarchingCube::Interpolation(Node* p1, Node* p2)
@@ -437,9 +484,14 @@ glm::vec3 MarchingCube::Interpolation(Node* p1, Node* p2)
 	return p;
 }
 
-float MarchingCube::ComputePoly6(float h, float r)
+// r값은 0~1 사이의 값
+// return 되는 값은 0~1.5668
+float MarchingCube::ComputePoly6(float r)
 {
-	float a = h*h - r*r;
+	float a = 1.0f - r*r;
+
+	if (a < 0)
+		return 0;
 
 	return 1.56668f * a * a * a;
 }
@@ -448,15 +500,20 @@ float MarchingCube::WeightFunc(vec3 relativePos, float r)
 {
 	float len = glm::length(relativePos);
 
-	if (len > r)
+	if (len >= r)
 		return 0.0f;
 
+	// (1-a)^3인지 1-a^3인지 모르겠음, 오타가 있음
 	return 1.0f - (len / r)*(len / r)*(len / r);
 }
 
 float MarchingCube::IsotropicSmoothingKernel(glm::vec3 r, glm::mat3 G)
 {
-	return 0.0f;
+	/*cout << "det: " << glm::determinant(G) << endl;
+	cout << "r original len: " << glm::length(r) << endl;
+	cout << "r roteted len: " << glm::length(G*r) << endl;*/
+
+	return sigma * glm::determinant(G) * ComputePoly6(glm::length(G*r));
 }
 
 int	MarchingCube::FindCellIndex(int nX, int nY, int nZ)
@@ -472,3 +529,10 @@ int	MarchingCube::FindNodeIndex(int nX, int nY, int nZ)
 	return (nZ * m_nNodeResY * m_nNodeResX) + (nY * m_nNodeResX) + nX;
 }
 
+void MarchingCube::PrintDensity()
+{
+	for (int i = 0; i < m_stlNodeList.size(); i++)
+	{
+		cout << m_stlNodeList[i].mDensity << endl;
+	}
+}

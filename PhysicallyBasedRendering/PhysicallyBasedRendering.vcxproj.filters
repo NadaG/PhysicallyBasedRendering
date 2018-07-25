@@ -228,12 +228,15 @@
     <ClCompile Include="MarchingCube.cpp">
       <Filter>Source Files\MarchingCube</Filter>
     </ClCompile>
+<<<<<<< HEAD
     <ClCompile Include="MarchingMesh.cpp">
       <Filter>Source Files\MarchingCube</Filter>
     </ClCompile>
     <ClCompile Include="main.cu">
       <Filter>Source Files</Filter>
     </ClCompile>
+=======
+>>>>>>> 75f980fb391e4045d90d82579a06b61f1bc0076b
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -379,6 +382,9 @@
       <Filter>Shader Files</Filter>
     </None>
     <None Include="DepthBlur.fs">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="NormalPhong.fs">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>
@@ -540,9 +546,6 @@
       <Filter>Source Files\MarchingCube</Filter>
     </ClInclude>
     <ClInclude Include="MCTable.h">
-      <Filter>Source Files\MarchingCube</Filter>
-    </ClInclude>
-    <ClInclude Include="MarchingMesh.h">
       <Filter>Source Files\MarchingCube</Filter>
     </ClInclude>
   </ItemGroup>

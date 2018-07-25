@@ -116,6 +116,7 @@ struct Material
 		roughness = 0.0f;
 		metallic = 0.0f;
 
+		// 굴절 안하는 물체들
 		refractiveIndex = 0.0f;
 
 		texId = -1;

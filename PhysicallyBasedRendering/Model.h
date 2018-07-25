@@ -13,6 +13,8 @@ public:
 
 	void Delete();
 
+	Mesh& GetMesh(const int index) { return meshes[index]; }
+
 	std::vector<Triangle> GetTriangles() const;
 
 private:

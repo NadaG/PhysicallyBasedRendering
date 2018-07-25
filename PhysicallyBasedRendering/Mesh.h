@@ -67,6 +67,8 @@ public:
 	void Draw();
 	void Delete();
 
+	void Export(const string mesh);
+
 	const glm::vec3& GetAlbedo() { return albedo; }
 
 	std::vector<Triangle> GetTriangles() const;

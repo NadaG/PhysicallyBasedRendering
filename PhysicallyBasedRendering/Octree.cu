@@ -77,7 +77,6 @@ void Subdivide(OctreeNode* root)
 	root->children[3]->bnd.bounds[0].z = root->bnd.bounds[0].z;
 	root->children[3]->bnd.bounds[1].z = (root->bnd.bounds[0].z + root->bnd.bounds[1].z) / 2;
 
-
 	//	left top front
 	root->children[4]->bnd.bounds[0].x = root->bnd.bounds[0].x;
 	root->children[4]->bnd.bounds[1].x = (root->bnd.bounds[0].x + root->bnd.bounds[1].x) / 2;

@@ -170,7 +170,8 @@ void FluidRenderer::InitializeRender()
 	cubes[0].pos.y = 0.0f;
 	cubes[0].pos.z = 0.0f;
 
-	importer.Initialize(boundarySize, cubes, 1);
+	// simulation 공간을 약간 작게 해주어야 marching cube가 제대로 그려짐
+	importer.Initialize(boundarySize * 0.8f, cubes, 1);
 	fluidVertices = new GLfloat[importer.particleNum * 6];
 
 	fluidVAO.GenVAOVBOIBO();
@@ -182,7 +183,7 @@ void FluidRenderer::InitializeRender()
 	fluidVAO.VertexAttribPointer(3, 6);
 
 	currentFrame = 0;
-	float resolutionRatio = 2.0f;
+	float resolutionRatio = 5.0f;
 	mc.BuildingGird(
 		boundarySize.x,
 		boundarySize.y,
@@ -190,10 +191,10 @@ void FluidRenderer::InitializeRender()
 		boundarySize.x*resolutionRatio,
 		boundarySize.y*resolutionRatio,
 		boundarySize.z*resolutionRatio,
-		0.5f);
+		0.75f);
 
-	isRenderOnDefaultFBO = true;
-	targetFrame = 150;
+	isRenderOnDefaultFBO = false;
+	targetFrame = 210;
 }
 
 void FluidRenderer::Render()
@@ -229,7 +230,7 @@ void FluidRenderer::Render()
 
 		ScreenSpaceFluidNormalRender();
 
-		outfile += "fluid_screenspace1/";
+		outfile += "fluid_screenspace3/";
 		outfile += tmp;
 		outfile += ".png";
 		pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
@@ -243,7 +244,7 @@ void FluidRenderer::Render()
 		MarchingCubeFluidNormalRender(outfile);
 
 		outfile = "";
-		outfile += "fluid_marchingcube1/";
+		outfile += "fluid_marchingcube3/";
 		outfile += tmp;
 		outfile += ".png";
 		pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
@@ -392,7 +393,11 @@ void FluidRenderer::ScreenSpaceFluidNormalRender()
 void FluidRenderer::MarchingCubeFluidNormalRender(const string& meshfile)
 {
 	cout << importer.particleNum << endl;
-	mc.ComputeIsotropicSmoothingDensity(fluidVertices, importer.particleNum);
+	float* densities = mc.ComputeParticleDensity(fluidVertices, importer.particleNum);
+	
+	mc.ComputeAnisotropicKernelGridDensity(fluidVertices, densities, importer.particleNum);
+	//mc.ComputeSphericalKernelGridDensity(fluidVertices, densities, importer.particleNum);
+
 	mc.ExcuteMarchingCube(meshfile);
 
 	glEnable(GL_DEPTH_TEST);
@@ -433,6 +438,8 @@ void FluidRenderer::MarchingCubeFluidNormalRender(const string& meshfile)
 	Model m;
 	m.Load(meshfile);
 	m.Draw();
+
+	delete[] densities;
 }
 
 void FluidRenderer::PhongRenderUsingNormalMap(const string &imgfile)

@@ -959,6 +959,7 @@ void LoadCudaTextures()
 	cudaMipmappedArray* cuMipmappedArray;
 
 	cudaMallocArray(&cuArray, &channelDesc, 2048, 2048);
+	//cudaMalloc3DArray()
 
 	cudaMemcpyToArray(cuArray, 0, 0, texArray, size, cudaMemcpyHostToDevice);
 

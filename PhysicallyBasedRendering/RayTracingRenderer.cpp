@@ -108,8 +108,7 @@ void RayTracingRenderer::InitializeRender()
 	//OfflineRender("0002.png");
 
 	dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadFluidScene("Obj/PouringFluid/0250.obj");
-	OfflineRender("04.png");
-	Sleep(1000.0f);
+	OfflineRender("0002.png");
 }
 
 // glm의 cross(a, b)는 오른손으로 a방향에서 b방향으로 감싸쥘 때의 엄지방향이다.
@@ -139,11 +138,17 @@ void RayTracingRenderer::Render()
 	cudaGraphicsResourceGetMappedPointer((void**)&output, &num_bytes, cuda_pbo_resource);
 	glm::mat4 view = camera->GetModelMatrix();
 
-	vec3 min = vec3(-50, -50, -50);
-	vec3 max = vec3(50, 50, 50);
+	///////////////////////////
+	// build octree
+	vec3 min = vec3(-30, -30, -30);
+	vec3 max = vec3(30, 30, 30);
 
-	OctreeNode* root = BuildOctree((Triangle *)triangles.data(), triangles.size(), 4000, min, max);
-	OctreeNode* octree = OTHostToDevice(root);
+	OctreeNode* root2 = BuildOctree((Triangle *)triangles.data(), triangles.size(), 1000, min, max);
+
+	OctreeNode* octree = OTHostToDevice(root2);
+
+	cout << "build octree" << endl;
+	///////////////////////////
 
 	for (int i = 0; i < gridY; i++)
 	{
@@ -209,11 +214,18 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	cudaGraphicsResourceGetMappedPointer((void**)&output, &num_bytes, cuda_pbo_resource);
 	glm::mat4 view = camera->GetModelMatrix();
 
+	///////////////////////////
+	// build octree
 	vec3 min = vec3(-50, -50, -50);
-	vec3 max = vec3(50, 50, 50);
+	vec3 max = vec3(50, 60, 50);
 
-	OctreeNode* root = BuildOctree((Triangle *)triangles.data(), triangles.size(), 3500, min, max);
-	OctreeNode* octree = OTHostToDevice(root);
+	OctreeNode* root1 = BuildOctree((Triangle *)triangles.data(), triangles.size(), 4000, min, max);
+
+	OctreeNode* octree = OTHostToDevice(root1);
+
+	cout << "triangles : "<<triangles.size() << endl;
+	cout << "build octree" << endl;
+	///////////////////////////
 
 	for (int i = 0; i < gridY; i++)
 	{

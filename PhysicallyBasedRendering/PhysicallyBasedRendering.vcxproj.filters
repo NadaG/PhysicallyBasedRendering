@@ -1,575 +1,159 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="Source Files\ShaderProgram">
-      <UniqueIdentifier>{69990197-91e5-4b54-b00b-d71130cf5cad}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Debug">
-      <UniqueIdentifier>{e4ec2be3-9d0e-4279-ab13-6375651a717c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\InputManager">
-      <UniqueIdentifier>{7bcee99e-7742-49d1-8db5-42e170e5862f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shader Files">
-      <UniqueIdentifier>{235228da-a903-4667-8a70-696607d67e5d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\WindowManager">
-      <UniqueIdentifier>{d0486940-34b2-4ddb-b9e1-463b1a4d94bd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Mesh">
-      <UniqueIdentifier>{0451c2ab-f7ae-4638-9c54-ab91d656db54}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\SceneManager">
-      <UniqueIdentifier>{00d1b6e1-46db-43d9-8da2-d894c29fc8cb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Texture">
-      <UniqueIdentifier>{d6542cf9-e9b2-4b92-8e5f-a881497b0c60}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\FrameBufferObject">
-      <UniqueIdentifier>{71bd6ca2-dfdf-4cc4-aef9-40b71c64e691}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\RenderBufferObject">
-      <UniqueIdentifier>{9c0a9713-4edf-4246-8cb1-67ddac6668c4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Renderer">
-      <UniqueIdentifier>{6ab3a25f-36e5-438c-8ef8-0b3c3b91be90}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\FluidSimulationImporter">
-      <UniqueIdentifier>{bc1ae529-61bc-410a-8127-8de2f557781c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\VertexArrayObject">
-      <UniqueIdentifier>{8e9898b3-7e8b-4d81-8c35-54959ea7382c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\SmokeSimulationImporter">
-      <UniqueIdentifier>{beb5f74d-9186-4879-bfdc-bace7e2ea705}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\LTCfitting">
-      <UniqueIdentifier>{6b7ee98d-806b-438a-bcff-bb1cbfb0163d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shader Files\tessTest">
-      <UniqueIdentifier>{d35235c1-b9b6-4e50-83e0-3bbec95c6301}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Model">
-      <UniqueIdentifier>{9542e2e1-ab0d-4294-b183-45c8fa7d257a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shader Files\Bloom">
-      <UniqueIdentifier>{bc53664a-c52a-4b3f-b9f8-bdfe9433880a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Material">
-      <UniqueIdentifier>{88725c2d-f062-47c4-b1f3-43c3e9c4360a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Cuda">
-      <UniqueIdentifier>{f8ed83a0-8c59-455e-8d72-4678316f81f6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Object">
-      <UniqueIdentifier>{65341de4-8367-44df-b29b-9883047ec312}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Movement">
-      <UniqueIdentifier>{8e4eb587-93e4-498a-8832-bc761068e40d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shader Files\RayTracing">
-      <UniqueIdentifier>{b114e266-7bcb-4bab-9019-1b5159c65eb2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shader Files\TemporalGlare">
-      <UniqueIdentifier>{6513c0cc-b86e-4aa8-9939-a5e6a3cd9e67}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shader Files\Basic">
-      <UniqueIdentifier>{231df6eb-7552-409d-9552-bc7c0f8a47fa}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Exporter">
-      <UniqueIdentifier>{b75650c2-c649-4282-bbab-f6ebf37478eb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\MyMath">
-      <UniqueIdentifier>{5938992f-0d03-4106-bd4e-94c832d9de5c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\FourierTransform">
-      <UniqueIdentifier>{12817b2d-33d3-4d70-8ffa-82eab3cbc5cc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shader Files\Debug">
-      <UniqueIdentifier>{a5cd879a-26b4-4fd5-992b-10cfa62a6d95}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\PixelBufferObject">
-      <UniqueIdentifier>{098a2370-dfc9-444a-8133-a1e54713bdee}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\MarchingCube">
-      <UniqueIdentifier>{21c4e3dc-06e7-4f1b-b6c1-f7f7cb4f8978}</UniqueIdentifier>
-    </Filter>
+    <CudaCompile Include="Octree.cu" />
+    <CudaCompile Include="RayTracer.cu" />
+    <CudaCompile Include="tmp.cu" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ShaderProgram.cpp">
-      <Filter>Source Files\ShaderProgram</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug.cpp">
-      <Filter>Source Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="InputManager.cpp">
-      <Filter>Source Files\InputManager</Filter>
-    </ClCompile>
-    <ClCompile Include="WindowManager.cpp">
-      <Filter>Source Files\WindowManager</Filter>
-    </ClCompile>
-    <ClCompile Include="SceneObject.cpp">
-      <Filter>Source Files\Object</Filter>
-    </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>Source Files\Mesh</Filter>
-    </ClCompile>
-    <ClCompile Include="SceneManager.cpp">
-      <Filter>Source Files\SceneManager</Filter>
-    </ClCompile>
-    <ClCompile Include="Texture.cpp">
-      <Filter>Source Files\Texture</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderBufferObject.cpp">
-      <Filter>Source Files\RenderBufferObject</Filter>
-    </ClCompile>
-    <ClCompile Include="FrameBufferObject.cpp">
-      <Filter>Source Files\FrameBufferObject</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderer.cpp">
-      <Filter>Source Files\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="PBRRenderer.cpp">
-      <Filter>Source Files\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="FluidRenderer.cpp">
-      <Filter>Source Files\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="FluidSimulationImporter.cpp">
-      <Filter>Source Files\FluidSimulationImporter</Filter>
-    </ClCompile>
-    <ClCompile Include="VertexArrayObject.cpp">
-      <Filter>Source Files\VertexArrayObject</Filter>
-    </ClCompile>
-    <ClCompile Include="PBRSceneManager.cpp">
-      <Filter>Source Files\SceneManager</Filter>
-    </ClCompile>
-    <ClCompile Include="FluidSceneManager.cpp">
-      <Filter>Source Files\SceneManager</Filter>
-    </ClCompile>
-    <ClCompile Include="LTCRenderer.cpp">
-      <Filter>Source Files\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="LTCSceneManager.cpp">
-      <Filter>Source Files\SceneManager</Filter>
-    </ClCompile>
-    <ClCompile Include="VolumeRenderer.cpp">
-      <Filter>Source Files\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="SmokeSceneManager.cpp">
-      <Filter>Source Files\SceneManager</Filter>
-    </ClCompile>
-    <ClCompile Include="SmokeSimulationImporter.cpp">
-      <Filter>Source Files\SmokeSimulationImporter</Filter>
-    </ClCompile>
-    <ClCompile Include="Texture2D.cpp">
-      <Filter>Source Files\Texture</Filter>
-    </ClCompile>
-    <ClCompile Include="TextureCube.cpp">
-      <Filter>Source Files\Texture</Filter>
-    </ClCompile>
-    <ClCompile Include="dds.cpp">
-      <Filter>Source Files\LTCfitting</Filter>
-    </ClCompile>
-    <ClCompile Include="fitLTC.cpp">
-      <Filter>Source Files\LTCfitting</Filter>
-    </ClCompile>
-    <ClCompile Include="StarBurstSceneManager.cpp">
-      <Filter>Source Files\SceneManager</Filter>
-    </ClCompile>
-    <ClCompile Include="StarBurstRenderer.cpp">
-      <Filter>Source Files\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="PhongShaderProgram.cpp">
-      <Filter>Source Files\ShaderProgram</Filter>
-    </ClCompile>
-    <ClCompile Include="Model.cpp">
-      <Filter>Source Files\Model</Filter>
-    </ClCompile>
-    <ClCompile Include="Material.cpp">
-      <Filter>Source Files\Material</Filter>
-    </ClCompile>
-    <ClCompile Include="Object.cpp">
-      <Filter>Source Files\Object</Filter>
-    </ClCompile>
-    <ClCompile Include="CameraMovement.cpp">
-      <Filter>Source Files\Movement</Filter>
-    </ClCompile>
-    <ClCompile Include="LightMovement.cpp">
-      <Filter>Source Files\Movement</Filter>
-    </ClCompile>
-    <ClCompile Include="BillBoardMovement.cpp">
-      <Filter>Source Files\Movement</Filter>
-    </ClCompile>
-    <ClCompile Include="RayTracingSceneManager.cpp">
-      <Filter>Source Files\SceneManager</Filter>
-    </ClCompile>
-    <ClCompile Include="RayTracingRenderer.cpp">
-      <Filter>Source Files\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="MyMath.cpp">
-      <Filter>Source Files\MyMath</Filter>
-    </ClCompile>
-    <ClCompile Include="Exporter.cpp">
-      <Filter>Source Files\Exporter</Filter>
-    </ClCompile>
-    <ClCompile Include="FourierTransform.cpp">
-      <Filter>Source Files\FourierTransform</Filter>
-    </ClCompile>
-    <ClCompile Include="TemporalGlareRenderer.cpp">
-      <Filter>Source Files\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="TemporalGlareSceneManager.cpp">
-      <Filter>Source Files\SceneManager</Filter>
-    </ClCompile>
-    <ClCompile Include="PixelBufferObject.cpp">
-      <Filter>Source Files\PixelBufferObject</Filter>
-    </ClCompile>
-    <ClCompile Include="MarchingCube.cpp">
-      <Filter>Source Files\MarchingCube</Filter>
-    </ClCompile>
+    <ClCompile Include="BillBoardMovement.cpp" />
+    <ClCompile Include="CameraMovement.cpp" />
+    <ClCompile Include="dds.cpp" />
+    <ClCompile Include="Exporter.cpp" />
+    <ClCompile Include="fitLTC.cpp" />
+    <ClCompile Include="FluidSceneManager.cpp" />
+    <ClCompile Include="FluidRenderer.cpp" />
+    <ClCompile Include="FluidSimulationImporter.cpp" />
+    <ClCompile Include="FrameBufferObject.cpp" />
+    <ClCompile Include="LightMovement.cpp" />
+    <ClCompile Include="LTCRenderer.cpp" />
+    <ClCompile Include="LTCSceneManager.cpp" />
+    <ClCompile Include="MarchingCube.cpp" />
+    <ClCompile Include="Material.cpp" />
+    <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Model.cpp" />
+    <ClCompile Include="MyMath.cpp" />
+    <ClCompile Include="Object.cpp" />
+    <ClCompile Include="PBRRenderer.cpp" />
+    <ClCompile Include="PBRSceneManager.cpp" />
+    <ClCompile Include="PhongShaderProgram.cpp" />
+    <ClCompile Include="PixelBufferObject.cpp" />
+    <ClCompile Include="RayTracingRenderer.cpp" />
+    <ClCompile Include="RayTracingSceneManager.cpp" />
+    <ClCompile Include="RenderBufferObject.cpp" />
+    <ClCompile Include="SceneManager.cpp" />
+    <ClCompile Include="SceneObject.cpp" />
+    <ClCompile Include="Debug.cpp" />
+    <ClCompile Include="InputManager.cpp" />
+    <ClCompile Include="main.cu" />
+    <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="ShaderProgram.cpp" />
+    <ClCompile Include="SmokeSceneManager.cpp" />
+    <ClCompile Include="SmokeSimulationImporter.cpp" />
+    <ClCompile Include="StarBurstRenderer.cpp" />
+    <ClCompile Include="StarBurstSceneManager.cpp" />
+    <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="Texture2D.cpp" />
+    <ClCompile Include="TextureCube.cpp" />
+    <ClCompile Include="VertexArrayObject.cpp" />
+    <ClCompile Include="VolumeRenderer.cpp" />
+    <ClCompile Include="WindowManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BillBoardMovement.h" />
+    <ClInclude Include="brdf.h" />
+    <ClInclude Include="brdf_beckmann.h" />
+    <ClInclude Include="brdf_disneyDiffuse.h" />
+    <ClInclude Include="brdf_ggx.h" />
+    <ClInclude Include="CameraMovement.h" />
+    <ClInclude Include="CImg.h" />
+    <ClInclude Include="dds.h" />
+    <ClInclude Include="DefaultMovement.h" />
+    <ClInclude Include="export.h" />
+    <ClInclude Include="Exporter.h" />
+    <ClInclude Include="FluidRenderer.h" />
+    <ClInclude Include="FluidSceneManager.h" />
+    <ClInclude Include="FluidSimulationImporter.h" />
+    <ClInclude Include="FrameBufferObject.h" />
+    <ClInclude Include="MarchingCube.h" />
+    <ClInclude Include="MCTable.h" />
+    <ClInclude Include="Octree.cuh" />
+    <ClInclude Include="PixelBufferObject.h" />
+    <ClInclude Include="LightMovement.h" />
+    <ClInclude Include="LTCRenderer.h" />
+    <ClInclude Include="LTCSceneManager.h" />
+    <ClInclude Include="Material.h" />
+    <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Model.h" />
+    <ClInclude Include="MyMath.h" />
+    <ClInclude Include="nelder_mead.h" />
+    <ClInclude Include="Object.h" />
+    <ClInclude Include="PBRRenderer.h" />
+    <ClInclude Include="PBRSceneManager.h" />
+    <ClInclude Include="PhongShaderProgram.h" />
+    <ClInclude Include="plot.h" />
+    <ClInclude Include="RayTracingRenderer.h" />
+    <ClInclude Include="RayTracingSceneManager.h" />
+    <ClInclude Include="RenderBufferObject.h" />
+    <ClInclude Include="SceneManager.h" />
+    <ClInclude Include="SceneObject.h" />
+    <ClInclude Include="Debug.h" />
+    <ClInclude Include="InputManager.h" />
+    <ClInclude Include="Renderer.h" />
+    <ClInclude Include="Movement.h" />
+    <ClInclude Include="ShaderProgram.h" />
+    <ClInclude Include="SmokeSimulationImporter.h" />
+    <ClInclude Include="SmokeSceneManager.h" />
+    <ClInclude Include="StarBurstRenderer.h" />
+    <ClInclude Include="StarBurstSceneManager.h" />
+    <ClInclude Include="RayTracer.cuh" />
+    <ClInclude Include="Texture.h" />
+    <ClInclude Include="Texture2D.h" />
+    <ClInclude Include="TextureCube.h" />
+    <ClInclude Include="VertexArrayObject.h" />
+    <ClInclude Include="VolumeRenderer.h" />
+    <ClInclude Include="WindowManager.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Basic.fs" />
+    <None Include="Basic.vs" />
+    <None Include="Cos.fs" />
+    <None Include="FresnelDiffraction.fs" />
+    <None Include="MarchingCubeFluid.fs" />
+    <None Include="Multiply.fs" />
+    <None Include="NormalPhong.fs" />
+    <None Include="Primitive.fs" />
+    <None Include="Primitive.vs" />
+    <None Include="Pupil.fs" />
+    <None Include="BloomBlend.fs" />
+    <None Include="Brdf.fs" />
+    <None Include="Brdf.vs" />
+    <None Include="Brightness.fs" />
+    <None Include="Cubemap.vs" />
+    <None Include="equirectangularToCubemap.fs" />
+    <None Include="fragment.fs" />
+    <None Include="GaussianBlur.fs" />
+    <None Include="geometry.gs" />
+    <None Include="irradianceConvolution.fs" />
+    <None Include="Lensflare.fs" />
+    <None Include="LTC.fs" />
+    <None Include="ParticleBasic.vs" />
+    <None Include="ParticleThickness.fs" />
+    <None Include="PBRBrightness.fs" />
+    <None Include="PBR_uniform.fs" />
+    <None Include="Phong.fs" />
+    <None Include="PointToCube.gs" />
+    <None Include="Prefilter.fs" />
+    <None Include="Quad.fs" />
+    <None Include="Quad.vs" />
+    <None Include="Depth.fs" />
+    <None Include="Depth.vs" />
+    <None Include="DepthBlur.fs" />
+    <None Include="Light.fs" />
+    <None Include="Light.vs" />
+    <None Include="RayTracing.fs" />
+    <None Include="Reflect.fs" />
+    <None Include="Reflect.vs" />
+    <None Include="SkyBox.fs" />
+    <None Include="SkyBox.vs" />
+    <None Include="Surface.fs" />
     <None Include="packages.config" />
-    <None Include="Depth.fs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Depth.vs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="PBR.fs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="PBR.vs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Light.fs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Light.vs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Quad.fs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Quad.vs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Surface.fs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="ParticleDepth.fs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="ParticleThickness.fs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="ParticleSphere.vs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Cubemap.vs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="equirectangularToCubemap.fs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="LTC.fs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="SkyBox.vs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="SkyBox.fs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Reflect.fs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Reflect.vs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="irradianceConvolution.fs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Prefilter.fs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Brdf.fs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Brdf.vs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="PBR_uniform.fs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="PointToCube.gs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Phong.fs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="vertex.vs">
-      <Filter>Shader Files\tessTest</Filter>
-    </None>
-    <None Include="fragment.fs">
-      <Filter>Shader Files\tessTest</Filter>
-    </None>
-    <None Include="tessellationEvaluation.tes">
-      <Filter>Shader Files\tessTest</Filter>
-    </None>
-    <None Include="geometry.gs">
-      <Filter>Shader Files\tessTest</Filter>
-    </None>
-    <None Include="tessellationControl.tcs">
-      <Filter>Shader Files\tessTest</Filter>
-    </None>
-    <None Include="ParticleBasic.vs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="GaussianBlur.fs">
-      <Filter>Shader Files\Bloom</Filter>
-    </None>
-    <None Include="PBRBrightness.fs">
-      <Filter>Shader Files\Bloom</Filter>
-    </None>
-    <None Include="BloomBlend.fs">
-      <Filter>Shader Files\Bloom</Filter>
-    </None>
-    <None Include="Brightness.fs">
-      <Filter>Shader Files\Bloom</Filter>
-    </None>
-    <None Include="RayTracing.fs">
-      <Filter>Shader Files\RayTracing</Filter>
-    </None>
-    <None Include="Lensflare.fs">
-      <Filter>Shader Files\Bloom</Filter>
-    </None>
-    <None Include="Pupil.fs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="Basic.fs">
-      <Filter>Shader Files\Basic</Filter>
-    </None>
-    <None Include="Basic.vs">
-      <Filter>Shader Files\Basic</Filter>
-    </None>
-    <None Include="Primitive.vs">
-      <Filter>Shader Files\Basic</Filter>
-    </None>
-    <None Include="Primitive.fs">
-      <Filter>Shader Files\Basic</Filter>
-    </None>
-    <None Include="FresnelDiffraction.fs">
-      <Filter>Shader Files\TemporalGlare</Filter>
-    </None>
-    <None Include="Multiply.fs">
-      <Filter>Shader Files\TemporalGlare</Filter>
-    </None>
-    <None Include="Cos.fs">
-      <Filter>Shader Files\Debug</Filter>
-    </None>
-    <None Include="MarchingCubeFluid.fs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="DepthBlur.fs">
-      <Filter>Shader Files</Filter>
-    </None>
-    <None Include="NormalPhong.fs">
-      <Filter>Shader Files</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="ShaderProgram.h">
-      <Filter>Source Files\ShaderProgram</Filter>
-    </ClInclude>
-    <ClInclude Include="Debug.h">
-      <Filter>Source Files\Debug</Filter>
-    </ClInclude>
-    <ClInclude Include="InputManager.h">
-      <Filter>Source Files\InputManager</Filter>
-    </ClInclude>
-    <ClInclude Include="WindowManager.h">
-      <Filter>Source Files\WindowManager</Filter>
-    </ClInclude>
-    <ClInclude Include="SceneObject.h">
-      <Filter>Source Files\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>Source Files\Mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="SceneManager.h">
-      <Filter>Source Files\SceneManager</Filter>
-    </ClInclude>
-    <ClInclude Include="Texture.h">
-      <Filter>Source Files\Texture</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderBufferObject.h">
-      <Filter>Source Files\RenderBufferObject</Filter>
-    </ClInclude>
-    <ClInclude Include="FrameBufferObject.h">
-      <Filter>Source Files\FrameBufferObject</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer.h">
-      <Filter>Source Files\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="PBRRenderer.h">
-      <Filter>Source Files\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="FluidRenderer.h">
-      <Filter>Source Files\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="FluidSimulationImporter.h">
-      <Filter>Source Files\FluidSimulationImporter</Filter>
-    </ClInclude>
-    <ClInclude Include="VertexArrayObject.h">
-      <Filter>Source Files\VertexArrayObject</Filter>
-    </ClInclude>
-    <ClInclude Include="FluidSceneManager.h">
-      <Filter>Source Files\SceneManager</Filter>
-    </ClInclude>
-    <ClInclude Include="PBRSceneManager.h">
-      <Filter>Source Files\SceneManager</Filter>
-    </ClInclude>
-    <ClInclude Include="LTCRenderer.h">
-      <Filter>Source Files\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="LTCSceneManager.h">
-      <Filter>Source Files\SceneManager</Filter>
-    </ClInclude>
-    <ClInclude Include="VolumeRenderer.h">
-      <Filter>Source Files\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="SmokeSceneManager.h">
-      <Filter>Source Files\SceneManager</Filter>
-    </ClInclude>
-    <ClInclude Include="SmokeSimulationImporter.h">
-      <Filter>Source Files\SmokeSimulationImporter</Filter>
-    </ClInclude>
-    <ClInclude Include="Texture2D.h">
-      <Filter>Source Files\Texture</Filter>
-    </ClInclude>
-    <ClInclude Include="TextureCube.h">
-      <Filter>Source Files\Texture</Filter>
-    </ClInclude>
-    <ClInclude Include="nelder_mead.h">
-      <Filter>Source Files\LTCfitting</Filter>
-    </ClInclude>
-    <ClInclude Include="plot.h">
-      <Filter>Source Files\LTCfitting</Filter>
-    </ClInclude>
-    <ClInclude Include="brdf.h">
-      <Filter>Source Files\LTCfitting</Filter>
-    </ClInclude>
-    <ClInclude Include="brdf_beckmann.h">
-      <Filter>Source Files\LTCfitting</Filter>
-    </ClInclude>
-    <ClInclude Include="brdf_disneyDiffuse.h">
-      <Filter>Source Files\LTCfitting</Filter>
-    </ClInclude>
-    <ClInclude Include="brdf_ggx.h">
-      <Filter>Source Files\LTCfitting</Filter>
-    </ClInclude>
-    <ClInclude Include="CImg.h">
-      <Filter>Source Files\LTCfitting</Filter>
-    </ClInclude>
-    <ClInclude Include="dds.h">
-      <Filter>Source Files\LTCfitting</Filter>
-    </ClInclude>
-    <ClInclude Include="export.h">
-      <Filter>Source Files\LTCfitting</Filter>
-    </ClInclude>
-    <ClInclude Include="StarBurstRenderer.h">
-      <Filter>Source Files\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="StarBurstSceneManager.h">
-      <Filter>Source Files\SceneManager</Filter>
-    </ClInclude>
-    <ClInclude Include="PhongShaderProgram.h">
-      <Filter>Source Files\ShaderProgram</Filter>
-    </ClInclude>
-    <ClInclude Include="Model.h">
-      <Filter>Source Files\Model</Filter>
-    </ClInclude>
-    <ClInclude Include="Material.h">
-      <Filter>Source Files\Material</Filter>
-    </ClInclude>
-    <ClInclude Include="Object.h">
-      <Filter>Source Files\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="CameraMovement.h">
-      <Filter>Source Files\Movement</Filter>
-    </ClInclude>
-    <ClInclude Include="DefaultMovement.h">
-      <Filter>Source Files\Movement</Filter>
-    </ClInclude>
-    <ClInclude Include="LightMovement.h">
-      <Filter>Source Files\Movement</Filter>
-    </ClInclude>
-    <ClInclude Include="Movement.h">
-      <Filter>Source Files\Movement</Filter>
-    </ClInclude>
-    <ClInclude Include="BillBoardMovement.h">
-      <Filter>Source Files\Movement</Filter>
-    </ClInclude>
-    <ClInclude Include="RayTracingSceneManager.h">
-      <Filter>Source Files\SceneManager</Filter>
-    </ClInclude>
-    <ClInclude Include="RayTracingRenderer.h">
-      <Filter>Source Files\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Exporter.h">
-      <Filter>Source Files\Exporter</Filter>
-    </ClInclude>
-    <ClInclude Include="RayTracer.cuh">
-      <Filter>Source Files\Cuda</Filter>
-    </ClInclude>
-    <ClInclude Include="MyMath.h">
-      <Filter>Source Files\MyMath</Filter>
-    </ClInclude>
-    <ClInclude Include="FourierTransform.h">
-      <Filter>Source Files\FourierTransform</Filter>
-    </ClInclude>
-    <ClInclude Include="TemporalGlareRenderer.h">
-      <Filter>Source Files\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="TemporalGlareSceneManager.h">
-      <Filter>Source Files\SceneManager</Filter>
-    </ClInclude>
-    <ClInclude Include="PixelBufferObject.h">
-      <Filter>Source Files\PixelBufferObject</Filter>
-    </ClInclude>
-    <ClInclude Include="Octree.cuh">
-      <Filter>Source Files\Cuda</Filter>
-    </ClInclude>
-    <ClInclude Include="MarchingCube.h">
-      <Filter>Source Files\MarchingCube</Filter>
-    </ClInclude>
-    <ClInclude Include="MCTable.h">
-      <Filter>Source Files\MarchingCube</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <CudaCompile Include="RayTracer.cu">
-      <Filter>Source Files\Cuda</Filter>
-    </CudaCompile>
-    <CudaCompile Include="Octree.cu">
-      <Filter>Source Files\Cuda</Filter>
-    </CudaCompile>
+    <None Include="ParticleDepth.fs" />
+    <None Include="ParticleSphere.vs" />
+    <None Include="PBR.fs" />
+    <None Include="PBR.vs" />
+    <None Include="tessellationControl.tcs" />
+    <None Include="tessellationEvaluation.tes" />
+    <None Include="vertex.vs" />
   </ItemGroup>
 </Project>

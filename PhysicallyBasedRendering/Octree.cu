@@ -20,8 +20,6 @@ void tmpfunc()
 
 const int OTSize = sizeof(OctreeNode);
 
-//	CPU¿¡¼­ GPU·Î Æ®¸® Á¤º¸ ¿Å±â±â
-//	Bottom Up ¹æ½ÄÀ¸·Î ¿Å±ä´Ù
 OctreeNode* OTHostToDevice(OctreeNode* root)
 {
 	if (root == nullptr)
@@ -29,7 +27,6 @@ OctreeNode* OTHostToDevice(OctreeNode* root)
 
 	for (int i = 0; i < 8; i++)
 		root->children[i] = OTHostToDevice(root->children[i]);
-
 
 	int* gtriangleIdxData;
 	cudaMalloc((void**)&gtriangleIdxData, sizeof(int)*root->triangleIdx.size());
@@ -41,14 +38,11 @@ OctreeNode* OTHostToDevice(OctreeNode* root)
 	cudaMalloc((void**)&gnode, OTSize);
 	cudaMemcpy(gnode, root, OTSize, cudaMemcpyHostToDevice);
 
-
 	//gnode->triangleIdx.data = gtriangleIdxData;
 
 	return gnode;
 }
 
-
-//	OctreeNodeÇÏ³ª¸¦ 8°³ÀÇ OctreeNode·Î ºÐÇÒ
 void Subdivide(OctreeNode* root)
 {
 	for (int i = 0; i < 8; i++)
@@ -63,7 +57,7 @@ void Subdivide(OctreeNode* root)
 	root->children[0]->bnd.bounds[1].z = (root->bnd.bounds[0].z + root->bnd.bounds[1].z) / 2;
 	//	right top back
 	root->children[1]->bnd.bounds[0].x = (root->bnd.bounds[0].x + root->bnd.bounds[1].x) / 2;
-	root->children[1]->bnd.bounds[1].x = root->bnd.bounds[1].x;
+	root->children[1]->bnd.bounds[1].x = root->bnd.bounds[1].x; 
 	root->children[1]->bnd.bounds[0].y = (root->bnd.bounds[0].y + root->bnd.bounds[1].y) / 2;
 	root->children[1]->bnd.bounds[1].y = root->bnd.bounds[1].y;
 	root->children[1]->bnd.bounds[0].z = root->bnd.bounds[0].z;
@@ -78,11 +72,11 @@ void Subdivide(OctreeNode* root)
 	//	right bottom back
 	root->children[3]->bnd.bounds[0].x = (root->bnd.bounds[0].x + root->bnd.bounds[1].x) / 2;
 	root->children[3]->bnd.bounds[1].x = root->bnd.bounds[1].x;
-	root->children[3]->bnd.bounds[0].y = root->bnd.bounds[0].y;
+	root->children[3]->bnd.bounds[0].y = root->bnd.bounds[0].y; 
 	root->children[3]->bnd.bounds[1].y = (root->bnd.bounds[0].y + root->bnd.bounds[1].y) / 2;
 	root->children[3]->bnd.bounds[0].z = root->bnd.bounds[0].z;
 	root->children[3]->bnd.bounds[1].z = (root->bnd.bounds[0].z + root->bnd.bounds[1].z) / 2;
-
+ 
 
 	//	left top front
 	root->children[4]->bnd.bounds[0].x = root->bnd.bounds[0].x;
@@ -90,28 +84,28 @@ void Subdivide(OctreeNode* root)
 	root->children[4]->bnd.bounds[0].y = (root->bnd.bounds[0].y + root->bnd.bounds[1].y) / 2;
 	root->children[4]->bnd.bounds[1].y = root->bnd.bounds[1].y;
 	root->children[4]->bnd.bounds[0].z = (root->bnd.bounds[0].z + root->bnd.bounds[1].z) / 2;
-	root->children[4]->bnd.bounds[1].z = root->bnd.bounds[1].z;
+	root->children[4]->bnd.bounds[1].z = root->bnd.bounds[1].z; 
 	//	right top front
 	root->children[5]->bnd.bounds[0].x = (root->bnd.bounds[0].x + root->bnd.bounds[1].x) / 2;
 	root->children[5]->bnd.bounds[1].x = root->bnd.bounds[1].x;
 	root->children[5]->bnd.bounds[0].y = (root->bnd.bounds[0].y + root->bnd.bounds[1].y) / 2;
 	root->children[5]->bnd.bounds[1].y = root->bnd.bounds[1].y;
 	root->children[5]->bnd.bounds[0].z = (root->bnd.bounds[0].z + root->bnd.bounds[1].z) / 2;
-	root->children[5]->bnd.bounds[1].z = root->bnd.bounds[1].z;
+	root->children[5]->bnd.bounds[1].z = root->bnd.bounds[1].z; 
 	//	left bottom front
 	root->children[6]->bnd.bounds[0].x = root->bnd.bounds[0].x;
 	root->children[6]->bnd.bounds[1].x = (root->bnd.bounds[0].x + root->bnd.bounds[1].x) / 2;
 	root->children[6]->bnd.bounds[0].y = root->bnd.bounds[0].y;
 	root->children[6]->bnd.bounds[1].y = (root->bnd.bounds[0].y + root->bnd.bounds[1].y) / 2;
 	root->children[6]->bnd.bounds[0].z = (root->bnd.bounds[0].z + root->bnd.bounds[1].z) / 2;
-	root->children[6]->bnd.bounds[1].z = root->bnd.bounds[1].z;
+	root->children[6]->bnd.bounds[1].z = root->bnd.bounds[1].z; 
 	//	right bottom front
 	root->children[7]->bnd.bounds[0].x = (root->bnd.bounds[0].x + root->bnd.bounds[1].x) / 2;
 	root->children[7]->bnd.bounds[1].x = root->bnd.bounds[1].x;
 	root->children[7]->bnd.bounds[0].y = root->bnd.bounds[0].y;
 	root->children[7]->bnd.bounds[1].y = (root->bnd.bounds[0].y + root->bnd.bounds[1].y) / 2;
 	root->children[7]->bnd.bounds[0].z = (root->bnd.bounds[0].z + root->bnd.bounds[1].z) / 2;
-	root->children[7]->bnd.bounds[1].z = root->bnd.bounds[1].z;
+	root->children[7]->bnd.bounds[1].z = root->bnd.bounds[1].z; 
 }
 
 void DeleteOctree(OctreeNode *root)
@@ -127,7 +121,7 @@ void DeleteOctree(OctreeNode *root)
 
 bool TriangleExist(OctreeNode* node, Triangle triangle)
 {
-	vec3 o;		//	»ï°¢ÇüÀÇ Áß½É
+	vec3 o;		//	ì‚¼ê°í˜•ì˜ ì¤‘ì‹¬
 	o.x = (triangle.v0.x + triangle.v1.x + triangle.v2.x) / 3;
 	o.y = (triangle.v0.y + triangle.v1.y + triangle.v2.y) / 3;
 	o.z = (triangle.v0.z + triangle.v1.z + triangle.v2.z) / 3;
@@ -136,11 +130,11 @@ bool TriangleExist(OctreeNode* node, Triangle triangle)
 	float b = length(o - triangle.v1);
 	float c = length(o - triangle.v2);
 
-	//	Áß½É°ú ²ÀÁöÁ¡°úÀÇ °Å¸® Áß °¡Àå Å« °ÍÀ» bounding sphereÀÇ ¹ÝÁö¸§À¸·Î °è»êÇÑ´Ù
+	//	ì¤‘ì‹¬ê³¼ ê¼­ì§€ì ê³¼ì˜ ê±°ë¦¬ ì¤‘ ê°€ìž¥ í° ê²ƒì„ bounding sphereì˜ ë°˜ì§€ë¦„ìœ¼ë¡œ ê³„ì‚°í•œë‹¤
 	float rad = std::max(a, b);
 	rad = std::max(rad, c);
 
-	vec3 bo;	//	nodeÀÇ Áß½É
+	vec3 bo;	//	nodeì˜ ì¤‘ì‹¬
 	bo.x = (node->bnd.bounds[0].x + node->bnd.bounds[1].x) / 2;
 	bo.y = (node->bnd.bounds[0].y + node->bnd.bounds[1].y) / 2;
 	bo.z = (node->bnd.bounds[0].z + node->bnd.bounds[1].z) / 2;
@@ -154,14 +148,6 @@ bool TriangleExist(OctreeNode* node, Triangle triangle)
 void SpaceDivision(OctreeNode* root, Triangle* triangles, Ovector* idx, int limit)
 {
 	Ovector *newIdx = new Ovector;
-
-	/*printf("%f %f %f\n%f %f %f\n\n",
-	root->bnd.bounds[0].x,
-	root->bnd.bounds[0].y,
-	root->bnd.bounds[0].z,
-	root->bnd.bounds[1].x,
-	root->bnd.bounds[1].y,
-	root->bnd.bounds[1].z);*/
 
 	for (int i = 0; i < idx->size(); i++)
 	{

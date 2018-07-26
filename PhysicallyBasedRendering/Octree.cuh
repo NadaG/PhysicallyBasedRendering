@@ -14,7 +14,7 @@ public:
 	int capacity, sz;
 
 	__host__ __device__
-		Ovector(int initSize = 2)
+	Ovector(int initSize = 2)
 	{
 		data = new int[initSize];
 		capacity = initSize;
@@ -22,14 +22,15 @@ public:
 		for (int i = 0; i < initSize; i++) data[i] = 0;
 	}
 	__host__ __device__
+	
 		~Ovector()
 	{
 		delete[] data;
 	}
 	__host__ __device__
-		int &operator[](int i) { return data[i]; }
+	int &operator[](int i) { return data[i]; }
 	__host__ __device__
-		void push_back(int value)
+	void push_back(int value)
 	{
 		if (full())
 		{
@@ -45,11 +46,11 @@ public:
 		data[sz++] = value;
 	}
 	__host__ __device__
-		int size() { return sz; }
+	int size() { return sz; }
 	__host__ __device__
-		bool empty() { return !sz; }
+	bool empty() { return !sz; }
 	__host__ __device__
-		bool full() { return capacity == sz; }
+	bool full() { return capacity == sz; }
 };
 
 

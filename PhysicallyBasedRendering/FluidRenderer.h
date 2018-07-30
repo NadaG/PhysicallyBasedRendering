@@ -1,16 +1,19 @@
 #pragma once
 
+#define BOOST_PYTHON_STATIC_LIB
+#define BOOST_LIB_NAME "boost_numpy3"
+
 #include "Renderer.h"
 #include "FluidSimulationImporter.h"
 #include "FluidSceneManager.h"
 #include "MarchingCube.h"
 
+#include <boost/config/auto_link.hpp>
+#include <boost/python.hpp>
+#include <boost/python/numpy.hpp>
 
-// screen space TODO
-// 논문 구현
-// 알고리즘 가속
-// 다양한 씬 이미지 뽑기
-// auto encoder 수정
+namespace py = boost::python;
+namespace np = boost::python::numpy;
 
 struct FluidCube
 {
@@ -28,6 +31,8 @@ public:
 
 	void InitializeRender();
 	void Render();
+
+	void InitializePython();
 
 	void ScreenSpaceFluidNormalRender();
 	void MarchingCubeFluidNormalRender(const string& meshfile);

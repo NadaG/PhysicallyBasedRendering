@@ -183,7 +183,8 @@ void FluidRenderer::InitializeRender()
 	fluidVAO.VertexAttribPointer(3, 6);
 
 	currentFrame = 0;
-	float resolutionRatio = 5.0f;
+	float resolutionRatio = 1.0f;
+	// 128장 그린거 5.0, 0.75였음
 	mc.BuildingGird(
 		boundarySize.x,
 		boundarySize.y,
@@ -191,10 +192,12 @@ void FluidRenderer::InitializeRender()
 		boundarySize.x*resolutionRatio,
 		boundarySize.y*resolutionRatio,
 		boundarySize.z*resolutionRatio,
-		0.75f);
+		0.2f);
 
-	isRenderOnDefaultFBO = false;
+	isRenderOnDefaultFBO = true;
 	targetFrame = 210;
+
+	InitializePython();
 }
 
 void FluidRenderer::Render()
@@ -205,7 +208,7 @@ void FluidRenderer::Render()
 	importer.Update(fluidVertices);
 	fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
 
-	if (isRenderOnDefaultFBO && currentFrame == targetFrame)
+	if (isRenderOnDefaultFBO/* && currentFrame == targetFrame*/)
 	{
 		MarchingCubeFluidNormalRender("tmp.obj");
 		//ScreenSpaceFluidNormalRender();
@@ -230,21 +233,22 @@ void FluidRenderer::Render()
 
 		ScreenSpaceFluidNormalRender();
 
-		outfile += "fluid_screenspace3/";
+		outfile += "fluid_screenspace4/";
 		outfile += tmp;
 		outfile += ".png";
 		pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
 		cout << currentFrame << "번째 screen space 프레임 그리는 중" << endl;
 		Sleep(2000.0f);
 
-		outfile = "";
-		outfile += "Obj/DroppingFluid/";
-		outfile += tmp;
-		outfile += ".obj";
-		MarchingCubeFluidNormalRender(outfile);
+		//// mesh file export
+		//outfile = "";
+		//outfile += "Obj/DroppingFluid/";
+		//outfile += tmp;
+		//outfile += ".obj";
+		//MarchingCubeFluidNormalRender(outfile);
 
 		outfile = "";
-		outfile += "fluid_marchingcube3/";
+		outfile += "fluid_marchingcube4/";
 		outfile += tmp;
 		outfile += ".png";
 		pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
@@ -253,6 +257,40 @@ void FluidRenderer::Render()
 	}
 
 	currentFrame++;
+}
+
+void FluidRenderer::InitializePython()
+{
+	Py_SetPythonHome(L"C:\\Users\\RENDER4\\AppData\\Local\\Programs\\python-3.6.3-h9e2ca53_1");
+	
+	Py_Initialize();
+	np::initialize();
+	
+	py::object main_module = py::import("__main__");
+	py::object main_namespace = main_module.attr("__dict__");
+
+	py::object sys_ = py::import("sys");
+	PyRun_SimpleString("import sys\n""sys.argv=['']");
+
+	string version = py::extract<string>(sys_.attr("version"));
+	cout << version << endl;
+
+	py::object print = py::import("__main__").attr("__builtins__").attr("print");
+	print("Hello, Python");
+
+	const py::object tf_ = py::import("tensorflow");
+
+	const np::ndarray d1 = np::array(py::make_tuple(1.0f, 2.0f, 3.0f, 4.0f));
+	const np::ndarray d2 = np::array(py::make_tuple(5.0f, 6.0f, 7.0f, 9.0f));
+
+	const py::object x1 = tf_.attr("constant")(d1);
+	const py::object x2 = tf_.attr("constant")(d2);
+
+	const py::object result = tf_.attr("multiply")(x1, x2);
+	const py::object sess = tf_.attr("Session")();
+
+	print(sess.attr("run")(result));
+	sess.attr("close");
 }
 
 void FluidRenderer::ScreenSpaceFluidNormalRender()

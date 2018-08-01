@@ -2,10 +2,8 @@
 #include "RayTracer.cuh"
 #include <glm\common.hpp>
 
-
 using glm::vec3;
 using glm::vec4;
-
 
 class Ovector
 {

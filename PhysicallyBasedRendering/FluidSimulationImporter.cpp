@@ -64,7 +64,7 @@ void(*quit)();
 
 void FluidSimulationImporter::Initialize(const glm::vec3 boundarySize, FluidCube* cubes, int cubeNum)
 {
-	handle = LoadLibrary(SOLUTION_DIR L"\\x64\\Release\\FLing.dll");
+	handle = LoadLibrary(SOLUTION_DIR L"\\x64\\Release\\FLing2.dll");
 
 	initialize = (int(*)(SimulationParam, FluidCube*, ObstacleCube*))GetProcAddress(handle, "initialize");
 	update = (void(*)(float*, float*, int*, ObstacleSphere *, int))GetProcAddress(handle, "update");
@@ -107,7 +107,7 @@ void FluidSimulationImporter::Initialize(const glm::vec3 boundarySize, FluidCube
 	vel = new float[particleNum * 3];
 	issur = new int[particleNum];
 
-	posScalingFactor = 0.5f;
+	posScalingFactor = 1.0f;
 }
 
 // pos와 velocity를 담음

@@ -10,8 +10,8 @@
 #include <vector>
 #include <unordered_map>
 
-//#include <Eigen/Dense>
-//#include <Eigen/SVD>
+#include <Eigen/Dense>
+#include <Eigen/SVD>
 
 #include "Model.h"
 #include "MCTable.h"
@@ -20,7 +20,7 @@
 struct Node
 {
 	glm::vec3 mNodePosition;
-	float mDensity;
+	float mValue;
 };
 
 class MarchingCube
@@ -56,26 +56,26 @@ public:
 	float Kn;
 	int Ne;
 
-	float sigma;
-
 public:
 	void BuildingGird(int nWidth, int nHeight, int nDepth, int nResX, int nResY, int nResZ, float thres);
 
-	void ComputeDensity(GLfloat* particlePoses, const int particleNum);
-	void ComputeIsotropicSmoothingDensity(GLfloat* particlePoses, const int particleNum);
+	float* ComputeParticleDensity(GLfloat* particlePoses, const int particleNum);
+
+	void ComputeSphericalKernelGridDensity(GLfloat* particlePoses, float* densities, const int particleNum);
+	void ComputeAnisotropicKernelGridDensity(GLfloat* particlePoses, float* densities, const int particleNum);
 	void ExcuteMarchingCube(const string& meshfile);
 
+	float DecaySpline(float a);
 	float ComputePoly6(float r);
 
 	float WeightFunc(vec3 relativePos, float r);
 
 	// relative pos와 matrix를 인풋으로 받아 float을 return하는 함수
-	float IsotropicSmoothingKernel(glm::vec3 r, glm::mat3 G);
+	float AnisotropicSmoothingKernel(glm::vec3 r, glm::mat3 G);
 
 
 	glm::vec3 Interpolation(Node* p1, Node* p2);
 
-	int	FindCellIndex(int nX, int nY, int nZ);
 	int	FindNodeIndex(int nX, int nY, int nZ);
 
 	void PrintDensity();

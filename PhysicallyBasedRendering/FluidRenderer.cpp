@@ -170,7 +170,8 @@ void FluidRenderer::InitializeRender()
 	cubes[0].pos.y = 0.0f;
 	cubes[0].pos.z = 0.0f;
 
-	importer.Initialize(boundarySize, cubes, 1);
+	// simulation 공간을 약간 작게 해주어야 marching cube가 제대로 그려짐
+	importer.Initialize(boundarySize * 0.8f, cubes, 1);
 	fluidVertices = new GLfloat[importer.particleNum * 6];
 
 	fluidVAO.GenVAOVBOIBO();
@@ -182,7 +183,8 @@ void FluidRenderer::InitializeRender()
 	fluidVAO.VertexAttribPointer(3, 6);
 
 	currentFrame = 0;
-	float resolutionRatio = 2.0f;
+	float resolutionRatio = 1.0f;
+	// 128장 그린거 5.0, 0.75였음
 	mc.BuildingGird(
 		boundarySize.x,
 		boundarySize.y,
@@ -190,10 +192,12 @@ void FluidRenderer::InitializeRender()
 		boundarySize.x*resolutionRatio,
 		boundarySize.y*resolutionRatio,
 		boundarySize.z*resolutionRatio,
-		0.5f);
+		0.2f);
 
 	isRenderOnDefaultFBO = true;
-	targetFrame = 150;
+	targetFrame = 210;
+
+	InitializePython();
 }
 
 void FluidRenderer::Render()
@@ -204,7 +208,7 @@ void FluidRenderer::Render()
 	importer.Update(fluidVertices);
 	fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
 
-	if (isRenderOnDefaultFBO && currentFrame == targetFrame)
+	if (isRenderOnDefaultFBO/* && currentFrame == targetFrame*/)
 	{
 		MarchingCubeFluidNormalRender("tmp.obj");
 		//ScreenSpaceFluidNormalRender();
@@ -229,21 +233,22 @@ void FluidRenderer::Render()
 
 		ScreenSpaceFluidNormalRender();
 
-		outfile += "fluid_screenspace1/";
+		outfile += "fluid_screenspace4/";
 		outfile += tmp;
 		outfile += ".png";
 		pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
 		cout << currentFrame << "번째 screen space 프레임 그리는 중" << endl;
 		Sleep(2000.0f);
 
-		outfile = "";
-		outfile += "Obj/DroppingFluid/";
-		outfile += tmp;
-		outfile += ".obj";
-		MarchingCubeFluidNormalRender(outfile);
+		//// mesh file export
+		//outfile = "";
+		//outfile += "Obj/DroppingFluid/";
+		//outfile += tmp;
+		//outfile += ".obj";
+		//MarchingCubeFluidNormalRender(outfile);
 
 		outfile = "";
-		outfile += "fluid_marchingcube1/";
+		outfile += "fluid_marchingcube4/";
 		outfile += tmp;
 		outfile += ".png";
 		pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
@@ -252,6 +257,40 @@ void FluidRenderer::Render()
 	}
 
 	currentFrame++;
+}
+
+void FluidRenderer::InitializePython()
+{
+	Py_SetPythonHome(L"C:\\Users\\RENDER4\\AppData\\Local\\Programs\\python-3.6.3-h9e2ca53_1");
+	
+	Py_Initialize();
+	np::initialize();
+	
+	py::object main_module = py::import("__main__");
+	py::object main_namespace = main_module.attr("__dict__");
+
+	py::object sys_ = py::import("sys");
+	PyRun_SimpleString("import sys\n""sys.argv=['']");
+
+	string version = py::extract<string>(sys_.attr("version"));
+	cout << version << endl;
+
+	py::object print = py::import("__main__").attr("__builtins__").attr("print");
+	print("Hello, Python");
+
+	const py::object tf_ = py::import("tensorflow");
+
+	const np::ndarray d1 = np::array(py::make_tuple(1.0f, 2.0f, 3.0f, 4.0f));
+	const np::ndarray d2 = np::array(py::make_tuple(5.0f, 6.0f, 7.0f, 9.0f));
+
+	const py::object x1 = tf_.attr("constant")(d1);
+	const py::object x2 = tf_.attr("constant")(d2);
+
+	const py::object result = tf_.attr("multiply")(x1, x2);
+	const py::object sess = tf_.attr("Session")();
+
+	print(sess.attr("run")(result));
+	sess.attr("close");
 }
 
 void FluidRenderer::ScreenSpaceFluidNormalRender()
@@ -392,7 +431,11 @@ void FluidRenderer::ScreenSpaceFluidNormalRender()
 void FluidRenderer::MarchingCubeFluidNormalRender(const string& meshfile)
 {
 	cout << importer.particleNum << endl;
-	mc.ComputeIsotropicSmoothingDensity(fluidVertices, importer.particleNum);
+	float* densities = mc.ComputeParticleDensity(fluidVertices, importer.particleNum);
+	
+	mc.ComputeAnisotropicKernelGridDensity(fluidVertices, densities, importer.particleNum);
+	//mc.ComputeSphericalKernelGridDensity(fluidVertices, densities, importer.particleNum);
+
 	mc.ExcuteMarchingCube(meshfile);
 
 	glEnable(GL_DEPTH_TEST);
@@ -433,6 +476,8 @@ void FluidRenderer::MarchingCubeFluidNormalRender(const string& meshfile)
 	Model m;
 	m.Load(meshfile);
 	m.Draw();
+
+	delete[] densities;
 }
 
 void FluidRenderer::PhongRenderUsingNormalMap(const string &imgfile)

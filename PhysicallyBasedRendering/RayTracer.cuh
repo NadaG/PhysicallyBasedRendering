@@ -22,6 +22,11 @@ using std::vector;
 
 struct OctreeNode;
 
+struct AABB
+{
+	vec3 bounds[2];
+};
+
 struct Triangle
 {
 	vec3 v0;
@@ -41,6 +46,8 @@ struct Triangle
 	vec2 v1uv;
 	vec2 v2uv;
 
+	AABB tbb;
+
 	int materialId;
 	int meshId;
 
@@ -54,6 +61,9 @@ struct Triangle
 
 		materialId = 0;
 		meshId = 0;
+
+		tbb.bounds[0] = vec3(0.0f);
+		tbb.bounds[1] = vec3(0.0f);
 	}
 
 	Triangle(vec3 v0, vec3 v1, vec3 v2)
@@ -121,11 +131,6 @@ struct Material
 
 		texId = -1;
 	}
-};
-
-struct AABB
-{
-	vec3 bounds[2];
 };
 
 DLLExport

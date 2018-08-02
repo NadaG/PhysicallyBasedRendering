@@ -4,6 +4,7 @@
     <CudaCompile Include="Octree.cu" />
     <CudaCompile Include="RayTracer.cu" />
     <CudaCompile Include="tmp.cu" />
+    <CudaCompile Include="KDTree.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BillBoardMovement.cpp" />
@@ -103,6 +104,7 @@
     <ClInclude Include="VertexArrayObject.h" />
     <ClInclude Include="VolumeRenderer.h" />
     <ClInclude Include="WindowManager.h" />
+    <ClInclude Include="KDTree.cuh" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Basic.fs" />

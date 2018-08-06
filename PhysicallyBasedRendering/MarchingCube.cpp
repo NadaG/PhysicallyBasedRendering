@@ -26,7 +26,7 @@ MarchingCube::MarchingCube(void)
 	// ±¦ÂúÀº parameter
 	// h = 1.5, thres = 1.5, resolution = 3.0
 
-	h = 1.5f;
+	h = 2.0f;
 	r = h * 2;
 }
 

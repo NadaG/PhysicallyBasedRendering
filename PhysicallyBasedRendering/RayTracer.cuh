@@ -134,7 +134,6 @@ void RayTrace(
 	const int gridX,
 	const int gridY,
 	glm::mat4 view,
-	const vector<AABB>& objects,
 	const vector<Triangle>& triangles, 
 	const vector<Sphere>& spheres,
 	const vector<Light>& lights, 

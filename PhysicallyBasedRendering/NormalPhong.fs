@@ -19,10 +19,9 @@ uniform sampler2D normalMap;
 void main()
 {
 	// 0 ~ 1
-	vec3 pixelNormal = texture(normalMap, vec2(outUV.x, 1.0f-outUV.y)).rgb;
-	
-	if(pixelNormal.r == 0.0f || pixelNormal.r > 0.95f)
-		discard;
+	vec3 pixelNormal = texture(normalMap, vec2(outUV.x, 1.0f - outUV.y)).rgb;
+
+
 
 	// -1 ~ 1
 	pixelNormal = normalize(pixelNormal * 2 - vec3(1.0)); 

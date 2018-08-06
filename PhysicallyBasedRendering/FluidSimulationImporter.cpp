@@ -45,7 +45,6 @@ struct SimulationParam
 SimulationParam sparam;
 HMODULE handle;
 
-
 struct ObstacleCube
 {
 	float3 pos;

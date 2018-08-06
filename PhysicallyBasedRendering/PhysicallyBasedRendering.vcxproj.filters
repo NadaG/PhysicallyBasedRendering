@@ -48,6 +48,7 @@
     <ClCompile Include="VertexArrayObject.cpp" />
     <ClCompile Include="VolumeRenderer.cpp" />
     <ClCompile Include="WindowManager.cpp" />
+    <ClCompile Include="FluidSimulationClient.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BillBoardMovement.h" />
@@ -103,6 +104,7 @@
     <ClInclude Include="VertexArrayObject.h" />
     <ClInclude Include="VolumeRenderer.h" />
     <ClInclude Include="WindowManager.h" />
+    <ClInclude Include="FluidSimulationClient.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Basic.fs" />

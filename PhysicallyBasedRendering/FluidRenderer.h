@@ -5,6 +5,7 @@
 
 #include "Renderer.h"
 #include "FluidSimulationImporter.h"
+#include "FluidSimulationClient.h"
 #include "FluidSceneManager.h"
 #include "MarchingCube.h"
 
@@ -106,6 +107,7 @@ private:
 
 	GLfloat* fluidVertices;
 	FluidSimulationImporter importer;
+	FluidSimulationClient clientImporter;
 
 	int currentFrame;
 

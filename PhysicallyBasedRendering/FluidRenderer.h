@@ -9,12 +9,12 @@
 #include "FluidSceneManager.h"
 #include "MarchingCube.h"
 
-#include <boost/config/auto_link.hpp>
-#include <boost/python.hpp>
-#include <boost/python/numpy.hpp>
-
-namespace py = boost::python;
-namespace np = boost::python::numpy;
+//#include <boost/config/auto_link.hpp>
+//#include <boost/python.hpp>
+//#include <boost/python/numpy.hpp>
+//
+//namespace py = boost::python;
+//namespace np = boost::python::numpy;
 
 struct FluidCube
 {

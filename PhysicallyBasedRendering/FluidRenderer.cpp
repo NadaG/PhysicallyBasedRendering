@@ -274,7 +274,7 @@ void FluidRenderer::Render()
 
 void FluidRenderer::InitializePython()
 {
-	Py_SetPythonHome(L"C:\\Users\\RENDER4\\AppData\\Local\\Programs\\python-3.6.3-h9e2ca53_1");
+	/*Py_SetPythonHome(L"C:\\Users\\RENDER4\\AppData\\Local\\Programs\\python-3.6.3-h9e2ca53_1");
 	
 	Py_Initialize();
 	np::initialize();
@@ -303,7 +303,7 @@ void FluidRenderer::InitializePython()
 	const py::object sess = tf_.attr("Session")();
 
 	print(sess.attr("run")(result));
-	sess.attr("close");
+	sess.attr("close");*/
 }
 
 void FluidRenderer::ScreenSpaceFluidNormalRender()

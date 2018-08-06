@@ -2,6 +2,7 @@
 
 #include "SceneManager.h"
 #include "Octree.cuh"
+#include "KDTree.cuh"
 
 class RayTracingSceneManager : public SceneManager
 {

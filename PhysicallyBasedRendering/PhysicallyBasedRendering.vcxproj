@@ -111,7 +111,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Users\RENDER4\Desktop\Files\OpenGL\GL64;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.1\lib\x64;C:\Users\RENDER4\Documents\Visual Studio 2015\Projects\PhysicallyBasedRendering\packages\libfftw.3.3.4\build\native\lib\x64;C:\Users\RENDER4\Documents\Visual Studio 2015\Projects\PhysicallyBasedRendering\packages\soil.1.16.0\build\native\lib\x64\Release;C:\Users\KUCG_ROG\Desktop\2018_1_GraphicsLecture\OpenGL\GL64;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.0\lib\x64</AdditionalLibraryDirectories>
-      <AdditionalDependencies>freeglut.lib;freeglutd.lib;glew32.lib;glfw3.lib;glfw3dll.lib;cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>cudart.lib;freeglut.lib;glew32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <StackReserveSize>10485760</StackReserveSize>
     </Link>
   </ItemDefinitionGroup>
@@ -152,7 +152,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Users\KUCG_ROG\Desktop\2018_1_GraphicsLecture\OpenGL\GL64;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.0\lib\x64;C:\Users\RENDER4\Documents\Visual Studio 2015\Projects\PhysicallyBasedRendering\packages\libfftw.3.3.4\build\native\lib\x64;C:\Users\RENDER4\Documents\Visual Studio 2015\Projects\PhysicallyBasedRendering\packages\soil.1.16.0\build\native\lib\x64\Release;C:\Users\RENDER4\Desktop\OpenGL\GL64;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\lib\x64;C:\Users\RENDER4\Desktop\boostpython\boost_1_63_0\stage\lib;C:\Users\RENDER4\AppData\Local\Programs\python-3.6.3-h9e2ca53_1\libs</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3dll.lib;glfw3.lib;glew32.lib;freeglutd.lib;freeglut.lib;cudart.lib;python36.lib;libboost_numpy3-vc140-mt-1_63.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>cudart.lib;freeglut.lib;glew32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <StackReserveSize>10485760</StackReserveSize>
     </Link>
   </ItemDefinitionGroup>
@@ -270,6 +270,7 @@
     <ClInclude Include="FluidSimulationClient.h" />
     <ClInclude Include="FluidSimulationImporter.h" />
     <ClInclude Include="FrameBufferObject.h" />
+    <ClInclude Include="KDTree.cuh" />
     <ClInclude Include="MarchingCube.h" />
     <ClInclude Include="MCTable.h" />
     <ClInclude Include="Octree.cuh" />
@@ -310,6 +311,7 @@
     <ClInclude Include="WindowManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <CudaCompile Include="KDTree.cu" />
     <CudaCompile Include="Octree.cu" />
     <CudaCompile Include="RayTracer.cu" />
     <CudaCompile Include="tmp.cu" />

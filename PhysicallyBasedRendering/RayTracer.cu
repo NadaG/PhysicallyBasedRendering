@@ -258,6 +258,8 @@ __device__ bool RayAABBsIntersect(Ray ray, AABB* boxes, int boxNum)
 
 __device__ bool RayTraversal(OctreeNode* root, Ray ray)
 {
+	if (root == nullptr)
+		return false;
 
 	if (ray.dir.x == 0)
 		return true;

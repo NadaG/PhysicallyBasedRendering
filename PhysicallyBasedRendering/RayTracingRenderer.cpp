@@ -143,6 +143,7 @@ void RayTracingRenderer::Render()
 	cout << "build octree start" << endl;
 
 	OctreeNode* root2 = BuildOctree((Triangle *)triangles.data(), triangles.size(), 1000, min, max);
+
 	OctreeNode* octree = OTHostToDevice(root2);
 	cout << "build octree end" << endl;
 
@@ -222,8 +223,13 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 
 	OctreeNode* root1 = BuildOctree((Triangle *)triangles.data(), triangles.size(), 400, min, max);
 	OctreeNode* octree = OTHostToDevice(root1);
+
 	cout << "build octree end" << endl;
-	
+
+	//KDTreeNode* kdroot = BuildKDTree(triangles);
+
+	cout << "triangles : "<<triangles.size() << endl;
+	cout << "build octree" << endl;
 	///////////////////////////
 
 	for (int i = 0; i < gridY; i++)

@@ -52,27 +52,27 @@ void RayTracingSceneManager::InitializeObjects()
 
 	redPlaneMat.ambient = 1.0f;
 	redPlaneMat.albedo = glm::vec3(0.0f, 0.0f, 0.0f);
-	redPlaneMat.emission = glm::vec3(100.0f, 0.0f, 0.0f);
+	redPlaneMat.emission = glm::vec3(50.0f, 0.0f, 0.0f);
 	redPlaneMat.metallic = 0.1f;
 	redPlaneMat.roughness = 0.8f;
 	materials.push_back(redPlaneMat);
 
 	greenPlaneMat.ambient = 1.0f;
 	greenPlaneMat.albedo = glm::vec3(0.0f, 0.0f, 0.0f);
-	greenPlaneMat.emission = glm::vec3(0.0f, 100.0f, 0.0f);
+	greenPlaneMat.emission = glm::vec3(0.0f, 50.0f, 0.0f);
 	greenPlaneMat.metallic = 0.1f;
 	greenPlaneMat.roughness = 1.0f;
 	materials.push_back(greenPlaneMat);
 
 	bluePlaneMat.ambient = 1.0f;
 	bluePlaneMat.albedo = glm::vec3(0.0f, 0.0f, 0.0f);
-	bluePlaneMat.emission = glm::vec3(0.0f, 0.0f, 100.0f);
+	bluePlaneMat.emission = glm::vec3(0.0f, 0.0f, 50.0f);
 	bluePlaneMat.metallic = 0.1f;
 	bluePlaneMat.roughness = 0.8f;
 	materials.push_back(bluePlaneMat);
 
 	flatPlaneMat.ambient = 1.0f;
-	flatPlaneMat.albedo = glm::vec3(0.0f, 0.0f, 0.0f);
+	flatPlaneMat.albedo = glm::vec3(0.3f, 0.3f, 0.3f);
 	flatPlaneMat.emission = glm::vec3(0.5f, 0.5f, 0.5f);
 	flatPlaneMat.metallic = 0.1f;
 	flatPlaneMat.roughness = 0.8f;
@@ -178,6 +178,8 @@ void RayTracingSceneManager::Update()
 
 vector<Triangle> RayTracingSceneManager::LoadPlaneTriangles(glm::mat4 model, const int materialId)
 {
+	vector<Triangle> triangles;
+
 	// πÿø° ±Ú∏∞ plane¿”
 	Triangle halfPlane1, halfPlane2;
 	halfPlane1.v0 = glm::vec3(model * vec4(-1.0f, 0.0f, 1.0f, 1.0f));
@@ -260,11 +262,11 @@ void RayTracingSceneManager::LoadFluidScene(const string meshfile)
 	//planeModel = glm::scale(planeModel, glm::vec3(100.0f, 1.0f, 100.0f));
 	//InsertTriangles(LoadPlaneTriangles(planeModel, 1));
 
-	//// rusted iron sphere 1
-	//glm::mat4 sphereModel = glm::mat4();
-	//sphereModel = glm::translate(sphereModel, glm::vec3(10.0f, 20.0f, 0.0f));
-	//sphereModel = glm::scale(sphereModel, glm::vec3(10.0f, 10.0f, 10.0f));
-	//InsertTriangles(LoadMeshTriangles("Obj/Sphere.obj", sphereModel, 2));
+	// rusted iron sphere 1
+	glm::mat4 sphereModel = glm::mat4();
+	sphereModel = glm::translate(sphereModel, glm::vec3(30.0f, 20.0f, 0.0f));
+	sphereModel = glm::scale(sphereModel, glm::vec3(10.0f, 10.0f, 10.0f));
+	InsertTriangles(LoadMeshTriangles("Obj/Sphere.obj", sphereModel, 2));
 
 	//// rusted iron sphere 2
 	//sphereModel = glm::mat4();
@@ -302,7 +304,7 @@ void RayTracingSceneManager::LoadFluidScene(const string meshfile)
 
 	// fluid
 	//InsertTriangles(LoadMeshTriangles(meshfile, glm::mat4(), 0));
-	InsertTriangles(LoadMeshTriangles(meshfile, glm::translate( glm::vec3(0.0f, 0.0f, -30.0f)), 0));
+	//InsertTriangles(LoadMeshTriangles(meshfile, glm::translate( glm::vec3(0.0f, 0.0f, -30.0f)), 0));
 }
 
 void RayTracingSceneManager::LoadPathTracingScene()
@@ -391,7 +393,7 @@ vector<Triangle> RayTracingSceneManager::LoadMeshTriangles(const string meshfile
 
 		triangles[i].tangent = tangent;
 		triangles[i].bitangent = bitangent;
-
+		
 		triangles[i].materialId = materialId;
 	}
 

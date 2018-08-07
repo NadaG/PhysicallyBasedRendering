@@ -2,6 +2,8 @@
 
 void Model::Load(const string& fileName)
 {
+	meshes.clear();
+
 	// aiprocess_triangulate는 triangle 형태가 아닌 model load 할 때 triangle로 불러들이는 것
 	// flipuvs는 y값은 flip하는 것
 	// scene의 mMeshes에는 모든 mesh들이 저장되어 있다

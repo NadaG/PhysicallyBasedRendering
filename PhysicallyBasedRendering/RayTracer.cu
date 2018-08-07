@@ -32,7 +32,9 @@ struct Ray
 	vec3 dir;
 	
 	int depth;
+
 	float decay;
+	//float 
 };
 
 const int WINDOW_HEIGHT = 1024;
@@ -45,7 +47,7 @@ const int QUEUE_SIZE = 32;
 
 const int DEPTH = 2;
 
-const int SAMPLE_NUM = 1;
+const int SAMPLE_NUM = 12;
 
 using std::cout;
 using std::endl;
@@ -54,7 +56,6 @@ using std::min;
 
 // TODO LIST
 // 1. 에너지 보존 for reflect and refract 
-// 3. shadow ray가 만난 면이 back face여도 그림자가 생기는 문제가 있음
 // 4. marching cube로 나온 fluid가 뒷면이 culling 되어 있는 문제가 있음
 // ggx distribution이라고 외우자
 __device__ float DistributionGGX(vec3 N, vec3 H, float roughness)
@@ -521,6 +522,11 @@ __device__ bool IsQueueEmpty(const int front, const int rear)
 	return front == rear;
 }
 
+__device__ bool IsLight(const vec3 emission)
+{
+	return emission.x > 0.0f || emission.y > 0.0f || emission.z > 0.0f;
+}
+
 __device__ bool IsLighted(
 	vec3 hitPoint,
 	Light light,
@@ -795,24 +801,39 @@ __device__ vec4 RayTraceColor(
 			vec3 ambient = vec3(0.03) * albedo * ao;
 
 			// Light Sampling
-			// sumLo += (ambient + Lo + emission) * nowRay.decay;
-
-			// Path Tracing, BRDF Sampling
-			// 광원에 닿았으면
-			
 			if (nowRay.depth == 1)
 			{
-				if (emission.x > 0.0f || emission.y > 0.0f || emission.z > 0.0f)
+				if (IsLight(emission))
 				{
-					sumLo += emission * nowRay.decay;
+					sumLo += emission;
+				}
+				else
+				{
+					sumLo += (ambient + Lo) * nowRay.decay;
 				}
 			}
 			else
 			{
 				float distance = glm::distance(hitPoint, nowRay.origin);
 				float attenuation = 1.0f / (distance * distance);
-				sumLo += emission * attenuation * nowRay.decay;
+				sumLo += emission * attenuation * nowRay.decay / (float)SAMPLE_NUM;
 			}
+
+			// Path Tracing, BRDF Sampling
+			// 광원에 닿았으면
+			/*if (nowRay.depth == 1)
+			{
+				if (IsLight(emission))
+				{
+					sumLo += emission * (nowRay.decay / SAMPLE_NUM);
+				}
+			}
+			else
+			{
+				float distance = glm::distance(hitPoint, nowRay.origin);
+				float attenuation = 1.0f / (distance * distance);
+				sumLo += emission * attenuation * (nowRay.decay / SAMPLE_NUM);
+			}*/
 
 			//////////////////////////////////////////////////////////////////////////////////////////분리선
 
@@ -845,9 +866,8 @@ __device__ vec4 RayTraceColor(
 					
 					// Path Tracing
 					reflectRay.dir = normalize(reflectRandomVec);
-					reflectRay.decay = nowRay.decay * 
-						glm::clamp(dot(N, reflectRay.dir), 0.0f, 1.0f) 
-						/ SAMPLE_NUM;
+					reflectRay.decay = nowRay.decay *
+						glm::clamp(dot(N, reflectRay.dir), 0.0f, 1.0f);
 					
 					reflectRay.depth = nowRay.depth + 1;
 					reflectRay.origin = hitPoint + reflectRay.dir * 0.08f;

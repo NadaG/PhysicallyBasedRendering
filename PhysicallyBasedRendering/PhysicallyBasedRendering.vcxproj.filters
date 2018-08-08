@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <CudaCompile Include="KDTree.cu" />
     <CudaCompile Include="Octree.cu" />
     <CudaCompile Include="RayTracer.cu" />
     <CudaCompile Include="tmp.cu" />
-    <CudaCompile Include="KDTree.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BillBoardMovement.cpp" />
@@ -14,6 +14,7 @@
     <ClCompile Include="fitLTC.cpp" />
     <ClCompile Include="FluidSceneManager.cpp" />
     <ClCompile Include="FluidRenderer.cpp" />
+    <ClCompile Include="FluidSimulationClient.cpp" />
     <ClCompile Include="FluidSimulationImporter.cpp" />
     <ClCompile Include="FrameBufferObject.cpp" />
     <ClCompile Include="LightMovement.cpp" />
@@ -49,7 +50,7 @@
     <ClCompile Include="VertexArrayObject.cpp" />
     <ClCompile Include="VolumeRenderer.cpp" />
     <ClCompile Include="WindowManager.cpp" />
-    <ClCompile Include="FluidSimulationClient.cpp" />
+    <ClCompile Include="NormalEstimateModel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BillBoardMovement.h" />
@@ -65,8 +66,10 @@
     <ClInclude Include="Exporter.h" />
     <ClInclude Include="FluidRenderer.h" />
     <ClInclude Include="FluidSceneManager.h" />
+    <ClInclude Include="FluidSimulationClient.h" />
     <ClInclude Include="FluidSimulationImporter.h" />
     <ClInclude Include="FrameBufferObject.h" />
+    <ClInclude Include="KDTree.cuh" />
     <ClInclude Include="MarchingCube.h" />
     <ClInclude Include="MCTable.h" />
     <ClInclude Include="Octree.cuh" />
@@ -105,11 +108,7 @@
     <ClInclude Include="VertexArrayObject.h" />
     <ClInclude Include="VolumeRenderer.h" />
     <ClInclude Include="WindowManager.h" />
-<<<<<<< HEAD
-    <ClInclude Include="FluidSimulationClient.h" />
-=======
-    <ClInclude Include="KDTree.cuh" />
->>>>>>> bcd6eaf2f1bc039a14f08c1a4b94a1ba461db569
+    <ClInclude Include="NormalEstimateModel.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Basic.fs" />

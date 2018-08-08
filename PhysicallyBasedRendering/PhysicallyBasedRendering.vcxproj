@@ -175,6 +175,7 @@
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="MyMath.cpp" />
+    <ClCompile Include="NormalEstimateModel.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="PBRRenderer.cpp" />
     <ClCompile Include="PBRSceneManager.cpp" />
@@ -273,6 +274,7 @@
     <ClInclude Include="KDTree.cuh" />
     <ClInclude Include="MarchingCube.h" />
     <ClInclude Include="MCTable.h" />
+    <ClInclude Include="NormalEstimateModel.h" />
     <ClInclude Include="Octree.cuh" />
     <ClInclude Include="PixelBufferObject.h" />
     <ClInclude Include="LightMovement.h" />

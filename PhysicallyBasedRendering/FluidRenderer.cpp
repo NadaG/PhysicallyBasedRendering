@@ -180,10 +180,10 @@ void FluidRenderer::InitializeRender()
 	//fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
 
 	// CLIENT
-	clientImporter.Initialize(boundarySize, cubes, 1);
+	/*clientImporter.Initialize(boundarySize, cubes, 1);
 	fluidVertices = new GLfloat[clientImporter.particleNum * 6];
-	fluidVAO.VertexBufferData(sizeof(GLfloat)*clientImporter.particleNum * 6, fluidVertices);
-	
+	fluidVAO.VertexBufferData(sizeof(GLfloat)*clientImporter.particleNum * 6, fluidVertices);*/
+
 	// position
 	fluidVAO.VertexAttribPointer(3, 6);
 	// color
@@ -204,11 +204,14 @@ void FluidRenderer::InitializeRender()
 	isRenderOnDefaultFBO = true;
 	targetFrame = 210;
 
-	//InitializePython();
+	NEM.LoadModel();
 }
 
 void FluidRenderer::Render()
 {
+	return;
+
+
 	if (currentFrame >= 5000 && !isRenderOnDefaultFBO)
 		return;
 
@@ -270,40 +273,6 @@ void FluidRenderer::Render()
 	}
 
 	currentFrame++;
-}
-
-void FluidRenderer::InitializePython()
-{
-	/*Py_SetPythonHome(L"C:\\Users\\RENDER4\\AppData\\Local\\Programs\\python-3.6.3-h9e2ca53_1");
-	
-	Py_Initialize();
-	np::initialize();
-	
-	py::object main_module = py::import("__main__");
-	py::object main_namespace = main_module.attr("__dict__");
-
-	py::object sys_ = py::import("sys");
-	PyRun_SimpleString("import sys\n""sys.argv=['']");
-
-	string version = py::extract<string>(sys_.attr("version"));
-	cout << version << endl;
-
-	py::object print = py::import("__main__").attr("__builtins__").attr("print");
-	print("Hello, Python");
-
-	const py::object tf_ = py::import("tensorflow");
-
-	const np::ndarray d1 = np::array(py::make_tuple(1.0f, 2.0f, 3.0f, 4.0f));
-	const np::ndarray d2 = np::array(py::make_tuple(5.0f, 6.0f, 7.0f, 9.0f));
-
-	const py::object x1 = tf_.attr("constant")(d1);
-	const py::object x2 = tf_.attr("constant")(d2);
-
-	const py::object result = tf_.attr("multiply")(x1, x2);
-	const py::object sess = tf_.attr("Session")();
-
-	print(sess.attr("run")(result));
-	sess.attr("close");*/
 }
 
 void FluidRenderer::ScreenSpaceFluidNormalRender()

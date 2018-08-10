@@ -67,6 +67,11 @@ void Mesh::SetMesh(aiMesh* mesh)
 		else
 		{
 			triangle.normal = cross(triangle.v1 - triangle.v0, triangle.v2 - triangle.v0);
+
+			// TODO Path Tracing
+			/*triangle.v0normal = triangle.normal;
+			triangle.v1normal = triangle.normal;
+			triangle.v2normal = triangle.normal;*/
 		}
 
 		if (mesh->HasTextureCoords(0))
@@ -80,6 +85,7 @@ void Mesh::SetMesh(aiMesh* mesh)
 	}
 
 	// vertex에 normal 정보가 없다면 vertex position 정보를 이용해 vertex normal을 구함
+	// TODO Path Tracing
 	if (!mesh->HasNormals())
 	{
 		vector<vector<int> > neighborFaceMap;

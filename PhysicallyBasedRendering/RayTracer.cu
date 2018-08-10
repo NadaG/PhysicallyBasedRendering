@@ -32,7 +32,9 @@ struct Ray
 	vec3 dir;
 	
 	int depth;
+
 	float decay;
+	//float 
 };
 
 const int WINDOW_HEIGHT = 1024;
@@ -43,9 +45,9 @@ const int RAY_Y_NUM = 32;
 
 const int QUEUE_SIZE = 32;
 
-const int DEPTH = 3;
+const int DEPTH = 2;
 
-const int SAMPLE_NUM = 1;
+const int SAMPLE_NUM = 12;
 
 using std::cout;
 using std::endl;
@@ -54,8 +56,6 @@ using std::min;
 
 // TODO LIST
 // 1. 에너지 보존 for reflect and refract 
-// 2. path tracing
-// 3. shadow ray가 만난 면이 back face여도 그림자가 생기는 문제가 있음
 // 4. marching cube로 나온 fluid가 뒷면이 culling 되어 있는 문제가 있음
 // ggx distribution이라고 외우자
 __device__ float DistributionGGX(vec3 N, vec3 H, float roughness)
@@ -185,7 +185,7 @@ __device__ bool RayTriangleIntersect(Ray ray, Triangle triangle, float& dist)
 
 	dist = dot(v0v2, qvec) * invDet;
 
-	return dist > 0.01f;
+	return dist > 0.001f;
 }
 
 //bool RayPlaneIntersect(Ray ray, vec4 plane, float& t)
@@ -523,6 +523,11 @@ __device__ bool IsQueueEmpty(const int front, const int rear)
 	return front == rear;
 }
 
+__device__ bool IsLight(const vec3 emission)
+{
+	return emission.x > 0.0f || emission.y > 0.0f || emission.z > 0.0f;
+}
+
 __device__ bool IsLighted(
 	vec3 hitPoint,
 	Light light,
@@ -630,8 +635,6 @@ __device__ vec4 RayTraceColor(
 	Ray ray,
 	int rayIndex,
 	Ray* rayQueue,
-	AABB* objects,
-	int objNum,
 	Triangle* triangles,
 	int triangleNum,
 	Sphere* spheres,
@@ -656,9 +659,6 @@ __device__ vec4 RayTraceColor(
 		Ray nowRay;
 		nowRay = GetQueueFront(rayQueue, front);
 		Dequeue(rayQueue, front);
-
-		if (!RayAABBsIntersect(nowRay, objects, objNum))
-			continue;
 
 		vec3 hitPoint = glm::vec3(0.0f);
 		// hit한 object의 material id
@@ -802,27 +802,39 @@ __device__ vec4 RayTraceColor(
 			vec3 ambient = vec3(0.03) * albedo * ao;
 
 			// Light Sampling
-			sumLo += (ambient + Lo + emission) * nowRay.decay;
+			if (nowRay.depth == 1)
+			{
+				if (IsLight(emission))
+				{
+					sumLo += emission;
+				}
+				else
+				{
+					sumLo += (ambient + Lo) * nowRay.decay;
+				}
+			}
+			else
+			{
+				float distance = glm::distance(hitPoint, nowRay.origin);
+				float attenuation = 1.0f / (distance * distance);
+				sumLo += emission * attenuation * nowRay.decay / (float)SAMPLE_NUM;
+			}
 
-			//// Path Tracing, BRDF Sampling
-			//// 광원에 닿았으면
-			//if (emission.x > 0.0f || emission.y > 0.0f || emission.z > 0.0f)
-			//{
-			//	if (nowRay.depth == 1)
-			//	{
-			//		sumLo += emission * nowRay.decay;
-			//	}
-			//	else
-			//	{
-			//		float distance = glm::distance(hitPoint, nowRay.origin);
-			//		float attenuation = 1.0f / (distance * distance);
-			//		sumLo += emission * attenuation * nowRay.decay;
-			//	}
-			//}
-			//else
-			//{
-			//	sumLo += (ambient + Lo) * nowRay.decay;
-			//}
+			// Path Tracing, BRDF Sampling
+			// 광원에 닿았으면
+			/*if (nowRay.depth == 1)
+			{
+				if (IsLight(emission))
+				{
+					sumLo += emission * (nowRay.decay / SAMPLE_NUM);
+				}
+			}
+			else
+			{
+				float distance = glm::distance(hitPoint, nowRay.origin);
+				float attenuation = 1.0f / (distance * distance);
+				sumLo += emission * attenuation * (nowRay.decay / SAMPLE_NUM);
+			}*/
 
 			//////////////////////////////////////////////////////////////////////////////////////////분리선
 
@@ -835,47 +847,53 @@ __device__ vec4 RayTraceColor(
 						randomNums[(rayIndex * SAMPLE_NUM + j) * 2]);
 					float phi = 2 * glm::pi<float>() * randomNums[(rayIndex * SAMPLE_NUM + j) * 2 + 1];
 
-					vec3 randomVec = vec3(
+					vec3 randomVec = normalize(vec3(
 						cosf(phi)*r,
 						randomNums[(rayIndex * SAMPLE_NUM + j) * 2],
-						sinf(phi)*r);
+						sinf(phi)*r));
 
 					glm::mat3 TNB = glm::mat3(
 						triangles[nearestTriangleIdx].tangent,
 						N,
 						triangles[nearestTriangleIdx].bitangent);
-					randomVec = TNB * normalize(randomVec);
+					vec3 reflectRandomVec = TNB * randomVec;
 
-					Ray reflectRay;
 					
+					Ray reflectRay;
 					// 여기서 kS.r을 쓴 이유는 reflect ray 하나만 쓰기 때문에 한 것
 					// Ray Tracing
-					 reflectRay.dir = normalize(reflect(nowRay.dir, N));
-					 reflectRay.decay = kS.r * nowRay.decay / SAMPLE_NUM;
+					/*reflectRay.dir = normalize(reflect(nowRay.dir, N));
+					reflectRay.decay = kS.r * nowRay.decay / SAMPLE_NUM;*/
 					
 					// Path Tracing
-	/*				reflectRay.dir = normalize(randomVec);
-					reflectRay.decay = nowRay.decay * glm::clamp(dot(N, reflectRay.dir), 0.0f, 1.0f) / SAMPLE_NUM;*/
+					reflectRay.dir = normalize(reflectRandomVec);
+					reflectRay.decay = nowRay.decay *
+						glm::clamp(dot(N, reflectRay.dir), 0.0f, 1.0f);
 					
-					// reflect ray의 시작점은 hit point
 					reflectRay.depth = nowRay.depth + 1;
-					reflectRay.origin = hitPoint + reflectRay.dir * 0.05f;
+					reflectRay.origin = hitPoint + reflectRay.dir * 0.08f;
 
 					Enqueue(rayQueue, reflectRay, rear);
+
+	/*				glm::mat3 refractTNB = glm::mat3(
+						triangles[nearestTriangleIdx].tangent,
+						normalize(refract(nowRay.dir, N, 1.0f / materials[materialId].refractiveIndex)),
+						-triangles[nearestTriangleIdx].bitangent);
+					vec3 refractRandomVec = ;*/
+
+					Ray refractRay;
+					// 현재 빛의 감쇠 정도와 물체의 재질에 따라 refract ray의 감쇠 정도가 정해짐
+					refractRay.dir = normalize(refract(
+						nowRay.dir, N, 1.0f / materials[materialId].refractiveIndex));
+					refractRay.decay = nowRay.decay * kD.r / SAMPLE_NUM;
+
+					// 투명한 Object이기 때문에 kD가 refract decay로 들어간 거임
+
+					refractRay.depth = nowRay.depth + 1;
+					refractRay.origin = hitPoint + refractRay.dir * 0.08f;
+
+					Enqueue(rayQueue, refractRay, rear);
 				}
-
-				// refract는 ray tracing
-				Ray refractRay;
-				refractRay.origin = hitPoint + refractRay.dir * 0.05f;
-				// 현재 빛의 감쇠 정도와 물체의 재질에 따라 refract ray의 감쇠 정도가 정해짐
-				refractRay.dir = normalize(refract(nowRay.dir, N, 1.0f / materials[materialId].refractiveIndex));
-				// refract ray의 시작점은 hit point
-
-				// 투명한 Object이기 때문에 kD가 refract decay로 들어간 거임
-				refractRay.decay = kD.r * nowRay.decay;
-				refractRay.depth = nowRay.depth + 1;
-
-				Enqueue(rayQueue, refractRay, rear);
 			}
 		}
 	}
@@ -897,7 +915,6 @@ __global__ void RayTraceD(
 	const int gridX,
 	const int gridY,
 	glm::mat4 view,
-	AABB* boundingboxes, int boxNum,
 	Triangle* triangles, int triangleNum,
 	Sphere* spheres, int sphereNum,
 	Light* lights, int lightNum,
@@ -924,8 +941,6 @@ __global__ void RayTraceD(
 				ray,
 				blockIdx.x * blockDim.x + threadIdx.x,
 				rayQueue,
-				boundingboxes,
-				boxNum,
 				triangles,
 				triangleNum,
 				spheres,
@@ -962,7 +977,6 @@ void RayTrace(
 	const int gridX,
 	const int gridY,
 	glm::mat4 view,
-	const vector<AABB>& boundingboxes,
 	const vector<Triangle>& triangles,
 	const vector<Sphere>& spheres,
 	const vector<Light>& lights,
@@ -970,7 +984,6 @@ void RayTrace(
 	const vector<float>& randomThetaPi,
 	OctreeNode* root)
 {
-	thrust::device_vector<AABB> b = boundingboxes;
 	thrust::device_vector<Triangle> t = triangles;
 	thrust::device_vector<Sphere> s = spheres;
 	thrust::device_vector<Light> l = lights;
@@ -998,8 +1011,6 @@ void RayTrace(
 		gridX,
 		gridY,
 		view,
-		b.data().get(),
-		b.size(),
 		t.data().get(),
 		t.size(),
 		s.data().get(),

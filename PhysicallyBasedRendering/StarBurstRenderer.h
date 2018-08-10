@@ -6,7 +6,6 @@
 
 #include <memory>
 
-// TODO path tracing and bloom here
 // Renderer에서는 각각의 ShaderProgram과 Object 배열이 있고
 // ShaderProgram의 vertex shader, fragment shader를 선택하는 과정이 있으며
 // ShaderProgram을 use하고 object를 render하는 과정이 있다.

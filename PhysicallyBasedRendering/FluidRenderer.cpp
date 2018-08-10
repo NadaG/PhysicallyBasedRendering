@@ -47,7 +47,7 @@ void FluidRenderer::InitializeRender()
 
 	//tmpTex.LoadTexture("ExportData/tmp.png");
 	//tmpTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_REPEAT, GL_REPEAT);
-	////////////////////////???
+	////////////////////////
 
 	///////////////////
 	floorAlbedoTex.LoadTexture("Texture/Floor/albedo.png");
@@ -171,19 +171,26 @@ void FluidRenderer::InitializeRender()
 	cubes[0].pos.z = 0.0f;
 
 	// simulation 공간을 약간 작게 해주어야 marching cube가 제대로 그려짐
-	importer.Initialize(boundarySize * 0.8f, cubes, 1);
-	fluidVertices = new GLfloat[importer.particleNum * 6];
 
 	fluidVAO.GenVAOVBOIBO();
-	fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
-	
+
+	// DLL
+	//importer.Initialize(boundarySize * 0.8f, cubes, 1);
+	//fluidVertices = new GLfloat[importer.particleNum * 6];
+	//fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
+
+	// CLIENT
+	/*clientImporter.Initialize(boundarySize, cubes, 1);
+	fluidVertices = new GLfloat[clientImporter.particleNum * 6];
+	fluidVAO.VertexBufferData(sizeof(GLfloat)*clientImporter.particleNum * 6, fluidVertices);*/
+
 	// position
 	fluidVAO.VertexAttribPointer(3, 6);
 	// color
 	fluidVAO.VertexAttribPointer(3, 6);
 
 	currentFrame = 0;
-	float resolutionRatio = 1.0f;
+	float resolutionRatio = 4.0f;
 	// 128장 그린거 5.0, 0.75였음
 	mc.BuildingGird(
 		boundarySize.x,
@@ -192,26 +199,34 @@ void FluidRenderer::InitializeRender()
 		boundarySize.x*resolutionRatio,
 		boundarySize.y*resolutionRatio,
 		boundarySize.z*resolutionRatio,
-		0.2f);
+		0.4f);
 
 	isRenderOnDefaultFBO = true;
 	targetFrame = 210;
 
-	InitializePython();
+	NEM.LoadModel();
 }
 
 void FluidRenderer::Render()
 {
-	if (currentFrame >= 1000 && !isRenderOnDefaultFBO)
+	return;
+
+
+	if (currentFrame >= 5000 && !isRenderOnDefaultFBO)
 		return;
 
-	importer.Update(fluidVertices);
-	fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
+	// DLL
+	//importer.Update(fluidVertices);
+	//fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
+	
+	// CLIENT
+	clientImporter.Update(fluidVertices);
+	fluidVAO.VertexBufferData(sizeof(GLfloat)*clientImporter.particleNum * 6, fluidVertices);
 
 	if (isRenderOnDefaultFBO/* && currentFrame == targetFrame*/)
 	{
-		MarchingCubeFluidNormalRender("tmp.obj");
-		//ScreenSpaceFluidNormalRender();
+		//MarchingCubeFluidNormalRender("tmp.obj");
+		ScreenSpaceFluidNormalRender();
 		
 		/*char tmp[1024];
 		sprintf(tmp, "%04d", currentFrame);
@@ -221,9 +236,10 @@ void FluidRenderer::Render()
 		outfile += tmp;
 		outfile += ".png";
 
-		outfile = "Decoded/decode295000.png";
+		outfile = "Decoded/decode295000.png";*/
 
-		PhongRenderUsingNormalMap(outfile);*/
+		//PhongRenderUsingNormalMap("Decoded/decode430000.png");
+		//PhongRenderUsingNormalMap("ExportData/fluid_marchingcube6/0226.png");
 	}
 	else if (!isRenderOnDefaultFBO/* && currentFrame == targetFrame*/)
 	{
@@ -233,22 +249,22 @@ void FluidRenderer::Render()
 
 		ScreenSpaceFluidNormalRender();
 
-		outfile += "fluid_screenspace4/";
+		outfile += "fluid_screenspace5/";
 		outfile += tmp;
 		outfile += ".png";
 		pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
 		cout << currentFrame << "번째 screen space 프레임 그리는 중" << endl;
 		Sleep(2000.0f);
 
-		//// mesh file export
-		//outfile = "";
-		//outfile += "Obj/DroppingFluid/";
-		//outfile += tmp;
-		//outfile += ".obj";
-		//MarchingCubeFluidNormalRender(outfile);
+		// mesh file export
+		outfile = "";
+		outfile += "Obj/DroppingFluid/";
+		/*outfile += tmp;*/
+		outfile += "tmp.obj";
+		MarchingCubeFluidNormalRender(outfile);
 
 		outfile = "";
-		outfile += "fluid_marchingcube4/";
+		outfile += "fluid_marchingcube5/";
 		outfile += tmp;
 		outfile += ".png";
 		pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
@@ -257,40 +273,6 @@ void FluidRenderer::Render()
 	}
 
 	currentFrame++;
-}
-
-void FluidRenderer::InitializePython()
-{
-	/*Py_SetPythonHome(L"C:\\Users\\RENDER4\\AppData\\Local\\Programs\\python-3.6.3-h9e2ca53_1");
-	
-	Py_Initialize();
-	np::initialize();
-	
-	py::object main_module = py::import("__main__");
-	py::object main_namespace = main_module.attr("__dict__");
-
-	py::object sys_ = py::import("sys");
-	PyRun_SimpleString("import sys\n""sys.argv=['']");
-
-	string version = py::extract<string>(sys_.attr("version"));
-	cout << version << endl;
-
-	py::object print = py::import("__main__").attr("__builtins__").attr("print");
-	print("Hello, Python");
-
-	const py::object tf_ = py::import("tensorflow");
-
-	const np::ndarray d1 = np::array(py::make_tuple(1.0f, 2.0f, 3.0f, 4.0f));
-	const np::ndarray d2 = np::array(py::make_tuple(5.0f, 6.0f, 7.0f, 9.0f));
-
-	const py::object x1 = tf_.attr("constant")(d1);
-	const py::object x2 = tf_.attr("constant")(d2);
-
-	const py::object result = tf_.attr("multiply")(x1, x2);
-	const py::object sess = tf_.attr("Session")();
-
-	print(sess.attr("run")(result));
-	sess.attr("close");*/
 }
 
 void FluidRenderer::ScreenSpaceFluidNormalRender()
@@ -434,7 +416,6 @@ void FluidRenderer::MarchingCubeFluidNormalRender(const string& meshfile)
 	float* densities = mc.ComputeParticleDensity(fluidVertices, importer.particleNum);
 	
 	mc.ComputeAnisotropicKernelGridDensity(fluidVertices, densities, importer.particleNum);
-	//mc.ComputeSphericalKernelGridDensity(fluidVertices, densities, importer.particleNum);
 
 	mc.ExcuteMarchingCube(meshfile);
 
@@ -501,9 +482,9 @@ void FluidRenderer::PhongRenderUsingNormalMap(const string &imgfile)
 
 	phongShader->Use();
 
-	phongShader->SetUniformVector3f("ambientColor", glm::vec3(0.2f, 0.2f, 0.3f));
-	phongShader->SetUniformVector3f("diffuseColor", glm::vec3(0.2f, 0.2f, 0.6f));
-	phongShader->SetUniformVector3f("specularColor", glm::vec3(0.0f, 0.0f, 0.0f));
+	phongShader->SetUniformVector3f("ambientColor", glm::vec3(0.1f, 0.1f, 0.1f));
+	phongShader->SetUniformVector3f("diffuseColor", glm::vec3(0.2f, 0.4f, 0.7f));
+	phongShader->SetUniformVector3f("specularColor", glm::vec3(0.005f, 0.01f, 0.03f));
 
 	phongShader->SetUniformMatrix4f("model", model);
 	phongShader->SetUniformMatrix4f("view", view);
@@ -536,11 +517,17 @@ void FluidRenderer::TerminateRender()
 
 	sceneManager->TerminateObjects();
 	importer.Quit();
+	clientImporter.Quit();
 }
 
 void FluidRenderer::DrawFluids(const float cameraDist)
 {
 	fluidVAO.Bind();
 	glPointSize(pointSize / cameraDist);
-	glDrawArrays(GL_POINTS, 0, importer.particleNum);
+
+	// DLL
+	//glDrawArrays(GL_POINTS, 0, importer.particleNum);
+	
+	// CLIENT
+	glDrawArrays(GL_POINTS, 0, clientImporter.particleNum);
 }

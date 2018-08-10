@@ -164,6 +164,7 @@
     <ClCompile Include="fitLTC.cpp" />
     <ClCompile Include="FluidSceneManager.cpp" />
     <ClCompile Include="FluidRenderer.cpp" />
+    <ClCompile Include="FluidSimulationClient.cpp" />
     <ClCompile Include="FluidSimulationImporter.cpp" />
     <ClCompile Include="FrameBufferObject.cpp" />
     <ClCompile Include="LightMovement.cpp" />
@@ -174,6 +175,7 @@
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="MyMath.cpp" />
+    <ClCompile Include="NormalEstimateModel.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="PBRRenderer.cpp" />
     <ClCompile Include="PBRSceneManager.cpp" />
@@ -266,11 +268,13 @@
     <ClInclude Include="Exporter.h" />
     <ClInclude Include="FluidRenderer.h" />
     <ClInclude Include="FluidSceneManager.h" />
+    <ClInclude Include="FluidSimulationClient.h" />
     <ClInclude Include="FluidSimulationImporter.h" />
     <ClInclude Include="FrameBufferObject.h" />
     <ClInclude Include="KDTree.cuh" />
     <ClInclude Include="MarchingCube.h" />
     <ClInclude Include="MCTable.h" />
+    <ClInclude Include="NormalEstimateModel.h" />
     <ClInclude Include="Octree.cuh" />
     <ClInclude Include="PixelBufferObject.h" />
     <ClInclude Include="LightMovement.h" />

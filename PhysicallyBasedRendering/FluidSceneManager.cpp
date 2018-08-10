@@ -13,7 +13,8 @@ void FluidSceneManager::InitializeObjects()
 	sceneObjs.push_back(skyboxObj);
 	sceneObjs[1].Scale(glm::vec3(10.0f));
 
-	movingCamera->WorldTranslate(glm::vec3(0.0f, 0.0f, 60.0f));
+	movingCamera->WorldTranslate(glm::vec3(0.0f, 20.0f, 80.0f));
+	movingCamera->ModelRotate(glm::vec3(1.0f, 0.0f, 0.0f), -0.3f);
 }
 
 void FluidSceneManager::Update()

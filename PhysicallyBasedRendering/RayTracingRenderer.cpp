@@ -41,10 +41,6 @@ void RayTracingRenderer::InitializeRender()
 
 	vector<Triangle> triangles = dynamic_cast<RayTracingSceneManager*>(sceneManager)->triangles;
 	vector<Sphere> spheres = dynamic_cast<RayTracingSceneManager*>(sceneManager)->spheres;
-	AABB aabb;
-	aabb.bounds[0] = glm::vec3(-100.0f, -100.0f, -100.0f);
-	aabb.bounds[1] = glm::vec3(100.0f, 100.0f, 100.0f);
-	objects.push_back(aabb);
 
 	/*for (int i = 0; i < triangles.size(); i++)
 	{
@@ -108,7 +104,7 @@ void RayTracingRenderer::InitializeRender()
 	//OfflineRender("0002.png");
 
 	dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadFluidScene("Obj/PouringFluid/0250.obj");
-	OfflineRender("0002.png");
+	OfflineRender("0003.png");
 }
 
 // glm의 cross(a, b)는 오른손으로 a방향에서 b방향으로 감싸쥘 때의 엄지방향이다.
@@ -140,16 +136,17 @@ void RayTracingRenderer::Render()
 
 	///////////////////////////
 	// build octree
-	vec3 min = vec3(-30, -30, -30);
-	vec3 max = vec3(30, 30, 30);
+	vec3 min = vec3(-100, -100, -100);
+	vec3 max = vec3(100, 100, 100);
+
+	cout << "triangles : " << triangles.size() << endl;
+	cout << "build octree start" << endl;
 
 	OctreeNode* root2 = BuildOctree((Triangle *)triangles.data(), triangles.size(), 1000, min, max);
 
-
-
 	OctreeNode* octree = OTHostToDevice(root2);
+	cout << "build octree end" << endl;
 
-	cout << "build octree" << endl;
 	///////////////////////////
 
 	for (int i = 0; i < gridY; i++)
@@ -164,7 +161,7 @@ void RayTracingRenderer::Render()
 			auto gen = [&dis, &mersenne_engine]() {return dis(mersenne_engine); };
 			generate(begin(vec), end(vec), gen);
 
-			RayTrace(output, i, j, view, objects, triangles, spheres, lights, materials, vec, octree);
+			RayTrace(output, i, j, view, triangles, spheres, lights, materials, vec, octree);
 		}
 	}
 
@@ -222,10 +219,11 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	vec3 max = vec3(30, 31, 33);
 
 	OctreeNode* root1 = BuildOctree((Triangle *)triangles.data(), triangles.size(), 64, min, max);
-
 	OctreeNode* octree = OTHostToDevice(root1);
 
-	KDTreeNode* kdroot = BuildKDTree(triangles);
+	cout << "build octree end" << endl;
+
+	//KDTreeNode* kdroot = BuildKDTree(triangles);
 
 	cout << "triangles : "<<triangles.size() << endl;
 	cout << "build octree" << endl;
@@ -243,7 +241,7 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 			auto gen = [&dis, &mersenne_engine]() {return dis(mersenne_engine); };
 			generate(begin(vec), end(vec), gen);
 
-			RayTrace(output, i, j, view, objects, triangles, spheres, lights, materials, vec, octree);
+			RayTrace(output, i, j, view, triangles, spheres, lights, materials, vec, octree);
 		}
 	}
 

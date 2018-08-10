@@ -241,7 +241,6 @@ OctreeNode* BuildOctree(Triangle* triangles, int numTriangles, int limit, vec3 m
 	root->bnd.bounds[1] = max;
 
 	SpaceDivision(root, triangles, idx, limit);
-	cout << "end" << endl;
 
 	return root;
 }

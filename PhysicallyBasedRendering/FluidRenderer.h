@@ -1,19 +1,11 @@
 #pragma once
 
-#define BOOST_PYTHON_STATIC_LIB
-#define BOOST_LIB_NAME "boost_numpy3"
-
 #include "Renderer.h"
 #include "FluidSimulationImporter.h"
+#include "FluidSimulationClient.h"
 #include "FluidSceneManager.h"
 #include "MarchingCube.h"
-
-//#include <boost/config/auto_link.hpp>
-//#include <boost/python.hpp>
-//#include <boost/python/numpy.hpp>
-//
-//namespace py = boost::python;
-//namespace np = boost::python::numpy;
+#include "NormalEstimateModel.h"
 
 struct FluidCube
 {
@@ -31,8 +23,6 @@ public:
 
 	void InitializeRender();
 	void Render();
-
-	void InitializePython();
 
 	void ScreenSpaceFluidNormalRender();
 	void MarchingCubeFluidNormalRender(const string& meshfile);
@@ -106,6 +96,7 @@ private:
 
 	GLfloat* fluidVertices;
 	FluidSimulationImporter importer;
+	FluidSimulationClient clientImporter;
 
 	int currentFrame;
 
@@ -114,6 +105,8 @@ private:
 	PNGExporter pngExporter;
 
 	Texture2D pngTex;
+
+	NormalEstimateModel NEM;
 
 private:
 

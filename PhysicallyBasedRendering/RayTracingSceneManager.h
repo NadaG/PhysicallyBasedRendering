@@ -22,7 +22,7 @@ public:
 	vector<Triangle> LoadPlaneTriangles(glm::mat4 model, const int materialId);
 	vector<Triangle> LoadMeshTriangles(const string meshfile, glm::mat4 model, const int materialId);
 
-	void InsertTriangles(vector<Triangle> triangles);
+	void InsertTriangles(const vector<Triangle>& triangles);
 
 	void LoadFluidScene(const string meshfile);
 	void LoadPathTracingScene();

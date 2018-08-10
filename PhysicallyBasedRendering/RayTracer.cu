@@ -262,8 +262,9 @@ __device__ bool RayTraversal(OctreeNode* root, Ray ray)
 	if (root == nullptr)
 		return false;
 
-	if (ray.dir.x == 0)
+	/*if (ray.dir.x == 0)
 		return true;
+		*/
 
 	if (ray.dir.x < 0)
 	{

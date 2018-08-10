@@ -1,2 +1,4 @@
 Obj/
 Texture/
+NormalEstimateModel.h
+NormalEstimateModel.cpp

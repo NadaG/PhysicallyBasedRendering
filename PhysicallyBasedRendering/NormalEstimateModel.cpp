@@ -7,29 +7,29 @@ NormalEstimateModel::NormalEstimateModel()
 
 NormalEstimateModel::~NormalEstimateModel()
 {
-	sess.attr("close");
+	//sess.attr("close");
 }
 
 void NormalEstimateModel::InitializePython()
 {
-	Py_SetPythonHome(L"C:\\Users\\RENDER4\\AppData\\Local\\Programs\\python-3.6.3-h9e2ca53_1");
+	//Py_SetPythonHome(L"C:\\Users\\RENDER4\\AppData\\Local\\Programs\\python-3.6.3-h9e2ca53_1");
 
-	Py_Initialize();
-	np::initialize();
+	//Py_Initialize();
+	//np::initialize();
 
-	py::object main_module = py::import("__main__");
-	py::object main_namespace = main_module.attr("__dict__");
+	//py::object main_module = py::import("__main__");
+	//py::object main_namespace = main_module.attr("__dict__");
 
-	sys_ = py::import("sys");
-	PyRun_SimpleString("import sys\n""sys.argv=['']\n");
+	//sys_ = py::import("sys");
+	//PyRun_SimpleString("import sys\n""sys.argv=['']\n");
 
-	string version = py::extract<string>(sys_.attr("version"));
+	//string version = py::extract<string>(sys_.attr("version"));
 
-	print = py::import("__main__").attr("__builtins__").attr("print");
+	//print = py::import("__main__").attr("__builtins__").attr("print");
 
-	tf_ = py::import("tensorflow");
-	
-	sess = tf_.attr("Session")();
+	//tf_ = py::import("tensorflow");
+	//
+	//sess = tf_.attr("Session")();
 
 	/*const np::ndarray d1 = np::array(py::make_tuple(1.0f, 2.0f, 3.0f, 4.0f));
 	const np::ndarray d2 = np::array(py::make_tuple(5.0f, 6.0f, 7.0f, 9.0f));
@@ -56,30 +56,6 @@ void NormalEstimateModel::LoadModel()
 
 void NormalEstimateModel::UseModel(float* data)
 {
-	//string s = "noisy_image = np.array(";
-
-	//for (int n = 0; n < 1; n++)
-	//{
-	//	s += "[";
-	//	for (int i = 0; i < 1024; i++)
-	//	{
-	//		s += "[";
-	//		for (int j = 0; j < 1024; j++)
-	//		{
-	//			s += "[";
-	//			for (int k = 0; k < 2; k++)
-	//			{
-	//				s += "0,";
-	//			}
-	//			s += "0],";
-	//		}
-	//		s += "],";
-	//	}
-	//	s += "]";
-	//}
-
-	//s += ")\n";
-
 	string s = "noisy_image = np.array(";
 	s += "[";
 
@@ -112,8 +88,6 @@ void NormalEstimateModel::UseModel(float* data)
 		"	noisy_image = np.reshape(noisy_image, (reso, reso, 3), order='C')\n"
 		"	cv2.imwrite('ExportData/model_output/original_image.png', noisy_image)\n"
 	);
-
-
 }
 
 char const* greet()

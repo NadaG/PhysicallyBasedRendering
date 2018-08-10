@@ -215,18 +215,15 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 
 	///////////////////////////
 	// build octree
-	vec3 min = vec3(-100, -100, -100);
-	vec3 max = vec3(100, 100, 100);
+	vec3 min = vec3(-51, -51, -51);
+	vec3 max = vec3(51, 51, 51);
 
-	cout << "triangles : " << triangles.size() << endl;
-	cout << "build octree start" << endl;
-
-	OctreeNode* root1 = BuildOctree((Triangle *)triangles.data(), triangles.size(), 400, min, max);
+	OctreeNode* root1 = BuildOctree((Triangle *)triangles.data(), triangles.size(), 64, min, max);
 	OctreeNode* octree = OTHostToDevice(root1);
 
 	cout << "build octree end" << endl;
 
-	//KDTreeNode* kdroot = BuildKDTree(triangles);
+	KDTreeNode* kdroot = BuildKDTree(triangles);
 
 	cout << "triangles : "<<triangles.size() << endl;
 	cout << "build octree" << endl;

@@ -4,6 +4,7 @@
 
 
 #define CHUNKSIZE 256
+#define CUTOFF 0.001
 
 using glm::vec3;
 using glm::vec4;
@@ -15,12 +16,14 @@ struct KDTreeNode
 	KDTreeNode* rightChild;
 
 	AABB bnd;
+	AABB tbb;
 
 	int firstTriangle;
 	int triangleNum;
 
 	int chunkSize;
 
+	__host__ __device__
 	KDTreeNode()
 	{
 		firstTriangle = -1;
@@ -29,6 +32,9 @@ struct KDTreeNode
 
 		bnd.bounds[0] = vec3(999999.0f);
 		bnd.bounds[1] = vec3(-999999.0f);
+
+		tbb.bounds[0] = vec3(999999.0f);
+		tbb.bounds[1] = vec3(-999999.0f);
 
 		leftChild = nullptr;
 		rightChild = nullptr;
@@ -107,8 +113,8 @@ struct ChunkNode
 		node = nullptr;
 		firstTriangle = -1;
 		triangleNum = 0;
-		cbb.bounds[0] = vec3(0.0f);
-		cbb.bounds[1] = vec3(0.0f);
+		cbb.bounds[0] = vec3(99999.0f);
+		cbb.bounds[1] = vec3(-99999.0f);
 	}
 };
 

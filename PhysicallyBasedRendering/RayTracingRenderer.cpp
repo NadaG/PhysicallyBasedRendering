@@ -218,10 +218,10 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 
 	///////////////////////////
 	// build octree
-	vec3 min = vec3(-50, -50, -50);
-	vec3 max = vec3(50, 60, 50);
+	vec3 min = vec3(-10, 0, -10);
+	vec3 max = vec3(30, 31, 33);
 
-	OctreeNode* root1 = BuildOctree((Triangle *)triangles.data(), triangles.size(), 100, min, max);
+	OctreeNode* root1 = BuildOctree((Triangle *)triangles.data(), triangles.size(), 64, min, max);
 
 	OctreeNode* octree = OTHostToDevice(root1);
 

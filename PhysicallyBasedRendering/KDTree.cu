@@ -184,29 +184,64 @@ __global__ void ComputeChunkAABB(ChunkNode* chunkList, int chunkNum, Triangle* T
 			chunkList[idx].cbb.bounds[1].x = thrust::max(max.x, T[chunkList[idx].firstTriangle + i].tbb.bounds[1].x);
 			chunkList[idx].cbb.bounds[1].y = thrust::max(max.y, T[chunkList[idx].firstTriangle + i].tbb.bounds[1].y);
 			chunkList[idx].cbb.bounds[1].z = thrust::max(max.z, T[chunkList[idx].firstTriangle + i].tbb.bounds[1].z);
+
+			min.x = chunkList[idx].cbb.bounds[0].x;
+			min.y = chunkList[idx].cbb.bounds[0].y;
+			min.z = chunkList[idx].cbb.bounds[0].z;
+
+			max.x = chunkList[idx].cbb.bounds[1].x;
+			max.y = chunkList[idx].cbb.bounds[1].y;
+			max.z = chunkList[idx].cbb.bounds[1].z;
+
 		}	
 	}
 }
 
 
-__global__ void SegmentedReduction(ChunkNode* chunkList, int gap)
+__global__ void SegmentedReduction(ChunkNode* chunkList, int gap, int cnum)
 {
 	unsigned int idx = blockDim.x * blockIdx.x + threadIdx.x;
 
+	if (idx*gap * 2 > cnum - 1 || idx*gap * 2 + gap > cnum-1)
+		return;
+
 	if (chunkList[idx*gap * 2].node == chunkList[idx*gap * 2 + gap].node)
 	{
-		chunkList[idx*gap * 2].cbb.bounds[0].x = thrust::min(chunkList[idx*gap * 2].cbb.bounds[0].x, chunkList[idx*gap * 2].cbb.bounds[0].x);
-		chunkList[idx*gap * 2].cbb.bounds[0].y = thrust::min(chunkList[idx*gap * 2].cbb.bounds[0].y, chunkList[idx*gap * 2].cbb.bounds[0].y);
-		chunkList[idx*gap * 2].cbb.bounds[0].z = thrust::min(chunkList[idx*gap * 2].cbb.bounds[0].z, chunkList[idx*gap * 2].cbb.bounds[0].z);
+		chunkList[idx*gap * 2].cbb.bounds[0].x = thrust::min(chunkList[idx*gap * 2].cbb.bounds[0].x, chunkList[idx*gap * 2 + gap].cbb.bounds[0].x);
+		chunkList[idx*gap * 2].cbb.bounds[0].y = thrust::min(chunkList[idx*gap * 2].cbb.bounds[0].y, chunkList[idx*gap * 2 + gap].cbb.bounds[0].y);
+		chunkList[idx*gap * 2].cbb.bounds[0].z = thrust::min(chunkList[idx*gap * 2].cbb.bounds[0].z, chunkList[idx*gap * 2 + gap].cbb.bounds[0].z);
 
-		chunkList[idx*gap * 2].cbb.bounds[1].x = thrust::max(chunkList[idx*gap * 2].cbb.bounds[1].x, chunkList[idx*gap * 2].cbb.bounds[1].x);
-		chunkList[idx*gap * 2].cbb.bounds[1].y = thrust::max(chunkList[idx*gap * 2].cbb.bounds[1].y, chunkList[idx*gap * 2].cbb.bounds[1].y);
-		chunkList[idx*gap * 2].cbb.bounds[1].z = thrust::max(chunkList[idx*gap * 2].cbb.bounds[1].z, chunkList[idx*gap * 2].cbb.bounds[1].z);
+		chunkList[idx*gap * 2].cbb.bounds[1].x = thrust::max(chunkList[idx*gap * 2].cbb.bounds[1].x, chunkList[idx*gap * 2 + gap].cbb.bounds[1].x);
+		chunkList[idx*gap * 2].cbb.bounds[1].y = thrust::max(chunkList[idx*gap * 2].cbb.bounds[1].y, chunkList[idx*gap * 2 + gap].cbb.bounds[1].y);
+		chunkList[idx*gap * 2].cbb.bounds[1].z = thrust::max(chunkList[idx*gap * 2].cbb.bounds[1].z, chunkList[idx*gap * 2 + gap].cbb.bounds[1].z);
 	}
 	else
-	{ 
-		
+	{	
+		if (chunkList[idx*gap * 2 + gap].node == chunkList[0].node)
+		{
+			chunkList[idx*gap * 2].node->tbb.bounds[0].x = thrust::min(chunkList[idx*gap * 2].node->tbb.bounds[0].x, chunkList[idx*gap * 2].cbb.bounds[0].x);
+			chunkList[idx*gap * 2].node->tbb.bounds[0].y = thrust::min(chunkList[idx*gap * 2].node->tbb.bounds[0].y, chunkList[idx*gap * 2].cbb.bounds[0].y);
+			chunkList[idx*gap * 2].node->tbb.bounds[0].z = thrust::min(chunkList[idx*gap * 2].node->tbb.bounds[0].z, chunkList[idx*gap * 2].cbb.bounds[0].z);
+
+			chunkList[idx*gap * 2].node->tbb.bounds[1].x = thrust::max(chunkList[idx*gap * 2].node->tbb.bounds[1].x, chunkList[idx*gap * 2].cbb.bounds[1].x);
+			chunkList[idx*gap * 2].node->tbb.bounds[1].y = thrust::max(chunkList[idx*gap * 2].node->tbb.bounds[1].y, chunkList[idx*gap * 2].cbb.bounds[1].y);
+			chunkList[idx*gap * 2].node->tbb.bounds[1].z = thrust::max(chunkList[idx*gap * 2].node->tbb.bounds[1].z, chunkList[idx*gap * 2].cbb.bounds[1].z);
+
+			chunkList[idx*gap * 2] = chunkList[idx*gap * 2 + gap];
+		}
+		else
+		{
+			chunkList[idx*gap * 2 + gap].node->tbb.bounds[0].x = thrust::min(chunkList[idx*gap * 2 + gap].node->tbb.bounds[0].x, chunkList[idx*gap * 2 + gap].cbb.bounds[0].x);
+			chunkList[idx*gap * 2 + gap].node->tbb.bounds[0].y = thrust::min(chunkList[idx*gap * 2 + gap].node->tbb.bounds[0].y, chunkList[idx*gap * 2 + gap].cbb.bounds[0].y);
+			chunkList[idx*gap * 2 + gap].node->tbb.bounds[0].z = thrust::min(chunkList[idx*gap * 2 + gap].node->tbb.bounds[0].z, chunkList[idx*gap * 2 + gap].cbb.bounds[0].z);
+
+			chunkList[idx*gap * 2 + gap].node->tbb.bounds[1].x = thrust::max(chunkList[idx*gap * 2 + gap].node->tbb.bounds[1].x, chunkList[idx*gap * 2 + gap].cbb.bounds[1].x);
+			chunkList[idx*gap * 2 + gap].node->tbb.bounds[1].y = thrust::max(chunkList[idx*gap * 2 + gap].node->tbb.bounds[1].y, chunkList[idx*gap * 2 + gap].cbb.bounds[1].y);
+			chunkList[idx*gap * 2 + gap].node->tbb.bounds[1].z = thrust::max(chunkList[idx*gap * 2 + gap].node->tbb.bounds[1].z, chunkList[idx*gap * 2 + gap].cbb.bounds[1].z);
+		}
 	}
+
+	chunkList[0].node->tbb = chunkList[0].cbb;
 }
 
 
@@ -259,9 +294,26 @@ void ProcessLargeNodes(Nvector* activeList, Nvector* smallList, Nvector* nextLis
 
 	ComputeChunkAABB << < cnum, 1 >> > (chunkList, cnum, T);
 	
-	//SegmentedReduction << < block, 1024 >> > ();
+	int a = 0;
+	if (cnum % 2 == 0)
+		a = cnum / 2;
+	else
+		a = cnum / 2 + 1;
+	for (int gap = 0; gap < a; gap++)
+	{
+		SegmentedReduction << < 1, cnum >> > (chunkList, pow(2, gap), cnum);
+	}
 
 	///////////////////////////////////////////////
+
+
+	///////////////////////////////////////////////
+	//	3rd step, split large node
+
+	//SplitLargeNode << < 1, 1 >> > ();
+
+	///////////////////////////////////////////////
+
 
 
 
@@ -270,11 +322,42 @@ void ProcessLargeNodes(Nvector* activeList, Nvector* smallList, Nvector* nextLis
 	cudaMemcpy(hostList, chunkList, sizeof(ChunkNode)*cnum, cudaMemcpyDeviceToHost);
 
 	cout << "idx " <<hostList[33].triangleNum << endl;
-	cout << "AABB " << hostList[0].cbb.bounds[0].x << endl;
-	cout << "AABB " << hostList[0].cbb.bounds[0].y << endl;
-	cout << "AABB " << hostList[0].cbb.bounds[0].z << endl;
 
-	cout << "AABB "<<hostList[0].cbb.bounds[1].x << endl;
-	cout << "AABB " << hostList[0].cbb.bounds[1].y << endl;
-	cout << "AABB " << hostList[0].cbb.bounds[1].z << endl;
-}
+	for (int i = 0; i < 34; i++)
+	{
+		//cout << "AABB " << hostList[i].cbb.bounds[1].y << endl;
+	}
+
+	
+	//cudaMemcpy(hostList, chunkList, sizeof(ChunkNode)*cnum, cudaMemcpyDeviceToHost);
+	KDTreeNode* node11 = new KDTreeNode();
+	cudaMemcpy(node11, hostList[0].node, sizeof(KDTreeNode), cudaMemcpyDeviceToHost);
+
+	//cout << "==========================" << endl;
+	//cout << "AABB " << hostList[0].cbb.bounds[0].x << endl;
+	//cout << "AABB " << hostList[0].cbb.bounds[0].y << endl;
+	//cout << "AABB " << hostList[0].cbb.bounds[0].z << endl;
+
+	//cout << "AABB "<<hostList[0].cbb.bounds[1].x << endl;
+	//cout << "AABB " << hostList[0].cbb.bounds[1].y << endl;
+	//cout << "AABB " << hostList[0].cbb.bounds[1].z << endl;
+
+	cout << "==========================" << endl;
+	cout << "AABB " << node11->tbb.bounds[0].x << endl;
+	cout << "AABB " << node11->tbb.bounds[0].y << endl;
+	cout << "AABB " << node11->tbb.bounds[0].z << endl;
+
+	cout << "AABB " << node11->tbb.bounds[1].x << endl;
+	cout << "AABB " << node11->tbb.bounds[1].y << endl;
+	cout << "AABB " << node11->tbb.bounds[1].z << endl;
+
+	cudaFree(chunkList);
+	delete hostList;
+	cudaFree(devNTL);
+	cudaFree(devData);
+	cudaFree(devActiveList);
+
+	tmp->nodeTriangleList = nullptr;
+	tmp->data = nullptr;
+	delete tmp;
+}  

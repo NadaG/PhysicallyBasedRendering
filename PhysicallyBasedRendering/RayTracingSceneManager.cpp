@@ -292,7 +292,7 @@ void RayTracingSceneManager::LoadFluidScene(const string meshfile)
 	//InsertTriangles(LoadPlaneTriangles(planeModel, 5));
 
 	// fluid
-	InsertTriangles(LoadMeshTriangles(meshfile, glm::mat4(), 0));
+	InsertTriangles(LoadMeshTriangles(meshfile, glm::translate(glm::vec3(-10.0f, 0.0f, 0.0f)), 0));
 }
 
 void RayTracingSceneManager::LoadPathTracingScene()

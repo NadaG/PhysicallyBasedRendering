@@ -4,6 +4,7 @@
 
 
 #define CHUNKSIZE 256
+#define CUTOFF 0.3
 
 using glm::vec3;
 using glm::vec4;

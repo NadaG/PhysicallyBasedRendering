@@ -245,6 +245,126 @@ __global__ void SegmentedReduction(ChunkNode* chunkList, int gap, int cnum)
 }
 
 
+__global__ void SplitLargeNode(Nvector* activeList)
+{
+	unsigned int idx = blockDim.x * blockIdx.x + threadIdx.x;
+
+	if (idx >= activeList->size())
+		return;
+
+
+	////////////////////////////////////////////////////
+	//	cut off empty space
+	//	min
+	if (abs(activeList->operator[](idx).bnd.bounds[0].x-activeList->operator[](idx).tbb.bounds[0].x) / 
+		abs(activeList->operator[](idx).bnd.bounds[0].x - activeList->operator[](idx).bnd.bounds[1].x) > CUTOFF)
+	{
+		activeList->operator[](idx).bnd.bounds[0].x = activeList->operator[](idx).tbb.bounds[0].x;
+	}
+
+	if (abs(activeList->operator[](idx).bnd.bounds[0].y - activeList->operator[](idx).tbb.bounds[0].y) / 
+		abs(activeList->operator[](idx).bnd.bounds[0].y- activeList->operator[](idx).bnd.bounds[1].y) > CUTOFF)
+	{
+		activeList->operator[](idx).bnd.bounds[0].y = activeList->operator[](idx).tbb.bounds[0].y;
+	}
+
+	if (abs(activeList->operator[](idx).bnd.bounds[0].z - activeList->operator[](idx).tbb.bounds[0].z) / 
+		abs(activeList->operator[](idx).bnd.bounds[0].z - activeList->operator[](idx).bnd.bounds[1].z) > CUTOFF)
+	{
+		activeList->operator[](idx).bnd.bounds[0].z = activeList->operator[](idx).tbb.bounds[0].z;
+	}
+
+
+	// max
+	if (abs(activeList->operator[](idx).bnd.bounds[1].x - activeList->operator[](idx).tbb.bounds[1].x) / 
+		abs(activeList->operator[](idx).bnd.bounds[0].x - activeList->operator[](idx).bnd.bounds[1].x)> CUTOFF)
+	{
+		activeList->operator[](idx).bnd.bounds[1].x = activeList->operator[](idx).tbb.bounds[1].x;
+	}
+
+	if (abs(activeList->operator[](idx).bnd.bounds[1].y - activeList->operator[](idx).tbb.bounds[1].y) / 
+		abs(activeList->operator[](idx).bnd.bounds[0].y - activeList->operator[](idx).bnd.bounds[1].y) > CUTOFF)
+	{
+		activeList->operator[](idx).bnd.bounds[1].y = activeList->operator[](idx).tbb.bounds[1].y;
+	}
+
+	if (abs(activeList->operator[](idx).bnd.bounds[1].z - activeList->operator[](idx).tbb.bounds[1].z) / 
+		abs(activeList->operator[](idx).bnd.bounds[0].z - activeList->operator[](idx).bnd.bounds[1].z) > CUTOFF)
+	{
+		activeList->operator[](idx).bnd.bounds[1].z = activeList->operator[](idx).tbb.bounds[1].z;
+	}
+	////////////////////////////////////////////////////
+
+
+	////////////////////////////////////////////////////
+	//	split node at spatial median of the longest axis
+	float xAxis = abs(activeList->operator[](idx).bnd.bounds[0].x - activeList->operator[](idx).bnd.bounds[1].x);
+	float yAxis = abs(activeList->operator[](idx).bnd.bounds[0].y - activeList->operator[](idx).bnd.bounds[1].y);
+	float zAxis = abs(activeList->operator[](idx).bnd.bounds[0].z - activeList->operator[](idx).bnd.bounds[1].z);
+
+	float maxAxis = thrust::max(zAxis, thrust::max(xAxis, yAxis));
+
+	if (xAxis == maxAxis)
+	{
+		float median = (activeList->operator[](idx).bnd.bounds[0].x + activeList->operator[](idx).bnd.bounds[1].x) / 2;
+
+		KDTreeNode* leftChild = new KDTreeNode;
+		KDTreeNode* rightChild = new KDTreeNode;
+
+		leftChild->bnd.bounds[0] = activeList->operator[](idx).bnd.bounds[0];
+		leftChild->bnd.bounds[1] = activeList->operator[](idx).bnd.bounds[1];
+		leftChild->bnd.bounds[1].x = median;
+
+		rightChild->bnd.bounds[0] = activeList->operator[](idx).bnd.bounds[0];
+		rightChild->bnd.bounds[1] = activeList->operator[](idx).bnd.bounds[1];
+		rightChild->bnd.bounds[0].x = median;
+
+		activeList->operator[](idx).leftChild = leftChild;
+		activeList->operator[](idx).rightChild = rightChild;
+	
+	}
+	else if (yAxis == maxAxis)
+	{
+		float median = (activeList->operator[](idx).bnd.bounds[0].y + activeList->operator[](idx).bnd.bounds[1].y) / 2;
+
+		KDTreeNode* leftChild = new KDTreeNode;
+		KDTreeNode* rightChild = new KDTreeNode;
+
+		leftChild->bnd.bounds[0] = activeList->operator[](idx).bnd.bounds[0];
+		leftChild->bnd.bounds[1] = activeList->operator[](idx).bnd.bounds[1];
+		leftChild->bnd.bounds[1].y = median;
+
+		rightChild->bnd.bounds[0] = activeList->operator[](idx).bnd.bounds[0];
+		rightChild->bnd.bounds[1] = activeList->operator[](idx).bnd.bounds[1];
+		rightChild->bnd.bounds[0].y = median;
+
+		activeList->operator[](idx).leftChild = leftChild;
+		activeList->operator[](idx).rightChild = rightChild;
+	}
+	else
+	{
+		float median = (activeList->operator[](idx).bnd.bounds[0].z + activeList->operator[](idx).bnd.bounds[1].z) / 2;
+
+		KDTreeNode* leftChild = new KDTreeNode;
+		KDTreeNode* rightChild = new KDTreeNode;
+
+		leftChild->bnd.bounds[0] = activeList->operator[](idx).bnd.bounds[0];
+		leftChild->bnd.bounds[1] = activeList->operator[](idx).bnd.bounds[1];
+		leftChild->bnd.bounds[1].z = median;
+
+		rightChild->bnd.bounds[0] = activeList->operator[](idx).bnd.bounds[0];
+		rightChild->bnd.bounds[1] = activeList->operator[](idx).bnd.bounds[1];
+		rightChild->bnd.bounds[0].z = median;
+
+		activeList->operator[](idx).leftChild = leftChild;
+		activeList->operator[](idx).rightChild = rightChild;
+	}
+	////////////////////////////////////////////////////
+
+
+}
+
+
 void ProcessLargeNodes(Nvector* activeList, Nvector* smallList, Nvector* nextList, Triangle* T, int triangleNum)
 {
 	//	copy active list to GPU memory
@@ -270,7 +390,6 @@ void ProcessLargeNodes(Nvector* activeList, Nvector* smallList, Nvector* nextLis
 
 	///////////////////////////////////////////////
 	//	1st step, group triangles into chunks
-
 	ChunkNode* chunkList;
 
 	//	active list에 존재하는 모든 chunk의 개수를 구한다.
@@ -283,9 +402,7 @@ void ProcessLargeNodes(Nvector* activeList, Nvector* smallList, Nvector* nextLis
 	
 	int block = activeList->size();
 
-	ChunkingTriangle << < block, 1 >> > (devActiveList, chunkList);
-
-	
+	ChunkingTriangle << < block, 1 >> > (devActiveList, chunkList);	
 	///////////////////////////////////////////////
 
 
@@ -299,6 +416,7 @@ void ProcessLargeNodes(Nvector* activeList, Nvector* smallList, Nvector* nextLis
 		a = cnum / 2;
 	else
 		a = cnum / 2 + 1;
+
 	for (int gap = 0; gap < a; gap++)
 	{
 		SegmentedReduction << < 1, cnum >> > (chunkList, pow(2, gap), cnum);
@@ -310,7 +428,7 @@ void ProcessLargeNodes(Nvector* activeList, Nvector* smallList, Nvector* nextLis
 	///////////////////////////////////////////////
 	//	3rd step, split large node
 
-	//SplitLargeNode << < 1, 1 >> > ();
+	SplitLargeNode << < block, 1 >> > (devActiveList);
 
 	///////////////////////////////////////////////
 
@@ -350,6 +468,15 @@ void ProcessLargeNodes(Nvector* activeList, Nvector* smallList, Nvector* nextLis
 	cout << "AABB " << node11->tbb.bounds[1].x << endl;
 	cout << "AABB " << node11->tbb.bounds[1].y << endl;
 	cout << "AABB " << node11->tbb.bounds[1].z << endl;
+
+	cout << "==========================" << endl;
+	cout << "AABB " << node11->bnd.bounds[0].x << endl;
+	cout << "AABB " << node11->bnd.bounds[0].y << endl;
+	cout << "AABB " << node11->bnd.bounds[0].z << endl;
+
+	cout << "AABB " << node11->bnd.bounds[1].x << endl;
+	cout << "AABB " << node11->bnd.bounds[1].y << endl;
+	cout << "AABB " << node11->bnd.bounds[1].z << endl;
 
 	cudaFree(chunkList);
 	delete hostList;

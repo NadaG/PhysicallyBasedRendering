@@ -10,8 +10,8 @@
 #include <vector>
 #include <unordered_map>
 
-//#include <Eigen/Dense>
-//#include <Eigen/SVD>
+#include <Eigen/Dense>
+#include <Eigen/SVD>
 
 #include "Model.h"
 #include "MCTable.h"
@@ -39,6 +39,17 @@ public:
 	int		m_nNodeResX;
 	int		m_nNodeResY;
 	int		m_nNodeResZ;
+
+	// marching cube를 진행할 때 검색할 주위 grid 개수의 반
+	int		halfWidth;
+
+	float widthSpacing;
+	float heightSpacing;		
+	float depthSpacing;
+
+	float widthGridRatio;
+	float heightGridRatio;
+	float depthGridRatio;
 
 	float m_DensityThres;
 

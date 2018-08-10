@@ -1,8 +1,11 @@
 #include "MarchingCube.h"
 #include <iostream>
+#include <algorithm>
 
 using std::cout;
 using std::endl;
+
+using std::min;
 
 MarchingCube::MarchingCube(void)
 {
@@ -19,7 +22,7 @@ MarchingCube::MarchingCube(void)
 	Kr = 4.0f;
 	//Ks = 1400.0f;
 	Ks = 1.0f;
-	Kn = 1.0f;
+	Kn = 0.8f;
 	//Kn = 5.0f;
 	Ne = 25;
 
@@ -28,6 +31,8 @@ MarchingCube::MarchingCube(void)
 
 	h = 2.0f;
 	r = h * 2;
+
+	halfWidth = 5;
 }
 
 MarchingCube::~MarchingCube(void)
@@ -46,18 +51,25 @@ void MarchingCube::BuildingGird(int nWidth, int nHeight, int nDepth, int nResX, 
 	m_nResX = nResX;
 	m_nResY = nResY;
 	m_nResZ = nResZ;
-	m_nNodeResX = m_nResX + 1;
-	m_nNodeResY = m_nResY + 1;
-	m_nNodeResZ = m_nResZ + 1;
+	m_nNodeResX = m_nResX + halfWidth * 2 + 1;
+	m_nNodeResY = m_nResY + halfWidth * 2 + 1;
+	m_nNodeResZ = m_nResZ + halfWidth * 2 + 1;
+	//m_nNodeResX = m_nResX + 1;
+	//m_nNodeResY = m_nResY + 1;
+	//m_nNodeResZ = m_nResZ + 1;
 
 	m_DensityThres = thres;
 	//mMarchingThres = 0.04f;
 	//mMarchingThres = 0.29f;
 
 	//Calculate Cell Spacing
-	float widthSpacing = (float)m_nWidth / (float)m_nResX;
-	float heightSpacing = (float)m_nHeight / (float)m_nResY;
-	float depthSpacing = (float)m_nDepth / (float)m_nResZ;
+	widthSpacing = (float)m_nWidth / (float)m_nResX;
+	heightSpacing = (float)m_nHeight / (float)m_nResY;
+	depthSpacing = (float)m_nDepth / (float)m_nResZ;
+
+	widthGridRatio = 1 / widthSpacing;
+	heightGridRatio = 1 / heightSpacing;
+	depthGridRatio = 1 / depthSpacing;
 
 	float dx = 0.0f;
 	float dy = 0.0f;
@@ -117,6 +129,7 @@ float* MarchingCube::ComputeParticleDensity(GLfloat* particlePoses, const int pa
 		// 0~7정도 되는 듯
 		//cout << particleDensities[i] << endl;
 	}
+	cout << "compute particle density end" << endl;
 
 	return particleDensities;
 }
@@ -142,14 +155,13 @@ void MarchingCube::ComputeSphericalKernelGridDensity(GLfloat* particlePoses, flo
 			m_nHeight * 0.5f,
 			m_nDepth * 0.5f);
 
-		int k = translatedParticlePos.x / ((float)m_nWidth / (float)m_nResX);
-		int j = translatedParticlePos.y / ((float)m_nHeight / (float)m_nResY);
-		int i = translatedParticlePos.z / ((float)m_nDepth / (float)m_nResZ);
+		int k = translatedParticlePos.x * widthGridRatio;
+		int j = translatedParticlePos.y * heightGridRatio;
+		int i = translatedParticlePos.z * depthGridRatio;
 
-		const int halfWidth = 5;
-		const int nodeNum = (halfWidth * 2 + 1) * (halfWidth * 2 + 1) * (halfWidth * 2 + 1);
+		int nodeNum = (halfWidth * 2 + 1) * (halfWidth * 2 + 1) * (halfWidth * 2 + 1);
 
-		int nNodes[nodeNum];
+		int* nNodes = new int[nodeNum];
 
 		for (int ii = -halfWidth; ii <= halfWidth; ii++)
 		{
@@ -182,215 +194,227 @@ void MarchingCube::ComputeSphericalKernelGridDensity(GLfloat* particlePoses, flo
 				m_stlNodeList[nNodes[node]].mValue += value;
 			}
 		}
+
+		delete[] nNodes;
 	}
 }
 
 void MarchingCube::ComputeAnisotropicKernelGridDensity(GLfloat* particlePoses, float* densities, const int particleNum)
 {
-	//for (int i = 0; i < m_stlNodeList.size(); i++)
-	//{
-	//	m_stlNodeList[i].mValue = 0.0f;
-	//}
+	for (int i = 0; i < m_stlNodeList.size(); i++)
+	{
+		m_stlNodeList[i].mValue = 0.0f;
+	}
 
-	//for (int itr = 0; itr < particleNum; itr++)
-	//{
-	//	// particle의 world coordinate의 위치
-	//	glm::vec3 particlePos = glm::vec3(
-	//		particlePoses[itr * 6 + 0],
-	//		particlePoses[itr * 6 + 1],
-	//		particlePoses[itr * 6 + 2]);
+	float min_x = 10000.0f;
+	for (int itr = 0; itr < particleNum; itr++)
+	{
+		// particle의 world coordinate의 위치
+		glm::vec3 particlePos = glm::vec3(
+			particlePoses[itr * 6 + 0],
+			particlePoses[itr * 6 + 1],
+			particlePoses[itr * 6 + 2]);
 
-	//	// 논문에서는 0.9 ~ 1.0을 사용했다 함
-	//	float lambda = 0.9f;
-	//	vec3 weightPosSum = glm::vec3();
-	//	float weightSum = 0.0f;
+		// 논문에서는 0.9 ~ 1.0을 사용했다 함
+		float lambda = 0.0f;
+		vec3 weightPosSum = glm::vec3();
+		float weightSum = 0.0f;
 
-	//	int neighborNum = 0;
+		int neighborNum = 0;
 
-	//	for (int jtr = 0; jtr < particleNum; jtr++)
-	//	{
-	//		if (itr == jtr)
-	//			continue;
+		for (int jtr = 0; jtr < particleNum; jtr++)
+		{
+			if (itr == jtr)
+				continue;
 
-	//		glm::vec3 particlePos2 = glm::vec3(
-	//			particlePoses[jtr * 6 + 0],
-	//			particlePoses[jtr * 6 + 1],
-	//			particlePoses[jtr * 6 + 2]);
+			glm::vec3 particlePos2 = glm::vec3(
+				particlePoses[jtr * 6 + 0],
+				particlePoses[jtr * 6 + 1],
+				particlePoses[jtr * 6 + 2]);
 
-	//		if (glm::distance(particlePos, particlePos2) < this->r)
-	//		{
-	//			neighborNum++;
-	//		}
+			if (glm::distance(particlePos, particlePos2) < this->r)
+			{
+				neighborNum++;
+			}
 
-	//		float weight = WeightFunc(particlePos - particlePos2, this->r);
-	//		weightSum += weight;
-	//		weightPosSum += weight * particlePos2;
-	//	}
+			float weight = WeightFunc(particlePos - particlePos2, this->r);
+			weightSum += weight;
+			weightPosSum += weight * particlePos2;
+		}
 
-	//	vec3 weightPosMean = particlePos;
-	//	vec3 averagedPos = particlePos;
-	//	if (neighborNum > 0)
-	//	{
-	//		weightPosMean = weightPosSum / weightSum;
-	//		averagedPos = (1.0f - lambda) * particlePos + lambda * weightPosMean;
-	//	}
+		vec3 weightPosMean = particlePos;
+		vec3 averagedPos = particlePos;
+		if (neighborNum > 0)
+		{
+			weightPosMean = weightPosSum / weightSum;
+			averagedPos = (1.0f - lambda) * particlePos + lambda * weightPosMean;
+		}
 
-	//	//cout << neighborNum << endl;
+		//cout << neighborNum << endl;
 
-	//	Eigen::Matrix3f C;
-	//	glm::mat3 G, singular;
-	//	for (int i = 0; i < 3; i++)
-	//	{
-	//		for (int j = 0; j < 3; j++)
-	//		{
-	//			C(i, j) = 0.0f;
-	//		}
-	//	}
+		Eigen::Matrix3f C;
+		glm::mat3 G, singular;
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				C(i, j) = 0.0f;
+			}
+		}
 
-	//	for (int jtr = 0; jtr < particleNum; jtr++)
-	//	{
-	//		if (itr == jtr)
-	//			continue;
+		for (int jtr = 0; jtr < particleNum; jtr++)
+		{
+			if (itr == jtr)
+				continue;
 
-	//		glm::vec3 particlePos2 = glm::vec3(
-	//			particlePoses[jtr * 6 + 0],
-	//			particlePoses[jtr * 6 + 1],
-	//			particlePoses[jtr * 6 + 2]);
+			glm::vec3 particlePos2 = glm::vec3(
+				particlePoses[jtr * 6 + 0],
+				particlePoses[jtr * 6 + 1],
+				particlePoses[jtr * 6 + 2]);
 
-	//		float weight = WeightFunc(particlePos - particlePos2, this->r);
+			float weight = WeightFunc(particlePos - particlePos2, this->r);
 
-	//		C(0, 0) += weight * (particlePos2.x - weightPosMean.x) * (particlePos2.x - weightPosMean.x);
-	//		C(0, 1) += weight * (particlePos2.x - weightPosMean.x) * (particlePos2.y - weightPosMean.y);
-	//		C(0, 2) += weight * (particlePos2.x - weightPosMean.x) * (particlePos2.z - weightPosMean.z);
-	//		C(1, 1) += weight * (particlePos2.y - weightPosMean.y) * (particlePos2.y - weightPosMean.y);
-	//		C(1, 2) += weight * (particlePos2.y - weightPosMean.y) * (particlePos2.z - weightPosMean.z);
-	//		C(2, 2) += weight * (particlePos2.z - weightPosMean.z) * (particlePos2.z - weightPosMean.z);
-	//	}
-	//	C(1, 0) = C(0, 1);
-	//	C(2, 0) = C(0, 2);
-	//	C(2, 1) = C(1, 2);
+			C(0, 0) += weight * (particlePos2.x - weightPosMean.x) * (particlePos2.x - weightPosMean.x);
+			C(0, 1) += weight * (particlePos2.x - weightPosMean.x) * (particlePos2.y - weightPosMean.y);
+			C(0, 2) += weight * (particlePos2.x - weightPosMean.x) * (particlePos2.z - weightPosMean.z);
+			C(1, 1) += weight * (particlePos2.y - weightPosMean.y) * (particlePos2.y - weightPosMean.y);
+			C(1, 2) += weight * (particlePos2.y - weightPosMean.y) * (particlePos2.z - weightPosMean.z);
+			C(2, 2) += weight * (particlePos2.z - weightPosMean.z) * (particlePos2.z - weightPosMean.z);
+		}
+		C(1, 0) = C(0, 1);
+		C(2, 0) = C(0, 2);
+		C(2, 1) = C(1, 2);
 
-	///*	cout << "c:" << endl;
-	//	cout << c << endl << endl << endl;*/
+	/*	cout << "c:" << endl;
+		cout << c << endl << endl << endl;*/
 
-	//	if (neighborNum > 0)
-	//	{
-	//		C /= weightSum;
-	//	}
+		if (neighborNum > 0)
+		{
+			C /= weightSum;
+		}
 
-	//	//cout << c.determinant() << endl;
-	//	//cout << "covariance matrix: " << c << endl;
+		//cout << c.determinant() << endl;
+		//cout << "covariance matrix: " << c << endl;
 
-	//	Eigen::JacobiSVD<Eigen::Matrix3f> decomposedC(C, Eigen::ComputeFullU);
+		Eigen::JacobiSVD<Eigen::Matrix3f> decomposedC(C, Eigen::ComputeFullU);
 
-	//	//cout << "sigular values:" << decomposedC.singularValues() << endl;
-	//	
-	//	// singularValues의 x값이 가장 큼
-	//	glm::vec3 singularValues = glm::vec3(
-	//		decomposedC.singularValues()(0), 
-	//		decomposedC.singularValues()(1), 
-	//		decomposedC.singularValues()(2));
-	//	
-	//	//Debug::GetInstance()->Log(singularValues);
+		//cout << "sigular values:" << decomposedC.singularValues() << endl;
+		
+		// singularValues의 x값이 가장 큼
+		glm::vec3 singularValues = glm::vec3(
+			decomposedC.singularValues()(0), 
+			decomposedC.singularValues()(1), 
+			decomposedC.singularValues()(2));
+		
+		//Debug::GetInstance()->Log(singularValues);
 
-	//	glm::mat3 R = glm::mat3(
-	//		decomposedC.matrixU()(0, 0), decomposedC.matrixU()(0, 1), decomposedC.matrixU()(0, 2),
-	//		decomposedC.matrixU()(1, 0), decomposedC.matrixU()(1, 1), decomposedC.matrixU()(1, 2),
-	//		decomposedC.matrixU()(2, 0), decomposedC.matrixU()(2, 1), decomposedC.matrixU()(2, 2));
+		glm::mat3 R = glm::mat3(
+			decomposedC.matrixU()(0, 0), decomposedC.matrixU()(0, 1), decomposedC.matrixU()(0, 2),
+			decomposedC.matrixU()(1, 0), decomposedC.matrixU()(1, 1), decomposedC.matrixU()(1, 2),
+			decomposedC.matrixU()(2, 0), decomposedC.matrixU()(2, 1), decomposedC.matrixU()(2, 2));
 
-	//	/*singular = Ks * glm::mat3(
-	//		singularValues.x, 0.0f, 0.0f,
-	//		0.0f, singularValues.y, 0.0f,
-	//		0.0f, 0.0f, singularValues.z);*/
-	//	//cout << "det kC" << endl;
-	//	//glm::mat3 kC = R * singular * glm::transpose(R);
-	//	//Debug::GetInstance()->Log(glm::determinant(kC));
+		/*singular = Ks * glm::mat3(
+			singularValues.x, 0.0f, 0.0f,
+			0.0f, singularValues.y, 0.0f,
+			0.0f, 0.0f, singularValues.z);*/
+		//cout << "det kC" << endl;
+		//glm::mat3 kC = R * singular * glm::transpose(R);
+		//Debug::GetInstance()->Log(glm::determinant(kC));
 
-	//	if (neighborNum > Ne)
-	//	{
-	//		singular = Ks * glm::mat3(
-	//			singularValues.x, 0.0f, 0.0f, 
-	//			0.0f, glm::max(singularValues.y, singularValues.x / Kr), 0.0f,
-	//			0.0f, 0.0f, glm::max(singularValues.z, singularValues.x / Kr));
-	//	}
-	//	else
-	//	{
-	//		// identity matrix
-	//		singular = Kn * glm::mat3();
-	//	}
+		if (neighborNum > Ne)
+		{
+			singular = Ks * glm::mat3(
+				singularValues.x, 0.0f, 0.0f, 
+				0.0f, glm::max(singularValues.y, singularValues.x / Kr), 0.0f,
+				0.0f, 0.0f, glm::max(singularValues.z, singularValues.x / Kr));
+		}
+		else
+		{
+			// identity matrix
+			singular = Kn * glm::mat3();
+		}
 
-	///*	cout << "singular" << endl;
-	//	Debug::GetInstance()->Log(singular);*/
+	/*	cout << "singular" << endl;
+		Debug::GetInstance()->Log(singular);*/
 
-	//	G = R * glm::inverse(singular) * glm::transpose(R) / this->h;
-	//	//G = R * glm::transpose(R) / this->h;
+		G = R * glm::inverse(singular) * glm::transpose(R) / this->h;
+		//G = R * glm::transpose(R) / this->h;
 
-	///*	cout << "G " << endl;
-	//	Debug::GetInstance()->Log(G);*/
+	/*	cout << "G " << endl;
+		Debug::GetInstance()->Log(G);*/
 
-	//	// width의 반을 중간으로 설정
-	//	vec3 translatedParticlePos = averagedPos + glm::vec3(
-	//		m_nWidth * 0.5f,
-	//		m_nHeight * 0.5f,
-	//		m_nDepth * 0.5f);
+		// width의 반을 중간으로 설정
+		vec3 translatedParticlePos = averagedPos + glm::vec3(
+			m_nWidth * 0.5f,
+			m_nHeight * 0.5f,
+			m_nDepth * 0.5f);
 
-	//	/*vec3 translatedParticlePos = particlePos + glm::vec3(
-	//		m_nWidth * 0.5f,
-	//		m_nHeight * 0.5f,
-	//		m_nDepth * 0.5f);*/
+		/*vec3 translatedParticlePos = particlePos + glm::vec3(
+			m_nWidth * 0.5f,
+			m_nHeight * 0.5f,
+			m_nDepth * 0.5f);*/
 
-	//	int k = translatedParticlePos.x / ((float)m_nWidth / (float)m_nResX);
-	//	int j = translatedParticlePos.y / ((float)m_nHeight / (float)m_nResY);
-	//	int i = translatedParticlePos.z / ((float)m_nDepth / (float)m_nResZ);
+		min_x = min(translatedParticlePos.x, min_x);
+		//cout << widthGridRatio << endl;
 
-	//	//Debug::GetInstance()->Log(k);
+		int k = translatedParticlePos.x * widthGridRatio;
+		int j = translatedParticlePos.y * heightGridRatio;
+		int i = translatedParticlePos.z * depthGridRatio;
 
-	//	const int halfWidth = 6;
-	//	const int nodeNum = (halfWidth * 2 + 1) * (halfWidth * 2 + 1) * (halfWidth * 2 + 1);
+		//int k = translatedParticlePos.x;
+		//int j = translatedParticlePos.y;
+		//int i = translatedParticlePos.z;
 
-	//	int nNodes[nodeNum];
+		//Debug::GetInstance()->Log(k);
 
-	//	for (int ii = -halfWidth; ii <= halfWidth; ii++)
-	//	{
-	//		for (int jj = -halfWidth; jj <= halfWidth; jj++)
-	//		{
-	//			for (int kk = -halfWidth; kk <= halfWidth; kk++)
-	//			{
-	//				int index =
-	//					(ii + halfWidth) * (halfWidth * 2 + 1) * (halfWidth * 2 + 1) +
-	//					(jj + halfWidth) * (halfWidth * 2 + 1) +
-	//					(kk + halfWidth);
-	//				nNodes[index] = FindNodeIndex(kk + k, jj + j, ii + i);
-	//			}
-	//		}
-	//	}
+		const int nodeNum = (halfWidth * 2 + 1) * (halfWidth * 2 + 1) * (halfWidth * 2 + 1);
 
-	//	for (int node = 0; node < nodeNum; node++)
-	//	{
-	//		// 공간 밖의 node
-	//		if (nNodes[node] == -1.0f)
-	//			continue;
+		int* nNodes = new int[nodeNum];
 
-	//		// node pos가 곧 node의 각 꼭짓점
-	//		glm::vec3 nodePos = m_stlNodeList[nNodes[node]].mNodePosition;
+		for (int ii = -halfWidth; ii <= halfWidth; ii++)
+		{
+			for (int jj = -halfWidth; jj <= halfWidth; jj++)
+			{
+				for (int kk = -halfWidth; kk <= halfWidth; kk++)
+				{
+					int index =
+						(ii + halfWidth) * (halfWidth * 2 + 1) * (halfWidth * 2 + 1) +
+						(jj + halfWidth) * (halfWidth * 2 + 1) +
+						(kk + halfWidth);
+					nNodes[index] = FindNodeIndex(kk + k, jj + j, ii + i);
+				}
+			}
+		}
 
-	//		// anisotropic
-	//		if (glm::distance(averagedPos, nodePos) <= this->h)
-	//		{
-	//			float value = AnisotropicSmoothingKernel(nodePos - averagedPos, G) / densities[i];
-	//			m_stlNodeList[nNodes[node]].mValue += value;
-	//		}
+		for (int node = 0; node < nodeNum; node++)
+		{
+			// 공간 밖의 node
+			if (nNodes[node] == -1.0f)
+				continue;
 
-	//		// isotropic
-	//		/*if (glm::distance(particlePos, nodePos) <= this->h)
-	//		{
-	//			float value = ComputePoly6(glm::distance(nodePos, particlePos)) / densities[i];
-	//			m_stlNodeList[nNodes[node]].mValue += value;
-	//		}*/
-	//	}
-	//}
+			// node pos가 곧 node의 각 꼭짓점
+			glm::vec3 nodePos = m_stlNodeList[nNodes[node]].mNodePosition;
 
-	////PrintDensity();
+			// anisotropic
+			if (glm::distance(averagedPos, nodePos) <= this->h)
+			{
+				float value = AnisotropicSmoothingKernel(nodePos - averagedPos, G) / densities[i];
+				m_stlNodeList[nNodes[node]].mValue += value;
+			}
+
+			// isotropic
+			/*if (glm::distance(particlePos, nodePos) <= this->h)
+			{
+				float value = ComputePoly6(glm::distance(nodePos, particlePos)) / densities[i];
+				m_stlNodeList[nNodes[node]].mValue += value;
+			}*/
+		}
+
+		delete[] nNodes;
+	}
+	cout << min_x << endl;
+
+	//PrintDensity();
 }
 
 void MarchingCube::ExcuteMarchingCube(const string& meshfile)
@@ -407,7 +431,6 @@ void MarchingCube::ExcuteMarchingCube(const string& meshfile)
 
 	int nVID = 0;
 
-	// 원래 i = 0; i < m_nResX; i++ 였음
 	for (int i = 0; i < m_nResX; i++)
 	{
 		for (int j = 0; j < m_nResY; j++)
@@ -505,13 +528,18 @@ void MarchingCube::ExcuteMarchingCube(const string& meshfile)
 
 	mesh->SetVertices(verts, vertsVec.size());
 	mesh->SetIndices(inds, indsVec.size());
-	mesh->CaculateVertexNormal();
-	mesh->CaculateFaceNormal();
+	
+	//mesh->CaculateFaceNormal();
+	//mesh->GenerateAndSetVAO();
 
-	mesh->GenerateAndSetVAO();
 	mesh->Export(meshfile);
 
+	cout << "export end" << endl;
+
 	delete mesh;
+
+	delete[] verts;
+	delete[] inds;
 }
 
 glm::vec3 MarchingCube::Interpolation(Node* p1, Node* p2)

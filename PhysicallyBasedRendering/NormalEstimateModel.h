@@ -23,7 +23,7 @@ public:
 	void LoadModel();
 
 	// model¿¡ inputÀ» ³Ö¾î¼­ outputÀ» »Ì¾Æ ³¿
-	void UseModel();
+	void UseModel(float* data);
 
 private:
 
@@ -33,6 +33,4 @@ private:
 	py::object sess;
 
 	void InitializePython();
-
-	void glutDisplayFunc(void(*fun)(int b));
 };

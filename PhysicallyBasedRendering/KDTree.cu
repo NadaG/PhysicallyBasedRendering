@@ -333,8 +333,8 @@ __global__ void SplitLargeNode(Nvector* activeList)
 		activeList->operator[](idx).rightChild = rightChild;
 
 		activeList->operator[](idx).leftChild->bnd.bounds[0].x = 1111.0f;
-		activeList->operator[](0).leftChild->triangleNum = 100;
-		//activeList->operator[](idx).bnd.bounds[0].x = 11111.0f;
+		
+		
 	
 	}
 	else if (yAxis == maxAxis)
@@ -375,6 +375,8 @@ __global__ void SplitLargeNode(Nvector* activeList)
 	}
 	////////////////////////////////////////////////////
 
+	if (activeList->operator[](0).leftChild->triangleNum == 100)
+		activeList->operator[](idx).bnd.bounds[0].x = 11111.0f;
 }
 
 
@@ -444,8 +446,6 @@ void ProcessLargeNodes(Nvector* activeList, Nvector* smallList, Nvector* nextLis
 	SplitLargeNode << < block, 1 >> > (devActiveList);
 
 	///////////////////////////////////////////////
-
-
 
 
 

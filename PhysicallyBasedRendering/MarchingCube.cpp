@@ -22,17 +22,17 @@ MarchingCube::MarchingCube(void)
 	Kr = 4.0f;
 	//Ks = 1400.0f;
 	Ks = 1.0f;
-	Kn = 0.8f;
-	//Kn = 5.0f;
-	Ne = 25;
+	Ne = 1;
 
 	// 괜찮은 parameter
 	// h = 1.5, thres = 1.5, resolution = 3.0
 
-	h = 2.0f;
+	h = 1.7f;
+	Kn = h;
+	//Kn = 5.0f;
 	r = h * 2;
 
-	halfWidth = 5;
+	halfWidth = 6;
 }
 
 MarchingCube::~MarchingCube(void)
@@ -201,6 +201,9 @@ void MarchingCube::ComputeSphericalKernelGridDensity(GLfloat* particlePoses, flo
 
 void MarchingCube::ComputeAnisotropicKernelGridDensity(GLfloat* particlePoses, float* densities, const int particleNum)
 {
+	vector<int> xs;
+	xs.resize(m_nNodeResX);
+
 	for (int i = 0; i < m_stlNodeList.size(); i++)
 	{
 		m_stlNodeList[i].mValue = 0.0f;
@@ -285,7 +288,8 @@ void MarchingCube::ComputeAnisotropicKernelGridDensity(GLfloat* particlePoses, f
 		C(2, 0) = C(0, 2);
 		C(2, 1) = C(1, 2);
 
-	/*	cout << "c:" << endl;
+		/*	
+		cout << "c:" << endl;
 		cout << c << endl << endl << endl;*/
 
 		if (neighborNum > 0)
@@ -357,13 +361,18 @@ void MarchingCube::ComputeAnisotropicKernelGridDensity(GLfloat* particlePoses, f
 		min_x = min(translatedParticlePos.x, min_x);
 		//cout << widthGridRatio << endl;
 
-		int k = translatedParticlePos.x * widthGridRatio;
-		int j = translatedParticlePos.y * heightGridRatio;
-		int i = translatedParticlePos.z * depthGridRatio;
+		// 반올림을 위해 0.5 더함
+		int k = floorf(translatedParticlePos.x * widthGridRatio + 0.5f);
+		int j = floorf(translatedParticlePos.y * heightGridRatio + 0.5f);
+		if (j < 20)
+			xs[k]++;
+		int i = floorf(translatedParticlePos.z * depthGridRatio + 0.5f);
 
-		//int k = translatedParticlePos.x;
-		//int j = translatedParticlePos.y;
-		//int i = translatedParticlePos.z;
+		/*int k = floorf(translatedParticlePos.x * widthGridRatio);
+		int j = floorf(translatedParticlePos.y * heightGridRatio);
+		if (j < 20)
+			xs[k]++;
+		int i = floorf(translatedParticlePos.z * depthGridRatio);*/
 
 		//Debug::GetInstance()->Log(k);
 
@@ -413,8 +422,13 @@ void MarchingCube::ComputeAnisotropicKernelGridDensity(GLfloat* particlePoses, f
 		delete[] nNodes;
 	}
 	cout << min_x << endl;
+	cout << "ratio:" << widthGridRatio << " " << heightGridRatio << " " << depthGridRatio << endl;
 
 	//PrintDensity();
+	for (int i = 0; i < xs.size(); i++)
+	{
+		cout << i << "번째: " << xs[i] << endl;
+	}
 }
 
 void MarchingCube::ExcuteMarchingCube(const string& meshfile)

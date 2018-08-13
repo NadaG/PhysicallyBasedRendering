@@ -254,7 +254,7 @@ void FluidRenderer::Render()
 
 		ScreenSpaceFluidNormalRender();
 
-		outfile += "fluid_screenspace5/";
+		outfile += "fluid_screenspace6/";
 		outfile += tmp;
 		outfile += ".png";
 		pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
@@ -269,7 +269,7 @@ void FluidRenderer::Render()
 		MarchingCubeFluidNormalRender(outfile);
 
 		outfile = "";
-		outfile += "fluid_marchingcube5/";
+		outfile += "fluid_marchingcube6/";
 		outfile += tmp;
 		outfile += ".png";
 		pngExporter.WritePngFile(outfile, pngTex, GL_RGB);

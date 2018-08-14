@@ -1,6 +1,8 @@
-#include "MarchingCube.h"
 #include <iostream>
 #include <algorithm>
+
+#include "MarchingCube.h"
+#include "MarchingCubeVertexNormalUtility.h"
 
 using std::cout;
 using std::endl;
@@ -19,20 +21,28 @@ MarchingCube::MarchingCube(void)
 	m_nNodeResY = 0;
 	m_nNodeResZ = 0;
 
-	Kr = 4.0f;
 	//Ks = 1400.0f;
-	Ks = 1.0f;
-	Ne = 1;
+	//Kn = 5.0f;
+
+	// 너무 한 축으로 길게 늘어지지 않도록 해주는 상수
+	Kr = 4.0f;
+
+	// particle 일정 수 
+	Ne = 100;
+
+	// 일정 수 이상의 particle이 있을 때 singular matrix에 곱해질 상수
+	Ks = 2.0f;
+
+	// 일정 수 이하의 particle이 있을 때 identity matrix에 곱해질 상수
+	Kn = 0.5f;
 
 	// 괜찮은 parameter
 	// h = 1.5, thres = 1.5, resolution = 3.0
 
-	h = 1.7f;
-	Kn = h;
-	//Kn = 5.0f;
+	h = 1.5f;
 	r = h * 2;
 
-	halfWidth = 6;
+	halfWidth = 10;
 }
 
 MarchingCube::~MarchingCube(void)
@@ -43,14 +53,19 @@ MarchingCube::~MarchingCube(void)
 // simulation 공간, 얼마만큼으로 나눌 것인지 resolution
 void MarchingCube::BuildingGird(int nWidth, int nHeight, int nDepth, int nResX, int nResY, int nResZ, float thres)
 {
+	// simulation 공간
 	// 30.0f
 	m_nWidth = nWidth;
 	m_nHeight = nHeight;
 	m_nDepth = nDepth;
+	
+	// marching cube grid 개수
 	// m_nWidth * reso
 	m_nResX = nResX;
 	m_nResY = nResY;
 	m_nResZ = nResZ;
+
+	// marching cube를 제대로 구하기 위해 padding을 씌운 grid 개수
 	m_nNodeResX = m_nResX + halfWidth * 2 + 1;
 	m_nNodeResY = m_nResY + halfWidth * 2 + 1;
 	m_nNodeResZ = m_nResZ + halfWidth * 2 + 1;
@@ -63,6 +78,7 @@ void MarchingCube::BuildingGird(int nWidth, int nHeight, int nDepth, int nResX, 
 	//mMarchingThres = 0.29f;
 
 	//Calculate Cell Spacing
+	// ==reso
 	widthSpacing = (float)m_nWidth / (float)m_nResX;
 	heightSpacing = (float)m_nHeight / (float)m_nResY;
 	depthSpacing = (float)m_nDepth / (float)m_nResZ;
@@ -71,13 +87,19 @@ void MarchingCube::BuildingGird(int nWidth, int nHeight, int nDepth, int nResX, 
 	heightGridRatio = 1 / heightSpacing;
 	depthGridRatio = 1 / depthSpacing;
 
-	float dx = 0.0f;
-	float dy = 0.0f;
-	float dz = 0.0f;
+	// -boundarySize.x * 0.5 - widthSpacing * halfWidth 부터 boundarySize.x * 0.5 + widthSpacing * halfWidth 까지
+	float dx = -widthSpacing * halfWidth;
+	float dy = -heightSpacing * halfWidth;
+	float dz = -depthSpacing * halfWidth;
 
 	int nodeIdx = 0;
 
+	// 15.0f
+	// cout << "half height: "<<m_nHeight*0.5 << endl;
+
 	//Building Node
+	// node position은 world 좌표계에서 정의됨 (값이 -일 수 있음)
+	// node의 index는 0부터 시작하기 때문에 시작이 0이 되도록 조정해야 함
 	for (int i = 0; i < m_nNodeResZ; i++)
 	{
 		for (int j = 0; j < m_nNodeResY; j++)
@@ -87,17 +109,22 @@ void MarchingCube::BuildingGird(int nWidth, int nHeight, int nDepth, int nResX, 
 				// 각 node는 voxel로 보지말고 voxel의 끝 점이라고 생각할 것
 				Node node;
 				// node의 world position
-				node.mNodePosition = glm::vec3(dx - m_nWidth * 0.5f, dy - m_nHeight * 0.5f, dz - m_nDepth * 0.5f);
+				node.mNodePosition = glm::vec3(
+					dx - m_nWidth * 0.5f, 
+					dy - m_nHeight * 0.5f,
+					dz - m_nDepth * 0.5f);
 				node.mValue = 0.0f;
+
+				//Debug::GetInstance()->Log(node.mNodePosition);
 
 				m_stlNodeList.push_back(node);
 				dx += widthSpacing;
 			}
 			dy += heightSpacing;
-			dx = 0.0f;
+			dx = -widthSpacing * halfWidth;
 		}
 		dz += depthSpacing;
-		dy = 0.0f;
+		dy = -heightSpacing * halfWidth;
 	}
 }
 
@@ -201,8 +228,8 @@ void MarchingCube::ComputeSphericalKernelGridDensity(GLfloat* particlePoses, flo
 
 void MarchingCube::ComputeAnisotropicKernelGridDensity(GLfloat* particlePoses, float* densities, const int particleNum)
 {
-	vector<int> xs;
-	xs.resize(m_nNodeResX);
+	/*vector<int> xs;
+	xs.resize(m_nNodeResX);*/
 
 	for (int i = 0; i < m_stlNodeList.size(); i++)
 	{
@@ -219,7 +246,7 @@ void MarchingCube::ComputeAnisotropicKernelGridDensity(GLfloat* particlePoses, f
 			particlePoses[itr * 6 + 2]);
 
 		// 논문에서는 0.9 ~ 1.0을 사용했다 함
-		float lambda = 0.0f;
+		float lambda = 0.9f;
 		vec3 weightPosSum = glm::vec3();
 		float weightSum = 0.0f;
 
@@ -349,9 +376,9 @@ void MarchingCube::ComputeAnisotropicKernelGridDensity(GLfloat* particlePoses, f
 
 		// width의 반을 중간으로 설정
 		vec3 translatedParticlePos = averagedPos + glm::vec3(
-			m_nWidth * 0.5f,
-			m_nHeight * 0.5f,
-			m_nDepth * 0.5f);
+			m_nWidth * 0.5f + widthSpacing * halfWidth,
+			m_nHeight * 0.5f + heightSpacing * halfWidth,
+			m_nDepth * 0.5f + depthSpacing * halfWidth);
 
 		/*vec3 translatedParticlePos = particlePos + glm::vec3(
 			m_nWidth * 0.5f,
@@ -364,8 +391,6 @@ void MarchingCube::ComputeAnisotropicKernelGridDensity(GLfloat* particlePoses, f
 		// 반올림을 위해 0.5 더함
 		int k = floorf(translatedParticlePos.x * widthGridRatio + 0.5f);
 		int j = floorf(translatedParticlePos.y * heightGridRatio + 0.5f);
-		if (j < 20)
-			xs[k]++;
 		int i = floorf(translatedParticlePos.z * depthGridRatio + 0.5f);
 
 		/*int k = floorf(translatedParticlePos.x * widthGridRatio);
@@ -421,48 +446,42 @@ void MarchingCube::ComputeAnisotropicKernelGridDensity(GLfloat* particlePoses, f
 
 		delete[] nNodes;
 	}
-	cout << min_x << endl;
-	cout << "ratio:" << widthGridRatio << " " << heightGridRatio << " " << depthGridRatio << endl;
+	//cout << min_x << endl;
+	//cout << "ratio:" << widthGridRatio << " " << heightGridRatio << " " << depthGridRatio << endl;
 
-	//PrintDensity();
-	for (int i = 0; i < xs.size(); i++)
-	{
-		cout << i << "번째: " << xs[i] << endl;
-	}
+	////PrintDensity();
+	//for (int i = 0; i < xs.size(); i++)
+	//{
+	//	cout << i << "번째: " << xs[i] << endl;
+	//}
+
+	//xs.clear();
 }
 
-void MarchingCube::ExcuteMarchingCube(const string& meshfile)
+void MarchingCube::ExcuteMarchingCube(int& vertexNum, int& indexNum)
 {
-	Mesh* mesh = new Mesh;
-	
-	Vertex* verts;
-	GLuint* inds;
+	ID2POINT3DID ***i2pt3idVertices = alloc3D<ID2POINT3DID>(m_nNodeResX, m_nNodeResY, m_nNodeResZ);
+	TRIANGLEVECTOR ***trivecTriangles = alloc3D<TRIANGLEVECTOR>(m_nNodeResX, m_nNodeResY, m_nNodeResZ);
 
-	std::vector<Vertex> vertsVec;
-	std::vector<GLuint> indsVec;
-
-	std::vector<glm::vec3> vList;
-
-	int nVID = 0;
-
-	for (int i = 0; i < m_nResX; i++)
+	for (int i = 0; i < m_nNodeResX; i++)
 	{
-		for (int j = 0; j < m_nResY; j++)
+		for (int j = 0; j < m_nNodeResY; j++)
 		{
-			for (int k = 0; k < m_nResZ; k++)
+			for (int k = 0; k < m_nNodeResZ; k++)
 			{
 				int cubeIdx = 0;
 				int nNodes[8];
+
 				nNodes[0] = FindNodeIndex(k, j, i);
-				nNodes[1] = FindNodeIndex(k + 1, j, i);
-				nNodes[2] = FindNodeIndex(k + 1, j, i + 1);
+				nNodes[1] = FindNodeIndex(k, j + 1, i);
+				nNodes[2] = FindNodeIndex(k, j + 1, i + 1);
 				nNodes[3] = FindNodeIndex(k, j, i + 1);
 
-				nNodes[4] = FindNodeIndex(k, j + 1, i);
+				nNodes[4] = FindNodeIndex(k + 1, j, i);
 				nNodes[5] = FindNodeIndex(k + 1, j + 1, i);
 				nNodes[6] = FindNodeIndex(k + 1, j + 1, i + 1);
-				nNodes[7] = FindNodeIndex(k, j + 1, i + 1);
-				
+				nNodes[7] = FindNodeIndex(k + 1, j, i + 1);
+
 				if (m_stlNodeList[nNodes[0]].mValue <= m_DensityThres) cubeIdx |= 1;	//LBB
 				if (m_stlNodeList[nNodes[1]].mValue <= m_DensityThres) cubeIdx |= 2;	//RBB
 				if (m_stlNodeList[nNodes[2]].mValue <= m_DensityThres) cubeIdx |= 4;	//RBF
@@ -478,82 +497,252 @@ void MarchingCube::ExcuteMarchingCube(const string& meshfile)
 				for (int idx = 0; idx < 12; idx++)
 					verList[idx] = glm::vec3(0.0, 0.0, 0.0);
 
-				if (edgeTable[cubeIdx] & 1) verList[0] = Interpolation(&m_stlNodeList[nNodes[0]], &m_stlNodeList[nNodes[1]]);
-				if (edgeTable[cubeIdx] & 2) verList[1] = Interpolation(&m_stlNodeList[nNodes[1]], &m_stlNodeList[nNodes[2]]);
-				if (edgeTable[cubeIdx] & 4) verList[2] = Interpolation(&m_stlNodeList[nNodes[2]], &m_stlNodeList[nNodes[3]]);
-				if (edgeTable[cubeIdx] & 8) verList[3] = Interpolation(&m_stlNodeList[nNodes[3]], &m_stlNodeList[nNodes[0]]);
-				if (edgeTable[cubeIdx] & 16) verList[4] = Interpolation(&m_stlNodeList[nNodes[4]], &m_stlNodeList[nNodes[5]]);
-				if (edgeTable[cubeIdx] & 32) verList[5] = Interpolation(&m_stlNodeList[nNodes[5]], &m_stlNodeList[nNodes[6]]);
-				if (edgeTable[cubeIdx] & 64) verList[6] = Interpolation(&m_stlNodeList[nNodes[6]], &m_stlNodeList[nNodes[7]]);
-				if (edgeTable[cubeIdx] & 128) verList[7] = Interpolation(&m_stlNodeList[nNodes[7]], &m_stlNodeList[nNodes[4]]);
-				if (edgeTable[cubeIdx] & 256) verList[8] = Interpolation(&m_stlNodeList[nNodes[0]], &m_stlNodeList[nNodes[4]]);
-				if (edgeTable[cubeIdx] & 512) verList[9] = Interpolation(&m_stlNodeList[nNodes[1]], &m_stlNodeList[nNodes[5]]);
-				if (edgeTable[cubeIdx] & 1024) verList[10] = Interpolation(&m_stlNodeList[nNodes[2]], &m_stlNodeList[nNodes[6]]);
-				if (edgeTable[cubeIdx] & 2048) verList[11] = Interpolation(&m_stlNodeList[nNodes[3]], &m_stlNodeList[nNodes[7]]);
+				if (edgeTable[cubeIdx] & 1)
+				{
+					Vec3ID vec3id;
+					verList[0] = Interpolation(&m_stlNodeList[nNodes[0]], &m_stlNodeList[nNodes[1]]);
+					vec3id.x = verList[0].x;
+					vec3id.y = verList[0].y;
+					vec3id.z = verList[0].z;
+					vec3id.newID = 0;
+					unsigned int id = FindEdgeIndex(i, j, k, 0);
+					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
+				}
+				if (edgeTable[cubeIdx] & 2)
+				{
+					Vec3ID vec3id;
+					verList[1] = Interpolation(&m_stlNodeList[nNodes[1]], &m_stlNodeList[nNodes[2]]);
+					vec3id.x = verList[1].x;
+					vec3id.y = verList[1].y;
+					vec3id.z = verList[1].z;
+					vec3id.newID = 1;
+					unsigned int id = FindEdgeIndex(i, j, k, 1);
+					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
+				}
+				if (edgeTable[cubeIdx] & 4)
+				{
+					Vec3ID vec3id;
+					verList[2] = Interpolation(&m_stlNodeList[nNodes[2]], &m_stlNodeList[nNodes[3]]);
+					vec3id.x = verList[2].x;
+					vec3id.y = verList[2].y;
+					vec3id.z = verList[2].z;
+					vec3id.newID = 2;
+					unsigned int id = FindEdgeIndex(i, j, k, 2);
+					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
+				}
+				if (edgeTable[cubeIdx] & 8)
+				{
+					Vec3ID vec3id;
+					verList[3] = Interpolation(&m_stlNodeList[nNodes[3]], &m_stlNodeList[nNodes[0]]);
+					vec3id.x = verList[3].x;
+					vec3id.y = verList[3].y;
+					vec3id.z = verList[3].z;
+					vec3id.newID = 3;
+					unsigned int id = FindEdgeIndex(i, j, k, 3);
+					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
+				}
+				if (edgeTable[cubeIdx] & 16)
+				{
+					Vec3ID vec3id;
+					verList[4] = Interpolation(&m_stlNodeList[nNodes[4]], &m_stlNodeList[nNodes[5]]);
+					vec3id.x = verList[4].x;
+					vec3id.y = verList[4].y;
+					vec3id.z = verList[4].z;
+					vec3id.newID = 4;
+					unsigned int id = FindEdgeIndex(i, j, k, 4);
+					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
+				}
+				if (edgeTable[cubeIdx] & 32)
+				{
+					Vec3ID vec3id;
+					verList[5] = Interpolation(&m_stlNodeList[nNodes[5]], &m_stlNodeList[nNodes[6]]);
+					vec3id.x = verList[5].x;
+					vec3id.y = verList[5].y;
+					vec3id.z = verList[5].z;
+					vec3id.newID = 5;
+					unsigned int id = FindEdgeIndex(i, j, k, 5);
+					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
+				}
+				if (edgeTable[cubeIdx] & 64)
+				{
+					Vec3ID vec3id;
+					verList[6] = Interpolation(&m_stlNodeList[nNodes[6]], &m_stlNodeList[nNodes[7]]);
+					vec3id.x = verList[6].x;
+					vec3id.y = verList[6].y;
+					vec3id.z = verList[6].z;
+					vec3id.newID = 6;
+					unsigned int id = FindEdgeIndex(i, j, k, 6);
+					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
+				}
+				if (edgeTable[cubeIdx] & 128)
+				{
+					Vec3ID vec3id;
+					verList[7] = Interpolation(&m_stlNodeList[nNodes[7]], &m_stlNodeList[nNodes[4]]);
+					vec3id.x = verList[7].x;
+					vec3id.y = verList[7].y;
+					vec3id.z = verList[7].z;
+					vec3id.newID = 7;
+					unsigned int id = FindEdgeIndex(i, j, k, 7);
+					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
+				}
+				if (edgeTable[cubeIdx] & 256)
+				{
+					Vec3ID vec3id;
+					verList[8] = Interpolation(&m_stlNodeList[nNodes[0]], &m_stlNodeList[nNodes[4]]);
+					vec3id.x = verList[8].x;
+					vec3id.y = verList[8].y;
+					vec3id.z = verList[8].z;
+					vec3id.newID = 8;
+					unsigned int id = FindEdgeIndex(i, j, k, 8);
+					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
+				}
+				if (edgeTable[cubeIdx] & 512)
+				{
+					Vec3ID vec3id;
+					verList[9] = Interpolation(&m_stlNodeList[nNodes[1]], &m_stlNodeList[nNodes[5]]);
+					vec3id.x = verList[9].x;
+					vec3id.y = verList[9].y;
+					vec3id.z = verList[9].z;
+					vec3id.newID = 9;
+					unsigned int id = FindEdgeIndex(i, j, k, 9);
+					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
+				}
+				if (edgeTable[cubeIdx] & 1024)
+				{
+					Vec3ID vec3id;
+					verList[10] = Interpolation(&m_stlNodeList[nNodes[2]], &m_stlNodeList[nNodes[6]]);
+					vec3id.x = verList[10].x;
+					vec3id.y = verList[10].y;
+					vec3id.z = verList[10].z;
+					vec3id.newID = 10;
+					unsigned int id = FindEdgeIndex(i, j, k, 10);
+					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
+				}
+				if (edgeTable[cubeIdx] & 2048)
+				{
+					Vec3ID vec3id;
+					verList[11] = Interpolation(&m_stlNodeList[nNodes[3]], &m_stlNodeList[nNodes[7]]);
+					vec3id.x = verList[11].x;
+					vec3id.y = verList[11].y;
+					vec3id.z = verList[11].z;
+					vec3id.newID = 11;
+					unsigned int id = FindEdgeIndex(i, j, k, 11);
+					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
+				}
+
+				for (int ii = 0; ii < 12; ii++)
+				{
+					if (verList[ii].x > 1000000 || verList[ii].x < -1000000)
+						Debug::GetInstance()->Log(verList[ii]);
+				}
 
 				//Generate Vertex
 				for (int n = 0; triTable[cubeIdx][n] != -1; n += 3)
 				{
-					Vertex verts[3];
+					TRIANGLE triangle;
+					unsigned int pointID0, pointID1, pointID2;
 
-					verts[0].position = 
-						glm::vec3(
-							verList[triTable[cubeIdx][n + 2]].x, 
-							verList[triTable[cubeIdx][n + 2]].y, 
-							verList[triTable[cubeIdx][n + 2]].z);
-					verts[1].position = 
-						glm::vec3(
-							verList[triTable[cubeIdx][n + 1]].x, 
-							verList[triTable[cubeIdx][n + 1]].y, 
-							verList[triTable[cubeIdx][n + 1]].z);
-					verts[2].position = 
-						glm::vec3(
-							verList[triTable[cubeIdx][n]].x, 
-							verList[triTable[cubeIdx][n]].y, 
-							verList[triTable[cubeIdx][n]].z);
-
-					indsVec.push_back(nVID);
-					nVID++;
-					indsVec.push_back(nVID);
-					nVID++; 
-					indsVec.push_back(nVID);
-					nVID++;
-
-					vertsVec.push_back(verts[0]);
-					vertsVec.push_back(verts[1]);
-					vertsVec.push_back(verts[2]);
+					pointID0 = FindEdgeIndex(i, j, k, triTable[cubeIdx][n]);
+					pointID1 = FindEdgeIndex(i, j, k, triTable[cubeIdx][n + 1]);
+					pointID2 = FindEdgeIndex(i, j, k, triTable[cubeIdx][n + 2]);
+					if (pointID0 == -1 || pointID1 == -1 || pointID2 == -1)
+						cout << "-1 found" << endl;
+					triangle.pointID[0] = pointID0;
+					triangle.pointID[1] = pointID1;
+					triangle.pointID[2] = pointID2;
+					trivecTriangles[i][j][k].push_back(triangle);
 				}
 			}
 		}
 	}
 
-	verts = new Vertex[vertsVec.size()];
-	inds = new GLuint[indsVec.size()];
-
-	for (int i = 0; i < vertsVec.size(); i++)
+	for (unsigned int x = 0; x < m_nNodeResX; x++)
 	{
-		verts[i] = vertsVec[i];
+		for (unsigned int y = 0; y < m_nNodeResY; y++)
+		{
+			for (unsigned int z = 0; z < m_nNodeResZ; z++)
+			{
+				ID2POINT3DID::iterator it = i2pt3idVertices[x][y][z].begin();
+				while (it != i2pt3idVertices[x][y][z].end())
+				{
+					m_i2pt3idVertices.insert(ID2POINT3DID::value_type((*it).first, (*it).second));
+					it++;
+				}
+				i2pt3idVertices[x][y][z].clear();
+
+				TRIANGLEVECTOR::iterator it2 = trivecTriangles[x][y][z].begin();
+				while (it2 != trivecTriangles[x][y][z].end())
+				{
+					m_trivecTriangles.push_back(*it2);
+					it2++;
+				}
+				trivecTriangles[x][y][z].clear();
+			}
+		}
 	}
 
-	for (int i = 0; i < indsVec.size(); i++)
+	RenameVerticesAndTriangles();
+	CalculateNormals();
+
+	free3D(i2pt3idVertices);
+	free3D(trivecTriangles);
+
+	vertexNum = m_nVertices;
+	indexNum = m_nTriangles * 3;
+
+	cout << "vertex num: "<< m_nVertices << endl;
+	cout << "index num: " << m_nTriangles << endl;
+
+	///////////////////////////////////////////////////////////
+
+}
+
+float* MarchingCube::GetVertices(const int vertexNum)
+{
+	float* verts = new float[vertexNum * 6];
+	Vertex* verts2 = new Vertex[vertexNum];
+
+	for (int i = 0; i < vertexNum; i++)
 	{
-		inds[i] = indsVec[i];
+		verts[i * 6 + 0] = m_ppt3dVertices[i].x;
+		verts[i * 6 + 1] = m_ppt3dVertices[i].y;
+		verts[i * 6 + 2] = m_ppt3dVertices[i].z;
+		verts[i * 6 + 3] = m_pvec3dNormals[i].x;
+		verts[i * 6 + 4] = m_pvec3dNormals[i].y;
+		verts[i * 6 + 5] = m_pvec3dNormals[i].z;
+
+		verts2[i].position.x = verts[i * 6 + 0];
+		verts2[i].position.y = verts[i * 6 + 1];
+		verts2[i].position.z = verts[i * 6 + 2];
+		verts2[i].normal.x = verts[i * 6 + 3];
+		verts2[i].normal.y = verts[i * 6 + 4];
+		verts2[i].normal.z = verts[i * 6 + 5];
 	}
 
-	mesh->SetVertices(verts, vertsVec.size());
-	mesh->SetIndices(inds, indsVec.size());
-	
-	//mesh->CaculateFaceNormal();
-	//mesh->GenerateAndSetVAO();
+	tmpMesh.SetVertices(verts2, vertexNum);
 
-	mesh->Export(meshfile);
+	return verts;
+}
 
-	cout << "export end" << endl;
+GLuint* MarchingCube::GetIndices(const int indexNum)
+{
+	GLuint* inds = new GLuint[indexNum];
+	for (int i = 0; i < indexNum; i++)
+	{
+		inds[i] = (GLuint)m_piTriangleIndices[i];
+	}
 
-	delete mesh;
+	tmpMesh.SetIndices(inds, indexNum);
+	tmpMesh.Export("ttt.obj");
 
-	delete[] verts;
-	delete[] inds;
+	return inds;
+}
+
+void MarchingCube::FreeVerticesIndices()
+{
+	delete[] m_ppt3dVertices;
+	delete[] m_pvec3dNormals;
+	delete[] m_piTriangleIndices;
 }
 
 glm::vec3 MarchingCube::Interpolation(Node* p1, Node* p2)
@@ -627,6 +816,154 @@ float MarchingCube::AnisotropicSmoothingKernel(glm::vec3 r, glm::mat3 G)
 	return 1.56668f * glm::determinant(G) * DecaySpline(glm::length(G*r));
 }
 
+int MarchingCube::FindEdgeIndex(unsigned int nX, unsigned int nY, unsigned int nZ, unsigned int nEdgeNo)
+{
+	switch (nEdgeNo)
+	{
+	case 0:
+		return FindVertexIndex(nX, nY, nZ) + 1;
+	case 1:
+		return FindVertexIndex(nX, nY + 1, nZ);
+	case 2:
+		return FindVertexIndex(nX + 1, nY, nZ) + 1;
+	case 3:
+		return FindVertexIndex(nX, nY, nZ);
+	case 4:
+		return FindVertexIndex(nX, nY, nZ + 1) + 1;
+	case 5:
+		return FindVertexIndex(nX, nY + 1, nZ + 1);
+	case 6:
+		return FindVertexIndex(nX + 1, nY, nZ + 1) + 1;
+	case 7:
+		return FindVertexIndex(nX, nY, nZ + 1);
+	case 8:
+		return FindVertexIndex(nX, nY, nZ) + 2;
+	case 9:
+		return FindVertexIndex(nX, nY + 1, nZ) + 2;
+	case 10:
+		return FindVertexIndex(nX + 1, nY + 1, nZ) + 2;
+	case 11:
+		return FindVertexIndex(nX + 1, nY, nZ) + 2;
+	default:
+		cout << "invalid edge" << endl;
+		// Invalid edge no.
+		return -1;
+	}
+}
+
+void MarchingCube::RenameVerticesAndTriangles()
+{
+	unsigned int nextID = 0;
+	ID2POINT3DID::iterator mapIterator = m_i2pt3idVertices.begin();
+	TRIANGLEVECTOR::iterator vecIterator = m_trivecTriangles.begin();
+
+	// Rename vertices.
+	while (mapIterator != m_i2pt3idVertices.end()) 
+	{
+		(*mapIterator).second.newID = nextID;
+		nextID++;
+		mapIterator++;
+	}
+
+	// Now rename triangles.
+	while (vecIterator != m_trivecTriangles.end()) 
+	{
+		for (unsigned int i = 0; i < 3; i++) {
+			unsigned int newID = m_i2pt3idVertices[(*vecIterator).pointID[i]].newID;
+			(*vecIterator).pointID[i] = newID;
+		}
+		vecIterator++;
+	}
+
+	// Copy all the vertices and triangles into two arrays so that they
+	// can be efficiently accessed.
+	// Copy vertices.
+	mapIterator = m_i2pt3idVertices.begin();
+	m_nVertices = m_i2pt3idVertices.size();
+	m_ppt3dVertices = new vec3[m_nVertices];
+	
+	for (unsigned int i = 0; i < m_nVertices; i++, mapIterator++) 
+	{
+		m_ppt3dVertices[i][0] = (*mapIterator).second.x;
+		m_ppt3dVertices[i][1] = (*mapIterator).second.y;
+		m_ppt3dVertices[i][2] = (*mapIterator).second.z;
+	}
+	// Copy vertex indices which make triangles.
+	vecIterator = m_trivecTriangles.begin();
+	m_nTriangles = m_trivecTriangles.size();
+	m_piTriangleIndices = new unsigned int[m_nTriangles * 3];
+	
+	for (unsigned int i = 0; i < m_nTriangles; i++, vecIterator++) 
+	{
+		m_piTriangleIndices[i * 3] = (*vecIterator).pointID[0];
+		m_piTriangleIndices[i * 3 + 1] = (*vecIterator).pointID[1];
+		m_piTriangleIndices[i * 3 + 2] = (*vecIterator).pointID[2];
+	}
+
+	m_i2pt3idVertices.clear();
+	m_trivecTriangles.clear();
+}
+
+void MarchingCube::CalculateNormals()
+{
+	m_nNormals = m_nVertices;
+	m_pvec3dNormals = new vec3[m_nNormals];
+
+	// Set all normals to 0.
+	for (int i = 0; i < m_nNormals; i++) 
+	{
+		m_pvec3dNormals[i][0] = 0;
+		m_pvec3dNormals[i][1] = 0;
+		m_pvec3dNormals[i][2] = 0;
+	}
+
+	// Calculate normals.
+	for (unsigned int i = 0; i < m_nTriangles; i++) 
+	{
+		vec3 vec1, vec2, normal;
+		unsigned int id0, id1, id2;
+		id0 = m_piTriangleIndices[i * 3];
+		id1 = m_piTriangleIndices[i * 3 + 1];
+		id2 = m_piTriangleIndices[i * 3 + 2];
+
+		glm::vec3 ve1 = glm::vec3(m_ppt3dVertices[id0][0], m_ppt3dVertices[id0][1], m_ppt3dVertices[id0][2]);
+		glm::vec3 ve2 = glm::vec3(m_ppt3dVertices[id1][0], m_ppt3dVertices[id1][1], m_ppt3dVertices[id1][2]);
+		glm::vec3 ve3 = glm::vec3(m_ppt3dVertices[id2][0], m_ppt3dVertices[id2][1], m_ppt3dVertices[id2][2]);
+
+		glm::vec3 v1 = ve2 - ve1;
+		glm::vec3 v2 = ve3 - ve1;
+
+		glm::vec3 c_v1_v2 = glm::cross(v1, v2);
+
+		m_pvec3dNormals[id0][0] += c_v1_v2.x;
+		m_pvec3dNormals[id0][1] += c_v1_v2.y;
+		m_pvec3dNormals[id0][2] += c_v1_v2.z;
+
+		m_pvec3dNormals[id1][0] += c_v1_v2.x;
+		m_pvec3dNormals[id1][1] += c_v1_v2.y;
+		m_pvec3dNormals[id1][2] += c_v1_v2.z;
+
+		m_pvec3dNormals[id2][0] += c_v1_v2.x;
+		m_pvec3dNormals[id2][1] += c_v1_v2.y;
+		m_pvec3dNormals[id2][2] += c_v1_v2.z;
+
+	}
+
+	// Normalize normals.
+	for (int i = 0; i < m_nNormals; i++) 
+	{
+		float length = sqrt(m_pvec3dNormals[i][0] * m_pvec3dNormals[i][0] + m_pvec3dNormals[i][1] * m_pvec3dNormals[i][1] + m_pvec3dNormals[i][2] * m_pvec3dNormals[i][2]);
+		m_pvec3dNormals[i][0] /= length;
+		m_pvec3dNormals[i][1] /= length;
+		m_pvec3dNormals[i][2] /= length;
+	}
+}
+
+int MarchingCube::FindVertexIndex(int nX, int nY, int nZ)
+{
+	return 3 * (nZ * (m_nNodeResY + 1) * (m_nNodeResX + 1) + nY * (m_nNodeResX + 1) + nX);
+}
+
 int	MarchingCube::FindNodeIndex(int nX, int nY, int nZ)
 {
 	// 0 ~ m_nNodeResX - 1까지의 범위
@@ -643,3 +980,8 @@ void MarchingCube::PrintDensity()
 		cout << m_stlNodeList[i].mValue << endl;
 	}
 }
+
+
+
+
+

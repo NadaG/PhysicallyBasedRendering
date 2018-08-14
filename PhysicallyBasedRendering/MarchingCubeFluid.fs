@@ -13,7 +13,7 @@ uniform vec3 eyePos;
 void main()
 {
 	// -1 ~ 1
-	vec3 normal = outNormal;
+	vec3 normal = normalize(outNormal);
 	
 	vec3 ambient = vec3(0.1f, 0.1f, 0.1f);
 	vec3 diffuse = vec3(0.3f, 0.3f, 0.9f);

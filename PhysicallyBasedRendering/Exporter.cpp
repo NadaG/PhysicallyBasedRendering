@@ -120,6 +120,7 @@ void PNGExporter::WritePngFile(const string fileName, float* data, const int wid
 		}
 	}
 
+	delete[] data;
 	WritePngFile(fileName, rawData, width, height, 8, colorType);
 }
 

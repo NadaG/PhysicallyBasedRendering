@@ -145,52 +145,41 @@ void FluidRenderer::InitializeRender()
 		thicknessBlurFBO[i].BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &thicknessBlurTex[i]);
 	}
 
-	boundarySize = glm::vec3(30.0f, 30.0f, 30.0f);
+	boundarySize = glm::vec3(20.0f, 20.0f, 20.0f);
 	
-	FluidCube* cubes = new FluidCube[1];
+	FluidCube* cubes = new FluidCube[2];
 
-	/*cubes[0].size.x = 20;
-	cubes[0].size.y = 20;
-	cubes[0].size.z = 25;
-	cubes[0].pos.x = -8.0f;
+	cubes[0].size.x = 18;
+	cubes[0].size.y = 25;
+	cubes[0].size.z = 18;
+	cubes[0].pos.x = 3.0f;
 	cubes[0].pos.y = 0.0f;
-	cubes[0].pos.z = -8.0f;
+	cubes[0].pos.z = -5.0f;
 
-	cubes[1].size.x = 20;
-	cubes[1].size.y = 30;
-	cubes[1].size.z = 25;
-	cubes[1].pos.x = 8.0f;
+	cubes[1].size.x = 15;
+	cubes[1].size.y = 15;
+	cubes[1].size.z = 15;
+	cubes[1].pos.x = -4.0f;
 	cubes[1].pos.y = 0.0f;
-	cubes[1].pos.z = 8.0f;*/
-
-	cubes[0].size.x = 40;
-	cubes[0].size.y = 30;
-	cubes[0].size.z = 40;
-	cubes[0].pos.x = 0.0f;
-	cubes[0].pos.y = 0.0f;
-	cubes[0].pos.z = 0.0f;
+	cubes[1].pos.z = 6.0f;
 
 	// simulation 공간을 약간 작게 해주어야 marching cube가 제대로 그려짐
 
-	fluidVAO.GenVAOVBOIBO();
-
 	// DLL
-	importer.Initialize(boundarySize * 0.8f, cubes, 1);
+	importer.Initialize(boundarySize * 1.0f, cubes, 2);
 	fluidVertices = new GLfloat[importer.particleNum * 6];
-	fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
 
 	// CLIENT
 	/*clientImporter.Initialize(boundarySize, cubes, 1);
-	fluidVertices = new GLfloat[clientImporter.particleNum * 6];
-	fluidVAO.VertexBufferData(sizeof(GLfloat)*clientImporter.particleNum * 6, fluidVertices);*/
+	fluidVertices = new GLfloat[clientImporter.particleNum * 6];*/
 
-	// position
+	fluidVAO.GenVAOVBOIBO();
 	fluidVAO.VertexAttribPointer(3, 6);
-	// color
 	fluidVAO.VertexAttribPointer(3, 6);
+	fluidVAO.SetDrawMode(GL_POINTS);
 
 	currentFrame = 0;
-	float resolutionRatio = 3.0f;
+	float resolutionRatio = 6.0f;
 	// 128장 그린거 5.0, 0.75였음
 	mc.BuildingGird(
 		boundarySize.x,
@@ -201,8 +190,14 @@ void FluidRenderer::InitializeRender()
 		boundarySize.z*resolutionRatio,
 		0.2f);
 
-	isRenderOnDefaultFBO = false;
-	targetFrame = 210;
+	cout << "fluid mesh vao setting 이전" << endl;
+
+	fluidMeshVAO.GenVAOVBOIBO();
+	fluidMeshVAO.VertexAttribPointer(3, 6);
+	fluidMeshVAO.VertexAttribPointer(3, 6);
+	fluidMeshVAO.SetDrawMode(GL_TRIANGLES);
+
+	cout << "fluid mesh vao setting 이후" << endl;
 
 	/*float* data = new float[1024 * 1024 * 3];
 	for (int i = 0; i < 1024 * 1024 * 3; i++)
@@ -212,26 +207,29 @@ void FluidRenderer::InitializeRender()
 	NEM.UseModel(data);
 
 	delete[] data;*/
+
+	isRenderOnDefaultFBO = false;
+	targetFrame = 200;
+
+	delete[] cubes;
 }
 
 void FluidRenderer::Render()
 {
-	if (currentFrame >= 5000 && !isRenderOnDefaultFBO)
+	if (currentFrame >= 1000 && !isRenderOnDefaultFBO)
 		return;
 
 	// DLL
 	importer.Update(fluidVertices);
-	fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
-	
+
 	// CLIENT
 	/*clientImporter.Update(fluidVertices);
 	fluidVAO.VertexBufferData(sizeof(GLfloat)*clientImporter.particleNum * 6, fluidVertices);*/
 
-	if (isRenderOnDefaultFBO && currentFrame == targetFrame)
+	if (isRenderOnDefaultFBO)
 	{
-		MarchingCubeFluidNormalRender("tmp.obj");
-		//ScreenSpaceFluidNormalRender();
-		Sleep(1000.0f);
+		//MarchingCubeFluidNormalRender();
+		ScreenSpaceFluidNormalRender();
 		
 		/*char tmp[1024];
 		sprintf(tmp, "%04d", currentFrame);
@@ -246,13 +244,17 @@ void FluidRenderer::Render()
 		//PhongRenderUsingNormalMap("Decoded/decode430000.png");
 		//PhongRenderUsingNormalMap("ExportData/fluid_marchingcube6/0226.png");
 	}
-	else if (!isRenderOnDefaultFBO/* && currentFrame == targetFrame*/)
+	else if (!isRenderOnDefaultFBO && currentFrame == targetFrame)
 	{
+		cout << "target frame에 들어옴" << endl;
+
 		char tmp[1024];
 		sprintf(tmp, "%04d", currentFrame);
 		string outfile = "";
 
 		ScreenSpaceFluidNormalRender();
+
+		cout << "screen space fluid normal render 끝남" << endl;
 
 		outfile += "fluid_screenspace6/";
 		outfile += tmp;
@@ -261,13 +263,16 @@ void FluidRenderer::Render()
 		cout << currentFrame << "번째 screen space 프레임 그리는 중" << endl;
 		Sleep(2000.0f);
 
+		cout << "png export 끝남" << endl;
+
 		// mesh file export
 		outfile = "";
 		outfile += "Obj/DroppingFluid/";
 		/*outfile += tmp;*/
 		outfile += "tmp.obj";
-		MarchingCubeFluidNormalRender(outfile);
 
+		MarchingCubeFluidNormalRender();
+		
 		outfile = "";
 		outfile += "fluid_marchingcube6/";
 		outfile += tmp;
@@ -275,8 +280,6 @@ void FluidRenderer::Render()
 		pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
 		cout << currentFrame << "번째 marching cube 프레임 그리는 중" << endl;
 		Sleep(2000.0f);
-
-
 
 		//Deep Learning
 		//cout << "screen space start!" << endl;
@@ -301,6 +304,9 @@ void FluidRenderer::ScreenSpaceFluidNormalRender()
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	fluidVAO.Bind();
+	fluidVAO.VertexBufferData(sizeof(GLfloat) * importer.particleNum * 6, fluidVertices);
 
 	Object* camera = sceneManager->movingCamera;
 	SceneObject& quad = sceneManager->quadObj;
@@ -431,15 +437,25 @@ void FluidRenderer::ScreenSpaceFluidNormalRender()
 	quad.DrawModel();
 }
 
-void FluidRenderer::MarchingCubeFluidNormalRender(const string& meshfile)
+void FluidRenderer::MarchingCubeFluidNormalRender()
 {
-	cout << importer.particleNum << endl;
+	cout << "particle num: " << importer.particleNum << endl;
 	float* densities = mc.ComputeParticleDensity(fluidVertices, importer.particleNum);
 	
 	mc.ComputeAnisotropicKernelGridDensity(fluidVertices, densities, importer.particleNum);
 	//mc.ComputeSphericalKernelGridDensity(fluidVertices, densities, importer.particleNum);
+	
+	int vertexNum, indexNum;
+	mc.ExcuteMarchingCube(vertexNum, indexNum);
 
-	mc.ExcuteMarchingCube(meshfile);
+	float* verts;
+	GLuint* inds;
+	verts = mc.GetVertices(vertexNum);
+	inds = mc.GetIndices(indexNum);
+
+	fluidMeshVAO.Bind();
+	fluidMeshVAO.VertexBufferData(sizeof(GLfloat) * 6 * vertexNum, verts);
+	fluidMeshVAO.IndexBufferData(sizeof(GLuint) * indexNum, inds);
 
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
@@ -476,13 +492,19 @@ void FluidRenderer::MarchingCubeFluidNormalRender(const string& meshfile)
 	marchingCubeFluidShader->SetUniformVector3f("L", glm::vec3(0.0f, 100.0f, -10.0f));
 	marchingCubeFluidShader->SetUniformVector3f("eyePos", camera->GetWorldPosition());
 
-	Model m;
+	/*Model m;
 	m.Load(meshfile);
 	cout << "model load end" << endl;
 	m.Draw();
-	cout << "model draw end" << endl;
+	cout << "model draw end" << endl;*/
+
+	DrawFluidMesh(indexNum);
+	mc.FreeVerticesIndices();
 
 	delete[] densities;
+
+	delete[] verts;
+	delete[] inds;
 }
 
 void FluidRenderer::PhongRenderUsingNormalMap(const string &imgfile)
@@ -550,8 +572,20 @@ void FluidRenderer::DrawFluids(const float cameraDist)
 	glPointSize(pointSize / cameraDist);
 
 	// DLL
+	//fluidVAO.SetDrawMode(GL_POINTS);
 	glDrawArrays(GL_POINTS, 0, importer.particleNum);
 	
 	// CLIENT
 	// glDrawArrays(GL_POINTS, 0, clientImporter.particleNum);
+
+	glBindVertexArray(0);
+}
+
+void FluidRenderer::DrawFluidMesh(int indexNum)
+{
+	fluidMeshVAO.Bind();
+
+	glDrawElements(GL_TRIANGLES, indexNum, GL_UNSIGNED_INT, 0);
+
+	glBindVertexArray(0);
 }

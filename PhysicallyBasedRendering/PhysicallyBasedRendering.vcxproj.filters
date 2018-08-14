@@ -4,7 +4,6 @@
     <CudaCompile Include="KDTree.cu" />
     <CudaCompile Include="Octree.cu" />
     <CudaCompile Include="RayTracer.cu" />
-    <CudaCompile Include="tmp.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BillBoardMovement.cpp" />
@@ -51,6 +50,7 @@
     <ClCompile Include="VolumeRenderer.cpp" />
     <ClCompile Include="WindowManager.cpp" />
     <ClCompile Include="NormalEstimateModel.cpp" />
+    <ClCompile Include="MarchingCubeVertexNormal.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BillBoardMovement.h" />
@@ -109,6 +109,8 @@
     <ClInclude Include="VolumeRenderer.h" />
     <ClInclude Include="WindowManager.h" />
     <ClInclude Include="NormalEstimateModel.h" />
+    <ClInclude Include="MarchingCubeVertexNormal.h" />
+    <ClInclude Include="MarchingCubeVertexNormalUtility.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Basic.fs" />

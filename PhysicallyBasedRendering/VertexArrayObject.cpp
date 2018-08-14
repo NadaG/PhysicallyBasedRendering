@@ -32,6 +32,7 @@ void VertexArrayObject::VertexAttribPointer(const GLuint& size, const GLuint& st
 {
 	// 이게 어쩌면 오류를 만들고 있을 수도
 	glBindVertexArray(vao);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glEnableVertexAttribArray(vertexAttribPointerId);
 	glVertexAttribPointer(
 		vertexAttribPointerId, 

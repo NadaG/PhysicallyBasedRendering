@@ -25,7 +25,7 @@ public:
 	void Render();
 
 	void ScreenSpaceFluidNormalRender();
-	void MarchingCubeFluidNormalRender(const string& meshfile);
+	void MarchingCubeFluidNormalRender();
 
 	void PhongRenderUsingNormalMap(const string& imgfile);
 
@@ -93,6 +93,7 @@ private:
 	FrameBufferObject pngFBO;
 
 	VertexArrayObject fluidVAO;
+	VertexArrayObject fluidMeshVAO;
 
 	GLfloat* fluidVertices;
 	FluidSimulationImporter importer;
@@ -116,4 +117,6 @@ private:
 	glm::vec3 boundarySize;
 
 	void DrawFluids(const float cameraDist);
+	void DrawFluidMesh(const int indexNum);
+
 };

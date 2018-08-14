@@ -18,7 +18,7 @@ public:
 
 	void Bind() { glBindVertexArray(vao); }
 
-	// VertexBufferDate 전에 불려야 함
+	// VertexBufferData를 먼저 불러주어야 함
 	void VertexAttribPointer(const GLuint& size, const GLuint& stride);
 
 	void SetDrawMode(const GLenum drawMode) { this->drawMode = drawMode; }

@@ -328,9 +328,14 @@ void Mesh::Export(const string mesh)
 		fprintf(pFile, "v %f %f %f\n", vertices[i].position.x, vertices[i].position.y, vertices[i].position.z);
 	}
 
+	for (int i = 0; i < vertexNum; i++)
+	{
+		fprintf(pFile, "vn %f %f %f\n", vertices[i].normal.x, vertices[i].normal.y, vertices[i].normal.z);
+	}
+
 	for (int i = 0; i < indexNum; i+=3)
 	{
-		fprintf(pFile, "f %d %d %d\n", indices[i] + 1, indices[i+1] + 1, indices[i+2] + 1);
+		fprintf(pFile, "f %d %d %d\n", indices[i] + 1, indices[i + 1] + 1, indices[i + 2] + 1);
 	}
 
 	fclose(pFile);

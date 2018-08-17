@@ -31,7 +31,7 @@ struct SimulationParam
 	float restDensity;
 	float pressure;
 	float surfacetension;
-	float threshold;
+	float kernelSize;
 	float surfaceThreshold;
 
 	int box2d;
@@ -82,7 +82,7 @@ void FluidSimulationImporter::Initialize(const glm::vec3 boundarySize, FluidCube
 	sparam.restDensity = 1000.0f;
 	sparam.pressure = 0.01f;
 	sparam.surfacetension = 0.01f;
-	sparam.threshold = 1.0f;
+	sparam.kernelSize = 1.0f;
 	sparam.surfaceThreshold = 0.0f;
 	sparam.vAtten = 0.00002f;
 

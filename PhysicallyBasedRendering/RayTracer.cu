@@ -1035,7 +1035,7 @@ void LoadCudaTextures()
 
 	cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc(32, 32, 32, 32, cudaChannelFormatKindFloat);
 	cudaArray* cuArray;
-	cudaMipmappedArray* cuMipmappedArray;
+	//cudaMipmappedArray* cuMipmappedArray;
 
 	cudaMallocArray(&cuArray, &channelDesc, 2048, 2048);
 	//cudaMalloc3DArray()

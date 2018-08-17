@@ -119,7 +119,6 @@ int main(int argc, char **argv)
 
 	WindowManager::GetInstance()->Terminate();
 
-
 	return 0;
 }
 

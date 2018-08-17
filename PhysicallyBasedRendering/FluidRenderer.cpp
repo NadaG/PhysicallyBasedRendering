@@ -112,7 +112,6 @@ void FluidRenderer::InitializeRender()
 		cout << "thickness FBO complete" << endl;
 	}
 
-
 	pbrFBO.GenFrameBufferObject();
 	pbrFBO.BindTexture(GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, &worldDepthTex);
 	pbrFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &worldColorTex);
@@ -174,30 +173,32 @@ void FluidRenderer::InitializeRender()
 	fluidVertices = new GLfloat[clientImporter.particleNum * 6];*/
 
 	fluidVAO.GenVAOVBOIBO();
+	fluidVAO.VertexBufferData(sizeof(GLfloat) * importer.particleNum * 6, fluidVertices);
 	fluidVAO.VertexAttribPointer(3, 6);
 	fluidVAO.VertexAttribPointer(3, 6);
 	fluidVAO.SetDrawMode(GL_POINTS);
+	glBindVertexArray(0);
 
-	currentFrame = 0;
-	float resolutionRatio = 6.0f;
-	// 128장 그린거 5.0, 0.75였음
-	mc.BuildingGird(
-		boundarySize.x,
-		boundarySize.y,
-		boundarySize.z,
-		boundarySize.x*resolutionRatio,
-		boundarySize.y*resolutionRatio,
-		boundarySize.z*resolutionRatio,
-		0.2f);
-
-	cout << "fluid mesh vao setting 이전" << endl;
+	cout << "fluid vao 생성" << endl;
 
 	fluidMeshVAO.GenVAOVBOIBO();
+	fluidMeshVAO.VertexBufferData(0, 0);
+	fluidMeshVAO.IndexBufferData(0, 0);
 	fluidMeshVAO.VertexAttribPointer(3, 6);
 	fluidMeshVAO.VertexAttribPointer(3, 6);
 	fluidMeshVAO.SetDrawMode(GL_TRIANGLES);
+	glBindVertexArray(0);
 
-	cout << "fluid mesh vao setting 이후" << endl;
+	cout << "fluid mesh vao 생성" << endl;
+
+	currentFrame = 0;
+	float resolutionRatio = 4.0f;
+
+	/*mc.BuildingGird(
+		boundarySize.x,
+		boundarySize.y,
+		boundarySize.z,
+		0.0f, 0.0f, 0.0f, 1.0f, 0.2f);*/
 
 	/*float* data = new float[1024 * 1024 * 3];
 	for (int i = 0; i < 1024 * 1024 * 3; i++)
@@ -208,8 +209,8 @@ void FluidRenderer::InitializeRender()
 
 	delete[] data;*/
 
-	isRenderOnDefaultFBO = false;
-	targetFrame = 200;
+	isRenderOnDefaultFBO = true;
+	targetFrame = 100;
 
 	delete[] cubes;
 }
@@ -221,6 +222,7 @@ void FluidRenderer::Render()
 
 	// DLL
 	importer.Update(fluidVertices);
+	//return;
 
 	// CLIENT
 	/*clientImporter.Update(fluidVertices);
@@ -244,11 +246,11 @@ void FluidRenderer::Render()
 		//PhongRenderUsingNormalMap("Decoded/decode430000.png");
 		//PhongRenderUsingNormalMap("ExportData/fluid_marchingcube6/0226.png");
 	}
-	else if (!isRenderOnDefaultFBO && currentFrame == targetFrame)
+	else if (!isRenderOnDefaultFBO/* && currentFrame == targetFrame*/)
 	{
 		cout << "target frame에 들어옴" << endl;
 
-		char tmp[1024];
+		char tmp[512];
 		sprintf(tmp, "%04d", currentFrame);
 		string outfile = "";
 
@@ -305,8 +307,8 @@ void FluidRenderer::ScreenSpaceFluidNormalRender()
 	glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	fluidVAO.Bind();
-	fluidVAO.VertexBufferData(sizeof(GLfloat) * importer.particleNum * 6, fluidVertices);
+	glBindBuffer(GL_ARRAY_BUFFER, fluidVAO.VBO());
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * importer.particleNum * 6, fluidVertices, GL_STATIC_DRAW);
 
 	Object* camera = sceneManager->movingCamera;
 	SceneObject& quad = sceneManager->quadObj;
@@ -453,9 +455,9 @@ void FluidRenderer::MarchingCubeFluidNormalRender()
 	verts = mc.GetVertices(vertexNum);
 	inds = mc.GetIndices(indexNum);
 
-	fluidMeshVAO.Bind();
-	fluidMeshVAO.VertexBufferData(sizeof(GLfloat) * 6 * vertexNum, verts);
-	fluidMeshVAO.IndexBufferData(sizeof(GLuint) * indexNum, inds);
+	glBindBuffer(GL_ARRAY_BUFFER, fluidMeshVAO.VBO());
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * vertexNum, verts, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indexNum, inds, GL_STATIC_DRAW);
 
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
@@ -563,7 +565,10 @@ void FluidRenderer::TerminateRender()
 
 	sceneManager->TerminateObjects();
 	importer.Quit();
+	
 	//clientImporter.Quit();
+
+	// 절대 delete[] vertices 하지 말것!!
 }
 
 void FluidRenderer::DrawFluids(const float cameraDist)

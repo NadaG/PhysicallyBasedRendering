@@ -10,7 +10,9 @@ void PNGExporter::WritePngFile(const string fileName, png_bytep* rowPointers, co
 
 	/* create file */
 	FILE *fp = fopen((exportDir + fileName).c_str(), "wb");
-	
+
+	cout << "png file open" << endl;
+
 	/* initialize stuff */
 	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 

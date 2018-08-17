@@ -51,6 +51,7 @@
     <ClCompile Include="WindowManager.cpp" />
     <ClCompile Include="NormalEstimateModel.cpp" />
     <ClCompile Include="MarchingCubeVertexNormal.cpp" />
+    <ClCompile Include="MarchingCubeTmp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BillBoardMovement.h" />
@@ -111,6 +112,7 @@
     <ClInclude Include="NormalEstimateModel.h" />
     <ClInclude Include="MarchingCubeVertexNormal.h" />
     <ClInclude Include="MarchingCubeVertexNormalUtility.h" />
+    <ClInclude Include="MarchingCubeTMp.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Basic.fs" />

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <algorithm>
 
-#include "MarchingCube.h"
+#include "MarchingCubeTMp.h"
 #include "MarchingCubeVertexNormalUtility.h"
 
 using std::cout;
@@ -9,20 +9,24 @@ using std::endl;
 
 using std::min;
 
-MarchingCube::MarchingCube(void)
+MarchingCubeTmp::MarchingCubeTmp(void)
 {
-	m_nWidth = 0;
-	m_nHeight = 0;
-	m_nDepth = 0;
-	m_nResX = 0;
-	m_nResY = 0;
-	m_nResZ = 0;
-	m_nNodeResX = 0;
-	m_nNodeResY = 0;
-	m_nNodeResZ = 0;
+	simulWidth = 0;
+	simulHeight = 0;
+	simulDepth = 0;
 
-	//Ks = 1400.0f;
-	//Kn = 5.0f;
+	simulOriginX = 0.0f;
+	simulOriginY = 0.0f;
+	simulOriginZ = 0.0f;
+
+	nodeNumX = 0;
+	nodeNumY = 0;
+	nodeNumZ = 0;
+
+	nodeWidth = 0.0f;
+	nodeHeight = 0.0f;
+	nodeDepth = 0.0f;
+
 
 	// 너무 한 축으로 길게 늘어지지 않도록 해주는 상수
 	Kr = 4.0f;
@@ -42,93 +46,74 @@ MarchingCube::MarchingCube(void)
 	h = 1.5f;
 	r = h * 2;
 
-	halfWidth = 10;
+	paddingHalfWidth = 10;
+	paddingHalfHeight = 10;
+	paddingHalfDepth = 10;
 }
 
-MarchingCube::~MarchingCube(void)
+MarchingCubeTmp::~MarchingCubeTmp(void)
 {
-	m_stlNodeList.clear();
+	nodeList.clear();
 }
 
 // simulation 공간, 얼마만큼으로 나눌 것인지 resolution
-void MarchingCube::BuildingGird(int nWidth, int nHeight, int nDepth, int nResX, int nResY, int nResZ, float thres)
+void MarchingCubeTmp::BuildingGird(
+	float simulWidth, float simulHeight, float simulDepth,
+	float simulOriginX, float simulOriginY, float simulOriginZ,
+	float reso, float thres)
 {
-	// simulation 공간
-	// 30.0f
-	m_nWidth = nWidth;
-	m_nHeight = nHeight;
-	m_nDepth = nDepth;
-	
-	// marching cube grid 개수
-	// m_nWidth * reso
-	m_nResX = nResX;
-	m_nResY = nResY;
-	m_nResZ = nResZ;
+	this->simulWidth = simulWidth;
+	this->simulHeight = simulHeight;
+	this->simulDepth = simulDepth;
 
-	// marching cube를 제대로 구하기 위해 padding을 씌운 grid 개수
-	m_nNodeResX = m_nResX + halfWidth * 2 + 1;
-	m_nNodeResY = m_nResY + halfWidth * 2 + 1;
-	m_nNodeResZ = m_nResZ + halfWidth * 2 + 1;
-	//m_nNodeResX = m_nResX + 1;
-	//m_nNodeResY = m_nResY + 1;
-	//m_nNodeResZ = m_nResZ + 1;
+	this->simulOriginX = simulOriginX;
+	this->simulOriginY = simulOriginY;
+	this->simulOriginZ = simulOriginZ;
 
-	m_DensityThres = thres;
-	//mMarchingThres = 0.04f;
-	//mMarchingThres = 0.29f;
+	// 양쪽에 같은 크기의 padding + 가장 마지막에 하나 추가
+	this->nodeNumX = this->simulWidth * reso + paddingHalfWidth * 2 + 1;
+	this->nodeNumY = this->simulHeight * reso + paddingHalfHeight * 2 + 1;
+	this->nodeNumZ = this->simulDepth * reso + paddingHalfDepth * 2 + 1;
+
+	this->resolution = reso;
+
+	this->nodeWidth = 1.0f / this->resolution;
+	this->nodeHeight = 1.0f / this->resolution;
+	this->nodeDepth = 1.0f / this->resolution;
+
+	densityThres = thres;
 
 	//Calculate Cell Spacing
-	// ==reso
-	widthSpacing = (float)m_nWidth / (float)m_nResX;
-	heightSpacing = (float)m_nHeight / (float)m_nResY;
-	depthSpacing = (float)m_nDepth / (float)m_nResZ;
-
-	widthGridRatio = 1 / widthSpacing;
-	heightGridRatio = 1 / heightSpacing;
-	depthGridRatio = 1 / depthSpacing;
-
-	// -boundarySize.x * 0.5 - widthSpacing * halfWidth 부터 boundarySize.x * 0.5 + widthSpacing * halfWidth 까지
-	float dx = -widthSpacing * halfWidth;
-	float dy = -heightSpacing * halfWidth;
-	float dz = -depthSpacing * halfWidth;
-
-	int nodeIdx = 0;
-
-	// 15.0f
-	// cout << "half height: "<<m_nHeight*0.5 << endl;
+	float initNodePosX = simulOriginX - this->nodeNumX * this->nodeWidth;
+	float initNodePosY = simulOriginY - this->nodeNumY * this->nodeHeight;
+	float initNodePosZ = simulOriginZ - this->nodeNumZ * this->nodeDepth;
 
 	//Building Node
 	// node position은 world 좌표계에서 정의됨 (값이 -일 수 있음)
 	// node의 index는 0부터 시작하기 때문에 시작이 0이 되도록 조정해야 함
-	for (int i = 0; i < m_nNodeResZ; i++)
+	for (int i = 0; i < nodeNumZ; i++)
 	{
-		for (int j = 0; j < m_nNodeResY; j++)
+		for (int j = 0; j < nodeNumY; j++)
 		{
-			for (int k = 0; k < m_nNodeResX; k++)
+			for (int k = 0; k < nodeNumX; k++)
 			{
 				// 각 node는 voxel로 보지말고 voxel의 끝 점이라고 생각할 것
 				Node node;
 				// node의 world position
 				node.mNodePosition = glm::vec3(
-					dx - m_nWidth * 0.5f, 
-					dy - m_nHeight * 0.5f,
-					dz - m_nDepth * 0.5f);
+					initNodePosX + k * nodeWidth,
+					initNodePosY + j * nodeHeight,
+					initNodePosZ + i * nodeDepth);
+
 				node.mValue = 0.0f;
 
-				//Debug::GetInstance()->Log(node.mNodePosition);
-
-				m_stlNodeList.push_back(node);
-				dx += widthSpacing;
+				nodeList.push_back(node);
 			}
-			dy += heightSpacing;
-			dx = -widthSpacing * halfWidth;
 		}
-		dz += depthSpacing;
-		dy = -heightSpacing * halfWidth;
 	}
 }
 
-float* MarchingCube::ComputeParticleDensity(GLfloat* particlePoses, const int particleNum)
+float* MarchingCubeTmp::ComputeParticleDensity(GLfloat* particlePoses, const int particleNum)
 {
 	float* particleDensities = new float[particleNum];
 
@@ -144,7 +129,7 @@ float* MarchingCube::ComputeParticleDensity(GLfloat* particlePoses, const int pa
 		{
 			if (i == j)
 				continue;
-			
+
 			vec3 particlePosB = vec3(
 				particlePoses[j * 6 + 0],
 				particlePoses[j * 6 + 1],
@@ -161,11 +146,11 @@ float* MarchingCube::ComputeParticleDensity(GLfloat* particlePoses, const int pa
 	return particleDensities;
 }
 
-void MarchingCube::ComputeSphericalKernelGridDensity(GLfloat* particlePoses, float* densities, const int particleNum)
+void MarchingCubeTmp::ComputeSphericalKernelGridDensity(GLfloat* particlePoses, float* densities, const int particleNum)
 {
-	for (int i = 0; i < m_stlNodeList.size(); i++)
+	for (int i = 0; i < nodeList.size(); i++)
 	{
-		m_stlNodeList[i].mValue = 0.0f;
+		nodeList[i].mValue = 0.0f;
 	}
 
 	for (int itr = 0; itr < particleNum; itr++)
@@ -178,28 +163,31 @@ void MarchingCube::ComputeSphericalKernelGridDensity(GLfloat* particlePoses, flo
 
 		// width의 반을 중간으로 설정
 		vec3 translatedParticlePos = particlePos + glm::vec3(
-			m_nWidth * 0.5f,
-			m_nHeight * 0.5f,
-			m_nDepth * 0.5f);
+			simulWidth * 0.5f,
+			simulHeight * 0.5f,
+			simulDepth * 0.5f);
 
-		int k = translatedParticlePos.x * widthGridRatio;
-		int j = translatedParticlePos.y * heightGridRatio;
-		int i = translatedParticlePos.z * depthGridRatio;
+		int k = translatedParticlePos.x * this->resolution;
+		int j = translatedParticlePos.y * this->resolution;
+		int i = translatedParticlePos.z * this->resolution;
 
-		int nodeNum = (halfWidth * 2 + 1) * (halfWidth * 2 + 1) * (halfWidth * 2 + 1);
+		int nodeNum = 
+			(paddingHalfWidth * 2 + 1) * 
+			(paddingHalfHeight * 2 + 1) * 
+			(paddingHalfDepth * 2 + 1);
 
 		int* nNodes = new int[nodeNum];
 
-		for (int ii = -halfWidth; ii <= halfWidth; ii++)
+		for (int ii = -paddingHalfDepth; ii <= paddingHalfDepth; ii++)
 		{
-			for (int jj = -halfWidth; jj <= halfWidth; jj++)
+			for (int jj = -paddingHalfHeight; jj <= paddingHalfHeight; jj++)
 			{
-				for (int kk = -halfWidth; kk <= halfWidth; kk++)
+				for (int kk = -paddingHalfWidth; kk <= paddingHalfWidth; kk++)
 				{
 					int index =
-						(ii + halfWidth) * (halfWidth * 2 + 1) * (halfWidth * 2 + 1) +
-						(jj + halfWidth) * (halfWidth * 2 + 1) +
-						(kk + halfWidth);
+						(ii + paddingHalfDepth) * (paddingHalfHeight * 2 + 1) * (paddingHalfWidth * 2 + 1) +
+						(jj + paddingHalfHeight) * (paddingHalfWidth * 2 + 1) +
+						(kk + paddingHalfWidth);
 					nNodes[index] = FindNodeIndex(kk + k, jj + j, ii + i);
 				}
 			}
@@ -212,13 +200,13 @@ void MarchingCube::ComputeSphericalKernelGridDensity(GLfloat* particlePoses, flo
 				continue;
 
 			// node pos가 곧 node의 각 꼭짓점
-			glm::vec3 nodePos = m_stlNodeList[nNodes[node]].mNodePosition;
+			glm::vec3 nodePos = nodeList[nNodes[node]].mNodePosition;
 
 			// 파티클과 node의 거리가 thresh hold 값보다 작으면 
 			if (glm::distance(particlePos, nodePos) <= this->h)
 			{
 				float value = ComputePoly6(glm::distance(nodePos, particlePos)) / densities[i];
-				m_stlNodeList[nNodes[node]].mValue += value;
+				nodeList[nNodes[node]].mValue += value;
 			}
 		}
 
@@ -226,14 +214,14 @@ void MarchingCube::ComputeSphericalKernelGridDensity(GLfloat* particlePoses, flo
 	}
 }
 
-void MarchingCube::ComputeAnisotropicKernelGridDensity(GLfloat* particlePoses, float* densities, const int particleNum)
+void MarchingCubeTmp::ComputeAnisotropicKernelGridDensity(GLfloat* particlePoses, float* densities, const int particleNum)
 {
 	/*vector<int> xs;
 	xs.resize(m_nNodeResX);*/
 
-	for (int i = 0; i < m_stlNodeList.size(); i++)
+	for (int i = 0; i < nodeList.size(); i++)
 	{
-		m_stlNodeList[i].mValue = 0.0f;
+		nodeList[i].mValue = 0.0f;
 	}
 
 	float min_x = 10000.0f;
@@ -315,7 +303,7 @@ void MarchingCube::ComputeAnisotropicKernelGridDensity(GLfloat* particlePoses, f
 		C(2, 0) = C(0, 2);
 		C(2, 1) = C(1, 2);
 
-		/*	
+		/*
 		cout << "c:" << endl;
 		cout << c << endl << endl << endl;*/
 
@@ -330,13 +318,13 @@ void MarchingCube::ComputeAnisotropicKernelGridDensity(GLfloat* particlePoses, f
 		Eigen::JacobiSVD<Eigen::Matrix3f> decomposedC(C, Eigen::ComputeFullU);
 
 		//cout << "sigular values:" << decomposedC.singularValues() << endl;
-		
+
 		// singularValues의 x값이 가장 큼
 		glm::vec3 singularValues = glm::vec3(
-			decomposedC.singularValues()(0), 
-			decomposedC.singularValues()(1), 
+			decomposedC.singularValues()(0),
+			decomposedC.singularValues()(1),
 			decomposedC.singularValues()(2));
-		
+
 		//Debug::GetInstance()->Log(singularValues);
 
 		glm::mat3 R = glm::mat3(
@@ -345,9 +333,9 @@ void MarchingCube::ComputeAnisotropicKernelGridDensity(GLfloat* particlePoses, f
 			decomposedC.matrixU()(2, 0), decomposedC.matrixU()(2, 1), decomposedC.matrixU()(2, 2));
 
 		/*singular = Ks * glm::mat3(
-			singularValues.x, 0.0f, 0.0f,
-			0.0f, singularValues.y, 0.0f,
-			0.0f, 0.0f, singularValues.z);*/
+		singularValues.x, 0.0f, 0.0f,
+		0.0f, singularValues.y, 0.0f,
+		0.0f, 0.0f, singularValues.z);*/
 		//cout << "det kC" << endl;
 		//glm::mat3 kC = R * singular * glm::transpose(R);
 		//Debug::GetInstance()->Log(glm::determinant(kC));
@@ -355,7 +343,7 @@ void MarchingCube::ComputeAnisotropicKernelGridDensity(GLfloat* particlePoses, f
 		if (neighborNum > Ne)
 		{
 			singular = Ks * glm::mat3(
-				singularValues.x, 0.0f, 0.0f, 
+				singularValues.x, 0.0f, 0.0f,
 				0.0f, glm::max(singularValues.y, singularValues.x / Kr), 0.0f,
 				0.0f, 0.0f, glm::max(singularValues.z, singularValues.x / Kr));
 		}
@@ -365,56 +353,59 @@ void MarchingCube::ComputeAnisotropicKernelGridDensity(GLfloat* particlePoses, f
 			singular = Kn * glm::mat3();
 		}
 
-	/*	cout << "singular" << endl;
+		/*	cout << "singular" << endl;
 		Debug::GetInstance()->Log(singular);*/
 
 		G = R * glm::inverse(singular) * glm::transpose(R) / this->h;
 		//G = R * glm::transpose(R) / this->h;
 
-	/*	cout << "G " << endl;
+		/*	cout << "G " << endl;
 		Debug::GetInstance()->Log(G);*/
 
 		// width의 반을 중간으로 설정
-		vec3 translatedParticlePos = averagedPos + glm::vec3(
-			m_nWidth * 0.5f + widthSpacing * halfWidth,
-			m_nHeight * 0.5f + heightSpacing * halfWidth,
-			m_nDepth * 0.5f + depthSpacing * halfWidth);
+		vec3 translatedParticlePos = particlePos + glm::vec3(
+			simulWidth * 0.5f + nodeWidth * paddingHalfWidth,
+			simulHeight * 0.5f + nodeHeight * paddingHalfHeight,
+			simulDepth * 0.5f + nodeDepth * paddingHalfDepth);
 
 		/*vec3 translatedParticlePos = particlePos + glm::vec3(
-			m_nWidth * 0.5f,
-			m_nHeight * 0.5f,
-			m_nDepth * 0.5f);*/
+		m_nWidth * 0.5f,
+		m_nHeight * 0.5f,
+		m_nDepth * 0.5f);*/
 
 		min_x = min(translatedParticlePos.x, min_x);
 		//cout << widthGridRatio << endl;
 
 		// 반올림을 위해 0.5 더함
-		int k = floorf(translatedParticlePos.x * widthGridRatio + 0.5f);
-		int j = floorf(translatedParticlePos.y * heightGridRatio + 0.5f);
-		int i = floorf(translatedParticlePos.z * depthGridRatio + 0.5f);
+		int k = floorf(translatedParticlePos.x * resolution + 0.5f);
+		int j = floorf(translatedParticlePos.y * resolution + 0.5f);
+		int i = floorf(translatedParticlePos.z * resolution + 0.5f);
 
 		/*int k = floorf(translatedParticlePos.x * widthGridRatio);
 		int j = floorf(translatedParticlePos.y * heightGridRatio);
 		if (j < 20)
-			xs[k]++;
+		xs[k]++;
 		int i = floorf(translatedParticlePos.z * depthGridRatio);*/
 
 		//Debug::GetInstance()->Log(k);
 
-		const int nodeNum = (halfWidth * 2 + 1) * (halfWidth * 2 + 1) * (halfWidth * 2 + 1);
+		const int nodeNum =
+			(paddingHalfWidth * 2 + 1) *
+			(paddingHalfHeight * 2 + 1) *
+			(paddingHalfDepth * 2 + 1);
 
 		int* nNodes = new int[nodeNum];
 
-		for (int ii = -halfWidth; ii <= halfWidth; ii++)
+		for (int ii = -paddingHalfDepth; ii <= paddingHalfDepth; ii++)
 		{
-			for (int jj = -halfWidth; jj <= halfWidth; jj++)
+			for (int jj = -paddingHalfHeight; jj <= paddingHalfHeight; jj++)
 			{
-				for (int kk = -halfWidth; kk <= halfWidth; kk++)
+				for (int kk = -paddingHalfWidth; kk <= paddingHalfWidth; kk++)
 				{
 					int index =
-						(ii + halfWidth) * (halfWidth * 2 + 1) * (halfWidth * 2 + 1) +
-						(jj + halfWidth) * (halfWidth * 2 + 1) +
-						(kk + halfWidth);
+						(ii + paddingHalfDepth) * (paddingHalfHeight * 2 + 1) * (paddingHalfWidth * 2 + 1) +
+						(jj + paddingHalfHeight) * (paddingHalfWidth * 2 + 1) +
+						(kk + paddingHalfWidth);
 					nNodes[index] = FindNodeIndex(kk + k, jj + j, ii + i);
 				}
 			}
@@ -427,20 +418,20 @@ void MarchingCube::ComputeAnisotropicKernelGridDensity(GLfloat* particlePoses, f
 				continue;
 
 			// node pos가 곧 node의 각 꼭짓점
-			glm::vec3 nodePos = m_stlNodeList[nNodes[node]].mNodePosition;
+			glm::vec3 nodePos = nodeList[nNodes[node]].mNodePosition;
 
 			// anisotropic
 			if (glm::distance(averagedPos, nodePos) <= this->h)
 			{
 				float value = AnisotropicSmoothingKernel(nodePos - averagedPos, G) / densities[i];
-				m_stlNodeList[nNodes[node]].mValue += value;
+				nodeList[nNodes[node]].mValue += value;
 			}
 
 			// isotropic
 			/*if (glm::distance(particlePos, nodePos) <= this->h)
 			{
-				float value = ComputePoly6(glm::distance(nodePos, particlePos)) / densities[i];
-				m_stlNodeList[nNodes[node]].mValue += value;
+			float value = ComputePoly6(glm::distance(nodePos, particlePos)) / densities[i];
+			m_stlNodeList[nNodes[node]].mValue += value;
 			}*/
 		}
 
@@ -458,16 +449,16 @@ void MarchingCube::ComputeAnisotropicKernelGridDensity(GLfloat* particlePoses, f
 	//xs.clear();
 }
 
-void MarchingCube::ExcuteMarchingCube(int& vertexNum, int& indexNum)
+void MarchingCubeTmp::ExcuteMarchingCube(int& vertexNum, int& indexNum)
 {
-	ID2POINT3DID ***i2pt3idVertices = alloc3D<ID2POINT3DID>(m_nNodeResX, m_nNodeResY, m_nNodeResZ);
-	TRIANGLEVECTOR ***trivecTriangles = alloc3D<TRIANGLEVECTOR>(m_nNodeResX, m_nNodeResY, m_nNodeResZ);
+	ID2POINT3DID ***i2pt3idVertices = alloc3D<ID2POINT3DID>(nodeNumX, nodeNumY, nodeNumZ);
+	TRIANGLEVECTOR ***trivecTriangles = alloc3D<TRIANGLEVECTOR>(nodeNumX, nodeNumY, nodeNumZ);
 
-	for (int i = 0; i < m_nNodeResX; i++)
+	for (int i = 0; i < nodeNumZ; i++)
 	{
-		for (int j = 0; j < m_nNodeResY; j++)
+		for (int j = 0; j < nodeNumY; j++)
 		{
-			for (int k = 0; k < m_nNodeResZ; k++)
+			for (int k = 0; k < nodeNumX; k++)
 			{
 				int cubeIdx = 0;
 				int nNodes[8];
@@ -482,14 +473,14 @@ void MarchingCube::ExcuteMarchingCube(int& vertexNum, int& indexNum)
 				nNodes[6] = FindNodeIndex(k + 1, j + 1, i + 1);
 				nNodes[7] = FindNodeIndex(k + 1, j, i + 1);
 
-				if (m_stlNodeList[nNodes[0]].mValue <= m_DensityThres) cubeIdx |= 1;	//LBB
-				if (m_stlNodeList[nNodes[1]].mValue <= m_DensityThres) cubeIdx |= 2;	//RBB
-				if (m_stlNodeList[nNodes[2]].mValue <= m_DensityThres) cubeIdx |= 4;	//RBF
-				if (m_stlNodeList[nNodes[3]].mValue <= m_DensityThres) cubeIdx |= 8;	//LBF
-				if (m_stlNodeList[nNodes[4]].mValue <= m_DensityThres) cubeIdx |= 16;	//LTB
-				if (m_stlNodeList[nNodes[5]].mValue <= m_DensityThres) cubeIdx |= 32;	//RTB
-				if (m_stlNodeList[nNodes[6]].mValue <= m_DensityThres) cubeIdx |= 64;	//RTF
-				if (m_stlNodeList[nNodes[7]].mValue <= m_DensityThres) cubeIdx |= 128;	//LTF
+				if (nodeList[nNodes[0]].mValue <= densityThres) cubeIdx |= 1;	//LBB
+				if (nodeList[nNodes[1]].mValue <= densityThres) cubeIdx |= 2;	//RBB
+				if (nodeList[nNodes[2]].mValue <= densityThres) cubeIdx |= 4;	//RBF
+				if (nodeList[nNodes[3]].mValue <= densityThres) cubeIdx |= 8;	//LBF
+				if (nodeList[nNodes[4]].mValue <= densityThres) cubeIdx |= 16;	//LTB
+				if (nodeList[nNodes[5]].mValue <= densityThres) cubeIdx |= 32;	//RTB
+				if (nodeList[nNodes[6]].mValue <= densityThres) cubeIdx |= 64;	//RTF
+				if (nodeList[nNodes[7]].mValue <= densityThres) cubeIdx |= 128;	//LTF
 
 				if (edgeTable[cubeIdx] == 0) continue;
 
@@ -500,7 +491,7 @@ void MarchingCube::ExcuteMarchingCube(int& vertexNum, int& indexNum)
 				if (edgeTable[cubeIdx] & 1)
 				{
 					Vec3ID vec3id;
-					verList[0] = Interpolation(&m_stlNodeList[nNodes[0]], &m_stlNodeList[nNodes[1]]);
+					verList[0] = Interpolation(&nodeList[nNodes[0]], &nodeList[nNodes[1]]);
 					vec3id.x = verList[0].x;
 					vec3id.y = verList[0].y;
 					vec3id.z = verList[0].z;
@@ -508,10 +499,10 @@ void MarchingCube::ExcuteMarchingCube(int& vertexNum, int& indexNum)
 					unsigned int id = FindEdgeIndex(i, j, k, 0);
 					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
 				}
-				if ((edgeTable[cubeIdx] & 2) && (j == m_nNodeResY - 1))
+				if ((edgeTable[cubeIdx] & 2) && (j == nodeNumY - 1))
 				{
 					Vec3ID vec3id;
-					verList[1] = Interpolation(&m_stlNodeList[nNodes[1]], &m_stlNodeList[nNodes[2]]);
+					verList[1] = Interpolation(&nodeList[nNodes[1]], &nodeList[nNodes[2]]);
 					vec3id.x = verList[1].x;
 					vec3id.y = verList[1].y;
 					vec3id.z = verList[1].z;
@@ -519,10 +510,10 @@ void MarchingCube::ExcuteMarchingCube(int& vertexNum, int& indexNum)
 					unsigned int id = FindEdgeIndex(i, j, k, 1);
 					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
 				}
-				if ((edgeTable[cubeIdx] & 4) && (i == m_nNodeResX - 1))
+				if ((edgeTable[cubeIdx] & 4) && (i == nodeNumX - 1))
 				{
 					Vec3ID vec3id;
-					verList[2] = Interpolation(&m_stlNodeList[nNodes[2]], &m_stlNodeList[nNodes[3]]);
+					verList[2] = Interpolation(&nodeList[nNodes[2]], &nodeList[nNodes[3]]);
 					vec3id.x = verList[2].x;
 					vec3id.y = verList[2].y;
 					vec3id.z = verList[2].z;
@@ -533,7 +524,7 @@ void MarchingCube::ExcuteMarchingCube(int& vertexNum, int& indexNum)
 				if (edgeTable[cubeIdx] & 8)
 				{
 					Vec3ID vec3id;
-					verList[3] = Interpolation(&m_stlNodeList[nNodes[3]], &m_stlNodeList[nNodes[0]]);
+					verList[3] = Interpolation(&nodeList[nNodes[3]], &nodeList[nNodes[0]]);
 					vec3id.x = verList[3].x;
 					vec3id.y = verList[3].y;
 					vec3id.z = verList[3].z;
@@ -541,10 +532,10 @@ void MarchingCube::ExcuteMarchingCube(int& vertexNum, int& indexNum)
 					unsigned int id = FindEdgeIndex(i, j, k, 3);
 					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
 				}
-				if ((edgeTable[cubeIdx] & 16) && (k == m_nNodeResZ - 1))
+				if ((edgeTable[cubeIdx] & 16) && (k == nodeNumZ - 1))
 				{
 					Vec3ID vec3id;
-					verList[4] = Interpolation(&m_stlNodeList[nNodes[4]], &m_stlNodeList[nNodes[5]]);
+					verList[4] = Interpolation(&nodeList[nNodes[4]], &nodeList[nNodes[5]]);
 					vec3id.x = verList[4].x;
 					vec3id.y = verList[4].y;
 					vec3id.z = verList[4].z;
@@ -552,10 +543,10 @@ void MarchingCube::ExcuteMarchingCube(int& vertexNum, int& indexNum)
 					unsigned int id = FindEdgeIndex(i, j, k, 4);
 					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
 				}
-				if ((edgeTable[cubeIdx] & 32) && (j == m_nNodeResY - 1) && (k == m_nNodeResZ - 1))
+				if ((edgeTable[cubeIdx] & 32) && (j == nodeNumY - 1) && (k == nodeNumZ - 1))
 				{
 					Vec3ID vec3id;
-					verList[5] = Interpolation(&m_stlNodeList[nNodes[5]], &m_stlNodeList[nNodes[6]]);
+					verList[5] = Interpolation(&nodeList[nNodes[5]], &nodeList[nNodes[6]]);
 					vec3id.x = verList[5].x;
 					vec3id.y = verList[5].y;
 					vec3id.z = verList[5].z;
@@ -563,10 +554,10 @@ void MarchingCube::ExcuteMarchingCube(int& vertexNum, int& indexNum)
 					unsigned int id = FindEdgeIndex(i, j, k, 5);
 					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
 				}
-				if ((edgeTable[cubeIdx] & 64) && (i == m_nNodeResX - 1) && (k == m_nNodeResZ - 1))
+				if ((edgeTable[cubeIdx] & 64) && (i == nodeNumX - 1) && (k == nodeNumZ - 1))
 				{
 					Vec3ID vec3id;
-					verList[6] = Interpolation(&m_stlNodeList[nNodes[6]], &m_stlNodeList[nNodes[7]]);
+					verList[6] = Interpolation(&nodeList[nNodes[6]], &nodeList[nNodes[7]]);
 					vec3id.x = verList[6].x;
 					vec3id.y = verList[6].y;
 					vec3id.z = verList[6].z;
@@ -574,10 +565,10 @@ void MarchingCube::ExcuteMarchingCube(int& vertexNum, int& indexNum)
 					unsigned int id = FindEdgeIndex(i, j, k, 6);
 					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
 				}
-				if ((edgeTable[cubeIdx] & 128) && (k == m_nNodeResZ - 1))
+				if ((edgeTable[cubeIdx] & 128) && (k == nodeNumZ - 1))
 				{
 					Vec3ID vec3id;
-					verList[7] = Interpolation(&m_stlNodeList[nNodes[7]], &m_stlNodeList[nNodes[4]]);
+					verList[7] = Interpolation(&nodeList[nNodes[7]], &nodeList[nNodes[4]]);
 					vec3id.x = verList[7].x;
 					vec3id.y = verList[7].y;
 					vec3id.z = verList[7].z;
@@ -588,7 +579,7 @@ void MarchingCube::ExcuteMarchingCube(int& vertexNum, int& indexNum)
 				if (edgeTable[cubeIdx] & 256)
 				{
 					Vec3ID vec3id;
-					verList[8] = Interpolation(&m_stlNodeList[nNodes[0]], &m_stlNodeList[nNodes[4]]);
+					verList[8] = Interpolation(&nodeList[nNodes[0]], &nodeList[nNodes[4]]);
 					vec3id.x = verList[8].x;
 					vec3id.y = verList[8].y;
 					vec3id.z = verList[8].z;
@@ -596,10 +587,10 @@ void MarchingCube::ExcuteMarchingCube(int& vertexNum, int& indexNum)
 					unsigned int id = FindEdgeIndex(i, j, k, 8);
 					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
 				}
-				if ((edgeTable[cubeIdx] & 512) && (j == m_nNodeResY - 1))
+				if ((edgeTable[cubeIdx] & 512) && (j == nodeNumY - 1))
 				{
 					Vec3ID vec3id;
-					verList[9] = Interpolation(&m_stlNodeList[nNodes[1]], &m_stlNodeList[nNodes[5]]);
+					verList[9] = Interpolation(&nodeList[nNodes[1]], &nodeList[nNodes[5]]);
 					vec3id.x = verList[9].x;
 					vec3id.y = verList[9].y;
 					vec3id.z = verList[9].z;
@@ -607,10 +598,10 @@ void MarchingCube::ExcuteMarchingCube(int& vertexNum, int& indexNum)
 					unsigned int id = FindEdgeIndex(i, j, k, 9);
 					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
 				}
-				if ((edgeTable[cubeIdx] & 1024) && (i == m_nNodeResX - 1) && (j == m_nNodeResY - 1))
+				if ((edgeTable[cubeIdx] & 1024) && (i == nodeNumX - 1) && (j == nodeNumY - 1))
 				{
 					Vec3ID vec3id;
-					verList[10] = Interpolation(&m_stlNodeList[nNodes[2]], &m_stlNodeList[nNodes[6]]);
+					verList[10] = Interpolation(&nodeList[nNodes[2]], &nodeList[nNodes[6]]);
 					vec3id.x = verList[10].x;
 					vec3id.y = verList[10].y;
 					vec3id.z = verList[10].z;
@@ -618,10 +609,10 @@ void MarchingCube::ExcuteMarchingCube(int& vertexNum, int& indexNum)
 					unsigned int id = FindEdgeIndex(i, j, k, 10);
 					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
 				}
-				if ((edgeTable[cubeIdx] & 2048) && (i == m_nNodeResX - 1))
+				if ((edgeTable[cubeIdx] & 2048) && (i == nodeNumX - 1))
 				{
 					Vec3ID vec3id;
-					verList[11] = Interpolation(&m_stlNodeList[nNodes[3]], &m_stlNodeList[nNodes[7]]);
+					verList[11] = Interpolation(&nodeList[nNodes[3]], &nodeList[nNodes[7]]);
 					vec3id.x = verList[11].x;
 					vec3id.y = verList[11].y;
 					vec3id.z = verList[11].z;
@@ -656,11 +647,11 @@ void MarchingCube::ExcuteMarchingCube(int& vertexNum, int& indexNum)
 		}
 	}
 
-	for (unsigned int x = 0; x < m_nNodeResX; x++)
+	for (unsigned int x = 0; x < nodeNumZ; x++)
 	{
-		for (unsigned int y = 0; y < m_nNodeResY; y++)
+		for (unsigned int y = 0; y < nodeNumY; y++)
 		{
-			for (unsigned int z = 0; z < m_nNodeResZ; z++)
+			for (unsigned int z = 0; z < nodeNumX; z++)
 			{
 				ID2POINT3DID::iterator it = i2pt3idVertices[x][y][z].begin();
 				while (it != i2pt3idVertices[x][y][z].end())
@@ -690,14 +681,14 @@ void MarchingCube::ExcuteMarchingCube(int& vertexNum, int& indexNum)
 	vertexNum = m_nVertices;
 	indexNum = m_nTriangles * 3;
 
-	cout << "vertex num: "<< m_nVertices << endl;
+	cout << "vertex num: " << m_nVertices << endl;
 	cout << "index num: " << m_nTriangles << endl;
 
 	///////////////////////////////////////////////////////////
 
 }
 
-float* MarchingCube::GetVertices(const int vertexNum)
+float* MarchingCubeTmp::GetVertices(const int vertexNum)
 {
 	float* verts = new float[vertexNum * 6];
 	//Vertex* verts2 = new Vertex[vertexNum];
@@ -724,7 +715,7 @@ float* MarchingCube::GetVertices(const int vertexNum)
 	return verts;
 }
 
-GLuint* MarchingCube::GetIndices(const int indexNum)
+GLuint* MarchingCubeTmp::GetIndices(const int indexNum)
 {
 	GLuint* inds = new GLuint[indexNum];
 	for (int i = 0; i < indexNum; i++)
@@ -738,26 +729,26 @@ GLuint* MarchingCube::GetIndices(const int indexNum)
 	return inds;
 }
 
-void MarchingCube::FreeVerticesIndices()
+void MarchingCubeTmp::FreeVerticesIndices()
 {
 	delete[] m_ppt3dVertices;
 	delete[] m_pvec3dNormals;
 	delete[] m_piTriangleIndices;
 }
 
-glm::vec3 MarchingCube::Interpolation(Node* p1, Node* p2)
+glm::vec3 MarchingCubeTmp::Interpolation(Node* p1, Node* p2)
 {
 	glm::vec3 p = glm::vec3(0.0f, 0.0f, 0.0f);
 	float scalar = 0.00001f;
 
-	if (abs(m_DensityThres - p1->mValue) < scalar)
+	if (abs(densityThres - p1->mValue) < scalar)
 		return p1->mNodePosition;
-	if (abs(m_DensityThres - p2->mValue) < scalar)
+	if (abs(densityThres - p2->mValue) < scalar)
 		return p2->mNodePosition;
 	if (abs(p2->mValue - p1->mValue) < scalar)
 		return p1->mNodePosition;
 
-	float mu = (m_DensityThres - p1->mValue) / (p2->mValue - p1->mValue);
+	float mu = (densityThres - p1->mValue) / (p2->mValue - p1->mValue);
 
 	p.x = p1->mNodePosition.x + mu * (p2->mNodePosition.x - p1->mNodePosition.x);
 	p.y = p1->mNodePosition.y + mu * (p2->mNodePosition.y - p1->mNodePosition.y);
@@ -769,7 +760,7 @@ glm::vec3 MarchingCube::Interpolation(Node* p1, Node* p2)
 // a가 0에 가까울 수록 1에 가깝고
 // 1에 가까울 수록 0에 가까운 함수
 // 
-float MarchingCube::DecaySpline(float a)
+float MarchingCubeTmp::DecaySpline(float a)
 {
 	if (a > 1.0f)
 		return 0;
@@ -778,7 +769,7 @@ float MarchingCube::DecaySpline(float a)
 
 // r값은 0~1 사이의 값
 // return 되는 값은 0~1.5668
-float MarchingCube::ComputePoly6(float r)
+float MarchingCubeTmp::ComputePoly6(float r)
 {
 	float a = this->h*this->h - r*r;
 	float h3 = this->h*this->h*this->h;
@@ -790,7 +781,7 @@ float MarchingCube::ComputePoly6(float r)
 	return (1.56668f / h3) * DecaySpline(r / this->h);
 }
 
-float MarchingCube::WeightFunc(vec3 relativePos, float r)
+float MarchingCubeTmp::WeightFunc(vec3 relativePos, float r)
 {
 	float len = glm::length(relativePos);
 
@@ -801,7 +792,7 @@ float MarchingCube::WeightFunc(vec3 relativePos, float r)
 	return 1.0f - (len / r)*(len / r)*(len / r);
 }
 
-float MarchingCube::AnisotropicSmoothingKernel(glm::vec3 r, glm::mat3 G)
+float MarchingCubeTmp::AnisotropicSmoothingKernel(glm::vec3 r, glm::mat3 G)
 {
 	/*cout << "det: " << glm::determinant(G) << endl;
 	cout << "r original len: " << glm::length(r) << endl;
@@ -811,12 +802,12 @@ float MarchingCube::AnisotropicSmoothingKernel(glm::vec3 r, glm::mat3 G)
 	cout << "r roteted len: " << glm::length(G*r) << endl;*/
 
 	/*if (glm::length(G*r) > 1.0f)
-		cout << "!";*/
+	cout << "!";*/
 
 	return 1.56668f * glm::determinant(G) * DecaySpline(glm::length(G*r));
 }
 
-int MarchingCube::FindEdgeIndex(unsigned int nX, unsigned int nY, unsigned int nZ, unsigned int nEdgeNo)
+int MarchingCubeTmp::FindEdgeIndex(unsigned int nX, unsigned int nY, unsigned int nZ, unsigned int nEdgeNo)
 {
 	switch (nEdgeNo)
 	{
@@ -851,14 +842,14 @@ int MarchingCube::FindEdgeIndex(unsigned int nX, unsigned int nY, unsigned int n
 	}
 }
 
-void MarchingCube::RenameVerticesAndTriangles()
+void MarchingCubeTmp::RenameVerticesAndTriangles()
 {
 	unsigned int nextID = 0;
 	ID2POINT3DID::iterator mapIterator = m_i2pt3idVertices.begin();
 	TRIANGLEVECTOR::iterator vecIterator = m_trivecTriangles.begin();
 
 	// Rename vertices.
-	while (mapIterator != m_i2pt3idVertices.end()) 
+	while (mapIterator != m_i2pt3idVertices.end())
 	{
 		(*mapIterator).second.newID = nextID;
 		nextID++;
@@ -866,7 +857,7 @@ void MarchingCube::RenameVerticesAndTriangles()
 	}
 
 	// Now rename triangles.
-	while (vecIterator != m_trivecTriangles.end()) 
+	while (vecIterator != m_trivecTriangles.end())
 	{
 		for (unsigned int i = 0; i < 3; i++) {
 			unsigned int newID = m_i2pt3idVertices[(*vecIterator).pointID[i]].newID;
@@ -881,8 +872,8 @@ void MarchingCube::RenameVerticesAndTriangles()
 	mapIterator = m_i2pt3idVertices.begin();
 	m_nVertices = m_i2pt3idVertices.size();
 	m_ppt3dVertices = new vec3[m_nVertices];
-	
-	for (unsigned int i = 0; i < m_nVertices; i++, mapIterator++) 
+
+	for (unsigned int i = 0; i < m_nVertices; i++, mapIterator++)
 	{
 		m_ppt3dVertices[i][0] = (*mapIterator).second.x;
 		m_ppt3dVertices[i][1] = (*mapIterator).second.y;
@@ -892,8 +883,8 @@ void MarchingCube::RenameVerticesAndTriangles()
 	vecIterator = m_trivecTriangles.begin();
 	m_nTriangles = m_trivecTriangles.size();
 	m_piTriangleIndices = new unsigned int[m_nTriangles * 3];
-	
-	for (unsigned int i = 0; i < m_nTriangles; i++, vecIterator++) 
+
+	for (unsigned int i = 0; i < m_nTriangles; i++, vecIterator++)
 	{
 		m_piTriangleIndices[i * 3] = (*vecIterator).pointID[0];
 		m_piTriangleIndices[i * 3 + 1] = (*vecIterator).pointID[1];
@@ -904,13 +895,13 @@ void MarchingCube::RenameVerticesAndTriangles()
 	m_trivecTriangles.clear();
 }
 
-void MarchingCube::CalculateNormals()
+void MarchingCubeTmp::CalculateNormals()
 {
 	m_nNormals = m_nVertices;
 	m_pvec3dNormals = new vec3[m_nNormals];
 
 	// Set all normals to 0.
-	for (int i = 0; i < m_nNormals; i++) 
+	for (int i = 0; i < m_nNormals; i++)
 	{
 		m_pvec3dNormals[i][0] = 0;
 		m_pvec3dNormals[i][1] = 0;
@@ -918,7 +909,7 @@ void MarchingCube::CalculateNormals()
 	}
 
 	// Calculate normals.
-	for (unsigned int i = 0; i < m_nTriangles; i++) 
+	for (unsigned int i = 0; i < m_nTriangles; i++)
 	{
 		vec3 vec1, vec2, normal;
 		unsigned int id0, id1, id2;
@@ -950,7 +941,7 @@ void MarchingCube::CalculateNormals()
 	}
 
 	// Normalize normals.
-	for (int i = 0; i < m_nNormals; i++) 
+	for (int i = 0; i < m_nNormals; i++)
 	{
 		float length = sqrt(m_pvec3dNormals[i][0] * m_pvec3dNormals[i][0] + m_pvec3dNormals[i][1] * m_pvec3dNormals[i][1] + m_pvec3dNormals[i][2] * m_pvec3dNormals[i][2]);
 		m_pvec3dNormals[i][0] /= length;
@@ -959,29 +950,24 @@ void MarchingCube::CalculateNormals()
 	}
 }
 
-int MarchingCube::FindVertexIndex(int nX, int nY, int nZ)
+int MarchingCubeTmp::FindVertexIndex(int nX, int nY, int nZ)
 {
-	return 3 * (nZ * (m_nNodeResY + 1) * (m_nNodeResX + 1) + nY * (m_nNodeResX + 1) + nX);
+	return 3 * (nZ * (nodeNumY + 1) * (nodeNumX + 1) + nY * (nodeNumX + 1) + nX);
 }
 
-int	MarchingCube::FindNodeIndex(int nX, int nY, int nZ)
+int	MarchingCubeTmp::FindNodeIndex(int nX, int nY, int nZ)
 {
 	// 0 ~ m_nNodeResX - 1까지의 범위
-	if (nX < 0 || nX >= m_nNodeResX || nY < 0 || nY >= m_nNodeResY || nZ < 0 || nZ >= m_nNodeResZ)
+	if (nX < 0 || nX >= nodeNumX || nY < 0 || nY >= nodeNumY || nZ < 0 || nZ >= nodeNumZ)
 		return -1.0f;
 
-	return (nZ * m_nNodeResY * m_nNodeResX) + (nY * m_nNodeResX) + nX;
+	return (nZ * nodeNumY * nodeNumX) + (nY * nodeNumX) + nX;
 }
 
-void MarchingCube::PrintDensity()
+void MarchingCubeTmp::PrintDensity()
 {
-	for (int i = 0; i < m_stlNodeList.size(); i++)
+	for (int i = 0; i < nodeList.size(); i++)
 	{
-		cout << m_stlNodeList[i].mValue << endl;
+		cout << nodeList[i].mValue << endl;
 	}
 }
-
-
-
-
-

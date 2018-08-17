@@ -9,9 +9,16 @@ VertexArrayObject::~VertexArrayObject()
 
 void VertexArrayObject::GenVAOVBOIBO()
 {
+	hasIBO = true;
+	GenVAOVBO();
+	glGenBuffers(1, &ibo);
+}
+
+void VertexArrayObject::GenVAOVBO()
+{
+	hasIBO = false;
 	glGenVertexArrays(1, &vao);
 	glGenBuffers(1, &vbo);
-	glGenBuffers(1, &ibo);
 }
 
 void VertexArrayObject::VertexBufferData(const GLsizeiptr& size, const GLvoid* data)
@@ -30,17 +37,14 @@ void VertexArrayObject::IndexBufferData(const GLsizeiptr& size, const GLvoid* da
 
 void VertexArrayObject::VertexAttribPointer(const GLuint& size, const GLuint& stride)
 {
-	// 이게 어쩌면 오류를 만들고 있을 수도
-	glBindVertexArray(vao);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glEnableVertexAttribArray(vertexAttribPointerId);
 	glVertexAttribPointer(
-		vertexAttribPointerId, 
-		size, 
-		GL_FLOAT, 
-		GL_FALSE, 
-		sizeof(GLfloat) * stride, 
-		(void*)(vertexAttribPointerOffset*sizeof(GLfloat)));
+		vertexAttribPointerId,
+		size,
+		GL_FLOAT,
+		GL_FALSE,
+		sizeof(GLfloat) * stride,
+		(void*)(vertexAttribPointerOffset * sizeof(GLfloat)));
+	glEnableVertexAttribArray(vertexAttribPointerId);
 	vertexAttribPointerId++;
 	vertexAttribPointerOffset += size;
 }

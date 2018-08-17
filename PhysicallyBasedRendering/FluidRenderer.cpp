@@ -2,6 +2,8 @@
 
 void FluidRenderer::InitializeRender()
 {
+	GLenum err;
+
 	backgroundColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 	pbrShader = new ShaderProgram("PBR.vs", "PBR.fs");
@@ -88,6 +90,7 @@ void FluidRenderer::InitializeRender()
 		GL_FLOAT);
 	pngTex.SetParameters(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
+
 	depthFBO.GenFrameBufferObject();
 	// rbo는 texture로 쓰이지 않을 것이라는 것을 뜻함
 	// 이 힌트를 미리 줌으로써 가속화를 할 수 있음
@@ -122,6 +125,10 @@ void FluidRenderer::InitializeRender()
 		cout << "pbr fbo complete" << endl;
 	}
 
+	err = glGetError();
+	if (err != GL_NO_ERROR)
+		printf("d Error: %s\n", glewGetErrorString(err));
+
 	pngFBO.GenFrameBufferObject();
 	pngFBO.BindDefaultDepthBuffer(depthWidth, depthHeight);
 	pngFBO.BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &pngTex);
@@ -144,23 +151,23 @@ void FluidRenderer::InitializeRender()
 		thicknessBlurFBO[i].BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &thicknessBlurTex[i]);
 	}
 
-	boundarySize = glm::vec3(20.0f, 20.0f, 20.0f);
+	boundarySize = glm::vec3(10.0f, 10.0f, 10.0f);
 	
 	FluidCube* cubes = new FluidCube[2];
 
-	cubes[0].size.x = 18;
-	cubes[0].size.y = 25;
-	cubes[0].size.z = 18;
+	cubes[0].size.x = 5;
+	cubes[0].size.y = 5;
+	cubes[0].size.z = 5;
 	cubes[0].pos.x = 3.0f;
 	cubes[0].pos.y = 0.0f;
 	cubes[0].pos.z = -5.0f;
 
-	cubes[1].size.x = 15;
-	cubes[1].size.y = 15;
-	cubes[1].size.z = 15;
+	/*cubes[1].size.x = 5;
+	cubes[1].size.y = 5;
+	cubes[1].size.z = 5;
 	cubes[1].pos.x = -4.0f;
 	cubes[1].pos.y = 0.0f;
-	cubes[1].pos.z = 6.0f;
+	cubes[1].pos.z = 6.0f;*/
 
 	// simulation 공간을 약간 작게 해주어야 marching cube가 제대로 그려짐
 
@@ -174,31 +181,30 @@ void FluidRenderer::InitializeRender()
 
 	fluidVAO.GenVAOVBOIBO();
 	fluidVAO.VertexBufferData(sizeof(GLfloat) * importer.particleNum * 6, fluidVertices);
+	fluidVAO.IndexBufferData(sizeof(GLuint) * importer.particleNum, fluidVertices);
 	fluidVAO.VertexAttribPointer(3, 6);
 	fluidVAO.VertexAttribPointer(3, 6);
-	fluidVAO.SetDrawMode(GL_POINTS);
-	glBindVertexArray(0);
 
 	cout << "fluid vao 생성" << endl;
 
-	fluidMeshVAO.GenVAOVBOIBO();
+	/*fluidMeshVAO.GenVAOVBOIBO();
 	fluidMeshVAO.VertexBufferData(0, 0);
 	fluidMeshVAO.IndexBufferData(0, 0);
 	fluidMeshVAO.VertexAttribPointer(3, 6);
 	fluidMeshVAO.VertexAttribPointer(3, 6);
 	fluidMeshVAO.SetDrawMode(GL_TRIANGLES);
-	glBindVertexArray(0);
+	glBindVertexArray(0);*/
 
 	cout << "fluid mesh vao 생성" << endl;
 
 	currentFrame = 0;
 	float resolutionRatio = 4.0f;
 
-	/*mc.BuildingGird(
+	mc.BuildingGird(
 		boundarySize.x,
 		boundarySize.y,
 		boundarySize.z,
-		0.0f, 0.0f, 0.0f, 1.0f, 0.2f);*/
+		0.0f, 0.0f, 0.0f, 1.0f, 0.2f);
 
 	/*float* data = new float[1024 * 1024 * 3];
 	for (int i = 0; i < 1024 * 1024 * 3; i++)
@@ -222,16 +228,14 @@ void FluidRenderer::Render()
 
 	// DLL
 	importer.Update(fluidVertices);
-	//return;
-
 	// CLIENT
 	/*clientImporter.Update(fluidVertices);
 	fluidVAO.VertexBufferData(sizeof(GLfloat)*clientImporter.particleNum * 6, fluidVertices);*/
 
 	if (isRenderOnDefaultFBO)
 	{
-		//MarchingCubeFluidNormalRender();
-		ScreenSpaceFluidNormalRender();
+		MarchingCubeFluidNormalRender();
+		//ScreenSpaceFluidNormalRender();
 		
 		/*char tmp[1024];
 		sprintf(tmp, "%04d", currentFrame);
@@ -308,7 +312,7 @@ void FluidRenderer::ScreenSpaceFluidNormalRender()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glBindBuffer(GL_ARRAY_BUFFER, fluidVAO.VBO());
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * importer.particleNum * 6, fluidVertices, GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * importer.particleNum * 6, fluidVertices);
 
 	Object* camera = sceneManager->movingCamera;
 	SceneObject& quad = sceneManager->quadObj;
@@ -565,10 +569,10 @@ void FluidRenderer::TerminateRender()
 
 	sceneManager->TerminateObjects();
 	importer.Quit();
-	
+
 	//clientImporter.Quit();
 
-	// 절대 delete[] vertices 하지 말것!!
+	// 절대 delete[] fluidVertices 하지 말것!!
 }
 
 void FluidRenderer::DrawFluids(const float cameraDist)
@@ -583,7 +587,6 @@ void FluidRenderer::DrawFluids(const float cameraDist)
 	// CLIENT
 	// glDrawArrays(GL_POINTS, 0, clientImporter.particleNum);
 
-	glBindVertexArray(0);
 }
 
 void FluidRenderer::DrawFluidMesh(int indexNum)
@@ -592,5 +595,4 @@ void FluidRenderer::DrawFluidMesh(int indexNum)
 
 	glDrawElements(GL_TRIANGLES, indexNum, GL_UNSIGNED_INT, 0);
 
-	glBindVertexArray(0);
 }

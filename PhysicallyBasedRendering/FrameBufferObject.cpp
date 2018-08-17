@@ -65,7 +65,16 @@ void FrameBufferObject::Clear(const float & r, const float & g, const float & b,
 // depth attachment는 따로 draw에 넣어줄 필요 없음
 void FrameBufferObject::DrawBuffers()
 {
+	GLenum err;
+	err = glGetError();
+	if (err != GL_NO_ERROR)
+		printf("1 Error: %s\n", glewGetErrorString(err));
+
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	err = glGetError();
+	if (err != GL_NO_ERROR)
+		printf("2 Error: %s\n", glewGetErrorString(err));
+	
 	int attaSize = attachments.size();
 	GLuint* atts = new GLuint[attaSize];
 	for (int i = 0; i < attaSize; i++)
@@ -73,6 +82,10 @@ void FrameBufferObject::DrawBuffers()
 		atts[i] = attachments[i];
 	}
 	glDrawBuffers(attaSize, atts);
+	
+	err = glGetError();
+	if (err != GL_NO_ERROR)
+		printf("3 Error: %s\n", glewGetErrorString(err));
 	delete atts;
 }
 

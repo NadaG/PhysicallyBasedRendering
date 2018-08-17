@@ -30,6 +30,8 @@ enum Scene
 
 int main(int argc, char **argv)
 {
+	
+
 	/*OctreeNode octree;
 	octree.bnd.bounds[0] = glm::vec3(-30, -30, -30);
 	octree.bnd.bounds[1] = glm::vec3(30, 30, 30);
@@ -54,7 +56,7 @@ int main(int argc, char **argv)
 	InputManager::GetInstance()->Initialize(window);
 
 	//TO Refacto 어딘가로 버려버릴것
-	glewExperimental = true;
+	glewExperimental = GL_TRUE;
 
 	if (glewInit() != GLEW_OK)
 	{
@@ -64,6 +66,11 @@ int main(int argc, char **argv)
 
 	Renderer* renderer;
 	SceneManager* sceneManager;
+
+	// 처음에 1280 에러가 하나 나오는데 그것은 신경쓰지 않아도 됨
+	GLenum err = glGetError();
+	if (err != GL_NO_ERROR)
+		printf("Error: %s\n", glewGetErrorString(err));
 
 	switch (scene)
 	{

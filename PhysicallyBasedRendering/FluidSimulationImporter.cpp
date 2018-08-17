@@ -106,6 +106,16 @@ void FluidSimulationImporter::Initialize(const glm::vec3 boundarySize, FluidCube
 	vel = new float[particleNum * 3];
 	issur = new int[particleNum];
 
+	for (int i = 0; i < particleNum*3; i++)
+	{
+		pos[i] = 0.0f;
+		stopFramePos[i] = 0.0f;
+		vel[i] = 0.0f;
+	}
+
+	for (int i = 0; i < particleNum; i++)
+		issur[i] = 0;
+
 	posScalingFactor = 1.0f;
 }
 

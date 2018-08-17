@@ -46,6 +46,11 @@ MarchingCubeTmp::MarchingCubeTmp(void)
 	h = 1.5f;
 	r = h * 2;
 
+
+	m_ppt3dVertices = NULL;
+	m_piTriangleIndices = NULL;
+	m_pvec3dNormals = NULL;
+
 	paddingHalfWidth = 10;
 	paddingHalfHeight = 10;
 	paddingHalfDepth = 10;
@@ -731,9 +736,7 @@ GLuint* MarchingCubeTmp::GetIndices(const int indexNum)
 
 void MarchingCubeTmp::FreeVerticesIndices()
 {
-	delete[] m_ppt3dVertices;
-	delete[] m_pvec3dNormals;
-	delete[] m_piTriangleIndices;
+	DeleteSurface();
 }
 
 glm::vec3 MarchingCubeTmp::Interpolation(Node* p1, Node* p2)
@@ -790,6 +793,22 @@ float MarchingCubeTmp::WeightFunc(vec3 relativePos, float r)
 
 	// (1-a)^3인지 1-a^3인지 모르겠음, 오타가 있음
 	return 1.0f - (len / r)*(len / r)*(len / r);
+}
+
+void MarchingCubeTmp::DeleteSurface()
+{
+	if (m_ppt3dVertices != NULL) {
+		delete[] m_ppt3dVertices;
+		m_ppt3dVertices = NULL;
+	}
+	if (m_piTriangleIndices != NULL) {
+		delete[] m_piTriangleIndices;
+		m_piTriangleIndices = NULL;
+	}
+	if (m_pvec3dNormals != NULL) {
+		delete[] m_pvec3dNormals;
+		m_pvec3dNormals = NULL;
+	}
 }
 
 float MarchingCubeTmp::AnisotropicSmoothingKernel(glm::vec3 r, glm::mat3 G)

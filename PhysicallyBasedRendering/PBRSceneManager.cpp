@@ -35,12 +35,12 @@ void PBRSceneManager::InitializeObjects()
 
 void PBRSceneManager::Update()
 {
-	movingCamera->Update();
+	/*movingCamera->Update();
 	lightObjs[selectedLightId]->Update();
 
 	for (int i = 0; i < lightObjs.size(); i++)
 	{
 		if (InputManager::GetInstance()->IsKey(GLFW_KEY_1 + i))
 			selectedLightId = i;
-	}
+	}*/
 }

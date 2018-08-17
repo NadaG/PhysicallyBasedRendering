@@ -18,5 +18,4 @@ void SmokeSceneManager::InitializeObjects()
 
 void SmokeSceneManager::Update()
 {
-	movingCamera->Update();
 }

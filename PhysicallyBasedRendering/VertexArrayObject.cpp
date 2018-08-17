@@ -18,19 +18,18 @@ void VertexArrayObject::GenVAOVBO()
 {
 	hasIBO = false;
 	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
 	glGenBuffers(1, &vbo);
 }
 
 void VertexArrayObject::VertexBufferData(const GLsizeiptr& size, const GLvoid* data)
 {
-	glBindVertexArray(vao);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
 }
 
 void VertexArrayObject::IndexBufferData(const GLsizeiptr& size, const GLvoid* data)
 {
-	glBindVertexArray(vao);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
 }

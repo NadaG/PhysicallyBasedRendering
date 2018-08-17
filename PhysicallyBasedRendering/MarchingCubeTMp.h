@@ -123,7 +123,6 @@ public:
 	// relative pos와 matrix를 인풋으로 받아 float을 return하는 함수
 	float AnisotropicSmoothingKernel(glm::vec3 r, glm::mat3 G);
 
-
 	glm::vec3 Interpolation(Node* p1, Node* p2);
 
 	int FindVertexIndex(int nX, int nY, int nZ);
@@ -132,6 +131,8 @@ public:
 
 	void RenameVerticesAndTriangles();
 	void CalculateNormals();
+
+	void DeleteSurface();
 
 	void PrintDensity();
 

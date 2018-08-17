@@ -10,13 +10,10 @@
 class Object
 {
 public:
-	Object(Movement* const movement);
+	Object();
 	virtual ~Object() {}
 
-	virtual void Update() { movement->Update(); }
 	// 여기서 delete를 하는게 맞는지 저쪽에서 해주는게 맞는지 잘 모르겠음
-	virtual void Delete() { delete movement; }
-
 	void WorldTranslate(const glm::vec3& vec);
 	// world 좌표계에서의 위치가 translate
 	void ModelTranslate(const glm::vec3& vec);
@@ -47,8 +44,6 @@ public:
 private:
 
 	// 여차하면 vector로 바꿀 것
-	Movement* movement;
-
 	glm::vec3 scaleVector;
 	glm::mat4 rotationMatrix;
 

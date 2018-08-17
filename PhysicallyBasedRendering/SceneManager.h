@@ -33,6 +33,7 @@ public:
 
 	// render가 안되는 object
 	Object* movingCamera;
+	CameraMovement* cameraMovement;
 	
 	SceneObject* billboard;
 

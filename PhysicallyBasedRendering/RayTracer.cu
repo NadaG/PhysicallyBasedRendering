@@ -16,6 +16,7 @@
 #include <ctime>
 #include <stdio.h>
 
+
 texture<float4, 2, cudaReadModeElementType> albedoTex;
 texture<float4, 2, cudaReadModeElementType> normalTex;
 texture<float4, 2, cudaReadModeElementType> aoTex;
@@ -24,18 +25,7 @@ texture<float4, 2, cudaReadModeElementType> roughnessTex;
 
 texture<float4, 2, cudaReadModeElementType> backgroundTex;
 
-struct Ray
-{
-	// Ray의 원점
-	vec3 origin;
-	// Ray의 방향
-	vec3 dir;
-	
-	int depth;
 
-	float decay;
-	//float 
-};
 
 const int WINDOW_HEIGHT = 1024;
 const int WINDOW_WIDTH = 1024;
@@ -47,7 +37,7 @@ const int QUEUE_SIZE = 32;
 
 const int DEPTH = 2;
 
-const int SAMPLE_NUM = 12;
+const int SAMPLE_NUM = 1;
 
 using std::cout;
 using std::endl;
@@ -257,14 +247,10 @@ __device__ bool RayAABBsIntersect(Ray ray, AABB* boxes, int boxNum)
 }
 
 
-__device__ bool RayTraversal(OctreeNode* root, Ray ray)
+__device__ float RayTraversal(OctreeNode* root, Ray ray, float& minDist)
 {
 	if (root == nullptr)
 		return false;
-
-	/*if (ray.dir.x == 0)
-		return true;
-		*/
 
 	if (ray.dir.x < 0)
 	{
@@ -293,14 +279,73 @@ __device__ bool RayTraversal(OctreeNode* root, Ray ray)
 	double tz0 = (root->bnd.bounds[0].z - ray.origin.z) * divz;
 	double tz1 = (root->bnd.bounds[1].z - ray.origin.z) * divz;
 
-	if (max(max(tx0, ty0), tz0) <= min(min(tx1, ty1), tz1))
-		return true;
+	float tmin = max(max(tx0, ty0), tz0);
+	float tmax = min(min(tx1, ty1), tz1);
+
+	if (tmin <= tmax)
+	{
+		//return true;
+
+		if (tmin < minDist)
+			return true;
+		else
+			return false;
+	}
 	else
 		return false;
 
 }
 
-__device__ void RayTreeTraversal(OctreeNode* root, Ray ray, int& minIdx, float& tmpDist, Triangle* triangles, const float& rayThreshold, float& minDist)
+__device__ float KDRayTraversal(gpukdtreeNode root, Ray ray)
+{
+
+
+	if (ray.dir.x < 0)
+	{
+		ray.origin.x = root.nodeAABB.bounds[0].x + root.nodeAABB.bounds[1].x - ray.origin.x;
+		ray.dir.x = -ray.dir.x;
+	}
+	if (ray.dir.y < 0)
+	{
+		ray.origin.y = root.nodeAABB.bounds[0].y + root.nodeAABB.bounds[1].y - ray.origin.y;
+		ray.dir.y = -ray.dir.y;
+	}
+	if (ray.dir.z < 0)
+	{
+		ray.origin.z = root.nodeAABB.bounds[0].z + root.nodeAABB.bounds[1].z - ray.origin.z;
+		ray.dir.z = -ray.dir.z;
+	}
+
+	double divx = 1 / ray.dir.x;
+	double divy = 1 / ray.dir.y;
+	double divz = 1 / ray.dir.z;
+
+	double tx0 = (root.nodeAABB.bounds[0].x - ray.origin.x) * divx;
+	double tx1 = (root.nodeAABB.bounds[1].x - ray.origin.x) * divx;
+	double ty0 = (root.nodeAABB.bounds[0].y - ray.origin.y) * divy;
+	double ty1 = (root.nodeAABB.bounds[1].y - ray.origin.y) * divy;
+	double tz0 = (root.nodeAABB.bounds[0].z - ray.origin.z) * divz;
+	double tz1 = (root.nodeAABB.bounds[1].z - ray.origin.z) * divz;
+
+	float tmin = max(max(tx0, ty0), tz0);
+	float tmax = min(min(tx1, ty1), tz1);
+
+	if (tmin <= tmax)
+	{
+		return true;
+	}
+	else
+		return false;
+
+}
+
+__device__ void RayTreeTraversal(OctreeNode* root, 
+								Ray ray, 
+								int& minIdx, 
+								float& tmpDist, 
+								Triangle* triangles, 
+								const float& rayThreshold, 
+								float& minDist)
 {
 	//// recursive
 	//if (RayTraversal(root, ray))
@@ -342,6 +387,7 @@ __device__ void RayTreeTraversal(OctreeNode* root, Ray ray, int& minIdx, float& 
 	OctreeNode** stackPtr = stack;
 	*stackPtr++ = NULL;
 
+
 	OctreeNode* node = root;
 	do
 	{
@@ -350,26 +396,27 @@ __device__ void RayTreeTraversal(OctreeNode* root, Ray ray, int& minIdx, float& 
 			children[i] = node->children[i];
 
 		bool intersect[8];
+		//float dist[8];
 		for (int i = 0; i < 8; i++)
-			intersect[i] = RayTraversal(children[i], ray);
+			intersect[i] = RayTraversal(children[i], ray, minDist);
 
 		for (int i = 0; i < 8; i++)
-		{
 			if (intersect[i] && children[i]->children[0] == nullptr)
 			{
 				for (int j = 0; j < children[i]->triangleIdx.size(); j++)
 				{
-					if (RayTriangleIntersect(ray, triangles[children[i]->triangleIdx.operator[](j)], tmpDist))
+					if (RayTriangleIntersect(ray, triangles[children[i]->triangleIdx[j]], tmpDist))
 					{
 						if (tmpDist > rayThreshold && tmpDist < minDist)
 						{
 							minDist = tmpDist;
 							minIdx = children[i]->triangleIdx.operator[](j);
 						}
-					}			
+					}	
 				}
 			}
-		}
+		
+
 
 		bool traverse[8];
 		for (int i = 0; i < 8; i++)
@@ -403,13 +450,51 @@ __device__ void RayTreeTraversal(OctreeNode* root, Ray ray, int& minIdx, float& 
 	} while (node != NULL);
 }
 
+__device__ void RayKDTreeTraversal(gpukdtree* root,
+									Ray ray,
+									int& minIdx,
+									float& tmpDist,
+									Triangle* triangles,
+									const float& rayThreshold,
+									float& minDist)
+{
+	int currentid, leftid, rightid, cid;
+	DeviceStack<int> treestack;
+	treestack.push(0);
+	while (!treestack.empty())
+	{
+		currentid = treestack.pop();
+
+		//test node intersection
+		if (KDRayTraversal(root->nodes.data[currentid], ray)) {
+			leftid = root->nodes.data[currentid].leftChild;
+			rightid = root->nodes.data[currentid].rightChild;
+			//// leaf node
+			if (leftid == -1 && rightid == -1) {
+				/*if (dkdtree::Intersect_nodeTriangles_Ray(ray, currentid, tmpDist, cid, root->nodes.data, triangles, root->triangleNodeAssociation.data)) {
+					if (tmpDist<minDist) {
+						minDist = tmpDist;
+						minIdx = cid;
+					}
+				}*/
+				continue;
+			}
+			// middle node
+			if (leftid != -1)
+				treestack.push(leftid);
+			if (rightid != -1)
+				treestack.push(rightid);
+		}
+	}
+
+}
 
 //ray의 원점과 가장 가까운 곳에서 intersect하는 triangle의 id를 가져오는 함수
 //octree 사용
-__device__ int FindNearestTriangleIdx(Ray ray, Triangle* triangles, OctreeNode* root, float& dist)
+__device__ int OTFindNearestTriangleIdx(Ray ray, Triangle* triangles, OctreeNode* root, float& dist)
 {
 	const float rayThreshold = 0.01f;
-	float minDist = 9999999.0f;
+	float minDist = 99999.0f;
 	int minIdx = -1;
 	float tmpDist;
 
@@ -419,36 +504,49 @@ __device__ int FindNearestTriangleIdx(Ray ray, Triangle* triangles, OctreeNode* 
 	return minIdx;
 }
 
+__device__ int KDFindNearestTriangleIdx(Ray ray, Triangle* triangles, gpukdtree* root, float& dist)
+{
+	const float rayThreshold = 0.01f;
+	float minDist = 99999.0f;
+	int minIdx = -1;
+	float tmpDist;
 
-// __device__ int FindNearestTriangleIdx(Ray ray, Triangle* triangles, int triangleNum, float& dist)
-//{
-//
-//	const float rayThreshold = 0.01f;
-//	float minDist = 9999999.0f;
-//	int minIdx = -1;
-//	float tmpDist;
-//
-//	for (int i = 0; i < triangleNum; ++i)
-//	{
-//		if (RayTriangleIntersect(ray, triangles[i], tmpDist))
-//		{
-//			if (tmpDist > rayThreshold && tmpDist < minDist)
-//			{
-//				minDist = tmpDist;
-//				minIdx = i;
-//			}
-//		}
-//	}
-//
-//	dist = minDist;
-//	return minIdx;
-//}
+	RayKDTreeTraversal(root, ray, minIdx, tmpDist, triangles, rayThreshold, minDist);	//	전체 삼각형 중 해당 ray가 지나가는 node에 있는 것만 골라낸다.
+
+	dist = minDist;
+	return minIdx;
+}
+
+
+ __device__ int findnearesttriangleidx(Ray ray, Triangle* triangles, int trianglenum, float& dist)
+{
+
+	const float raythreshold = 0.01f;
+	float mindist = 9999999.0f;
+	int minidx = -1;
+	float tmpdist;
+
+	for (int i = 0; i < trianglenum; ++i)
+	{
+		if (RayTriangleIntersect(ray, triangles[i], tmpdist))
+		{
+			if (tmpdist > raythreshold && tmpdist < mindist)
+			{
+				mindist = tmpdist;
+				minidx = i;
+			}
+		}
+	}
+
+	dist = mindist;
+	return minidx;
+}
 
 // ray의 원점과 가장 가까운 곳에서 intersect하는 sphere의 id를 가져오는 함수
 __device__ int FindNearestSphereIdx(Ray ray, Sphere* spheres, int sphereNum, float& dist)
 {
 	const float rayThreshold = 0.0001f;
-	float minDist = 9999999.0f;
+	float minDist = 999999.0f;
 	int minIdx = -1;
 	float tmpDist;
 
@@ -597,12 +695,14 @@ __device__ bool GetHitPointInfo(
 	int& materialId, 
 	vec3& N,
 	vec2& uv,
-	OctreeNode* root)
+	OctreeNode* root,
+	gpukdtree* kdroot)
 {
 	float distToTriangle, distToSphere, distToAreaLight = 0.0f;
 	
 	//옥트리
-	nearestTriangleIdx = FindNearestTriangleIdx(nowRay, triangles, root, distToTriangle);
+	nearestTriangleIdx = KDFindNearestTriangleIdx(nowRay, triangles, kdroot, distToTriangle);
+	//nearestTriangleIdx = OTFindNearestTriangleIdx(nowRay, triangles, root, distToTriangle);
 	//nearestTriangleIdx = FindNearestTriangleIdx(nowRay, triangles, triangleNum, distToTriangle);
 	nearestSphereIdx = FindNearestSphereIdx(nowRay, spheres, sphereNum, distToSphere);
 
@@ -631,6 +731,7 @@ __device__ bool GetHitPointInfo(
 	return true;
 }
 
+
 __device__ vec4 RayTraceColor(
 	Ray ray,
 	int rayIndex,
@@ -645,7 +746,8 @@ __device__ vec4 RayTraceColor(
 	int matNum,
 	float* randomNums,
 	int depth,
-	OctreeNode* root)
+	OctreeNode* root,
+	gpukdtree* kdroot)
 {
 	vec3 sumLo = vec3(0.0f, 0.0f, 0.0f);
 	int front = 0, rear = 0;
@@ -682,7 +784,8 @@ __device__ vec4 RayTraceColor(
 			materialId,
 			N,
 			uv,
-			root))
+			root,
+			kdroot))
 		{
 
 			// ∫Ω(kd c / π + ks DFG / 4(ωo⋅n)(ωi⋅n)) Li(p,ωi) n⋅ωi dωi
@@ -920,7 +1023,8 @@ __global__ void RayTraceD(
 	Light* lights, int lightNum,
 	Material* materials, int matNum,
 	float* randomNums,
-	OctreeNode* root)
+	OctreeNode* root,
+	gpukdtree* kdroot)
 {
 	//unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
 	unsigned int x = (blockIdx.x + gridY * RAY_Y_NUM) * WINDOW_HEIGHT + (threadIdx.x + gridX * RAY_X_NUM);
@@ -951,7 +1055,8 @@ __global__ void RayTraceD(
 				matNum,
 				randomNums,
 				DEPTH,
-				root);
+				root,
+				kdroot);
 		}
 	}
 
@@ -982,7 +1087,8 @@ void RayTrace(
 	const vector<Light>& lights,
 	const vector<Material>& materials,
 	const vector<float>& randomThetaPi,
-	OctreeNode* root)
+	OctreeNode* root,
+	gpukdtree* kdroot)
 {
 	thrust::device_vector<Triangle> t = triangles;
 	thrust::device_vector<Sphere> s = spheres;
@@ -1020,7 +1126,8 @@ void RayTrace(
 		m.data().get(),
 		m.size(),
 		rnums.data().get(),
-		root
+		root,
+		kdroot
 	);
 }
 

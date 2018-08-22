@@ -40,7 +40,7 @@ int main(int argc, char **argv)
 
 	cout << octree.children[0]->children[0]->bnd.bounds[0].x << octree.children[0]->children[0]->bnd.bounds[0].y << octree.children[0]->children[0]->bnd.bounds[0].z << endl;*/
 
-	Scene scene = FLUID_SCENE;
+	Scene scene = RAYTRACING_SCENE;
 
 	WindowManager::GetInstance()->Initialize();
 

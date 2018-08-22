@@ -144,9 +144,10 @@ bool TriangleExist(OctreeNode* node, Triangle triangle)
 	else
 		return true;
 
-	if (node->bnd.bounds[1].x < triangle.tbb.bounds[0].x || node->bnd.bounds[0].x > triangle.tbb.bounds[1].x) return false;
-	if (node->bnd.bounds[1].y < triangle.tbb.bounds[0].y || node->bnd.bounds[0].y > triangle.tbb.bounds[1].y) return false;
-	if (node->bnd.bounds[1].z < triangle.tbb.bounds[0].z || node->bnd.bounds[0].z > triangle.tbb.bounds[1].z) return false;
+// tbb
+//	if (node->bnd.bounds[1].x < triangle.tbb.bounds[0].x || node->bnd.bounds[0].x > triangle.tbb.bounds[1].x) return false;
+//  if (node->bnd.bounds[1].y < triangle.tbb.bounds[0].y || node->bnd.bounds[0].y > triangle.tbb.bounds[1].y) return false;
+//	if (node->bnd.bounds[1].z < triangle.tbb.bounds[0].z || node->bnd.bounds[0].z > triangle.tbb.bounds[1].z) return false;
 	return true;
 
 }

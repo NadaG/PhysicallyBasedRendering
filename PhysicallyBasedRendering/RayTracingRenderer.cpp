@@ -1,9 +1,9 @@
 #include "RayTracingRenderer.h"
-
+#include "gpukdtree.cuh"
 #include <chrono>
 #include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
-
+#include <ctime>
 #include <random>
 
 using namespace std::chrono;
@@ -161,7 +161,7 @@ void RayTracingRenderer::Render()
 			auto gen = [&dis, &mersenne_engine]() {return dis(mersenne_engine); };
 			generate(begin(vec), end(vec), gen);
 
-			RayTrace(output, i, j, view, triangles, spheres, lights, materials, vec, octree);
+			//RayTrace(output, i, j, view, triangles, spheres, lights, materials, vec, octree);
 		}
 	}
 
@@ -213,21 +213,80 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	cudaGraphicsResourceGetMappedPointer((void**)&output, &num_bytes, cuda_pbo_resource);
 	glm::mat4 view = camera->GetModelMatrix();
 
-	///////////////////////////
+
+	///////////////////////////////////////////////////////////
 	// build octree
 	vec3 min = vec3(-51, -51, -51);
 	vec3 max = vec3(51, 51, 51);
+
+	AABB rootAABB;
+	rootAABB.bounds[0] = min;
+	rootAABB.bounds[1] = max;
 
 	OctreeNode* root1 = BuildOctree((Triangle *)triangles.data(), triangles.size(), 64, min, max);
 	OctreeNode* octree = OTHostToDevice(root1);
 
 	cout << "build octree end" << endl;
 
-	KDTreeNode* kdroot = BuildKDTree(triangles);
+	//KDTreeNode* kdroot = BuildKDTree(triangles);
 
 	cout << "triangles : "<<triangles.size() << endl;
 	cout << "build octree" << endl;
-	///////////////////////////
+	///////////////////////////////////////////////////////////
+
+
+
+	///////////////////////////////////////////////////////////
+	//perform gpu kd-tree algorithm
+	time_t kdstart = clock();
+	gpukdtree* gpuroot = new gpukdtree((Triangle *)triangles.data(), triangles.size(), rootAABB);
+	gpuroot->create();
+	time_t kdend = clock();
+	cout << "gpu KD-Tree created in " << kdend - kdstart << endl;
+
+	
+	gpukdtreeNode* tmpnode0 = new gpukdtreeNode();
+	cudaMemcpy(tmpnode0, &gpuroot->nodes.data[0], sizeof(gpukdtreeNode), cudaMemcpyDeviceToHost);
+
+	gpukdtreeNode* tmpnode1 = new gpukdtreeNode();
+	cudaMemcpy(tmpnode1, &gpuroot->nodes.data[1], sizeof(gpukdtreeNode), cudaMemcpyDeviceToHost);
+
+	gpukdtreeNode* tmpnode2 = new gpukdtreeNode();
+	cudaMemcpy(tmpnode2, &gpuroot->nodes.data[3], sizeof(gpukdtreeNode), cudaMemcpyDeviceToHost);
+	
+	cout << tmpnode0->triangleNumber << endl;
+
+	cout << tmpnode0->nodeAABB.bounds[0].x << endl;
+	cout << tmpnode0->nodeAABB.bounds[0].y << endl;
+	cout << tmpnode0->nodeAABB.bounds[0].z << endl;
+
+	cout << tmpnode0->nodeAABB.bounds[1].x << endl;
+	cout << tmpnode0->nodeAABB.bounds[1].y << endl;
+	cout << tmpnode0->nodeAABB.bounds[1].z << endl;
+
+	cout << "=======================================" << endl;
+	cout << tmpnode1->leftChild << endl;
+
+	cout << tmpnode1->nodeAABB.bounds[0].x << endl;
+	cout << tmpnode1->nodeAABB.bounds[0].y << endl;
+	cout << tmpnode1->nodeAABB.bounds[0].z << endl;
+
+	cout << tmpnode1->nodeAABB.bounds[1].x << endl;
+	cout << tmpnode1->nodeAABB.bounds[1].y << endl;
+	cout << tmpnode1->nodeAABB.bounds[1].z << endl;
+	cout << "=======================================" << endl;
+	cout << tmpnode2->leftChild << endl;
+
+	cout << tmpnode2->nodeAABB.bounds[0].x << endl;
+	cout << tmpnode2->nodeAABB.bounds[0].y << endl;
+	cout << tmpnode2->nodeAABB.bounds[0].z << endl;
+
+	cout << tmpnode2->nodeAABB.bounds[1].x << endl;
+	cout << tmpnode2->nodeAABB.bounds[1].y << endl;
+	cout << tmpnode2->nodeAABB.bounds[1].z << endl;
+	///////////////////////////////////////////////////////////
+
+
 
 	for (int i = 0; i < gridY; i++)
 	{
@@ -241,7 +300,7 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 			auto gen = [&dis, &mersenne_engine]() {return dis(mersenne_engine); };
 			generate(begin(vec), end(vec), gen);
 
-			RayTrace(output, i, j, view, triangles, spheres, lights, materials, vec, octree);
+			RayTrace(output, i, j, view, triangles, spheres, lights, materials, vec, octree, gpuroot);
 		}
 	}
 

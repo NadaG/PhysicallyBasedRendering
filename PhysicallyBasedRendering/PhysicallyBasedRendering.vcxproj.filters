@@ -4,6 +4,7 @@
     <CudaCompile Include="KDTree.cu" />
     <CudaCompile Include="Octree.cu" />
     <CudaCompile Include="RayTracer.cu" />
+    <CudaCompile Include="gpukdtree.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BillBoardMovement.cpp" />
@@ -111,6 +112,7 @@
     <ClInclude Include="NormalEstimateModel.h" />
     <ClInclude Include="MarchingCubeVertexNormal.h" />
     <ClInclude Include="MarchingCubeVertexNormalUtility.h" />
+    <ClInclude Include="gpukdtree.cuh" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Basic.fs" />
@@ -163,5 +165,6 @@
     <None Include="tessellationControl.tcs" />
     <None Include="tessellationEvaluation.tes" />
     <None Include="vertex.vs" />
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

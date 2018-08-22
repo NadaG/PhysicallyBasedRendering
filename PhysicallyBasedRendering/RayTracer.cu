@@ -701,8 +701,8 @@ __device__ bool GetHitPointInfo(
 	float distToTriangle, distToSphere, distToAreaLight = 0.0f;
 	
 	//옥트리
-	nearestTriangleIdx = KDFindNearestTriangleIdx(nowRay, triangles, kdroot, distToTriangle);
-	//nearestTriangleIdx = OTFindNearestTriangleIdx(nowRay, triangles, root, distToTriangle);
+	//nearestTriangleIdx = KDFindNearestTriangleIdx(nowRay, triangles, kdroot, distToTriangle);
+	nearestTriangleIdx = OTFindNearestTriangleIdx(nowRay, triangles, root, distToTriangle);
 	//nearestTriangleIdx = FindNearestTriangleIdx(nowRay, triangles, triangleNum, distToTriangle);
 	nearestSphereIdx = FindNearestSphereIdx(nowRay, spheres, sphereNum, distToSphere);
 

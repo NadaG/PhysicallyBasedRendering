@@ -4,7 +4,7 @@
 #include "FluidSimulationImporter.h"
 #include "FluidSimulationClient.h"
 #include "FluidSceneManager.h"
-#include "MarchingCube.h"
+#include "MarchingCubeTMp.h"
 #include "NormalEstimateModel.h"
 
 struct FluidCube
@@ -101,7 +101,7 @@ private:
 
 	int currentFrame;
 
-	MarchingCube mc;
+	MarchingCubeTmp mc;
 
 	PNGExporter pngExporter;
 

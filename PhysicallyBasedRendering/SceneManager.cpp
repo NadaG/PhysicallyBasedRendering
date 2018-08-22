@@ -6,9 +6,8 @@
 
 SceneManager::SceneManager()
 {
-	CameraMovement* cameraMovement;
 	cameraMovement = new CameraMovement();
-	movingCamera = new Object(cameraMovement);
+	movingCamera = new Object;
 	cameraMovement->BindObject(movingCamera);
 }
 
@@ -17,7 +16,6 @@ void SceneManager::TerminateObjects()
 	for (int i = 0; i < sceneObjs.size(); i++)
 		sceneObjs[i].Delete();
 	
-	movingCamera->Delete();
 
 	for (int i = 0; i < lightObjs.size(); ++i)
 	{
@@ -34,7 +32,7 @@ void SceneManager::GenerateLight(glm::vec3 color, glm::vec3 size)
 	lightObjs.resize(lightsNum + 1);
 
 	LightMovement* lightMovement = new LightMovement(movingCamera);
-	lightObjs[lightsNum] = new SceneObject(lightMovement);
+	lightObjs[lightsNum] = new SceneObject();
 	lightMovement->BindObject(lightObjs[lightsNum]);
 
 	lightObjs[lightsNum]->LoadModel("Obj/Sphere.obj");

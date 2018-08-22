@@ -7,7 +7,7 @@ void StarBurstSceneManager::InitializeObjects()
 	skyboxObj.LoadModel(CUBE);
 
 	BillBoardMovement* billboardMovement = new BillBoardMovement(movingCamera);
-	billboard = new SceneObject(billboardMovement);
+	billboard = new SceneObject();
 	billboardMovement->BindObject(billboard);
 
 	billboard->LoadModel(QUAD);
@@ -32,14 +32,13 @@ void StarBurstSceneManager::InitializeObjects()
 
 void StarBurstSceneManager::Update()
 {
-	// 이 안에서 update가 돌아가야 함
-	movingCamera->Update();
-	lightObjs[selectedLightId]->Update();
-	billboard->Update();
+	//// 이 안에서 update가 돌아가야 함
+	//lightObjs[selectedLightId]->Update();
+	//billboard->Update();
 
-	for (int i = 0; i < lightObjs.size(); ++i)
-	{
-		if (InputManager::GetInstance()->IsKey(GLFW_KEY_1 + i))
-			selectedLightId = i;
-	}
+	//for (int i = 0; i < lightObjs.size(); ++i)
+	//{
+	//	if (InputManager::GetInstance()->IsKey(GLFW_KEY_1 + i))
+	//		selectedLightId = i;
+	//}
 }

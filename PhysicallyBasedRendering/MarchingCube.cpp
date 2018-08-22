@@ -28,13 +28,13 @@ MarchingCube::MarchingCube(void)
 	Kr = 4.0f;
 
 	// particle 일정 수 
-	Ne = 100;
+	Ne = 25;
 
 	// 일정 수 이상의 particle이 있을 때 singular matrix에 곱해질 상수
 	Ks = 2.0f;
 
 	// 일정 수 이하의 particle이 있을 때 identity matrix에 곱해질 상수
-	Kn = 0.5f;
+	Kn = 0.25f;
 
 	// 괜찮은 parameter
 	// h = 1.5, thres = 1.5, resolution = 3.0
@@ -463,6 +463,7 @@ void MarchingCube::ExcuteMarchingCube(int& vertexNum, int& indexNum)
 	//ID2POINT3DID ***i2pt3idVertices = alloc3D<ID2POINT3DID>(m_nNodeResX, m_nNodeResY, m_nNodeResZ);
 	//TRIANGLEVECTOR ***trivecTriangles = alloc3D<TRIANGLEVECTOR>(m_nNodeResX, m_nNodeResY, m_nNodeResZ);
 
+<<<<<<< HEAD
 	//for (int i = 0; i < m_nNodeResX; i++)
 	//{
 	//	for (int j = 0; j < m_nNodeResY; j++)
@@ -655,6 +656,200 @@ void MarchingCube::ExcuteMarchingCube(int& vertexNum, int& indexNum)
 	//		}
 	//	}
 	//}
+=======
+	for (int i = 0; i < m_nNodeResX; i++)
+	{
+		for (int j = 0; j < m_nNodeResY; j++)
+		{
+			for (int k = 0; k < m_nNodeResZ; k++)
+			{
+				int cubeIdx = 0;
+				int nNodes[8];
+
+				nNodes[0] = FindNodeIndex(k, j, i);
+				nNodes[1] = FindNodeIndex(k, j + 1, i);
+				nNodes[2] = FindNodeIndex(k, j + 1, i + 1);
+				nNodes[3] = FindNodeIndex(k, j, i + 1);
+
+				nNodes[4] = FindNodeIndex(k + 1, j, i);
+				nNodes[5] = FindNodeIndex(k + 1, j + 1, i);
+				nNodes[6] = FindNodeIndex(k + 1, j + 1, i + 1);
+				nNodes[7] = FindNodeIndex(k + 1, j, i + 1);
+
+				if (m_stlNodeList[nNodes[0]].mValue <= m_DensityThres) cubeIdx |= 1;	//LBB
+				if (m_stlNodeList[nNodes[1]].mValue <= m_DensityThres) cubeIdx |= 2;	//RBB
+				if (m_stlNodeList[nNodes[2]].mValue <= m_DensityThres) cubeIdx |= 4;	//RBF
+				if (m_stlNodeList[nNodes[3]].mValue <= m_DensityThres) cubeIdx |= 8;	//LBF
+				if (m_stlNodeList[nNodes[4]].mValue <= m_DensityThres) cubeIdx |= 16;	//LTB
+				if (m_stlNodeList[nNodes[5]].mValue <= m_DensityThres) cubeIdx |= 32;	//RTB
+				if (m_stlNodeList[nNodes[6]].mValue <= m_DensityThres) cubeIdx |= 64;	//RTF
+				if (m_stlNodeList[nNodes[7]].mValue <= m_DensityThres) cubeIdx |= 128;	//LTF
+
+				if (edgeTable[cubeIdx] == 0) continue;
+
+				glm::vec3 verList[12];
+				for (int idx = 0; idx < 12; idx++)
+					verList[idx] = glm::vec3(0.0, 0.0, 0.0);
+
+				if (edgeTable[cubeIdx] & 1)
+				{
+					Vec3ID vec3id;
+					verList[0] = Interpolation(&m_stlNodeList[nNodes[0]], &m_stlNodeList[nNodes[1]]);
+					vec3id.x = verList[0].x;
+					vec3id.y = verList[0].y;
+					vec3id.z = verList[0].z;
+					vec3id.newID = 0;
+					unsigned int id = FindEdgeIndex(i, j, k, 0);
+					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
+				}
+				if ((edgeTable[cubeIdx] & 2) && (j == m_nNodeResY - 1))
+				{
+					Vec3ID vec3id;
+					verList[1] = Interpolation(&m_stlNodeList[nNodes[1]], &m_stlNodeList[nNodes[2]]);
+					vec3id.x = verList[1].x;
+					vec3id.y = verList[1].y;
+					vec3id.z = verList[1].z;
+					vec3id.newID = 1;
+					unsigned int id = FindEdgeIndex(i, j, k, 1);
+					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
+				}
+				if ((edgeTable[cubeIdx] & 4) && (i == m_nNodeResX - 1))
+				{
+					Vec3ID vec3id;
+					verList[2] = Interpolation(&m_stlNodeList[nNodes[2]], &m_stlNodeList[nNodes[3]]);
+					vec3id.x = verList[2].x;
+					vec3id.y = verList[2].y;
+					vec3id.z = verList[2].z;
+					vec3id.newID = 2;
+					unsigned int id = FindEdgeIndex(i, j, k, 2);
+					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
+				}
+				if (edgeTable[cubeIdx] & 8)
+				{
+					Vec3ID vec3id;
+					verList[3] = Interpolation(&m_stlNodeList[nNodes[3]], &m_stlNodeList[nNodes[0]]);
+					vec3id.x = verList[3].x;
+					vec3id.y = verList[3].y;
+					vec3id.z = verList[3].z;
+					vec3id.newID = 3;
+					unsigned int id = FindEdgeIndex(i, j, k, 3);
+					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
+				}
+				if ((edgeTable[cubeIdx] & 16) && (k == m_nNodeResZ - 1))
+				{
+					Vec3ID vec3id;
+					verList[4] = Interpolation(&m_stlNodeList[nNodes[4]], &m_stlNodeList[nNodes[5]]);
+					vec3id.x = verList[4].x;
+					vec3id.y = verList[4].y;
+					vec3id.z = verList[4].z;
+					vec3id.newID = 4;
+					unsigned int id = FindEdgeIndex(i, j, k, 4);
+					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
+				}
+				if ((edgeTable[cubeIdx] & 32) && (j == m_nNodeResY - 1) && (k == m_nNodeResZ - 1))
+				{
+					Vec3ID vec3id;
+					verList[5] = Interpolation(&m_stlNodeList[nNodes[5]], &m_stlNodeList[nNodes[6]]);
+					vec3id.x = verList[5].x;
+					vec3id.y = verList[5].y;
+					vec3id.z = verList[5].z;
+					vec3id.newID = 5;
+					unsigned int id = FindEdgeIndex(i, j, k, 5);
+					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
+				}
+				if ((edgeTable[cubeIdx] & 64) && (i == m_nNodeResX - 1) && (k == m_nNodeResZ - 1))
+				{
+					Vec3ID vec3id;
+					verList[6] = Interpolation(&m_stlNodeList[nNodes[6]], &m_stlNodeList[nNodes[7]]);
+					vec3id.x = verList[6].x;
+					vec3id.y = verList[6].y;
+					vec3id.z = verList[6].z;
+					vec3id.newID = 6;
+					unsigned int id = FindEdgeIndex(i, j, k, 6);
+					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
+				}
+				if ((edgeTable[cubeIdx] & 128) && (k == m_nNodeResZ - 1))
+				{
+					Vec3ID vec3id;
+					verList[7] = Interpolation(&m_stlNodeList[nNodes[7]], &m_stlNodeList[nNodes[4]]);
+					vec3id.x = verList[7].x;
+					vec3id.y = verList[7].y;
+					vec3id.z = verList[7].z;
+					vec3id.newID = 7;
+					unsigned int id = FindEdgeIndex(i, j, k, 7);
+					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
+				}
+				if (edgeTable[cubeIdx] & 256)
+				{
+					Vec3ID vec3id;
+					verList[8] = Interpolation(&m_stlNodeList[nNodes[0]], &m_stlNodeList[nNodes[4]]);
+					vec3id.x = verList[8].x;
+					vec3id.y = verList[8].y;
+					vec3id.z = verList[8].z;
+					vec3id.newID = 8;
+					unsigned int id = FindEdgeIndex(i, j, k, 8);
+					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
+				}
+				if ((edgeTable[cubeIdx] & 512) && (j == m_nNodeResY - 1))
+				{
+					Vec3ID vec3id;
+					verList[9] = Interpolation(&m_stlNodeList[nNodes[1]], &m_stlNodeList[nNodes[5]]);
+					vec3id.x = verList[9].x;
+					vec3id.y = verList[9].y;
+					vec3id.z = verList[9].z;
+					vec3id.newID = 9;
+					unsigned int id = FindEdgeIndex(i, j, k, 9);
+					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
+				}
+				if ((edgeTable[cubeIdx] & 1024) && (i == m_nNodeResX - 1) && (j == m_nNodeResY - 1))
+				{
+					Vec3ID vec3id;
+					verList[10] = Interpolation(&m_stlNodeList[nNodes[2]], &m_stlNodeList[nNodes[6]]);
+					vec3id.x = verList[10].x;
+					vec3id.y = verList[10].y;
+					vec3id.z = verList[10].z;
+					vec3id.newID = 10;
+					unsigned int id = FindEdgeIndex(i, j, k, 10);
+					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
+				}
+				if ((edgeTable[cubeIdx] & 2048) && (i == m_nNodeResX - 1))
+				{
+					Vec3ID vec3id;
+					verList[11] = Interpolation(&m_stlNodeList[nNodes[3]], &m_stlNodeList[nNodes[7]]);
+					vec3id.x = verList[11].x;
+					vec3id.y = verList[11].y;
+					vec3id.z = verList[11].z;
+					vec3id.newID = 11;
+					unsigned int id = FindEdgeIndex(i, j, k, 11);
+					i2pt3idVertices[i][j][k].insert(ID2POINT3DID::value_type(id, vec3id));
+				}
+
+				for (int ii = 0; ii < 12; ii++)
+				{
+					if (verList[ii].x > 1000000 || verList[ii].x < -1000000)
+						Debug::GetInstance()->Log(verList[ii]);
+				}
+
+				//Generate Vertex
+				for (int n = 0; triTable[cubeIdx][n] != -1; n += 3)
+				{
+					TRIANGLE triangle;
+					unsigned int pointID0, pointID1, pointID2;
+
+					pointID0 = FindEdgeIndex(i, j, k, triTable[cubeIdx][n]);
+					pointID1 = FindEdgeIndex(i, j, k, triTable[cubeIdx][n + 1]);
+					pointID2 = FindEdgeIndex(i, j, k, triTable[cubeIdx][n + 2]);
+					if (pointID0 == -1 || pointID1 == -1 || pointID2 == -1)
+						cout << "-1 found" << endl;
+					triangle.pointID[0] = pointID0;
+					triangle.pointID[1] = pointID1;
+					triangle.pointID[2] = pointID2;
+					trivecTriangles[i][j][k].push_back(triangle);
+				}
+			}
+		}
+	}
+>>>>>>> a0e2646b86f8b0589e8a63a36e84f5f94af7189c
 
 	//for (unsigned int x = 0; x < m_nNodeResX; x++)
 	//{
@@ -700,7 +895,7 @@ void MarchingCube::ExcuteMarchingCube(int& vertexNum, int& indexNum)
 float* MarchingCube::GetVertices(const int vertexNum)
 {
 	float* verts = new float[vertexNum * 6];
-	Vertex* verts2 = new Vertex[vertexNum];
+	//Vertex* verts2 = new Vertex[vertexNum];
 
 	for (int i = 0; i < vertexNum; i++)
 	{
@@ -711,15 +906,15 @@ float* MarchingCube::GetVertices(const int vertexNum)
 		verts[i * 6 + 4] = m_pvec3dNormals[i].y;
 		verts[i * 6 + 5] = m_pvec3dNormals[i].z;
 
-		verts2[i].position.x = verts[i * 6 + 0];
+		/*verts2[i].position.x = verts[i * 6 + 0];
 		verts2[i].position.y = verts[i * 6 + 1];
 		verts2[i].position.z = verts[i * 6 + 2];
 		verts2[i].normal.x = verts[i * 6 + 3];
 		verts2[i].normal.y = verts[i * 6 + 4];
-		verts2[i].normal.z = verts[i * 6 + 5];
+		verts2[i].normal.z = verts[i * 6 + 5];*/
 	}
 
-	tmpMesh.SetVertices(verts2, vertexNum);
+	//tmpMesh.SetVertices(verts2, vertexNum);
 
 	return verts;
 }
@@ -732,8 +927,8 @@ GLuint* MarchingCube::GetIndices(const int indexNum)
 		inds[i] = (GLuint)m_piTriangleIndices[i];
 	}
 
-	tmpMesh.SetIndices(inds, indexNum);
-	tmpMesh.Export("ttt.obj");
+	/*tmpMesh.SetIndices(inds, indexNum);
+	tmpMesh.Export("ttt.obj");*/
 
 	return inds;
 }

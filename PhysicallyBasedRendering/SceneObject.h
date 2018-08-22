@@ -7,7 +7,7 @@ class SceneObject : public Object
 {
 public:
 	//SceneObject() : Object(new DefaultMovement()){}
-	SceneObject(Movement* const movement = new DefaultMovement()) : Object(movement){}
+	SceneObject() : Object(){}
 	virtual ~SceneObject() {}
 
 	void DrawModel();
@@ -20,7 +20,7 @@ public:
 	const glm::vec3& GetColor() { return this->color; }
 
 	// base의 delete함수를 부르는 것
-	void Delete() override { Object::Delete(); model.Delete(); }
+	void Delete() { model.Delete(); }
 	// 딱히 Update를 override할 필요가 없었음
 
 	std::vector<Triangle> GetTriangles() const;

@@ -106,7 +106,7 @@ GLuint ShaderProgram::LoadShader(const char* shaderFilePath, int shaderType)
 	// 쉐이더를 검사
 	glGetShaderiv(shaderID, GL_COMPILE_STATUS, &Result);
 	glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
-	if (InfoLogLength > 0)
+	if (InfoLogLength > 0 || Result != GL_TRUE)
 	{
 		std::vector<char> shaderErrorMessage(InfoLogLength + 1);
 		glGetShaderInfoLog(shaderID, InfoLogLength, NULL, &shaderErrorMessage[0]);
@@ -207,5 +207,6 @@ void ShaderProgram::BindTexture(Texture* texture, string name)
 
 void ShaderProgram::Delete()
 {
+	glUseProgram(shaderProgramID);
 	glDeleteShader(shaderProgramID);
 }

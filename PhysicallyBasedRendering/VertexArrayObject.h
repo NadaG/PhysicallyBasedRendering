@@ -8,10 +8,11 @@ class VertexArrayObject
 {
 public:
 	VertexArrayObject()
-		:drawMode(GL_POINTS){}
+		:drawMode(GL_POINTS) { hasIBO = false; }
 	virtual ~VertexArrayObject();
 
 	void GenVAOVBOIBO();
+	void GenVAOVBO();
 
 	void VertexBufferData(const GLsizeiptr& size, const GLvoid* data);
 	void IndexBufferData(const GLsizeiptr& size, const GLvoid* data);
@@ -21,11 +22,14 @@ public:
 	// VertexBufferData를 먼저 불러주어야 함
 	void VertexAttribPointer(const GLuint& size, const GLuint& stride);
 
-	void SetDrawMode(const GLenum drawMode) { this->drawMode = drawMode; }
-
 	const GLenum GetDrawMode() const { return drawMode; }
 
+	const GLuint VBO() { return vbo; }
+	const GLuint IBO() { return ibo; }
+
 private:
+	bool hasIBO;
+
 	GLuint vertexAttribPointerId = 0;
 	GLuint vertexAttribPointerOffset = 0;
 

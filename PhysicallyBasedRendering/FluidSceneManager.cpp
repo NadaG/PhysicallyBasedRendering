@@ -19,8 +19,6 @@ void FluidSceneManager::InitializeObjects()
 
 void FluidSceneManager::Update()
 {
-	movingCamera->Update();
-
 	/*movingCamera->ModelTranslate(glm::vec3(-0.55f, 0.0f, 0.0f));
 	movingCamera->ModelRotate(glm::vec3(0.0f, 1.0f, 0.0f), -0.008f);*/
 

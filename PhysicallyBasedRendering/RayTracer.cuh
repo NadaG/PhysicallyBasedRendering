@@ -15,7 +15,7 @@
 #include <thrust/device_vector.h>
 #include <glm\common.hpp>
 
-#define GPUKDTREETHRESHOLD 64
+#define GPUKDTREETHRESHOLD 32
 #define GPUKDTREEMAXSTACK 128
 
 using glm::vec2;

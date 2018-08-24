@@ -30,8 +30,6 @@ enum Scene
 
 int main(int argc, char **argv)
 {
-	
-
 	/*OctreeNode octree;
 	octree.bnd.bounds[0] = glm::vec3(-30, -30, -30);
 	octree.bnd.bounds[1] = glm::vec3(30, 30, 30);

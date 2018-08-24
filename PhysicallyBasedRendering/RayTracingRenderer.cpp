@@ -39,8 +39,8 @@ void RayTracingRenderer::InitializeRender()
 
 	vec.resize(rayNum * sampleNum * 2);
 
-	vector<Triangle> triangles = dynamic_cast<RayTracingSceneManager*>(sceneManager)->triangles;
-	vector<Sphere> spheres = dynamic_cast<RayTracingSceneManager*>(sceneManager)->spheres;
+	/*vector<Triangle> triangles = dynamic_cast<RayTracingSceneManager*>(sceneManager)->triangles;
+	vector<Sphere> spheres = dynamic_cast<RayTracingSceneManager*>(sceneManager)->spheres;*/
 
 	/*for (int i = 0; i < triangles.size(); i++)
 	{
@@ -104,6 +104,13 @@ void RayTracingRenderer::InitializeRender()
 	//OfflineRender("0002.png");
 
 	dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadFluidScene("Obj/PouringFluid/0250.obj");
+
+	triangles = dynamic_cast<RayTracingSceneManager*>(sceneManager)->triangles;
+	spheres = dynamic_cast<RayTracingSceneManager*>(sceneManager)->spheres;
+	lights = dynamic_cast<RayTracingSceneManager*>(sceneManager)->lights;
+	materials = dynamic_cast<RayTracingSceneManager*>(sceneManager)->materials;
+	camera = sceneManager->movingCamera;
+
 	OfflineRender("0003.png");
 }
 
@@ -193,13 +200,6 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 {
 	milliseconds bms = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 
-	Object* camera = sceneManager->movingCamera;
-
-	vector<Triangle> triangles = dynamic_cast<RayTracingSceneManager*>(sceneManager)->triangles;
-	vector<Sphere> spheres = dynamic_cast<RayTracingSceneManager*>(sceneManager)->spheres;
-	vector<Light> lights = dynamic_cast<RayTracingSceneManager*>(sceneManager)->lights;
-	vector<Material> materials = dynamic_cast<RayTracingSceneManager*>(sceneManager)->materials;
-
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 	UseDefaultFBO();
 	ClearDefaultFBO();
@@ -212,7 +212,6 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	// cuda memory로부터 cpu memory로 포인터 위치를 가져오는 건가?
 	cudaGraphicsResourceGetMappedPointer((void**)&output, &num_bytes, cuda_pbo_resource);
 	glm::mat4 view = camera->GetModelMatrix();
-
 
 	///////////////////////////////////////////////////////////
 	// build octree
@@ -227,15 +226,11 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	OctreeNode* octree = OTHostToDevice(root1);
 
 	//OctreeNode* octree = nullptr;
-
-
 	//KDTreeNode* kdroot = BuildKDTree(triangles);
 
 	cout << "triangles : "<<triangles.size() << endl;
-	//cout << "build octree" << endl;
+	cout << "build octree" << endl;
 	///////////////////////////////////////////////////////////
-
-
 
 	///////////////////////////////////////////////////////////
 	//perform gpu kd-tree algorithm
@@ -255,7 +250,7 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	gpukdtreeNode* tmpnode2 = new gpukdtreeNode();
 	cudaMemcpy(tmpnode2, &kdroot->nodes.data[2], sizeof(gpukdtreeNode), cudaMemcpyDeviceToHost);
 	
-	cout << tmpnode1->triangleNumber << endl;
+	cout << tmpnode0->triangleNumber << endl;
 
 	cout << tmpnode0->nodeAABB.bounds[0].x << endl;
 	cout << tmpnode0->nodeAABB.bounds[0].y << endl;
@@ -266,7 +261,7 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	cout << tmpnode0->nodeAABB.bounds[1].z << endl;
 
 	cout << "=======================================" << endl;
-	cout << tmpnode0->leftChild << endl;
+	cout << tmpnode1->triangleNumber << endl;
 
 	cout << tmpnode1->nodeAABB.bounds[0].x << endl;
 	cout << tmpnode1->nodeAABB.bounds[0].y << endl;
@@ -276,7 +271,7 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	cout << tmpnode1->nodeAABB.bounds[1].y << endl;
 	cout << tmpnode1->nodeAABB.bounds[1].z << endl;
 	cout << "=======================================" << endl;
-	cout << tmpnode0->rightChild << endl;
+	cout << tmpnode2->triangleNumber << endl;
 
 	cout << tmpnode2->nodeAABB.bounds[0].x << endl;
 	cout << tmpnode2->nodeAABB.bounds[0].y << endl;

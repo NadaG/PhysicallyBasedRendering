@@ -26,12 +26,11 @@ texture<float4, 2, cudaReadModeElementType> roughnessTex;
 texture<float4, 2, cudaReadModeElementType> backgroundTex;
 
 
-
 const int WINDOW_HEIGHT = 1024;
 const int WINDOW_WIDTH = 1024;
 
-const int RAY_X_NUM = 32;
-const int RAY_Y_NUM = 32;
+const int RAY_X_NUM = 128;
+const int RAY_Y_NUM = 128;
 
 const int QUEUE_SIZE = 32;
 
@@ -1107,39 +1106,59 @@ __global__ void RayTraceD(
 	glm::vec4 color = glm::vec4(0.0f);
 
 	Ray rayQueue[QUEUE_SIZE];
-	
-	for (int i = 0; i < 2; i++)
-	{
-		for (int j = 0; j < 2; j++)
-		{
-			Ray ray = GenerateCameraRay(blockIdx.x + gridY * RAY_Y_NUM, threadIdx.x + gridX * RAY_X_NUM, view, i, j);
 
-			// NOTICE for문을 돌릴 때 iter를 변수로 하니까 검은 화면이 나옴
-			// y, x로 들어가고
-			// 0, 0 좌표는 좌하단
-			color += RayTraceColor(
-				ray,
-				blockIdx.x * blockDim.x + threadIdx.x,
-				rayQueue,
-				triangles,
-				triangleNum,
-				spheres,
-				sphereNum,
-				lights,
-				lightNum,
-				materials,
-				matNum,
-				randomNums,
-				DEPTH,
-				root,
-				nodes,
-				tna);
-		}
-	}
+	Ray ray = GenerateCameraRay(blockIdx.x/2 + gridY * RAY_Y_NUM, threadIdx.x/2 + gridX * RAY_X_NUM, view, blockIdx.x % 2, threadIdx.x % 2);
+
+	color += RayTraceColor(
+		ray,
+		blockIdx.x * blockDim.x/4 + threadIdx.x/2,
+		rayQueue,
+		triangles,
+		triangleNum,
+		spheres,
+		sphereNum,
+		lights,
+		lightNum,
+		materials,
+		matNum,
+		randomNums,
+		DEPTH,
+		root,
+		nodes,
+		tna);
+	
+	//for (int i = 0; i < 2; i++)
+	//{
+	//	for (int j = 0; j < 2; j++)
+	//	{
+	//		Ray ray = GenerateCameraRay(blockIdx.x + gridY * RAY_Y_NUM, threadIdx.x + gridX * RAY_X_NUM, view, i, j);
+
+	//		// NOTICE for문을 돌릴 때 iter를 변수로 하니까 검은 화면이 나옴
+	//		// y, x로 들어가고
+	//		// 0, 0 좌표는 좌하단
+	//		color += RayTraceColor(
+	//			ray,
+	//			blockIdx.x * blockDim.x + threadIdx.x,
+	//			rayQueue,
+	//			triangles,
+	//			triangleNum,
+	//			spheres,
+	//			sphereNum,
+	//			lights,
+	//			lightNum,
+	//			materials,
+	//			matNum,
+	//			randomNums,
+	//			DEPTH,
+	//			root,
+	//			nodes,
+	//			tna);
+	//	}
+	//}
 
 	//color = glm::vec4(randomNums[x%1024]);
 
-	data[x] = color / 4.0f;
+	data[x/4] += color * 0.25f;
 	//data[x] = vec4(1.0f) / 4.0f;
 }
 
@@ -1190,7 +1209,7 @@ void RayTrace(
 
 	//cout << "ray trace device start" << endl;
 
-	RayTraceD << <RAY_Y_NUM, RAY_X_NUM >> > (
+	RayTraceD << <RAY_Y_NUM*2, RAY_X_NUM*2 >> > (
 		data,
 		gridX,
 		gridY,

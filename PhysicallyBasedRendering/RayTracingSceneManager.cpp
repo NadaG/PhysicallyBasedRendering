@@ -83,7 +83,7 @@ void RayTracingSceneManager::InitializeObjects()
 
 void RayTracingSceneManager::Update()
 {
-	if (InputManager::GetInstance()->IsKey(GLFW_KEY_J))
+	/*if (InputManager::GetInstance()->IsKey(GLFW_KEY_J))
 	{
 		movingCamera->ModelTranslate(glm::vec3(-moveSpeed, 0.0f, 0.0f));
 	}
@@ -171,7 +171,7 @@ void RayTracingSceneManager::Update()
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_H))
 	{
 		lights[0].pos += glm::vec3(0.0f, 0.0f, -moveSpeed);
-	}
+	}*/
 
 	spheres[lightSphereId].origin = lights[0].pos;
 }
@@ -239,7 +239,7 @@ void RayTracingSceneManager::LoadFluidScene(const string meshfile)
 	// light
 	Light light;
 	light.pos = glm::vec3(0.0f, 20.0f, 20.0f);
-	light.color = glm::vec3(500.0f, 500.0f, 500.0f);
+	light.color = glm::vec3(1500.0f, 1500.0f, 1500.0f);
 	lights.push_back(light);
 
 	Sphere sphere;
@@ -268,11 +268,23 @@ void RayTracingSceneManager::LoadFluidScene(const string meshfile)
 	sphereModel = glm::scale(sphereModel, glm::vec3(10.0f, 10.0f, 10.0f));
 	InsertTriangles(LoadMeshTriangles("Obj/Sphere.obj", sphereModel, 2));
 
-	//// rusted iron sphere 2
-	//sphereModel = glm::mat4();
-	//sphereModel = glm::translate(sphereModel, glm::vec3(25.0f, 25.0f, 0.0f));
-	//sphereModel = glm::scale(sphereModel, glm::vec3(5.0f, 5.0f, 5.0f));
-	//InsertTriangles(LoadMeshTriangles("Obj/Sphere.obj", sphereModel, 2));
+	// rusted iron sphere 2
+	sphereModel = glm::mat4();
+	sphereModel = glm::translate(sphereModel, glm::vec3(25.0f, 25.0f, 0.0f));
+	sphereModel = glm::scale(sphereModel, glm::vec3(5.0f, 5.0f, 5.0f));
+	InsertTriangles(LoadMeshTriangles("Obj/Sphere.obj", sphereModel, 2));
+
+	// rusted iron sphere 2
+	sphereModel = glm::mat4();
+	sphereModel = glm::translate(sphereModel, glm::vec3(0.0f, 25.0f, 0.0f));
+	sphereModel = glm::scale(sphereModel, glm::vec3(5.0f, 5.0f, 5.0f));
+	InsertTriangles(LoadMeshTriangles("Obj/Sphere.obj", sphereModel, 2));
+
+	// rusted iron sphere 2
+	sphereModel = glm::mat4();
+	sphereModel = glm::translate(sphereModel, glm::vec3(0.0f, 40.0f, 0.0f));
+	sphereModel = glm::scale(sphereModel, glm::vec3(5.0f, 5.0f, 5.0f));
+	InsertTriangles(LoadMeshTriangles("Obj/Sphere.obj", sphereModel, 2));
 
 	// Path Tracing
 	// floor

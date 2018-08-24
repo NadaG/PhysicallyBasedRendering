@@ -9,7 +9,7 @@ class RayTracingRenderer : public Renderer
 {
 public:
 	RayTracingRenderer(SceneManager* sceneManager)
-		:Renderer(sceneManager), gridX(32), gridY(32), sampleNum(1)
+		:Renderer(sceneManager), gridX(8), gridY(8), sampleNum(1)
 	{}
 	virtual ~RayTracingRenderer() {};
 
@@ -37,4 +37,11 @@ private:
 	const int sampleNum;
 
 	vector<float> vec;
+
+	vector<Triangle> triangles;
+	vector<Sphere> spheres;
+	vector<Light> lights;
+	vector<Material> materials;
+
+	Object* camera;
 };

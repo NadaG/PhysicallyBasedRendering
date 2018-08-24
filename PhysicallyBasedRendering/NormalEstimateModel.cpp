@@ -44,19 +44,19 @@ void NormalEstimateModel::InitializePython()
 }
 
 void NormalEstimateModel::LoadModel()
-{
+{/*
 	PyRun_SimpleString(
 		"import tensorflow as tf\n"
 		"import numpy as np\n"
 		"import cv2\n"
 	);
-
+*/
 	//const py::object saver = tf_.attr("train").attr("import_meta_graph")()
 }
 
 void NormalEstimateModel::UseModel(float* data)
 {
-	string s = "noisy_image = np.array(";
+	/*string s = "noisy_image = np.array(";
 	s += "[";
 
 	for (int n = 0; n < 1024 * 1024 * 3 - 1; n++)
@@ -87,16 +87,16 @@ void NormalEstimateModel::UseModel(float* data)
 		"	cv2.imwrite('ExportData/model_output/t.png', denoised_image)\n"
 		"	noisy_image = np.reshape(noisy_image, (reso, reso, 3), order='C')\n"
 		"	cv2.imwrite('ExportData/model_output/original_image.png', noisy_image)\n"
-	);
+	);*/
 }
 
 char const* greet()
 {
 	return "hello world";
 }
-
-BOOST_PYTHON_MODULE(hello_ext)
-{
-	using namespace boost::python;
-	def("greet", greet);
-}
+//
+//BOOST_PYTHON_MODULE(hello_ext)
+//{
+//	using namespace boost::python;
+//	def("greet", greet);
+//}

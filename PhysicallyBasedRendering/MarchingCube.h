@@ -3,16 +3,16 @@
 #include <iostream>
 #include <GL/glew.h>
 #include <GL/glut.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
+//#include <GL/gl.h>
+//#include <GL/glu.h>
 #include <glm\common.hpp>
 #include <glm\gtx\norm.hpp>
 #include <vector>
 #include <unordered_map>
 #include <map>
 
-#include <Eigen/Dense>
-#include <Eigen/SVD>
+//#include <Eigen/Dense>
+//#include <Eigen/SVD>
 
 #include "Model.h"
 #include "MCTable.h"

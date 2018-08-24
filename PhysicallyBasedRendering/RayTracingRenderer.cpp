@@ -232,7 +232,7 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	//KDTreeNode* kdroot = BuildKDTree(triangles);
 
 	cout << "triangles : "<<triangles.size() << endl;
-	//cout << "build octree" << endl;
+	cout << "build octree" << endl;
 	///////////////////////////////////////////////////////////
 
 
@@ -255,7 +255,7 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	gpukdtreeNode* tmpnode2 = new gpukdtreeNode();
 	cudaMemcpy(tmpnode2, &kdroot->nodes.data[2], sizeof(gpukdtreeNode), cudaMemcpyDeviceToHost);
 	
-	cout << tmpnode1->triangleNumber << endl;
+	cout << tmpnode0->triangleNumber << endl;
 
 	cout << tmpnode0->nodeAABB.bounds[0].x << endl;
 	cout << tmpnode0->nodeAABB.bounds[0].y << endl;
@@ -266,7 +266,7 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	cout << tmpnode0->nodeAABB.bounds[1].z << endl;
 
 	cout << "=======================================" << endl;
-	cout << tmpnode0->leftChild << endl;
+	cout << tmpnode1->triangleNumber << endl;
 
 	cout << tmpnode1->nodeAABB.bounds[0].x << endl;
 	cout << tmpnode1->nodeAABB.bounds[0].y << endl;
@@ -276,7 +276,7 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	cout << tmpnode1->nodeAABB.bounds[1].y << endl;
 	cout << tmpnode1->nodeAABB.bounds[1].z << endl;
 	cout << "=======================================" << endl;
-	cout << tmpnode0->rightChild << endl;
+	cout << tmpnode2->triangleNumber << endl;
 
 	cout << tmpnode2->nodeAABB.bounds[0].x << endl;
 	cout << tmpnode2->nodeAABB.bounds[0].y << endl;

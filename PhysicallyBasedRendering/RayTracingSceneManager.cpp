@@ -264,7 +264,7 @@ void RayTracingSceneManager::LoadFluidScene(const string meshfile)
 
 	// rusted iron sphere 1
 	glm::mat4 sphereModel = glm::mat4();
-	sphereModel = glm::translate(sphereModel, glm::vec3(30.0f, 20.0f, 0.0f));
+	sphereModel = glm::translate(sphereModel, glm::vec3(-30.0f, 20.0f, 0.0f));
 	sphereModel = glm::scale(sphereModel, glm::vec3(10.0f, 10.0f, 10.0f));
 	InsertTriangles(LoadMeshTriangles("Obj/Sphere.obj", sphereModel, 2));
 
@@ -303,7 +303,7 @@ void RayTracingSceneManager::LoadFluidScene(const string meshfile)
 	InsertTriangles(LoadPlaneTriangles(planeModel, 5));
 
 	// fluid
-	InsertTriangles(LoadMeshTriangles(meshfile, glm::translate(glm::vec3(-10.0f, 0.0f, 0.0f)), 0));
+	InsertTriangles(LoadMeshTriangles(meshfile, glm::translate(glm::vec3(-20.0f, 0.0f, 0.0f)), 0));
 }
 
 void RayTracingSceneManager::LoadPathTracingScene()

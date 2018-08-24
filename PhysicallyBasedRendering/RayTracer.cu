@@ -284,7 +284,7 @@ __device__ float RayTraversal(OctreeNode* root, Ray ray, float& minDist)
 
 	if (tmin <= tmax)
 	{
-		return true;
+		//return true;
 		if (tmin < minDist)
 			return true;
 		else
@@ -295,7 +295,7 @@ __device__ float RayTraversal(OctreeNode* root, Ray ray, float& minDist)
 
 }
 
-__device__ float KDRayTraversal(gpukdtreeNode* root, Ray ray, float& minDist)
+__device__ float KDRayTraversal(gpukdtreeNode* root, Ray ray, float& minDist, float& distance)
 {
 	if (root->triangleNumber <= 0)
 		return;
@@ -332,9 +332,12 @@ __device__ float KDRayTraversal(gpukdtreeNode* root, Ray ray, float& minDist)
 
 	if (tmin <= tmax)
 	{
-		return true;
+		//return true;
 		if (tmin < minDist)
+		{
+			distance = tmin;
 			return true;
+		}
 		else
 			return false;
 	}
@@ -466,28 +469,22 @@ __device__ void RayKDTreeTraversal(gpukdtreeNode* nodes,
 	int currentid=0, leftid = 0, rightid = 0, cid = 0;
 	DeviceStack<int> treestack;
 	treestack.push(0);
-
-	//int stack[64];
-	//int* stackPtr = stack;
-	//*stackPtr = -1;
-	//*++stackPtr = 0;
-
-	//gpukdtreeNode* kdtree = kdroot->nodes.data;
-
+	
+	float distance = -1.0f;
+	vec3 point;
 
 	while (!treestack.empty())
 	{
 		currentid = treestack.pop();
-		//currentid = *stackPtr--;
 
 		//test node intersection
-		if (KDRayTraversal(&nodes[currentid], ray, minDist))
+		if (KDRayTraversal(&nodes[currentid], ray, minDist, distance))
 		{
 			leftid = nodes[currentid].leftChild;
 			rightid = nodes[currentid].rightChild;
 
 			//// leaf node
-			if (leftid == -1 && rightid == -1)
+			if (leftid == -1)
 			{		
 				for (int i = nodes[currentid].triangleIndex; i < nodes[currentid].triangleIndex + nodes[currentid].triangleNumber; i++)
 				{
@@ -499,23 +496,62 @@ __device__ void RayKDTreeTraversal(gpukdtreeNode* nodes,
 						}
 					}
 				}
-			}
-	/*		else
-			{
-				treestack.push(1);
-				treestack.push(2);
-			}*/
 
+				continue;
+			}
+
+			
 			// middle node
 			if (leftid != -1)
 			{
-				treestack.push(leftid);
+				point = ray.origin + ray.dir * distance;
+
+				if (nodes[currentid].splitAxis == 0)
+				{
+					if (point.x < nodes[currentid].nodeAABB.bounds[0].x + nodes[currentid].splitPos)
+					{
+						treestack.push(leftid);
+						treestack.push(rightid);
+					}
+					else
+					{
+						treestack.push(rightid);
+						treestack.push(leftid);				
+					}
+				
+				}
+				else if (nodes[currentid].splitAxis == 1)
+				{
+					if (point.y < nodes[currentid].nodeAABB.bounds[0].y + nodes[currentid].splitPos)
+					{
+						treestack.push(leftid);
+						treestack.push(rightid);
+					}
+					else
+					{
+						treestack.push(rightid);
+						treestack.push(leftid);
+					}
+
+				}
+				else if (nodes[currentid].splitAxis == 2)
+				{
+					if (point.z < nodes[currentid].nodeAABB.bounds[0].z + nodes[currentid].splitPos)
+					{
+						treestack.push(leftid);
+						treestack.push(rightid);
+					}
+					else
+					{
+						treestack.push(rightid);
+						treestack.push(leftid);
+					}
+
+				}	
 			}
-			if (rightid != -1)
-			{
-				//*++stackPtr = rightid;
-				treestack.push(rightid);
-			}
+			
+			//if (rightid != -1)
+						
 		}
 	}
 }
@@ -731,6 +767,8 @@ __device__ bool GetHitPointInfo(
 	gpukdtreeNode* nodes,
 	int* tna)
 {
+	//return false;
+
 	float distToTriangle, distToSphere, distToAreaLight = 0.0f;
 	
 	//옥트리
@@ -738,6 +776,8 @@ __device__ bool GetHitPointInfo(
 	//nearestTriangleIdx = OTFindNearestTriangleIdx(nowRay, triangles, root, distToTriangle);
 	//nearestTriangleIdx = FindNearestTriangleIdx(nowRay, triangles, triangleNum, distToTriangle);
 	nearestSphereIdx = FindNearestSphereIdx(nowRay, spheres, sphereNum, distToSphere);
+
+	//return false;
 
 	// 아무곳도 intersect를 못했다거나 뒤쪽에 있다면
 	if ((nearestTriangleIdx == -1 || distToTriangle < 0.0f) &&

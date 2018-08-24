@@ -151,16 +151,16 @@ void FluidRenderer::InitializeRender()
 		thicknessBlurFBO[i].BindTexture(GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, &thicknessBlurTex[i]);
 	}
 
-	boundarySize = glm::vec3(10.0f, 10.0f, 10.0f);
-	
-	FluidCube* cubes = new FluidCube[2];
+	boundarySize = glm::vec3(30.0f, 30.0f, 30.0f);
+	//
+	FluidCube* cubes = new FluidCube[1];
 
-	cubes[0].size.x = 5;
-	cubes[0].size.y = 5;
-	cubes[0].size.z = 5;
-	cubes[0].pos.x = 3.0f;
+	cubes[0].size.x = 30;
+	cubes[0].size.y = 20;
+	cubes[0].size.z = 30;
+	cubes[0].pos.x = 0.0f;
 	cubes[0].pos.y = 0.0f;
-	cubes[0].pos.z = -5.0f;
+	cubes[0].pos.z = 0.0f;
 
 	/*cubes[1].size.x = 5;
 	cubes[1].size.y = 5;
@@ -169,15 +169,15 @@ void FluidRenderer::InitializeRender()
 	cubes[1].pos.y = 0.0f;
 	cubes[1].pos.z = 6.0f;*/
 
-	// simulation 공간을 약간 작게 해주어야 marching cube가 제대로 그려짐
+	//// simulation 공간을 약간 작게 해주어야 marching cube가 제대로 그려짐
 
-	// DLL
-	importer.Initialize(boundarySize * 1.0f, cubes, 2);
+	//// DLL
+	importer.Initialize(boundarySize * 1.0f, cubes, 1);
 	fluidVertices = new GLfloat[importer.particleNum * 6];
 
-	// CLIENT
-	/*clientImporter.Initialize(boundarySize, cubes, 1);
-	fluidVertices = new GLfloat[clientImporter.particleNum * 6];*/
+	//// CLIENT
+	///*clientImporter.Initialize(boundarySize, cubes, 1);
+	//fluidVertices = new GLfloat[clientImporter.particleNum * 6];*/
 
 	fluidVAO.GenVAOVBOIBO();
 	fluidVAO.VertexBufferData(sizeof(GLfloat) * importer.particleNum * 6, fluidVertices);
@@ -228,14 +228,15 @@ void FluidRenderer::Render()
 
 	// DLL
 	importer.Update(fluidVertices);
+	fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
+	
 	// CLIENT
-	/*clientImporter.Update(fluidVertices);
-	fluidVAO.VertexBufferData(sizeof(GLfloat)*clientImporter.particleNum * 6, fluidVertices);*/
+	/*clientImporter.Update(fluidVertices);*/
 
 	if (isRenderOnDefaultFBO)
 	{
-		MarchingCubeFluidNormalRender();
-		//ScreenSpaceFluidNormalRender();
+		//MarchingCubeFluidNormalRender();
+		ScreenSpaceFluidNormalRender();
 		
 		/*char tmp[1024];
 		sprintf(tmp, "%04d", currentFrame);

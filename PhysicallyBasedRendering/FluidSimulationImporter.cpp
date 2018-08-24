@@ -63,7 +63,7 @@ void(*quit)();
 
 void FluidSimulationImporter::Initialize(const glm::vec3 boundarySize, FluidCube* cubes, int cubeNum)
 {
-	handle = LoadLibrary(SOLUTION_DIR L"\\x64\\Release\\FLing2.dll");
+	handle = LoadLibrary(SOLUTION_DIR L"\\x64\\Release\\FLing3.dll");
 
 	initialize = (int(*)(SimulationParam, FluidCube*, ObstacleCube*))GetProcAddress(handle, "initialize");
 	update = (void(*)(float*, float*, int*, ObstacleSphere *, int))GetProcAddress(handle, "update");

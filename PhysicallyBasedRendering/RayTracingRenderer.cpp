@@ -10,6 +10,9 @@ using namespace std::chrono;
 
 void RayTracingRenderer::InitializeRender()
 {
+	phongShader = new ShaderProgram("Basic.vs", "Phong.fs");
+	phongShader->Use();
+
 	debugQuadShader->Use();
 	debugQuadShader->BindTexture(&rayTracingTex, "map");
 
@@ -109,84 +112,128 @@ void RayTracingRenderer::InitializeRender()
 	spheres = dynamic_cast<RayTracingSceneManager*>(sceneManager)->spheres;
 	lights = dynamic_cast<RayTracingSceneManager*>(sceneManager)->lights;
 	materials = dynamic_cast<RayTracingSceneManager*>(sceneManager)->materials;
+	sceneObjs = dynamic_cast<RayTracingSceneManager*>(sceneManager)->sceneObjs;
 	camera = sceneManager->movingCamera;
 
-	OfflineRender("0003.png");
+	//OfflineRender("0003.png");
 }
 
 // glm의 cross(a, b)는 오른손으로 a방향에서 b방향으로 감싸쥘 때의 엄지방향이다.
 void RayTracingRenderer::Render()
 {
-	return;
+	glEnable(GL_DEPTH_TEST);
+	glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	bool isPathTracing = dynamic_cast<RayTracingSceneManager*>(sceneManager)->isPathTracing;
 
 	milliseconds bms = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
-
-	Object* camera = sceneManager->movingCamera;
-
-	vector<Triangle> triangles = dynamic_cast<RayTracingSceneManager*>(sceneManager)->triangles;
-	vector<Sphere> spheres = dynamic_cast<RayTracingSceneManager*>(sceneManager)->spheres;
-	vector<Light> lights = dynamic_cast<RayTracingSceneManager*>(sceneManager)->lights;
-	vector<Material> materials = dynamic_cast<RayTracingSceneManager*>(sceneManager)->materials;
 
 	glViewport(0, 0, WindowManager::GetInstance()->width, WindowManager::GetInstance()->height);
 	UseDefaultFBO();
 	ClearDefaultFBO();
 
-	// render start //
-	cudaGraphicsMapResources(1, &cuda_pbo_resource, 0);
+	glm::mat4 view;
+	glm::mat4 projection = glm::perspective(
+		glm::radians(45.0f),
+		WindowManager::GetInstance()->width / WindowManager::GetInstance()->height,
+		0.01f,
+		300.0f);
 
-	glm::vec4* output;
-	size_t num_bytes;
-
-	cudaGraphicsResourceGetMappedPointer((void**)&output, &num_bytes, cuda_pbo_resource);
-	glm::mat4 view = camera->GetModelMatrix();
-
-	///////////////////////////
-	// build octree
-	vec3 min = vec3(-100, -100, -100);
-	vec3 max = vec3(100, 100, 100);
-
-	cout << "triangles : " << triangles.size() << endl;
-	cout << "build octree start" << endl;
-
-	OctreeNode* root2 = BuildOctree((Triangle *)triangles.data(), triangles.size(), 1000, min, max);
-
-	OctreeNode* octree = OTHostToDevice(root2);
-	cout << "build octree end" << endl;
-
-	///////////////////////////
-
-	for (int i = 0; i < gridY; i++)
+	if (isPathTracing)
 	{
-		for (int j = 0; j < gridX; j++)
+		view = camera->GetModelMatrix();
+
+		debugQuadShader->Use();
+		// render start //
+		cudaGraphicsMapResources(1, &cuda_pbo_resource, 0);
+
+		glm::vec4* output;
+		size_t num_bytes;
+
+		cudaGraphicsResourceGetMappedPointer((void**)&output, &num_bytes, cuda_pbo_resource);
+
+		///////////////////////////////////////////////////////////
+		// build octree
+		vec3 min = vec3(-51, -51, -51);
+		vec3 max = vec3(51, 51, 51);
+
+		AABB rootAABB;
+		rootAABB.bounds[0] = min;
+		rootAABB.bounds[1] = max;
+
+		cout << "triangles : " << triangles.size() << endl;
+		cout << "build octree" << endl;
+		///////////////////////////////////////////////////////////
+
+		///////////////////////////////////////////////////////////
+		//perform gpu kd-tree algorithm
+		time_t kdstart = clock();
+		gpukdtree* kdroot = new gpukdtree((Triangle *)triangles.data(), triangles.size(), rootAABB);
+		kdroot->create();
+		time_t kdend = clock();
+		cout << "gpu KD-Tree created in " << kdend - kdstart << endl;
+
+		///////////////////////////
+
+		for (int i = 0; i < gridY; i++)
 		{
-			// Path Tracing
-			std::random_device rd;
-			std::mt19937 mersenne_engine(rd());
-			std::uniform_real_distribution<> dis(0.0, 1.0);
+			for (int j = 0; j < gridX; j++)
+			{
+				// Path Tracing
+				std::random_device rd;
+				std::mt19937 mersenne_engine(rd());
+				std::uniform_real_distribution<> dis(0.0, 1.0);
 
-			auto gen = [&dis, &mersenne_engine]() {return dis(mersenne_engine); };
-			generate(begin(vec), end(vec), gen);
+				auto gen = [&dis, &mersenne_engine]() {return dis(mersenne_engine); };
+				generate(begin(vec), end(vec), gen);
 
-			//RayTrace(output, i, j, view, triangles, spheres, lights, materials, vec, octree);
+				RayTrace(output, i, j, view, triangles, spheres, lights, materials, vec, nullptr, kdroot);
+				cudaDeviceSynchronize();
+			}
+		}
+
+		cudaGraphicsUnmapResources(1, &cuda_pbo_resource, 0);
+
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, rayTracePBO);
+		glBindTexture(GL_TEXTURE_2D, rayTracingTex.GetTexture());
+		// pixels를 0으로 함으로써 연결된 PBO로 부터 픽셀 정보를 가져옴
+		glTexSubImage2D(
+			GL_TEXTURE_2D, 0, 0, 0,
+			WindowManager::GetInstance()->width,
+			WindowManager::GetInstance()->height,
+			GL_RGBA, GL_FLOAT, 0);
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+		// render end // 
+
+		SceneObject& quad = sceneManager->quadObj;
+		quad.DrawModel();
+	}
+	else
+	{
+		view = inverse(camera->GetModelMatrix());
+
+		phongShader->Use();
+		phongShader->SetUniformVector3f("diffuseColor", glm::vec3(0.4f, 0.4f, 0.4f));
+		phongShader->SetUniformVector3f("specularColor", glm::vec3(0.01f, 0.01f, 0.01f));
+
+		//phongShader->SetUniformMatrix4f("view", view);
+		phongShader->SetUniformMatrix4f("projection", projection);
+		phongShader->SetUniformMatrix4f("view", view);
+		//phongShader->SetUniformMatrix4f("projection", glm::mat4());
+
+		phongShader->SetUniformVector3f("lightDir", glm::vec3(0.0f, 0.0f, -1.0f));
+		phongShader->SetUniformVector3f("eyePos", camera->GetWorldPosition());
+		for (int i = 0; i < sceneObjs.size(); i++)
+		{
+			glm::mat4 model = sceneObjs[i].GetModelMatrix();
+
+			Debug::GetInstance()->Log(sceneObjs[i].GetColor());
+			phongShader->SetUniformVector3f("ambientColor", sceneObjs[i].GetColor());
+			phongShader->SetUniformMatrix4f("model", model);
+			sceneObjs[i].DrawModel();
 		}
 	}
-
-	cudaGraphicsUnmapResources(1, &cuda_pbo_resource, 0);
-
-	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, rayTracePBO);
-	glBindTexture(GL_TEXTURE_2D, rayTracingTex.GetTexture());
-	// pixels를 0으로 함으로써 연결된 PBO로 부터 픽셀 정보를 가져옴
-	glTexSubImage2D(
-		GL_TEXTURE_2D, 0, 0, 0,
-		WindowManager::GetInstance()->width,
-		WindowManager::GetInstance()->height,
-		GL_RGBA, GL_FLOAT, 0);
-	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-	// render end // 
-
-	SceneObject& quad = sceneManager->quadObj;
-	quad.DrawModel();
 
 	milliseconds ams = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 	cout << ams.count() - bms.count() << " milliseconds" << endl;
@@ -222,8 +269,8 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 	rootAABB.bounds[0] = min;
 	rootAABB.bounds[1] = max;
 
-	OctreeNode* root1 = BuildOctree((Triangle *)triangles.data(), triangles.size(), 64, min, max);
-	OctreeNode* octree = OTHostToDevice(root1);
+	/*OctreeNode* root1 = BuildOctree((Triangle *)triangles.data(), triangles.size(), 64, min, max);
+	OctreeNode* octree = OTHostToDevice(root1);*/
 
 	//OctreeNode* octree = nullptr;
 	//KDTreeNode* kdroot = BuildKDTree(triangles);
@@ -296,7 +343,7 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 			auto gen = [&dis, &mersenne_engine]() {return dis(mersenne_engine); };
 			generate(begin(vec), end(vec), gen);
 
-			RayTrace(output, i, j, view, triangles, spheres, lights, materials, vec, octree, kdroot);
+			RayTrace(output, i, j, view, triangles, spheres, lights, materials, vec, nullptr, kdroot);
 			cudaDeviceSynchronize();
 		}
 	}

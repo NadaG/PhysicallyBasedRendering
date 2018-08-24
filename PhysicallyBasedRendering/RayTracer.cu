@@ -640,8 +640,8 @@ __device__ Ray GenerateCameraRay(int y, int x, glm::mat4 cameraModelMatrix, int 
 
 	// 각 픽셀의 중앙을 가르키는 값 생성, 0~1의 값으로 Normalizing
 	// antialiasing
-	float NDCy = (y + 0.33333f + 0.33333f*rayY) / WINDOW_HEIGHT;
-	float NDCx = (x + 0.33333f + 0.33333f*rayX) / WINDOW_WIDTH;
+	float NDCy = (y + 0.33333f + 0.33333f * rayY) / WINDOW_HEIGHT;
+	float NDCx = (x + 0.33333f + 0.33333f * rayX) / WINDOW_WIDTH;
 
 	// no antialiasing
 	/*float NDCy = (y + 0.5f) / WINDOW_HEIGHT;
@@ -1065,7 +1065,6 @@ __device__ vec4 RayTraceColor(
 					refractRay.decay = nowRay.decay * kD.r / SAMPLE_NUM;
 
 					// 투명한 Object이기 때문에 kD가 refract decay로 들어간 거임
-
 					refractRay.depth = nowRay.depth + 1;
 					refractRay.origin = hitPoint + refractRay.dir * 0.08f;
 
@@ -1102,12 +1101,19 @@ __global__ void RayTraceD(
 	int* tna)
 {
 	//unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
-	unsigned int x = (blockIdx.x + gridY * RAY_Y_NUM) * WINDOW_HEIGHT + (threadIdx.x + gridX * RAY_X_NUM);
+	unsigned int x = 
+		(blockIdx.x + gridY * RAY_Y_NUM) * WINDOW_HEIGHT + 
+		(threadIdx.x + gridX * RAY_X_NUM);
 	glm::vec4 color = glm::vec4(0.0f);
 
 	Ray rayQueue[QUEUE_SIZE];
 
-	Ray ray = GenerateCameraRay(blockIdx.x/2 + gridY * RAY_Y_NUM, threadIdx.x/2 + gridX * RAY_X_NUM, view, blockIdx.x % 2, threadIdx.x % 2);
+	/*Ray ray = GenerateCameraRay(
+		blockIdx.x/2 + gridY * RAY_Y_NUM, 
+		threadIdx.x/2 + gridX * RAY_X_NUM, 
+		view, 
+		blockIdx.x % 2, 
+		threadIdx.x % 2);
 
 	color += RayTraceColor(
 		ray,
@@ -1125,41 +1131,41 @@ __global__ void RayTraceD(
 		DEPTH,
 		root,
 		nodes,
-		tna);
+		tna);*/
 	
-	//for (int i = 0; i < 2; i++)
-	//{
-	//	for (int j = 0; j < 2; j++)
-	//	{
-	//		Ray ray = GenerateCameraRay(blockIdx.x + gridY * RAY_Y_NUM, threadIdx.x + gridX * RAY_X_NUM, view, i, j);
+	Ray ray;
+	for (int i = 0; i < 2; i++)
+	{
+		for (int j = 0; j < 2; j++)
+		{
+			ray = GenerateCameraRay(blockIdx.x + gridY * RAY_Y_NUM, threadIdx.x + gridX * RAY_X_NUM, view, i, j);
 
-	//		// NOTICE for문을 돌릴 때 iter를 변수로 하니까 검은 화면이 나옴
-	//		// y, x로 들어가고
-	//		// 0, 0 좌표는 좌하단
-	//		color += RayTraceColor(
-	//			ray,
-	//			blockIdx.x * blockDim.x + threadIdx.x,
-	//			rayQueue,
-	//			triangles,
-	//			triangleNum,
-	//			spheres,
-	//			sphereNum,
-	//			lights,
-	//			lightNum,
-	//			materials,
-	//			matNum,
-	//			randomNums,
-	//			DEPTH,
-	//			root,
-	//			nodes,
-	//			tna);
-	//	}
-	//}
+			// NOTICE for문을 돌릴 때 iter를 변수로 하니까 검은 화면이 나옴
+			// y, x로 들어가고
+			// 0, 0 좌표는 좌하단
+			color += RayTraceColor(
+				ray,
+				blockIdx.x * blockDim.x + threadIdx.x,
+				rayQueue,
+				triangles,
+				triangleNum,
+				spheres,
+				sphereNum,
+				lights,
+				lightNum,
+				materials,
+				matNum,
+				randomNums,
+				DEPTH,
+				root,
+				nodes,
+				tna);
+		}
+	}
 
 	//color = glm::vec4(randomNums[x%1024]);
 
-	data[x/4] += color * 0.25f;
-	//data[x] = vec4(1.0f) / 4.0f;
+	data[x] = color * 0.25f;
 }
 
 __global__ void random(float* result, int seed)
@@ -1209,7 +1215,7 @@ void RayTrace(
 
 	//cout << "ray trace device start" << endl;
 
-	RayTraceD << <RAY_Y_NUM*2, RAY_X_NUM*2 >> > (
+	RayTraceD << <RAY_Y_NUM, RAY_X_NUM >> > (
 		data,
 		gridX,
 		gridY,

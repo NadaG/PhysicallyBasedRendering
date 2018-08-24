@@ -18,6 +18,8 @@ public:
 	// world 좌표계에서의 위치가 translate
 	void ModelTranslate(const glm::vec3& vec);
 
+	void SetScale(const glm::vec3& vec) { this->scaleVector = vec; }
+
 	void SetPosition(const glm::vec3& vec) { this->positionVector = vec; }
 
 	void ModelRotate(const glm::vec3& vec, float angle);

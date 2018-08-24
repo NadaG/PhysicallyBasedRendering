@@ -75,7 +75,7 @@ private:
 	const int blurNum = 2;
 
 	const float depthNear = 0.01f;
-	const float depthFar = 200.0;
+	const float depthFar = 200.0f;
 
 	const float sceneNaer = 0.01f;
 	const float sceneFar = 200.0f;

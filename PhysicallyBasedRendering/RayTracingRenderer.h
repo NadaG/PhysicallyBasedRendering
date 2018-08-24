@@ -23,6 +23,8 @@ public:
 private:
 	int writeFileNum = 0;
 
+	ShaderProgram* phongShader;
+
 	cudaGraphicsResource* cuda_pbo_resource;
 	GLuint rayTracePBO;
 	Texture2D rayTracingTex;
@@ -42,6 +44,7 @@ private:
 	vector<Sphere> spheres;
 	vector<Light> lights;
 	vector<Material> materials;
+	vector<SceneObject> sceneObjs;
 
 	Object* camera;
 };

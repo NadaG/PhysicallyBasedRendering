@@ -3,7 +3,7 @@
 out vec3 color;
 
 in vec3 worldPos;
-in vec3 normal;
+in vec3 outNormal;
 in vec2 outUV;
 
 uniform vec3 lightDir;
@@ -14,13 +14,12 @@ uniform vec3 diffuseColor;
 uniform vec3 specularColor;
 
 uniform float specularExpo;
-uniform vec3 trasmission;
 
-uniform sampler2D normalMap;
+//uniform sampler2D normalMap;
 
 void main()
 {
-	vec3 pixelNormal = normal;
+	vec3 pixelNormal = outNormal;
 	//vec3 pixelNormal = texture(normalMap, outUV);
 
 	vec3 lightColor = vec3(1.0, 1.0, 1.0);
@@ -31,8 +30,6 @@ void main()
 	vec3 specular = specularColor * max(0, pow(dot(normalize(reflect(lightDir, normalize(pixelNormal))), eyeDir), specularExpo));
 
 	color = ambient + diffuse + specular;
-	
-	color = vec3(1.0f, 0.0f, 0.0f);
 
 	// -1 ~ 1
 	//color = 0.5 * normal + vec3(0.5);

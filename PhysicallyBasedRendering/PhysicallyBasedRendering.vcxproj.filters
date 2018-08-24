@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <CudaCompile Include="gpukdtree.cu" />
     <CudaCompile Include="KDTree.cu" />
     <CudaCompile Include="Octree.cu" />
     <CudaCompile Include="RayTracer.cu" />
-    <CudaCompile Include="gpukdtree.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BillBoardMovement.cpp" />
@@ -21,10 +21,13 @@
     <ClCompile Include="LTCRenderer.cpp" />
     <ClCompile Include="LTCSceneManager.cpp" />
     <ClCompile Include="MarchingCube.cpp" />
+    <ClCompile Include="MarchingCubeTmp.cpp" />
+    <ClCompile Include="MarchingCubeVertexNormal.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="MyMath.cpp" />
+    <ClCompile Include="NormalEstimateModel.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="PBRRenderer.cpp" />
     <ClCompile Include="PBRSceneManager.cpp" />
@@ -50,9 +53,6 @@
     <ClCompile Include="VertexArrayObject.cpp" />
     <ClCompile Include="VolumeRenderer.cpp" />
     <ClCompile Include="WindowManager.cpp" />
-    <ClCompile Include="NormalEstimateModel.cpp" />
-    <ClCompile Include="MarchingCubeVertexNormal.cpp" />
-    <ClCompile Include="MarchingCubeTmp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BillBoardMovement.h" />
@@ -71,9 +71,14 @@
     <ClInclude Include="FluidSimulationClient.h" />
     <ClInclude Include="FluidSimulationImporter.h" />
     <ClInclude Include="FrameBufferObject.h" />
+    <ClInclude Include="gpukdtree.cuh" />
     <ClInclude Include="KDTree.cuh" />
     <ClInclude Include="MarchingCube.h" />
+    <ClInclude Include="MarchingCubeTMp.h" />
+    <ClInclude Include="MarchingCubeVertexNormal.h" />
+    <ClInclude Include="MarchingCubeVertexNormalUtility.h" />
     <ClInclude Include="MCTable.h" />
+    <ClInclude Include="NormalEstimateModel.h" />
     <ClInclude Include="Octree.cuh" />
     <ClInclude Include="PixelBufferObject.h" />
     <ClInclude Include="LightMovement.h" />
@@ -110,18 +115,11 @@
     <ClInclude Include="VertexArrayObject.h" />
     <ClInclude Include="VolumeRenderer.h" />
     <ClInclude Include="WindowManager.h" />
-    <ClInclude Include="NormalEstimateModel.h" />
-    <ClInclude Include="MarchingCubeVertexNormal.h" />
-    <ClInclude Include="MarchingCubeVertexNormalUtility.h" />
-<<<<<<< HEAD
-    <ClInclude Include="gpukdtree.cuh" />
-=======
-    <ClInclude Include="MarchingCubeTMp.h" />
->>>>>>> a0e2646b86f8b0589e8a63a36e84f5f94af7189c
   </ItemGroup>
   <ItemGroup>
     <None Include="Basic.fs" />
     <None Include="Basic.vs" />
+    <None Include="ClassDiagram.cd" />
     <None Include="Cos.fs" />
     <None Include="FresnelDiffraction.fs" />
     <None Include="MarchingCubeFluid.fs" />
@@ -170,6 +168,5 @@
     <None Include="tessellationControl.tcs" />
     <None Include="tessellationEvaluation.tes" />
     <None Include="vertex.vs" />
-    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

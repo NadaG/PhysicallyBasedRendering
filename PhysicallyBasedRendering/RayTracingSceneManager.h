@@ -8,7 +8,7 @@ class RayTracingSceneManager : public SceneManager
 {
 public:
 
-	RayTracingSceneManager():moveSpeed(0.5f), rotateSpeed(0.05f), lightSphereId(0) {}
+	RayTracingSceneManager():moveSpeed(0.5f), rotateSpeed(0.05f), lightSphereId(0), isPathTracing(true){}
 	virtual ~RayTracingSceneManager() {}
 
 	void InitializeObjects();
@@ -28,6 +28,8 @@ public:
 	void LoadPathTracingScene();
 
 	OctreeNode* root;
+
+	bool isPathTracing;
 
 private:
 

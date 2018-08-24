@@ -284,8 +284,7 @@ __device__ float RayTraversal(OctreeNode* root, Ray ray, float& minDist)
 
 	if (tmin <= tmax)
 	{
-		//return true;
-
+		return true;
 		if (tmin < minDist)
 			return true;
 		else
@@ -296,23 +295,24 @@ __device__ float RayTraversal(OctreeNode* root, Ray ray, float& minDist)
 
 }
 
-__device__ float KDRayTraversal(gpukdtreeNode root, Ray ray)
+__device__ float KDRayTraversal(gpukdtreeNode* root, Ray ray, float& minDist)
 {
-
+	if (root->triangleNumber <= 0)
+		return;
 
 	if (ray.dir.x < 0)
 	{
-		ray.origin.x = root.nodeAABB.bounds[0].x + root.nodeAABB.bounds[1].x - ray.origin.x;
+		ray.origin.x = root->nodeAABB.bounds[0].x + root->nodeAABB.bounds[1].x - ray.origin.x;
 		ray.dir.x = -ray.dir.x;
 	}
 	if (ray.dir.y < 0)
 	{
-		ray.origin.y = root.nodeAABB.bounds[0].y + root.nodeAABB.bounds[1].y - ray.origin.y;
+		ray.origin.y = root->nodeAABB.bounds[0].y + root->nodeAABB.bounds[1].y - ray.origin.y;
 		ray.dir.y = -ray.dir.y;
 	}
 	if (ray.dir.z < 0)
 	{
-		ray.origin.z = root.nodeAABB.bounds[0].z + root.nodeAABB.bounds[1].z - ray.origin.z;
+		ray.origin.z = root->nodeAABB.bounds[0].z + root->nodeAABB.bounds[1].z - ray.origin.z;
 		ray.dir.z = -ray.dir.z;
 	}
 
@@ -320,12 +320,12 @@ __device__ float KDRayTraversal(gpukdtreeNode root, Ray ray)
 	double divy = 1 / ray.dir.y;
 	double divz = 1 / ray.dir.z;
 
-	double tx0 = (root.nodeAABB.bounds[0].x - ray.origin.x) * divx;
-	double tx1 = (root.nodeAABB.bounds[1].x - ray.origin.x) * divx;
-	double ty0 = (root.nodeAABB.bounds[0].y - ray.origin.y) * divy;
-	double ty1 = (root.nodeAABB.bounds[1].y - ray.origin.y) * divy;
-	double tz0 = (root.nodeAABB.bounds[0].z - ray.origin.z) * divz;
-	double tz1 = (root.nodeAABB.bounds[1].z - ray.origin.z) * divz;
+	double tx0 = (root->nodeAABB.bounds[0].x - ray.origin.x) * divx;
+	double tx1 = (root->nodeAABB.bounds[1].x - ray.origin.x) * divx;
+	double ty0 = (root->nodeAABB.bounds[0].y - ray.origin.y) * divy;
+	double ty1 = (root->nodeAABB.bounds[1].y - ray.origin.y) * divy;
+	double tz0 = (root->nodeAABB.bounds[0].z - ray.origin.z) * divz;
+	double tz1 = (root->nodeAABB.bounds[1].z - ray.origin.z) * divz;
 
 	float tmin = max(max(tx0, ty0), tz0);
 	float tmax = min(min(tx1, ty1), tz1);
@@ -333,6 +333,10 @@ __device__ float KDRayTraversal(gpukdtreeNode root, Ray ray)
 	if (tmin <= tmax)
 	{
 		return true;
+		if (tmin < minDist)
+			return true;
+		else
+			return false;
 	}
 	else
 		return false;
@@ -450,7 +454,8 @@ __device__ void RayTreeTraversal(OctreeNode* root,
 	} while (node != NULL);
 }
 
-__device__ void RayKDTreeTraversal(gpukdtree* root,
+__device__ void RayKDTreeTraversal(gpukdtreeNode* nodes,
+									int* tna,
 									Ray ray,
 									int& minIdx,
 									float& tmpDist,
@@ -458,36 +463,63 @@ __device__ void RayKDTreeTraversal(gpukdtree* root,
 									const float& rayThreshold,
 									float& minDist)
 {
-	int currentid, leftid, rightid, cid;
+	int currentid=0, leftid = 0, rightid = 0, cid = 0;
 	DeviceStack<int> treestack;
 	treestack.push(0);
+
+	//int stack[64];
+	//int* stackPtr = stack;
+	//*stackPtr = -1;
+	//*++stackPtr = 0;
+
+	//gpukdtreeNode* kdtree = kdroot->nodes.data;
+
+
 	while (!treestack.empty())
 	{
 		currentid = treestack.pop();
+		//currentid = *stackPtr--;
 
 		//test node intersection
-		if (KDRayTraversal(root->nodes.data[currentid], ray)) {
-			leftid = root->nodes.data[currentid].leftChild;
-			rightid = root->nodes.data[currentid].rightChild;
+		if (KDRayTraversal(&nodes[currentid], ray, minDist))
+		{
+			leftid = nodes[currentid].leftChild;
+			rightid = nodes[currentid].rightChild;
+
 			//// leaf node
-			if (leftid == -1 && rightid == -1) {
-				/*if (dkdtree::Intersect_nodeTriangles_Ray(ray, currentid, tmpDist, cid, root->nodes.data, triangles, root->triangleNodeAssociation.data)) {
-					if (tmpDist<minDist) {
-						minDist = tmpDist;
-						minIdx = cid;
+			if (leftid == -1 && rightid == -1)
+			{		
+				for (int i = nodes[currentid].triangleIndex; i < nodes[currentid].triangleIndex + nodes[currentid].triangleNumber; i++)
+				{
+					if (RayTriangleIntersect(ray, triangles[tna[i]], tmpDist)) {
+						if (tmpDist > rayThreshold && tmpDist < minDist)
+						{
+							minDist = tmpDist;
+							minIdx = tna[i];
+						}
 					}
-				}*/
-				continue;
+				}
 			}
+	/*		else
+			{
+				treestack.push(1);
+				treestack.push(2);
+			}*/
+
 			// middle node
 			if (leftid != -1)
+			{
 				treestack.push(leftid);
+			}
 			if (rightid != -1)
+			{
+				//*++stackPtr = rightid;
 				treestack.push(rightid);
+			}
 		}
 	}
-
 }
+
 
 //ray의 원점과 가장 가까운 곳에서 intersect하는 triangle의 id를 가져오는 함수
 //octree 사용
@@ -504,42 +536,42 @@ __device__ int OTFindNearestTriangleIdx(Ray ray, Triangle* triangles, OctreeNode
 	return minIdx;
 }
 
-__device__ int KDFindNearestTriangleIdx(Ray ray, Triangle* triangles, gpukdtree* root, float& dist)
+__device__ int KDFindNearestTriangleIdx(Ray ray, Triangle* triangles, gpukdtreeNode* nodes,	int* tna, float& dist)
 {
 	const float rayThreshold = 0.01f;
 	float minDist = 99999.0f;
 	int minIdx = -1;
 	float tmpDist;
 
-	RayKDTreeTraversal(root, ray, minIdx, tmpDist, triangles, rayThreshold, minDist);	//	전체 삼각형 중 해당 ray가 지나가는 node에 있는 것만 골라낸다.
+	RayKDTreeTraversal(nodes, tna, ray, minIdx, tmpDist, triangles, rayThreshold, minDist);	//	전체 삼각형 중 해당 ray가 지나가는 node에 있는 것만 골라낸다.
 
 	dist = minDist;
 	return minIdx;
 }
 
 
- __device__ int findnearesttriangleidx(Ray ray, Triangle* triangles, int trianglenum, float& dist)
+ __device__ int FindNearestTriangleIdx(Ray ray, Triangle* triangles, int trianglenum, float& dist)
 {
 
-	const float raythreshold = 0.01f;
-	float mindist = 9999999.0f;
-	int minidx = -1;
-	float tmpdist;
+	const float rayThreshold = 0.01f;
+	float minDist = 9999999.0f;
+	int minIdx = -1;
+	float tmpDist;
 
 	for (int i = 0; i < trianglenum; ++i)
 	{
-		if (RayTriangleIntersect(ray, triangles[i], tmpdist))
+		if (RayTriangleIntersect(ray, triangles[i], tmpDist))
 		{
-			if (tmpdist > raythreshold && tmpdist < mindist)
+			if (tmpDist > rayThreshold && tmpDist < minDist)
 			{
-				mindist = tmpdist;
-				minidx = i;
+				minDist = tmpDist;
+				minIdx = i;
 			}
 		}
 	}
 
-	dist = mindist;
-	return minidx;
+	dist = minDist;
+	return minIdx;
 }
 
 // ray의 원점과 가장 가까운 곳에서 intersect하는 sphere의 id를 가져오는 함수
@@ -696,13 +728,14 @@ __device__ bool GetHitPointInfo(
 	vec3& N,
 	vec2& uv,
 	OctreeNode* root,
-	gpukdtree* kdroot)
+	gpukdtreeNode* nodes,
+	int* tna)
 {
 	float distToTriangle, distToSphere, distToAreaLight = 0.0f;
 	
 	//옥트리
-	//nearestTriangleIdx = KDFindNearestTriangleIdx(nowRay, triangles, kdroot, distToTriangle);
-	nearestTriangleIdx = OTFindNearestTriangleIdx(nowRay, triangles, root, distToTriangle);
+	nearestTriangleIdx = KDFindNearestTriangleIdx(nowRay, triangles, nodes, tna, distToTriangle);
+	//nearestTriangleIdx = OTFindNearestTriangleIdx(nowRay, triangles, root, distToTriangle);
 	//nearestTriangleIdx = FindNearestTriangleIdx(nowRay, triangles, triangleNum, distToTriangle);
 	nearestSphereIdx = FindNearestSphereIdx(nowRay, spheres, sphereNum, distToSphere);
 
@@ -747,7 +780,8 @@ __device__ vec4 RayTraceColor(
 	float* randomNums,
 	int depth,
 	OctreeNode* root,
-	gpukdtree* kdroot)
+	gpukdtreeNode* nodes,
+	int* tna)
 {
 	vec3 sumLo = vec3(0.0f, 0.0f, 0.0f);
 	int front = 0, rear = 0;
@@ -785,7 +819,8 @@ __device__ vec4 RayTraceColor(
 			N,
 			uv,
 			root,
-			kdroot))
+			nodes,
+			tna))
 		{
 
 			// ∫Ω(kd c / π + ks DFG / 4(ωo⋅n)(ωi⋅n)) Li(p,ωi) n⋅ωi dωi
@@ -1024,7 +1059,8 @@ __global__ void RayTraceD(
 	Material* materials, int matNum,
 	float* randomNums,
 	OctreeNode* root,
-	gpukdtree* kdroot)
+	gpukdtreeNode* nodes,
+	int* tna)
 {
 	//unsigned int x = blockIdx.x * blockDim.x + threadIdx.x;
 	unsigned int x = (blockIdx.x + gridY * RAY_Y_NUM) * WINDOW_HEIGHT + (threadIdx.x + gridX * RAY_X_NUM);
@@ -1056,13 +1092,15 @@ __global__ void RayTraceD(
 				randomNums,
 				DEPTH,
 				root,
-				kdroot);
+				nodes,
+				tna);
 		}
 	}
 
 	//color = glm::vec4(randomNums[x%1024]);
 
 	data[x] = color / 4.0f;
+	//data[x] = vec4(1.0f) / 4.0f;
 }
 
 __global__ void random(float* result, int seed)
@@ -1127,7 +1165,8 @@ void RayTrace(
 		m.size(),
 		rnums.data().get(),
 		root,
-		kdroot
+		kdroot->nodes.data,
+		kdroot->triangleNodeAssociation.data
 	);
 }
 

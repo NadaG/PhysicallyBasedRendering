@@ -15,7 +15,7 @@
 #include <thrust/device_vector.h>
 #include <glm\common.hpp>
 
-#define GPUKDTREETHRESHOLD 128
+#define GPUKDTREETHRESHOLD 64
 #define GPUKDTREEMAXSTACK 128
 
 using glm::vec2;
@@ -366,7 +366,7 @@ namespace dkdtree {
 	// travelsal algorithms
 	__global__ void IntersectRay(const Ray* r, int n, float* dist, int* iid, gpukdtreeNode* nodes, Triangle* tri, int* tna);
 	
-	__device__ bool Intersect_nodeTriangles_Ray(const Ray& r, int id, float& dist, int& iid, gpukdtreeNode* nodes, Triangle* tri, int* tna);
+	
 
 	struct MaxX
 	{
@@ -427,3 +427,5 @@ void LoadCudaTextures();
 __device__ bool RayTriangleIntersect(Ray ray, Triangle triangle, float& dist);
 
 __device__ bool Intersect_nodeAABB_Ray(const Ray& r, int id, gpukdtreeNode* nodes);
+
+__device__ bool Intersect_nodeTriangles_Ray(const Ray& r, int id, float& dist, int& iid, gpukdtreeNode* nodes, Triangle* tri, int* tna);

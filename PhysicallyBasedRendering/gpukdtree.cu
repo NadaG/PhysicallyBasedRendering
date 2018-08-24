@@ -3,7 +3,7 @@
 #include <thrust/transform_reduce.h>
 #include "RayTracer.cuh"
 
-#define INF 9e16f
+#define INF 999999.0f
 __global__
 void dkdtree::cu_create_AABB(int n, Triangle* tri, AABB* aabb)
 {
@@ -641,7 +641,7 @@ __global__ void dkdtree::IntersectRay(const Ray* ray, int n, float* dist, int* i
 			rightid = nodes[currentid].rightChild;
 			// leaf node
 			if (leftid == -1 && rightid == -1) {
-				if (dkdtree::Intersect_nodeTriangles_Ray(r, currentid, cdist, cid, nodes, tri, tna)) {
+				if (Intersect_nodeTriangles_Ray(r, currentid, cdist, cid, nodes, tri, tna)) {
 					if (cdist<mindist) {
 						mindist = cdist;
 						iid[tid] = cid;
@@ -734,7 +734,7 @@ __device__ __host__ bool intersect_triangle(Ray ray, Triangle triangle, float& d
 	return dist > 0.001f;
 }
 
-__device__ bool dkdtree::Intersect_nodeTriangles_Ray(const Ray& r, int id, float& dist, int& iid, gpukdtreeNode* nodes, Triangle* tri, int* tna)
+__device__ bool Intersect_nodeTriangles_Ray(const Ray& r, int id, float& dist, int& iid, gpukdtreeNode* nodes, Triangle* tri, int* tna)
 {
 	bool intersection = false;
 	float cdist;

@@ -6,7 +6,7 @@
 #include <glm\common.hpp>
 
 #pragma once
-#define GPUKDTREETHRESHOLD 7000
-#define GPUKDTREEMAXSTACK 7000
+//#define GPUKDTREETHRESHOLD 7000
+//#define GPUKDTREEMAXSTACK 7000
 
 // optimize memory access

@@ -6,6 +6,7 @@
 #include <ctime>
 #include <random>
 
+
 using namespace std::chrono;
 
 void RayTracingRenderer::InitializeRender()
@@ -106,15 +107,7 @@ void RayTracingRenderer::InitializeRender()
 
 	//OfflineRender("0002.png");
 
-	dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadFluidScene("Obj/PouringFluid/0250.obj");
-
-	triangles = dynamic_cast<RayTracingSceneManager*>(sceneManager)->triangles;
-	spheres = dynamic_cast<RayTracingSceneManager*>(sceneManager)->spheres;
-	lights = dynamic_cast<RayTracingSceneManager*>(sceneManager)->lights;
-	materials = dynamic_cast<RayTracingSceneManager*>(sceneManager)->materials;
-	sceneObjs = dynamic_cast<RayTracingSceneManager*>(sceneManager)->sceneObjs;
-	camera = sceneManager->movingCamera;
-
+	
 	//OfflineRender("0003.png");
 }
 
@@ -140,6 +133,25 @@ void RayTracingRenderer::Render()
 		0.01f,
 		300.0f);
 
+	char buffer[4];
+	sprintf(buffer, "%.04d", frame);
+	string fileName = buffer;
+	fileName = "Obj/PouringFluid/" + fileName + ".obj";
+	//cout << fileName << endl;
+
+	if (frame % 50 == 0)
+		cout << frame << endl;
+	dynamic_cast<RayTracingSceneManager*>(sceneManager)->LoadFluidScene(fileName);
+	triangles = dynamic_cast<RayTracingSceneManager*>(sceneManager)->triangles;
+
+	spheres = dynamic_cast<RayTracingSceneManager*>(sceneManager)->spheres;
+	lights = dynamic_cast<RayTracingSceneManager*>(sceneManager)->lights;
+	materials = dynamic_cast<RayTracingSceneManager*>(sceneManager)->materials;
+	sceneObjs = dynamic_cast<RayTracingSceneManager*>(sceneManager)->sceneObjs;
+	camera = sceneManager->movingCamera;
+
+	InitializeInformation(triangles, spheres, lights, materials);
+
 	if (isPathTracing)
 	{
 		view = camera->GetModelMatrix();
@@ -155,15 +167,24 @@ void RayTracingRenderer::Render()
 
 		///////////////////////////////////////////////////////////
 		// build octree
-		vec3 min = vec3(-51, -51, -51);
-		vec3 max = vec3(51, 51, 51);
+		vec3 min = vec3(-50.0f);
+		vec3 max = vec3(50.0f);
+
+		OctreeNode* octree = nullptr;
+		/*time_t ocstart = clock();
+		OctreeNode* root1 = BuildOctree((Triangle *)triangles.data(), triangles.size(), 64, min, max);
+		octree = OTHostToDevice(root1);
+		time_t ocend = clock();*/
+		//cout << "gpu OcTree created in " << ocend - ocstart << endl;
+
+		
 
 		AABB rootAABB;
 		rootAABB.bounds[0] = min;
 		rootAABB.bounds[1] = max;
 
-		cout << "triangles : " << triangles.size() << endl;
-		cout << "build octree" << endl;
+		//cout << "triangles : " << triangles.size() << endl;
+		//cout << "build octree" << endl;
 		///////////////////////////////////////////////////////////
 
 		///////////////////////////////////////////////////////////
@@ -172,10 +193,12 @@ void RayTracingRenderer::Render()
 		gpukdtree* kdroot = new gpukdtree((Triangle *)triangles.data(), triangles.size(), rootAABB);
 		kdroot->create();
 		time_t kdend = clock();
-		cout << "gpu KD-Tree created in " << kdend - kdstart << endl;
-
+		//cout << "gpu KD-Tree created in " << kdend - kdstart << endl;
+		//cout << "Nodes : " << kdroot->nodes.size() << endl;
 		///////////////////////////
+		
 
+		time_t rstart = clock();
 		for (int i = 0; i < gridY; i++)
 		{
 			for (int j = 0; j < gridX; j++)
@@ -188,10 +211,13 @@ void RayTracingRenderer::Render()
 				auto gen = [&dis, &mersenne_engine]() {return dis(mersenne_engine); };
 				generate(begin(vec), end(vec), gen);
 
-				RayTrace(output, i, j, view, triangles, spheres, lights, materials, vec, nullptr, kdroot);
+				RayTrace(output, i, j, view, triangles, spheres, lights, materials, vec, octree, kdroot);
 				cudaDeviceSynchronize();
 			}
 		}
+		time_t rend = clock();
+		//cout << "Traced " << rend - rstart << endl;
+
 
 		cudaGraphicsUnmapResources(1, &cuda_pbo_resource, 0);
 
@@ -208,6 +234,8 @@ void RayTracingRenderer::Render()
 
 		SceneObject& quad = sceneManager->quadObj;
 		quad.DrawModel();
+
+		delete kdroot;
 	}
 	else
 	{
@@ -237,11 +265,15 @@ void RayTracingRenderer::Render()
 
 	milliseconds ams = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 	cout << ams.count() - bms.count() << " milliseconds" << endl;
+
+	frame++;
+
 }
 
 void RayTracingRenderer::TerminateRender()
 {
 }
+
 
 void RayTracingRenderer::OfflineRender(const string outfile)
 {
@@ -343,7 +375,7 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 			auto gen = [&dis, &mersenne_engine]() {return dis(mersenne_engine); };
 			generate(begin(vec), end(vec), gen);
 
-			RayTrace(output, i, j, view, triangles, spheres, lights, materials, vec, nullptr, kdroot);
+			//RayTrace(output, i, j, view, triangles, spheres, lights, materials, vec, nullptr, kdroot);
 			cudaDeviceSynchronize();
 		}
 	}

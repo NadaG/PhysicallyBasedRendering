@@ -55,6 +55,8 @@ void gpukdtree::allocateMemory()
 	cudaMalloc((void**)&d_AABB, sizeof(AABB)*nTriangle);
 	cudaMemcpy(d_Triangles, h_Triangles, sizeof(Triangle)*nTriangle, cudaMemcpyHostToDevice);
 
+	
+
 	nodes.allocateMemory(nTriangle / 3);
 	triangleNodeAssociation.allocateMemory(nTriangle * 30);
 	triangleNodeAssociationHelper.allocateMemory(nTriangle * 10);
@@ -78,7 +80,7 @@ void gpukdtree::create()
 
 	allocateMemory();
 
-	cout << "memcpy on gpu" << endl;
+	//cout << "memcpy on gpu" << endl;
 	// calculate AABB
 	dkdtree::cu_create_AABB << <blocksize, 256 >> >(nTriangle, d_Triangles, d_AABB);
 	cudaThreadSynchronize();
@@ -440,6 +442,8 @@ __global__ void dkdtree::InitRoot(int nTri,
 	DeviceVector<int>::clear(tnaPtr);
 	DeviceVector<gpukdtreeNode>::clear(nodesPtr);
 
+	
+
 	gpukdtreeNode n;
 	n.triangleIndex = 0;
 	n.triangleNumber = nTri;
@@ -593,7 +597,7 @@ __global__ void dkdtree::MidSplitNode(Triangle* tri,
 		DeviceVector<int>::push_back(nextList, nextListPtr, leftid);
 	else if (leftcount>GPUKDTREETHRESHOLD)
 		DeviceVector<int>::push_back(smallList, smallListPtr, leftid);
-	if (rightcount>GPUKDTREETHRESHOLD)
+	if (rightcount>GPUKDTREETHRESHOLD * 2)
 		DeviceVector<int>::push_back(nextList, nextListPtr, rightid);
 	else if (rightcount>GPUKDTREETHRESHOLD)
 		DeviceVector<int>::push_back(smallList, smallListPtr, rightid);

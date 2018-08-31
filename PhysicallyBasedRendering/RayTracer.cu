@@ -25,16 +25,20 @@ texture<float4, 2, cudaReadModeElementType> roughnessTex;
 
 texture<float4, 2, cudaReadModeElementType> backgroundTex;
 
+thrust::device_vector<Triangle> dt;
+thrust::device_vector<Sphere> ds;
+thrust::device_vector<Light> dl;
+thrust::device_vector<Material> dm;
 
 const int WINDOW_HEIGHT = 1024;
 const int WINDOW_WIDTH = 1024;
 
-const int RAY_X_NUM = 128;
-const int RAY_Y_NUM = 128;
+const int RAY_X_NUM = 256;
+const int RAY_Y_NUM = 256;
 
 const int QUEUE_SIZE = 32;
 
-const int DEPTH = 2;
+const int DEPTH = 3;
 
 const int SAMPLE_NUM = 1;
 
@@ -42,6 +46,18 @@ using std::cout;
 using std::endl;
 using std::max;
 using std::min;
+
+void InitializeInformation(
+	const vector<Triangle>& triangles,
+	const vector<Sphere>& spheres,
+	const vector<Light>& lights,
+	const vector<Material>& materials)
+{
+		dt = triangles;
+		ds = spheres;
+		dl = lights;
+		dm = materials;
+}
 
 // TODO LIST
 // 1. 에너지 보존 for reflect and refract 
@@ -154,7 +170,7 @@ __device__ bool RayTriangleIntersect(Ray ray, Triangle triangle, float& dist)
 	float det = dot(v0v1, pvec);
 
 	// back face culling
-	if (det < 0.001f)
+	if (det < 0.01f)
 		return false;
 
 	/*if (fabsf(det) < 0.01f)
@@ -296,8 +312,7 @@ __device__ float RayTraversal(OctreeNode* root, Ray ray, float& minDist)
 
 __device__ float KDRayTraversal(gpukdtreeNode* root, Ray ray, float& minDist, float& distance)
 {
-	if (root->triangleNumber <= 0)
-		return;
+	//return true;
 
 	if (ray.dir.x < 0)
 	{
@@ -315,33 +330,52 @@ __device__ float KDRayTraversal(gpukdtreeNode* root, Ray ray, float& minDist, fl
 		ray.dir.z = -ray.dir.z;
 	}
 
-	double divx = 1 / ray.dir.x;
-	double divy = 1 / ray.dir.y;
-	double divz = 1 / ray.dir.z;
+	float divx = 1 / ray.dir.x;
+	float divy = 1 / ray.dir.y;
+	float divz = 1 / ray.dir.z;
 
-	double tx0 = (root->nodeAABB.bounds[0].x - ray.origin.x) * divx;
-	double tx1 = (root->nodeAABB.bounds[1].x - ray.origin.x) * divx;
-	double ty0 = (root->nodeAABB.bounds[0].y - ray.origin.y) * divy;
-	double ty1 = (root->nodeAABB.bounds[1].y - ray.origin.y) * divy;
-	double tz0 = (root->nodeAABB.bounds[0].z - ray.origin.z) * divz;
-	double tz1 = (root->nodeAABB.bounds[1].z - ray.origin.z) * divz;
+	float v1 = (root->nodeAABB.bounds[0].x - ray.origin.x) * divx;
+	float v2 = (root->nodeAABB.bounds[1].x - ray.origin.x) * divx;
+	float v3 = (root->nodeAABB.bounds[0].y - ray.origin.y) * divy;
+	float v4 = (root->nodeAABB.bounds[1].y - ray.origin.y) * divy;
+	float v5 = (root->nodeAABB.bounds[0].z - ray.origin.z) * divz;
+	float v6 = (root->nodeAABB.bounds[1].z - ray.origin.z) * divz;
 
-	float tmin = max(max(tx0, ty0), tz0);
-	float tmax = min(min(tx1, ty1), tz1);
+
+
+	//float dmin = max(max(min(v1, v2), min(v3, v4)), min(v5, v6));
+	//float dmax = min(min(max(v1, v2), max(v3, v4)), max(v5, v6));
+
+	float tmin = max(max(v1, v3), v5);
+	float tmax = min(min(v2, v4), v6);
 
 	if (tmin <= tmax)
 	{
-		//return true;
-		if (tmin < minDist)
+		return true;
+		/*if (tmin < minDist)
 		{
 			distance = tmin;
 			return true;
 		}
 		else
-			return false;
+			return false;*/
 	}
 	else
 		return false;
+
+	//if (dmax < 0)
+	//{
+	//	return false;
+	//}
+	//if (dmin > dmax)
+	//{
+	//	return false;
+	//}
+	//if (dmin > minDist)
+	//	return false;
+
+	//distance = dmin;
+	//return true;
 
 }
 
@@ -456,6 +490,7 @@ __device__ void RayTreeTraversal(OctreeNode* root,
 	} while (node != NULL);
 }
 
+
 __device__ void RayKDTreeTraversal(gpukdtreeNode* nodes,
 									int* tna,
 									Ray ray,
@@ -487,6 +522,7 @@ __device__ void RayKDTreeTraversal(gpukdtreeNode* nodes,
 			{		
 				for (int i = nodes[currentid].triangleIndex; i < nodes[currentid].triangleIndex + nodes[currentid].triangleNumber; i++)
 				{
+
 					if (RayTriangleIntersect(ray, triangles[tna[i]], tmpDist)) {
 						if (tmpDist > rayThreshold && tmpDist < minDist)
 						{
@@ -501,9 +537,12 @@ __device__ void RayKDTreeTraversal(gpukdtreeNode* nodes,
 
 			
 			// middle node
-			if (leftid != -1)
+			else
 			{
-				point = ray.origin + ray.dir * distance;
+				treestack.push(leftid);
+				treestack.push(rightid);
+
+				/*point = ray.origin + ray.dir * distance;
 
 				if (nodes[currentid].splitAxis == 0)
 				{
@@ -546,7 +585,7 @@ __device__ void RayKDTreeTraversal(gpukdtreeNode* nodes,
 						treestack.push(leftid);
 					}
 
-				}	
+				}	*/
 			}
 			
 			//if (rightid != -1)
@@ -640,12 +679,12 @@ __device__ Ray GenerateCameraRay(int y, int x, glm::mat4 cameraModelMatrix, int 
 
 	// 각 픽셀의 중앙을 가르키는 값 생성, 0~1의 값으로 Normalizing
 	// antialiasing
-	float NDCy = (y + 0.33333f + 0.33333f * rayY) / WINDOW_HEIGHT;
-	float NDCx = (x + 0.33333f + 0.33333f * rayX) / WINDOW_WIDTH;
+	/*float NDCy = (y + 0.33333f + 0.33333f * rayY) / WINDOW_HEIGHT;
+	float NDCx = (x + 0.33333f + 0.33333f * rayX) / WINDOW_WIDTH;*/
 
 	// no antialiasing
-	/*float NDCy = (y + 0.5f) / WINDOW_HEIGHT;
-	float NDCx = (x + 0.5f) / WINDOW_WIDTH;*/
+	float NDCy = (y + 0.5f) / WINDOW_HEIGHT;
+	float NDCx = (x + 0.5f) / WINDOW_WIDTH;
 
 	// window 종횡비
 	float aspectRatio = WINDOW_WIDTH / WINDOW_HEIGHT;
@@ -771,9 +810,9 @@ __device__ bool GetHitPointInfo(
 	float distToTriangle, distToSphere, distToAreaLight = 0.0f;
 	
 	//옥트리
-	nearestTriangleIdx = KDFindNearestTriangleIdx(nowRay, triangles, nodes, tna, distToTriangle);
+	//nearestTriangleIdx = KDFindNearestTriangleIdx(nowRay, triangles, nodes, tna, distToTriangle);
 	//nearestTriangleIdx = OTFindNearestTriangleIdx(nowRay, triangles, root, distToTriangle);
-	//nearestTriangleIdx = FindNearestTriangleIdx(nowRay, triangles, triangleNum, distToTriangle);
+	nearestTriangleIdx = FindNearestTriangleIdx(nowRay, triangles, triangleNum, distToTriangle);
 	nearestSphereIdx = FindNearestSphereIdx(nowRay, spheres, sphereNum, distToSphere);
 
 	//return false;
@@ -861,7 +900,6 @@ __device__ vec4 RayTraceColor(
 			nodes,
 			tna))
 		{
-
 			// ∫Ω(kd c / π + ks DFG / 4(ωo⋅n)(ωi⋅n)) Li(p,ωi) n⋅ωi dωi
 			// radiance * (1.0f * textureColor/pi + 0.0f) * lightcolor * NdotL
 			vec3 albedo;
@@ -993,8 +1031,9 @@ __device__ vec4 RayTraceColor(
 			else
 			{
 				float distance = glm::distance(hitPoint, nowRay.origin);
-				float attenuation = 1.0f / (distance * distance);
-				sumLo += emission * attenuation * nowRay.decay / (float)SAMPLE_NUM;
+				float attenuation = 1.0f / (distance);
+				//sumLo += emission * attenuation * nowRay.decay / (float)SAMPLE_NUM;
+				sumLo += (ambient + Lo) * nowRay.decay / (float)SAMPLE_NUM;
 			}
 
 			// Path Tracing, BRDF Sampling
@@ -1025,9 +1064,9 @@ __device__ vec4 RayTraceColor(
 					float phi = 2 * glm::pi<float>() * randomNums[(rayIndex * SAMPLE_NUM + j) * 2 + 1];
 
 					vec3 randomVec = normalize(vec3(
-						cosf(phi)*r,
+						__cosf(phi)*r,
 						randomNums[(rayIndex * SAMPLE_NUM + j) * 2],
-						sinf(phi)*r));
+						__sinf(phi)*r));
 
 					glm::mat3 TNB = glm::mat3(
 						triangles[nearestTriangleIdx].tangent,
@@ -1039,13 +1078,12 @@ __device__ vec4 RayTraceColor(
 					Ray reflectRay;
 					// 여기서 kS.r을 쓴 이유는 reflect ray 하나만 쓰기 때문에 한 것
 					// Ray Tracing
-					/*reflectRay.dir = normalize(reflect(nowRay.dir, N));
-					reflectRay.decay = kS.r * nowRay.decay / SAMPLE_NUM;*/
+					reflectRay.dir = normalize(reflect(nowRay.dir, N));
+					reflectRay.decay = kS.r * nowRay.decay / SAMPLE_NUM;
 					
 					// Path Tracing
-					reflectRay.dir = normalize(reflectRandomVec);
-					reflectRay.decay = nowRay.decay *
-						glm::clamp(dot(N, reflectRay.dir), 0.0f, 1.0f);
+					/*reflectRay.dir = normalize(reflectRandomVec);
+					reflectRay.decay = nowRay.decay * glm::clamp(dot(N, reflectRay.dir), 0.0f, 1.0f);*/
 					
 					reflectRay.depth = nowRay.depth + 1;
 					reflectRay.origin = hitPoint + reflectRay.dir * 0.08f;
@@ -1060,9 +1098,8 @@ __device__ vec4 RayTraceColor(
 
 					Ray refractRay;
 					// 현재 빛의 감쇠 정도와 물체의 재질에 따라 refract ray의 감쇠 정도가 정해짐
-					refractRay.dir = normalize(refract(
-						nowRay.dir, N, 1.0f / materials[materialId].refractiveIndex));
-					refractRay.decay = nowRay.decay * kD.r / SAMPLE_NUM;
+					refractRay.dir = normalize(refract(nowRay.dir, N, 1.0f / materials[materialId].refractiveIndex));
+					refractRay.decay = nowRay.decay /* * kD.r*/;
 
 					// 투명한 Object이기 때문에 kD가 refract decay로 들어간 거임
 					refractRay.depth = nowRay.depth + 1;
@@ -1108,6 +1145,8 @@ __global__ void RayTraceD(
 
 	Ray rayQueue[QUEUE_SIZE];
 
+
+
 	/*Ray ray = GenerateCameraRay(
 		blockIdx.x/2 + gridY * RAY_Y_NUM, 
 		threadIdx.x/2 + gridX * RAY_X_NUM, 
@@ -1134,11 +1173,11 @@ __global__ void RayTraceD(
 		tna);*/
 	
 	Ray ray;
-	for (int i = 0; i < 2; i++)
+	/*for (int i = 0; i < 2; i++)
 	{
 		for (int j = 0; j < 2; j++)
-		{
-			ray = GenerateCameraRay(blockIdx.x + gridY * RAY_Y_NUM, threadIdx.x + gridX * RAY_X_NUM, view, i, j);
+		{*/
+			ray = GenerateCameraRay(blockIdx.x + gridY * RAY_Y_NUM, threadIdx.x + gridX * RAY_X_NUM, view, 0, 0);
 
 			// NOTICE for문을 돌릴 때 iter를 변수로 하니까 검은 화면이 나옴
 			// y, x로 들어가고
@@ -1160,12 +1199,12 @@ __global__ void RayTraceD(
 				root,
 				nodes,
 				tna);
-		}
-	}
+		/*}
+	}*/
 
 	//color = glm::vec4(randomNums[x%1024]);
 
-	data[x] = color * 0.25f;
+	data[x] = color;
 }
 
 __global__ void random(float* result, int seed)
@@ -1180,6 +1219,7 @@ __global__ void random(float* result, int seed)
 	result[blockIdx.x] = (float)randNum / (float)randomMax;
 }
 
+
 void RayTrace(
 	glm::vec4* data,
 	const int gridX,
@@ -1193,41 +1233,23 @@ void RayTrace(
 	OctreeNode* root,
 	gpukdtree* kdroot)
 {
-	thrust::device_vector<Triangle> t = triangles;
-	thrust::device_vector<Sphere> s = spheres;
-	thrust::device_vector<Light> l = lights;
-	thrust::device_vector<Material> m = materials;
 	thrust::device_vector<float> rnums = randomThetaPi;
-
+	
 	cudaDeviceSetLimit(cudaLimitMallocHeapSize, 5000000000 * sizeof(float));
 	
-	/*vec3 min = vec3(-30, -30, -30);
-	vec3 max = vec3(30, 30, 30);
-
-	
-	int tnum = t.size();
-
-	printf("Num Triangles: %d\n", tnum);
-
-	OctreeNode* root = BuildOctree((Triangle *)triangles.data(), tnum, 1000, min, max);
-
-	OctreeNode* octree = OTHostToDevice(root);*/
-
-	//cout << "ray trace device start" << endl;
-
 	RayTraceD << <RAY_Y_NUM, RAY_X_NUM >> > (
 		data,
 		gridX,
 		gridY,
 		view,
-		t.data().get(),
-		t.size(),
-		s.data().get(),
-		s.size(),
-		l.data().get(),
-		l.size(),
-		m.data().get(),
-		m.size(),
+		dt.data().get(),
+		dt.size(),
+		ds.data().get(),
+		ds.size(),
+		dl.data().get(),
+		dl.size(),
+		dm.data().get(),
+		dm.size(),
 		rnums.data().get(),
 		root,
 		kdroot->nodes.data,
@@ -1367,3 +1389,4 @@ void LoadCudaTextures()
 	cudaBindTextureToArray(backgroundTex, cuArray, channelDesc);
 	delete texArray;
 }
+

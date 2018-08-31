@@ -6,8 +6,8 @@ void RayTracingSceneManager::InitializeObjects()
 	// fluid
 	//movingCamera->WorldTranslate(glm::vec3(10.0f, 20.0f, 110.0f));
 	// path tracing
-	movingCamera->WorldTranslate(glm::vec3(0.0f, 20.0f, 150.0f));
-	//movingCamera->ModelRotate(glm::vec3(0.0f, 1.0f, 0.0f), 3.141592f);
+	movingCamera->WorldTranslate(glm::vec3(0.0f, 50.0f, 100.0f));
+	movingCamera->ModelRotate(glm::vec3(1.0f, 0.0f, 0.0f), -0.5f);
 
 	// 0, 1, 2, 3, 4
 	Material fluidMat, planeMat, sphereMat, lightMat, areaLightMat;
@@ -23,7 +23,7 @@ void RayTracingSceneManager::InitializeObjects()
 	planeMat.albedo = glm::vec3(1.0f, 1.0f, 1.0f);
 	planeMat.metallic = 0.0f;
 	planeMat.roughness = 0.5f;
-	planeMat.texId = 1;
+	//planeMat.texId = 0;
 	materials.push_back(planeMat);
 
 	// PBR ÅØ½ºÃÄ
@@ -73,7 +73,7 @@ void RayTracingSceneManager::InitializeObjects()
 
 	flatPlaneMat.ambient = 1.0f;
 	flatPlaneMat.albedo = glm::vec3(0.3f, 0.3f, 0.3f);
-	flatPlaneMat.emission = glm::vec3(0.5f, 0.5f, 0.5f);
+	flatPlaneMat.emission = glm::vec3(1.0f, 1.0f, 1.0f);
 	flatPlaneMat.metallic = 0.1f;
 	flatPlaneMat.roughness = 0.8f;
 	materials.push_back(flatPlaneMat);
@@ -260,23 +260,34 @@ void RayTracingSceneManager::LoadFluidScene(const string meshfile)
 
 	// Ray Tracing
 	// floor
-	//glm::mat4 planeModel = glm::mat4();
-	//planeModel = glm::translate(planeModel, glm::vec3(0.0f, 1.0f, 0.0f));
-	//planeModel = glm::scale(planeModel, glm::vec3(100.0f, 1.0f, 100.0f));
-	//InsertTriangles(LoadPlaneTriangles(planeModel, 1));
+	glm::mat4 planeModel = glm::mat4();
+	planeModel = glm::translate(planeModel, glm::vec3(0.0f, 1.0f, 0.0f));
+	planeModel = glm::scale(planeModel, glm::vec3(planeSize, 1.0f, planeSize));
+	InsertTriangles(LoadPlaneTriangles(planeModel, 1));
 
 	//// back
 	//planeModel = glm::mat4();
 	//planeModel = glm::translate(planeModel, glm::vec3(0.0f, 1.0f, -50.0f));
 	//planeModel = glm::rotate(planeModel, 1.57079f, glm::vec3(1.0f, 0.0f, 0.0f));
-	//planeModel = glm::scale(planeModel, glm::vec3(100.0f, 1.0f, 100.0f));
+	//planeModel = glm::scale(planeModel, glm::vec3(planeSize, 1.0f, planeSize));
 	//InsertTriangles(LoadPlaneTriangles(planeModel, 1));
 
 	//// rusted iron sphere 1
 	//glm::mat4 sphereModel = glm::mat4();
-	//sphereModel = glm::translate(sphereModel, glm::vec3(-30.0f, 20.0f, 0.0f));
-	//sphereModel = glm::scale(sphereModel, glm::vec3(10.0f, 10.0f, 10.0f));
-	//InsertTriangles(LoadMeshTriangles("Obj/Sphere.obj", sphereModel, 2));
+	//sphereModel = glm::translate(sphereModel, glm::vec3(-10.0f, 0.0f, 0.0f));
+	//sphereModel = glm::scale(sphereModel, glm::vec3(7.0f, 7.0f, 7.0f));
+	//InsertTriangles(LoadMeshTriangles("Obj/dragon.obj", sphereModel, 0));
+
+
+	/*glm::mat4 sphereModel2 = glm::mat4();
+	sphereModel = glm::translate(sphereModel2, glm::vec3(10.0f, 0.0f, 0.0f));
+	sphereModel = glm::scale(sphereModel2, glm::vec3(7.0f, 7.0f, 7.0f));
+	InsertTriangles(LoadMeshTriangles("Obj/dragon.obj", sphereModel2, 2));*/
+
+	//glm::mat4 sphereModel2 = glm::mat4();
+	//sphereModel = glm::translate(sphereModel, glm::vec3(0.0f, 0.0f, 0.0f));
+	//sphereModel = glm::scale(sphereModel, glm::vec3(7.0f, 7.0f, 7.0f));
+	//InsertTriangles(LoadMeshTriangles("Obj/bunny.obj", sphereModel, 2));
 
 	//// rusted iron sphere 2
 	//sphereModel = glm::mat4();
@@ -286,104 +297,104 @@ void RayTracingSceneManager::LoadFluidScene(const string meshfile)
 
 	//// rusted iron sphere 3
 	//sphereModel = glm::mat4();
-	//sphereModel = glm::translate(sphereModel, glm::vec3(0.0f, 25.0f, 0.0f));
+	//sphereModel = glm::translate(sphereModel, glm::vec3(-40.0f, 20.0f, -40.0f));
 	//sphereModel = glm::scale(sphereModel, glm::vec3(5.0f, 5.0f, 5.0f));
 	//InsertTriangles(LoadMeshTriangles("Obj/Sphere.obj", sphereModel, 2));
 
 	//// rusted iron sphere 4
 	//sphereModel = glm::mat4();
-	//sphereModel = glm::translate(sphereModel, glm::vec3(0.0f, 40.0f, 0.0f));
-	//sphereModel = glm::scale(sphereModel, glm::vec3(5.0f, 5.0f, 5.0f));
+	//sphereModel = glm::translate(sphereModel, glm::vec3(0.0f, 25.0f, 0.0f));
+	//sphereModel = glm::scale(sphereModel, glm::vec3(7.0f, 7.0f, 7.0f));
 	//InsertTriangles(LoadMeshTriangles("Obj/Sphere.obj", sphereModel, 2));
 
-	// rusted iron sphere 1
-	sphere.origin = glm::vec3(-30.0f, 20.0f, 0.0f);
-	sphere.radius = 10.0f;
-	sphere.materialId = 2;
-	spheres.push_back(sphere);
+	//// rusted iron sphere 1
+	//sphere.origin = glm::vec3(-30.0f, 20.0f, 0.0f);
+	//sphere.radius = 10.0f;
+	//sphere.materialId = 2;
+	//spheres.push_back(sphere);
 
-	// rusted iron sphere 2
-	sphere.origin = glm::vec3(25.0f, 25.0f, 0.0f);
-	sphere.radius = 5.0f;
-	sphere.materialId = 2;
-	spheres.push_back(sphere);
+	//// rusted iron sphere 2
+	//sphere.origin = glm::vec3(25.0f, 25.0f, 0.0f);
+	//sphere.radius = 5.0f;
+	//sphere.materialId = 2;
+	//spheres.push_back(sphere);
 
-	// rusted iron sphere 3
-	sphere.origin = glm::vec3(0.0f, 25.0f, 0.0f);
-	sphere.radius = 8.0f;
-	sphere.materialId = 2;
-	spheres.push_back(sphere);
+	//// rusted iron sphere 3
+	//sphere.origin = glm::vec3(0.0f, 25.0f, 0.0f);
+	//sphere.radius = 8.0f;
+	//sphere.materialId = 2;
+	//spheres.push_back(sphere);
 
-	// rusted iron sphere 4
-	sphere.origin = glm::vec3(0.0f, 40.0f, 0.0f);
-	sphere.radius = 4.0f;
-	sphere.materialId = 2;
-	spheres.push_back(sphere);
+	//// rusted iron sphere 4
+	//sphere.origin = glm::vec3(0.0f, 40.0f, 0.0f);
+	//sphere.radius = 4.0f;
+	//sphere.materialId = 2;
+	//spheres.push_back(sphere);
 
-	SceneObject meshSphere;
-	meshSphere.LoadModel("Obj/Sphere.obj");
+	//SceneObject meshSphere;
+	//meshSphere.LoadModel("Obj/Sphere.obj");
 
-	for (int i = 0; i < spheres.size(); i++)
-	{
-		sceneObjs.push_back(meshSphere);
-		sceneObjs[i].WorldTranslate(spheres[i].origin);
-		sceneObjs[i].Scale(glm::vec3(spheres[i].radius));
-	}
+	//for (int i = 0; i < spheres.size(); i++)
+	//{
+	//	sceneObjs.push_back(meshSphere);
+	//	sceneObjs[i].WorldTranslate(spheres[i].origin);
+	//	sceneObjs[i].Scale(glm::vec3(spheres[i].radius));
+	//}
 
-	// Path Tracing
-	// floor
-	glm::mat4 planeModel = glm::mat4();
-	planeModel = glm::translate(planeModel, glm::vec3(0.0f, 0.0f, 0.0f));
-	planeModel = glm::scale(planeModel, glm::vec3(planeSize, 1.0f, planeSize));
-	InsertTriangles(LoadPlaneTriangles(planeModel, 8));
+	//// Path Tracing
+	//// floor
+	//glm::mat4 planeModel = glm::mat4();
+	//planeModel = glm::translate(planeModel, glm::vec3(0.0f, 0.0f, 0.0f));
+	//planeModel = glm::scale(planeModel, glm::vec3(planeSize, 1.0f, planeSize));
+	//InsertTriangles(LoadPlaneTriangles(planeModel, 8));
 
-	quadObj.SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-	quadObj.SetRotation(glm::rotate(1.57079f, glm::vec3(1.0f, 0.0f, 0.0f)));
-	quadObj.SetScale(glm::vec3(planeSize, planeSize, 1.0f));
-	quadObj.SetColor(vec3(0.5f, 0.5f, 0.5f));
-	sceneObjs.push_back(quadObj);
+	//quadObj.SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+	//quadObj.SetRotation(glm::rotate(1.57079f, glm::vec3(1.0f, 0.0f, 0.0f)));
+	//quadObj.SetScale(glm::vec3(planeSize, planeSize, 1.0f));
+	//quadObj.SetColor(vec3(0.5f, 0.5f, 0.5f));
+	//sceneObjs.push_back(quadObj);
 
-	// g, back 
-	planeModel = glm::mat4();
-	planeModel = glm::translate(planeModel, glm::vec3(0.0f, 0.0f, -50.0f));
-	planeModel = glm::rotate(planeModel, 1.57079f, glm::vec3(1.0f, 0.0f, 0.0f));
-	planeModel = glm::scale(planeModel, glm::vec3(planeSize, 1.0f, planeSize));
-	InsertTriangles(LoadPlaneTriangles(planeModel, 6));
+	//// g, back 
+	//planeModel = glm::mat4();
+	//planeModel = glm::translate(planeModel, glm::vec3(0.0f, 0.0f, -50.0f));
+	//planeModel = glm::rotate(planeModel, 1.57079f, glm::vec3(1.0f, 0.0f, 0.0f));
+	//planeModel = glm::scale(planeModel, glm::vec3(planeSize, 1.0f, planeSize));
+	//InsertTriangles(LoadPlaneTriangles(planeModel, 6));
 
-	quadObj.SetPosition(glm::vec3(0.0f, 0.0f, -planeSize));
-	quadObj.SetRotation(glm::mat4());
-	quadObj.SetScale(glm::vec3(planeSize, planeSize, 1.0f));
-	quadObj.SetColor(vec3(0.0f, 1.0f, 0.0f));
-	sceneObjs.push_back(quadObj);
+	//quadObj.SetPosition(glm::vec3(0.0f, 0.0f, -planeSize));
+	//quadObj.SetRotation(glm::mat4());
+	//quadObj.SetScale(glm::vec3(planeSize, planeSize, 1.0f));
+	//quadObj.SetColor(vec3(0.0f, 1.0f, 0.0f));
+	//sceneObjs.push_back(quadObj);
 
-	// r, left
-	planeModel = glm::mat4();
-	planeModel = glm::translate(planeModel, glm::vec3(45.0f, 0.0f, 0.0f));
-	planeModel = glm::rotate(planeModel, 1.57079f, glm::vec3(0.0f, 0.0f, 1.0f));
-	planeModel = glm::scale(planeModel, glm::vec3(planeSize, 1.0f, planeSize));
-	InsertTriangles(LoadPlaneTriangles(planeModel, 7));
+	//// r, left
+	//planeModel = glm::mat4();
+	//planeModel = glm::translate(planeModel, glm::vec3(45.0f, 0.0f, 0.0f));
+	//planeModel = glm::rotate(planeModel, 1.57079f, glm::vec3(0.0f, 0.0f, 1.0f));
+	//planeModel = glm::scale(planeModel, glm::vec3(planeSize, 1.0f, planeSize));
+	//InsertTriangles(LoadPlaneTriangles(planeModel, 7));
 
-	quadObj.SetPosition(glm::vec3(-45.0f, 0.0f, 0.0f));
-	quadObj.SetRotation(glm::rotate(1.57079f, glm::vec3(0.0f, -1.0f, 0.0f)));
-	quadObj.SetScale(glm::vec3(planeSize, planeSize, 1.0f));
-	quadObj.SetColor(vec3(1.0f, 0.0f, 0.0f));
-	sceneObjs.push_back(quadObj);
+	//quadObj.SetPosition(glm::vec3(-45.0f, 0.0f, 0.0f));
+	//quadObj.SetRotation(glm::rotate(1.57079f, glm::vec3(0.0f, -1.0f, 0.0f)));
+	//quadObj.SetScale(glm::vec3(planeSize, planeSize, 1.0f));
+	//quadObj.SetColor(vec3(1.0f, 0.0f, 0.0f));
+	//sceneObjs.push_back(quadObj);
 
-	// b, right
-	planeModel = glm::mat4();
-	planeModel = glm::translate(planeModel, glm::vec3(-45.0f, 0.0f, 0.0f));
-	planeModel = glm::rotate(planeModel, 1.57079f, glm::vec3(0.0f, 0.0f, -1.0f));
-	planeModel = glm::scale(planeModel, glm::vec3(planeSize, 1.0f, planeSize));
-	InsertTriangles(LoadPlaneTriangles(planeModel, 5));
+	//// b, right
+	//planeModel = glm::mat4();
+	//planeModel = glm::translate(planeModel, glm::vec3(-45.0f, 0.0f, 0.0f));
+	//planeModel = glm::rotate(planeModel, 1.57079f, glm::vec3(0.0f, 0.0f, -1.0f));
+	//planeModel = glm::scale(planeModel, glm::vec3(planeSize, 1.0f, planeSize));
+	//InsertTriangles(LoadPlaneTriangles(planeModel, 5));
 
-	quadObj.SetPosition(glm::vec3(45.0f, 0.0f, 0.0f));
-	quadObj.SetRotation(glm::rotate(1.57079f, glm::vec3(0.0f, 1.0f, 0.0f)));
-	quadObj.SetScale(glm::vec3(planeSize, planeSize, 1.0f));
-	quadObj.SetColor(vec3(0.0f, 0.0f, 1.0f));
-	sceneObjs.push_back(quadObj);
+	//quadObj.SetPosition(glm::vec3(45.0f, 0.0f, 0.0f));
+	//quadObj.SetRotation(glm::rotate(1.57079f, glm::vec3(0.0f, 1.0f, 0.0f)));
+	//quadObj.SetScale(glm::vec3(planeSize, planeSize, 1.0f));
+	//quadObj.SetColor(vec3(0.0f, 0.0f, 1.0f));
+	//sceneObjs.push_back(quadObj);
 
 	// fluid
-	//InsertTriangles(LoadMeshTriangles(meshfile, glm::translate(glm::vec3(-20.0f, 0.0f, 0.0f)), 0));
+	InsertTriangles(LoadMeshTriangles(meshfile, glm::translate(glm::vec3(-20.0f, 0.0f, 0.0f)), 0));
 }
 
 void RayTracingSceneManager::LoadPathTracingScene()
@@ -397,7 +408,7 @@ void RayTracingSceneManager::LoadPathTracingScene()
 	// light
 	Light light;
 	light.pos = glm::vec3(0.0f, 20.0f, 20.0f);
-	light.color = glm::vec3(1000.0f, 1000.0f, 1000.0f);
+	light.color = glm::vec3(10.0f, 10.0f, 10.0f);
 	lights.push_back(light);
 
 	Sphere sphere;

@@ -43,6 +43,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -50,6 +51,7 @@
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -114,6 +116,9 @@
       <AdditionalDependencies>cudart.lib;freeglut.lib;glew32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <StackReserveSize>10485760</StackReserveSize>
     </Link>
+    <CudaCompile>
+      <FastMath>true</FastMath>
+    </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -152,11 +157,13 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Users\KUCG_ROG\Desktop\2018_1_GraphicsLecture\PhysicallyBasedRendering %282%29;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.0\lib\x64;C:\Users\KUCG_ROG\Desktop\2018_1_GraphicsLecture\OpenGL\GL64;C:\Users\RENDER4\Desktop\OpenGL\GL64;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\lib\x64;C:\Users\RENDER4\Desktop\boostpython\boost_1_63_0\stage\lib;C:\Users\RENDER4\AppData\Local\Programs\python-3.6.3-h9e2ca53_1\libs</AdditionalLibraryDirectories>
+
       <AdditionalDependencies>cudart.lib;freeglut.lib;glew32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <StackReserveSize>10485760</StackReserveSize>
     </Link>
     <CudaCompile>
       <Include>%(Include)</Include>
+      <FastMath>true</FastMath>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>

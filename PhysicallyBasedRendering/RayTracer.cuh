@@ -15,7 +15,8 @@
 #include <thrust/device_vector.h>
 #include <glm\common.hpp>
 
-#define GPUKDTREETHRESHOLD 32
+
+#define GPUKDTREETHRESHOLD 25
 #define GPUKDTREEMAXSTACK 128
 
 using glm::vec2;
@@ -82,13 +83,25 @@ struct Triangle
 	int materialId;
 	int meshId;
 
+	__device__ __host__
 	Triangle()
 	{
-		v0 = vec3();
-		v1 = vec3();
-		v2 = vec3();
+		v0 = vec3(0.0f);
+		v1 = vec3(0.0f);
+		v2 = vec3(0.0f);
 
-		normal = vec3();
+		normal = vec3(0.0f);
+
+		v0normal = vec3(0.0f);
+		v1normal = vec3(0.0f);
+		v2normal = vec3(0.0f);
+
+		tangent = vec3(0.0f);
+		bitangent = vec3(0.0f);
+
+		v0uv = vec2(0.0f);
+		v1uv = vec2(0.0f);
+		v2uv = vec2(0.0f);
 
 		materialId = 0;
 		meshId = 0;
@@ -99,6 +112,7 @@ struct Triangle
 		//tbb.bounds[1] = vec3(0.0f);
 	}
 
+	__device__ __host__
 	Triangle(vec3 v0, vec3 v1, vec3 v2)
 	{
 		this->v0 = v0;
@@ -402,7 +416,13 @@ namespace dkdtree {
 }
 
 
-DLLExport
+
+void InitializeInformation(
+	const vector<Triangle>& triangles,
+	const vector<Sphere>& spheres,
+	const vector<Light>& lights,
+	const vector<Material>& materials);
+
 void RayTrace(
 	glm::vec4* data,
 	const int gridX,
@@ -416,8 +436,8 @@ void RayTrace(
 	OctreeNode* root,
 	gpukdtree* kdroot
 );
-
 void LoadCudaTextures();
+
 
 __device__ bool RayTriangleIntersect(Ray ray, Triangle triangle, float& dist);
 

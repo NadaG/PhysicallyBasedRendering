@@ -5,11 +5,12 @@
 
 #include "RayTracer.cuh"
 
+
 class RayTracingRenderer : public Renderer
 {
 public:
 	RayTracingRenderer(SceneManager* sceneManager)
-		:Renderer(sceneManager), gridX(8), gridY(8), sampleNum(1)
+		:Renderer(sceneManager), gridX(4), gridY(4), sampleNum(1)
 	{}
 	virtual ~RayTracingRenderer() {};
 
@@ -19,6 +20,7 @@ public:
 	void TerminateRender();
 
 	void OfflineRender(const string outfile);
+
 
 private:
 	int writeFileNum = 0;
@@ -45,6 +47,8 @@ private:
 	vector<Light> lights;
 	vector<Material> materials;
 	vector<SceneObject> sceneObjs;
+
+	int frame = 0;
 
 	Object* camera;
 };

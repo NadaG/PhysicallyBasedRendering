@@ -4,8 +4,9 @@
 #include "FluidSimulationImporter.h"
 #include "FluidSimulationClient.h"
 #include "FluidSceneManager.h"
-#include "MarchingCubeTMp.h"
+#include "MarchingCubeBefore.h"
 #include "NormalEstimateModel.h"
+#include "CIsoSurface.h"
 
 struct FluidCube
 {
@@ -32,9 +33,11 @@ public:
 	void TerminateRender(); 
 
 private:
+	ShaderProgram* particleColorShader;
 	ShaderProgram* particleDepthShader;
 	ShaderProgram* particleThicknessShader;
 
+	ShaderProgram* depthBlurShader;
 	ShaderProgram* blurShader;
 
 	ShaderProgram* surfaceShader;
@@ -58,6 +61,7 @@ private:
 	// debug용임 normal 값 저장
 	Texture2D colorTex;
 
+	Texture2D particleColorTex;
 	Texture2D depthTex;
 	Texture2D thicknessTex;
 
@@ -68,6 +72,7 @@ private:
 	// blur
 	Texture2D depthBlurTex[2];
 	Texture2D thicknessBlurTex[2];
+	Texture2D particleColorBlurTex[2];
 
 	const int depthWidth = 1024;
 	const int depthHeight = 1024;
@@ -84,9 +89,11 @@ private:
 
 	FrameBufferObject pbrFBO;
 	
+	FrameBufferObject particleColorFBO;
 	FrameBufferObject depthFBO;
 	FrameBufferObject thicknessFBO;
 
+	FrameBufferObject particleColorBlurFBO[2];
 	FrameBufferObject depthBlurFBO[2];
 	FrameBufferObject thicknessBlurFBO[2];
 
@@ -101,7 +108,7 @@ private:
 
 	int currentFrame;
 
-	MarchingCubeTmp mc;
+	MarchingCube mc;
 
 	PNGExporter pngExporter;
 
@@ -109,14 +116,18 @@ private:
 
 	NormalEstimateModel NEM;
 
+	CIsoSurface<float> iso;
+
 private:
 
 	bool isRenderOnDefaultFBO;
+	bool isScreenSpace;
+
 	int targetFrame;
+	int lastFrame;
 
 	glm::vec3 boundarySize;
 
 	void DrawFluids(const float cameraDist);
 	void DrawFluidMesh(const int indexNum);
-
 };

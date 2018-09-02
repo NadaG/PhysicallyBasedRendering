@@ -6,11 +6,13 @@ class FluidSceneManager : public SceneManager
 {
 public:
 
-	FluidSceneManager(){}
-	virtual ~FluidSceneManager(){}
+	FluidSceneManager() :moveSpeed(0.5f) {}
+	virtual ~FluidSceneManager() {}
 
 	void InitializeObjects();
 	void Update();
 
 private:
+
+	const float moveSpeed;
 };

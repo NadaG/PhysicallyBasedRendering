@@ -1,6 +1,7 @@
 #version 330 core
 
 in vec3 eyeSpacePos;
+in vec3 particleColor;
 
 layout(location = 0) out vec3 color;
 layout(location = 1) out vec3 depth;
@@ -46,5 +47,5 @@ void main()
 	depth = vec3(tmpDepth / far);
 	
 	// normal 값을 확인하기 위해
-	color = n;
+	color = particleColor;
 }

@@ -166,11 +166,6 @@ struct Material
 	}
 };
 
-
-
-
-
-
 struct gpukdtreeNode {
 	__device__ __host__ gpukdtreeNode(int l = -1, int r = -1, int sa = -1, int ti = 0, int tn = 0, float sp = 0)
 	{

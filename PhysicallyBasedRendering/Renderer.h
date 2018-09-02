@@ -72,7 +72,6 @@ protected:
 	GLFWwindow* window;
 
 	SceneManager* sceneManager;
-
 	ShaderProgram* debugQuadShader;
 
 	float zNear = 0.01f;

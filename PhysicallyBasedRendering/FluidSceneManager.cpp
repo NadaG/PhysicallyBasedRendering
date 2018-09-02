@@ -13,7 +13,7 @@ void FluidSceneManager::InitializeObjects()
 	sceneObjs.push_back(skyboxObj);
 	sceneObjs[1].Scale(glm::vec3(10.0f));
 
-	movingCamera->WorldTranslate(glm::vec3(0.0f, 10.0f, 40.0f));
+	movingCamera->WorldTranslate(glm::vec3(0.0f, 10.0f, 50.0f));
 	movingCamera->ModelRotate(glm::vec3(1.0f, 0.0f, 0.0f), -0.3f);
 }
 
@@ -52,51 +52,33 @@ void FluidSceneManager::Update()
 		movingCamera->ModelRotate(glm::vec3(0.0f, 0.0f, 1.0f), -0.03f);
 	}
 
-	/*if (InputManager::GetInstance()->IsKey(GLFW_KEY_A))
+	if (InputManager::GetInstance()->IsKey(GLFW_KEY_J))
 	{
-		glm::mat4 view = glm::lookAt(
-			movingCamera->GetWorldPosition(),
-			glm::vec3(0.0f, movingCamera->GetPosition().y, 0.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f)
-		);
-
-		glm::vec4 v = glm::inverse(view) * glm::vec4(-0.2f, 0.0f, 0.0f, 0.0f);
-		sceneObjs[0].WorldTranslate(v);
+		movingCamera->ModelTranslate(glm::vec3(-moveSpeed, 0.0f, 0.0f));
 	}
 
-	if (InputManager::GetInstance()->IsKey(GLFW_KEY_D))
+	if (InputManager::GetInstance()->IsKey(GLFW_KEY_L))
 	{
-		glm::mat4 view = glm::lookAt(
-			movingCamera->GetWorldPosition(),
-			glm::vec3(0.0f, movingCamera->GetPosition().y, 0.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f)
-		);
-
-		glm::vec4 v = glm::inverse(view) * glm::vec4(0.2f, 0.0f, 0.0f, 0.0f);
-		sceneObjs[0].WorldTranslate(v);
+		movingCamera->ModelTranslate(glm::vec3(moveSpeed, 0.0f, 0.0f));
 	}
 
-	if (InputManager::GetInstance()->IsKey(GLFW_KEY_W))
+	if (InputManager::GetInstance()->IsKey(GLFW_KEY_I))
 	{
-		glm::mat4 view = glm::lookAt(
-			movingCamera->GetWorldPosition(),
-			glm::vec3(0.0f, movingCamera->GetPosition().y, 0.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f)
-		);
-
-		glm::vec4 v = glm::inverse(view) * glm::vec4(0.0f, 0.2f, 0.0f, 0.0f);
-		sceneObjs[0].WorldTranslate(v);
+		movingCamera->ModelTranslate(glm::vec3(0.0f, 0.0f, -moveSpeed));
 	}
 
-	if (InputManager::GetInstance()->IsKey(GLFW_KEY_S))
+	if (InputManager::GetInstance()->IsKey(GLFW_KEY_K))
 	{
-		glm::mat4 view = glm::lookAt(
-			movingCamera->GetWorldPosition(),
-			glm::vec3(0.0f, movingCamera->GetPosition().y, 0.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f)
-		);
+		movingCamera->ModelTranslate(glm::vec3(0.0f, 0.0f, moveSpeed));
+	}
 
-		glm::vec4 v = glm::inverse(view) * glm::vec4(0.0f, -0.2f, 0.0f, 0.0f);
-		sceneObjs[0].WorldTranslate(v);
-	}*/
+	if (InputManager::GetInstance()->IsKey(GLFW_KEY_U))
+	{
+		movingCamera->ModelTranslate(glm::vec3(0.0f, moveSpeed, 0.0f));
+	}
+
+	if (InputManager::GetInstance()->IsKey(GLFW_KEY_O))
+	{
+		movingCamera->ModelTranslate(glm::vec3(0.0f, -moveSpeed, 0.0f));
+	}
 }

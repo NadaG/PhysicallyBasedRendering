@@ -69,8 +69,6 @@ void gpukdtree::freeMemory()
 	cudaFree(d_AABB);
 }
 
-
-
 void gpukdtree::create()
 {
 	cudaError_t err = cudaSuccess;

@@ -2,11 +2,14 @@
 
 uniform sampler2D worldMap;
 uniform sampler2D bluredDepthMap;
+
 uniform sampler2D thicknessMap;
+// test 해보기 위해 만들었던 맵
 uniform sampler2D normalMap;
 uniform sampler2D worldDepthMap;
 
 uniform sampler2D debugMap;
+uniform sampler2D bluredColorMap;
 
 uniform mat4 projection;
 uniform mat4 view;
@@ -98,7 +101,9 @@ void main()
 
 	vec3 eyeDir = normalize(posEye - vec3(view*vec4(eyePos, 1.0)));
 
-	vec3 ambient = vec3(0.15, 0.15, 0.2);
+	//vec3 ambient = vec3(0.15, 0.15, 0.2);
+	vec3 ambient = texture(bluredColorMap, outUV).rgb * 0.3f;
+
 	vec3 diffuse = vec3(0.2, 0.2, 0.5) * max(dot(-lightPosNorm, n), 0);
 	vec3 specular = vec3(0.2, 0.2, 0.6) * pow(max(dot(reflectDir, eyeDir), 0), 32);
 	
@@ -107,6 +112,9 @@ void main()
 	float I = 1 / (exp(1 * thickness));
 	
 	//color = ambient + diffuse + specular * fresnel(n, eyeDir) + worldColor * I;
+	
+	//color = texture(bluredColorMap, outUV).rgb;
+	//color = vec3(1.0, 1.0, 0.0);
 
 	//color = vec3(thickness);
 

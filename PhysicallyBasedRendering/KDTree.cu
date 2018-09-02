@@ -562,8 +562,6 @@ KDTreeNode* BuildKDTree(const vector<Triangle>& T)
 
 	ComputeAABB << < block, 1024 >> > (t.data().get(), t.size(), tbbs);
 	cout << "Compute Tri AABB" << endl;
-
-
 	
 	Nvector* nodeList = new Nvector();
 
@@ -574,7 +572,6 @@ KDTreeNode* BuildKDTree(const vector<Triangle>& T)
 	Nvector* nextList = new Nvector();
 
 	KDTreeNode* root = new KDTreeNode();
-
 
 	//////////////////////////////////////////////
 	//	initialize root node

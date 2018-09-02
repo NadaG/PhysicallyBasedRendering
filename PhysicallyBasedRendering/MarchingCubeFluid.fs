@@ -29,4 +29,7 @@ void main()
 
 	// normal color
 	color = normal * 0.5f + vec3(0.5f);
+
+	// debug
+	//color = vec3(1.0f, 0.0f, 0.0f);
 }

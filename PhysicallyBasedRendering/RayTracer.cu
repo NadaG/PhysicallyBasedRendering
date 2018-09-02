@@ -1203,7 +1203,6 @@ void RayTrace(
 	
 	/*vec3 min = vec3(-30, -30, -30);
 	vec3 max = vec3(30, 30, 30);
-
 	
 	int tnum = t.size();
 

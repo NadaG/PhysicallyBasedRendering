@@ -83,7 +83,7 @@ void FluidSimulationImporter::Initialize(const glm::vec3 boundarySize, FluidCube
 	sparam.pressure = 0.01f;
 	sparam.surfacetension = 0.01f;
 	sparam.kernelSize = 1.0f;
-	sparam.surfaceThreshold = 0.0f;
+	sparam.surfaceThreshold = 3000.0f;
 	sparam.vAtten = 0.00002f;
 
 	sparam.box2d = 0;
@@ -141,9 +141,18 @@ void FluidSimulationImporter::Update(GLfloat* v)
 			v[i * 6 + 0] = stopFramePos[i * 3 + 0];
 			v[i * 6 + 1] = stopFramePos[i * 3 + 1];
 			v[i * 6 + 2] = stopFramePos[i * 3 + 2];
-			v[i * 6 + 4] = vel[i * 3 + 0];
-			v[i * 6 + 5] = vel[i * 3 + 1];
-			v[i * 6 + 6] = vel[i * 3 + 2];
+			if (issur[i] > 0)
+			{
+				v[i * 6 + 3] = 1.0f;
+				v[i * 6 + 4] = 1.0f;
+				v[i * 6 + 5] = 1.0f;
+			}
+			else
+			{
+				v[i * 6 + 3] = 0.0f;
+				v[i * 6 + 4] = 0.0f;
+				v[i * 6 + 5] = 1.0f;
+			}
 		}
 	}
 	else
@@ -153,9 +162,19 @@ void FluidSimulationImporter::Update(GLfloat* v)
 			v[i * 6 + 0] = pos[i * 3 + 0] * posScalingFactor;
 			v[i * 6 + 1] = pos[i * 3 + 1] * posScalingFactor;
 			v[i * 6 + 2] = pos[i * 3 + 2] * posScalingFactor;
-			v[i * 6 + 4] = vel[i * 3 + 0];
-			v[i * 6 + 5] = vel[i * 3 + 1];
-			v[i * 6 + 6] = vel[i * 3 + 2];
+
+			if (issur[i] > 0)
+			{
+				v[i * 6 + 3] = 1.0f;
+				v[i * 6 + 4] = 1.0f;
+				v[i * 6 + 5] = 1.0f;
+			}
+			else
+			{
+				v[i * 6 + 3] = 0.0f;
+				v[i * 6 + 4] = 0.0f;
+				v[i * 6 + 5] = 1.0f;
+			}
 		}
 	}
 }

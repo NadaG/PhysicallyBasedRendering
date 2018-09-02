@@ -19,7 +19,7 @@ void RayTracingRenderer::InitializeRender()
 	LoadCudaTextures();
 
 	rayTracingTex.LoadTexture(
-		GL_RGBA16F,
+		GL_RGBA32F,
 		WindowManager::GetInstance()->width,
 		WindowManager::GetInstance()->height,
 		GL_RGBA,
@@ -370,4 +370,51 @@ void RayTracingRenderer::OfflineRender(const string outfile)
 
 	milliseconds ams = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 	cout << ams.count() - bms.count() << " milliseconds" << endl;
+}
+
+
+void tmp()
+{
+	//cudaGraphicsResource* cuda_pbo_resource;
+	//glGenTextures(1, &texture);
+	//glBindTexture(GL_TEXTURE_2D, texture);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, 0);
+	//glGenerateMipmap(GL_TEXTURE_2D);
+
+	//glBindTexture(GL_TEXTURE_2D, texture);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	//glGenBuffers(1, &rayTracePBO);
+	//glBindBuffer(GL_PIXEL_UNPACK_BUFFER, rayTracePBO);
+	//glBufferData(
+	//	GL_PIXEL_UNPACK_BUFFER,
+	//	width * height * sizeof(GLfloat) * 4,
+	//	0,
+	//	GL_STREAM_DRAW);
+
+	//cudaGraphicsGLRegisterBuffer(&cuda_pbo_resource, rayTracePBO, cudaGraphicsMapFlagsWriteDiscard);
+
+	//cudaGraphicsMapResources(1, &cuda_pbo_resource, 0);
+
+	//// device memory를 가르키는 포인터
+	//glm::vec4* output;
+	//size_t num_bytes;
+	//cudaGraphicsResourceGetMappedPointer((void**)&output, &num_bytes, cuda_pbo_resource);
+
+	//// kernel function 호출
+	//// RayTrace(output, i, j, view, triangles, spheres, lights, materials, vec, nullptr, kdroot);
+
+	//cudaGraphicsUnmapResources(1, &cuda_pbo_resource, 0);
+
+	//glBindBuffer(GL_PIXEL_UNPACK_BUFFER, rayTracePBO);
+	//glBindTexture(GL_TEXTURE_2D, texture);
+	//glTexSubImage2D(
+	//	GL_TEXTURE_2D, 0, 0, 0,
+	//	width,
+	//	height,
+	//	GL_RGBA, GL_FLOAT, 0);
+	//glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 }

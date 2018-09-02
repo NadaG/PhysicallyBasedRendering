@@ -383,7 +383,7 @@ void RayTracingSceneManager::LoadFluidScene(const string meshfile)
 	sceneObjs.push_back(quadObj);
 
 	// fluid
-	//InsertTriangles(LoadMeshTriangles(meshfile, glm::translate(glm::vec3(-20.0f, 0.0f, 0.0f)), 0));
+	InsertTriangles(LoadMeshTriangles(meshfile, glm::translate(glm::vec3(-20.0f, 0.0f, 0.0f)), 0));
 }
 
 void RayTracingSceneManager::LoadPathTracingScene()

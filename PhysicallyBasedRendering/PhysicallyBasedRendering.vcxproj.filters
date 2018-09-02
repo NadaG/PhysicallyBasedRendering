@@ -20,8 +20,6 @@
     <ClCompile Include="LightMovement.cpp" />
     <ClCompile Include="LTCRenderer.cpp" />
     <ClCompile Include="LTCSceneManager.cpp" />
-    <ClCompile Include="MarchingCube.cpp" />
-    <ClCompile Include="MarchingCubeTmp.cpp" />
     <ClCompile Include="MarchingCubeVertexNormal.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Mesh.cpp" />
@@ -53,6 +51,9 @@
     <ClCompile Include="VertexArrayObject.cpp" />
     <ClCompile Include="VolumeRenderer.cpp" />
     <ClCompile Include="WindowManager.cpp" />
+    <ClCompile Include="MarchingCubeBefore.cpp" />
+    <ClCompile Include="CIsoSurface.cpp" />
+    <ClCompile Include="Vectors.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BillBoardMovement.h" />
@@ -73,8 +74,6 @@
     <ClInclude Include="FrameBufferObject.h" />
     <ClInclude Include="gpukdtree.cuh" />
     <ClInclude Include="KDTree.cuh" />
-    <ClInclude Include="MarchingCube.h" />
-    <ClInclude Include="MarchingCubeTMp.h" />
     <ClInclude Include="MarchingCubeVertexNormal.h" />
     <ClInclude Include="MarchingCubeVertexNormalUtility.h" />
     <ClInclude Include="MCTable.h" />
@@ -115,6 +114,11 @@
     <ClInclude Include="VertexArrayObject.h" />
     <ClInclude Include="VolumeRenderer.h" />
     <ClInclude Include="WindowManager.h" />
+    <ClInclude Include="MarchingCubeBefore.h" />
+    <ClInclude Include="CIsoSurface.h" />
+    <ClInclude Include="MeshGet.h" />
+    <ClInclude Include="utility.h" />
+    <ClInclude Include="Vectors.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Basic.fs" />
@@ -168,5 +172,6 @@
     <None Include="tessellationControl.tcs" />
     <None Include="tessellationEvaluation.tes" />
     <None Include="vertex.vs" />
+    <None Include="ParticleColor.fs" />
   </ItemGroup>
 </Project>

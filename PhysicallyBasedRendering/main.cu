@@ -24,8 +24,6 @@ enum Scene
 	RAYTRACING_SCENE = 6
 };
 
-
-
 // TODO movement 셋팅하고 사용하는 부분 너무 복잡함, 함수로 빼내던가 해야함
 // TODO scene object update하고 render 하는 부분 이상함, renderer에서 여러 object를 다 가져와야하는 문제 해결
 // TODO shader 불러오고 사용하고 그리는 부분 중복되는 부분이 너무 많은데 그 부분들 수정하기
@@ -41,7 +39,7 @@ int main(int argc, char **argv)
 
 	cout << octree.children[0]->children[0]->bnd.bounds[0].x << octree.children[0]->children[0]->bnd.bounds[0].y << octree.children[0]->children[0]->bnd.bounds[0].z << endl;*/
 
-	Scene scene = RAYTRACING_SCENE;
+	Scene scene = FLUID_SCENE;
 
 	WindowManager::GetInstance()->Initialize();
 

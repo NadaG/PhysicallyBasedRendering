@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef CISOSURFACE_H
 #define CISOSURFACE_H
 // File Name: CIsoSurface.h
@@ -12,12 +14,16 @@
 
 #include <map>
 #include <vector>
+#include <gl\glew.h>
+#include <GL\freeglut.h>
 #include <glm\common.hpp>
 #include <glm\glm.hpp>
 
-#include "Model.h"
+#include <iostream>
+
+using namespace std;
+
 #include "Mesh.h"
-#include "Debug.h"
 
 using glm::vec3;
 
@@ -40,33 +46,30 @@ public:
 	CIsoSurface();
 	~CIsoSurface();
 	
-	// Generates the isosurface from the scalar field contained in the
-	// buffer ptScalarField[].
+	// Generates the isosurface from the scalar field contained in the buffer ptScalarField[].
 	void GenerateSurface(const T* ptScalarField, T tIsoLevel, 
 		unsigned int nCellsX, unsigned int nCellsY,  unsigned int nCellsZ, float fCellLengthX, float fCellLengthY, float fCellLengthZ,
 		float relativePosX, float relativePosY, float relativePosZ,
 		int& vertexNum, int& indexNum);
 
-	// Returns true if a valid surface has been generated.
 	bool IsSurfaceValid();
 
 	// Deletes the isosurface.
 	void DeleteSurface();
 
-	void ExportMesh(const int vertexNum, const int indexNum, const string fileName);
+	// void ExportMesh(const int vertexNum, const int indexNum, const string fileName);
 
-	// Returns the length, width, and height of the volume in which the
-	// isosurface in enclosed in.  Returns -1 if the surface is not
-	// valid.
-	int GetVolumeLengths(float& fVolLengthX, float& fVolLengthY, float& fVolLengthZ);
+	void ExportMesh(const int vertexNum, const int indexNum, const string objfile);
+	
+	float* GetVertices(const int vertexNum);
+	GLuint* GetIndices(const int indexNum);
 
-public:
+private:
 	// The number of vertices which make up the isosurface.
 	unsigned int m_nVertices;
 
 	// The vertices which make up the isosurface.
 	vec3* m_ppt3dVertices;
-	//int* m_ppt3dVertices;
 
 	// The number of triangles which make up the isosurface.
 	unsigned int m_nTriangles;
@@ -92,19 +95,14 @@ public:
 	// Returns the vertex ID.
 	unsigned int GetVertexID(unsigned int nX, unsigned int nY, unsigned int nZ);
 
-	float* GetVertices(const int vertexNum);
-	GLuint* GetIndices(const int indexNum);
-
-	// Calculates the intersection point of the isosurface with an
-	// edge.
+	// Calculates the intersection point of the isosurface with an edge.
 	POINT3DID CalculateIntersection(unsigned int nX, unsigned int nY, unsigned int nZ, unsigned int nEdgeNo);
 
 	// Interpolates between two grid points to produce the point at which
 	// the isosurface intersects an edge.
 	POINT3DID Interpolate(float fX1, float fY1, float fZ1, float fX2, float fY2, float fZ2, T tVal1, T tVal2);
  
-	// Renames vertices and triangles so that they can be accessed more
-	// efficiently.
+	// Renames vertices and triangles so that they can be accessed more efficiently.
 	void RenameVerticesAndTriangles();
 
 	// Calculates the normals.
@@ -115,6 +113,7 @@ public:
 
 	// Cell length in x, y, and z directions.
 	float m_fCellLengthX, m_fCellLengthY, m_fCellLengthZ;
+	// Simulation 공간과 좌표를 맞추기 위한 변수
 	float m_relativePosX, m_relativePosY, m_relativePosZ;
 
 	// The buffer holding the scalar field.
@@ -129,10 +128,6 @@ public:
 	// Lookup tables used in the construction of the isosurface.
 	static const unsigned int m_edgeTable[256];
 	static const int m_triTable[256][16];
-
-
-private:
-	Mesh tmpMesh;
 };
 #endif // CISOSURFACE_H
 

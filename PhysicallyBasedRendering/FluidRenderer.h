@@ -4,7 +4,7 @@
 #include "FluidSimulationImporter.h"
 #include "FluidSimulationClient.h"
 #include "FluidSceneManager.h"
-#include "MarchingCubeBefore.h"
+#include "MarchingCube.h"
 #include "NormalEstimateModel.h"
 #include "CIsoSurface.h"
 
@@ -26,7 +26,7 @@ public:
 	void Render();
 
 	void ScreenSpaceFluidNormalRender();
-	void MarchingCubeFluidNormalRender();
+	void MarchingCubeFluidNormalRender(const string meshfile, const bool isExport);
 
 	void PhongRenderUsingNormalMap(const string& imgfile);
 
@@ -109,14 +109,13 @@ private:
 	int currentFrame;
 
 	MarchingCube mc;
+	CIsoSurface<float> iso;
 
 	PNGExporter pngExporter;
 
 	Texture2D pngTex;
 
 	NormalEstimateModel NEM;
-
-	CIsoSurface<float> iso;
 
 private:
 

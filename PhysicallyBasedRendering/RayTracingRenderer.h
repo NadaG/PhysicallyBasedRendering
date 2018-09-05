@@ -2,9 +2,7 @@
 
 #include "Renderer.h"
 #include "RayTracingSceneManager.h"
-
 #include "RayTracer.cuh"
-
 
 class RayTracingRenderer : public Renderer
 {

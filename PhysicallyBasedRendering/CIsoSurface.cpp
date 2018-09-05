@@ -384,25 +384,21 @@ template <class T> void CIsoSurface<T>::GenerateSurface(
 		if (m_ptScalarField[(z+1)*nPointsInSlice + y*nPointsInXDirection + (x+1)] < m_tIsoLevel)
 			tableIndex |= 128;
 		
-		// Now create a triangulation of the isosurface in this
-		// cell.
+		// Now create a triangulation of the isosurface in this cell.
 		if (m_edgeTable[tableIndex] != 0) {
 			if (m_edgeTable[tableIndex] & 8) {
 				POINT3DID pt = CalculateIntersection(x, y, z, 3);
 				unsigned int id = GetEdgeID(x, y, z, 3);
-				//m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
 				i2pt3idVertices[x][y][z].insert(ID2POINT3DID::value_type(id, pt));
 			}
 			if (m_edgeTable[tableIndex] & 1) {
 				POINT3DID pt = CalculateIntersection(x, y, z, 0);
 				unsigned int id = GetEdgeID(x, y, z, 0);
-				//m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
 				i2pt3idVertices[x][y][z].insert(ID2POINT3DID::value_type(id, pt));
 			}
 			if (m_edgeTable[tableIndex] & 256) {
 				POINT3DID pt = CalculateIntersection(x, y, z, 8);
 				unsigned int id = GetEdgeID(x, y, z, 8);
-				//m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
 				i2pt3idVertices[x][y][z].insert(ID2POINT3DID::value_type(id, pt));
 			}
 			
@@ -410,13 +406,11 @@ template <class T> void CIsoSurface<T>::GenerateSurface(
 				if (m_edgeTable[tableIndex] & 4) {
 					POINT3DID pt = CalculateIntersection(x, y, z, 2);
 					unsigned int id = GetEdgeID(x, y, z, 2);
-					//m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
 					i2pt3idVertices[x][y][z].insert(ID2POINT3DID::value_type(id, pt));
 				}
 				if (m_edgeTable[tableIndex] & 2048) {
 					POINT3DID pt = CalculateIntersection(x, y, z, 11);
 					unsigned int id = GetEdgeID(x, y, z, 11);
-					//m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
 					i2pt3idVertices[x][y][z].insert(ID2POINT3DID::value_type(id, pt));
 				}
 			}
@@ -424,13 +418,11 @@ template <class T> void CIsoSurface<T>::GenerateSurface(
 				if (m_edgeTable[tableIndex] & 2) {
 					POINT3DID pt = CalculateIntersection(x, y, z, 1);
 					unsigned int id = GetEdgeID(x, y, z, 1);
-					//m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
 					i2pt3idVertices[x][y][z].insert(ID2POINT3DID::value_type(id, pt));
 				}
 				if (m_edgeTable[tableIndex] & 512) {
 					POINT3DID pt = CalculateIntersection(x, y, z, 9);
 					unsigned int id = GetEdgeID(x, y, z, 9);
-					//m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
 					i2pt3idVertices[x][y][z].insert(ID2POINT3DID::value_type(id, pt));
 				}
 			}
@@ -438,13 +430,11 @@ template <class T> void CIsoSurface<T>::GenerateSurface(
 				if (m_edgeTable[tableIndex] & 16) {
 					POINT3DID pt = CalculateIntersection(x, y, z, 4);
 					unsigned int id = GetEdgeID(x, y, z, 4);
-					//m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
 					i2pt3idVertices[x][y][z].insert(ID2POINT3DID::value_type(id, pt));
 				}
 				if (m_edgeTable[tableIndex] & 128) {
 					POINT3DID pt = CalculateIntersection(x, y, z, 7);
 					unsigned int id = GetEdgeID(x, y, z, 7);
-					//m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
 					i2pt3idVertices[x][y][z].insert(ID2POINT3DID::value_type(id, pt));
 				}
 			}
@@ -452,21 +442,18 @@ template <class T> void CIsoSurface<T>::GenerateSurface(
 				if (m_edgeTable[tableIndex] & 1024) {
 					POINT3DID pt = CalculateIntersection(x, y, z, 10);
 					unsigned int id = GetEdgeID(x, y, z, 10);
-					//m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
 					i2pt3idVertices[x][y][z].insert(ID2POINT3DID::value_type(id, pt));
 				}
 			if ((x==m_nCellsX - 1) && (z==m_nCellsZ - 1))
 				if (m_edgeTable[tableIndex] & 64) {
 					POINT3DID pt = CalculateIntersection(x, y, z, 6);
 					unsigned int id = GetEdgeID(x, y, z, 6);
-					//m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
 					i2pt3idVertices[x][y][z].insert(ID2POINT3DID::value_type(id, pt));
 				}
 			if ((y==m_nCellsY - 1) && (z==m_nCellsZ - 1))
 				if (m_edgeTable[tableIndex] & 32) {
 					POINT3DID pt = CalculateIntersection(x, y, z, 5);
 					unsigned int id = GetEdgeID(x, y, z, 5);
-					//m_i2pt3idVertices.insert(ID2POINT3DID::value_type(id, pt));
 					i2pt3idVertices[x][y][z].insert(ID2POINT3DID::value_type(id, pt));
 				}
 			
@@ -479,7 +466,6 @@ template <class T> void CIsoSurface<T>::GenerateSurface(
 				triangle.pointID[0] = pointID0;
 				triangle.pointID[1] = pointID1;
 				triangle.pointID[2] = pointID2;
-				//m_trivecTriangles.push_back(triangle);
 				trivecTriangles[x][y][z].push_back(triangle);
 			}
 		}
@@ -554,18 +540,6 @@ template <class T> void CIsoSurface<T>::DeleteSurface()
 	m_ptScalarField = NULL;
 	m_tIsoLevel = 0;
 	m_bValidSurface = false;
-}
-
-template <class T> int CIsoSurface<T>::GetVolumeLengths(float& fVolLengthX, float& fVolLengthY, float& fVolLengthZ)
-{
-	if (IsSurfaceValid()) {
-		fVolLengthX = m_fCellLengthX*m_nCellsX;
-		fVolLengthY = m_fCellLengthY*m_nCellsY;
-		fVolLengthZ = m_fCellLengthZ*m_nCellsZ;
-		return 1;
-	}
-	else
-		return -1;
 }
 
 template <class T> unsigned int CIsoSurface<T>::GetEdgeID(unsigned int nX, unsigned int nY, unsigned int nZ, unsigned int nEdgeNo)
@@ -697,9 +671,6 @@ template <class T> POINT3DID CIsoSurface<T>::Interpolate(float fX1, float fY1, f
 	POINT3DID interpolation;
 	float mu;
 
-	/*if (abs(tVal2 - tVal1) < 0.001f)
-		mu = 0.5f;
-	else*/
 	mu = float((m_tIsoLevel - tVal1))/(tVal2 - tVal1);
 	
 	interpolation.x = fX1 + mu*(fX2 - fX1);
@@ -783,6 +754,8 @@ template <class T> void CIsoSurface<T>::CalculateNormals()
 		glm::vec3 v1 = ve2 - ve1;
 		glm::vec3 v2 = ve3 - ve1;
 
+		// v1 v2 at first
+		// glm::vec3 c_v1_v2 = glm::cross(v1, v2);
 		glm::vec3 c_v1_v2 = glm::cross(v2, v1);
 
 		m_pvec3dNormals[id0][0] += c_v1_v2.x;
@@ -807,6 +780,34 @@ template <class T> void CIsoSurface<T>::CalculateNormals()
 		m_pvec3dNormals[i][2] /= length;
 	}
 }
+
+//template<class T>
+//void CIsoSurface<T>::ExportMesh(const int vertexNum, const int indexNum, const string objfile)
+//{
+//	FILE *pFile;
+//	char fileName[255];
+//
+//	sprintf_s(fileName, size_t(fileName), objfile.c_str());
+//
+//	fopen_s(&pFile, fileName, "w+t");
+//	for (int i = 0; i < vertexNum; i++)
+//	{
+//		fprintf(pFile, "v %f %f %f\n", m_ppt3dVertices[i].x, m_ppt3dVertices[i].y, m_ppt3dVertices[i].z);
+//		fprintf(pFile, "vn %f %f %f\n", m_pvec3dNormals[i].x, m_pvec3dNormals[i].y, m_pvec3dNormals[i].z);
+//	}
+//
+//	for (int i = 0; i < indexNum; i += 3)
+//	{
+//		fprintf(pFile, "f %d %d %d\n", 
+//			m_piTriangleIndices[i] + 1, 
+//			m_piTriangleIndices[i + 1] + 1, 
+//			m_piTriangleIndices[i + 2] + 1);
+//	}
+//
+//	fclose(pFile);
+//
+//	cout << "obj file export end" << endl;
+//}
 
 template <class T>
 float* CIsoSurface<T>::GetVertices(const int vertexNum)
@@ -841,28 +842,31 @@ GLuint* CIsoSurface<T>::GetIndices(const int indexNum)
 template <class T>
 void CIsoSurface<T>::ExportMesh(const int vertexNum, const int indexNum, const string fileName)
 {
-	Vertex* verts2 = new Vertex[vertexNum];
+	Mesh exportMesh;
+	Vertex* verts = new Vertex[vertexNum];
 
-	for (int i = 0; i < vertexNum; i++)
+	OPENMP_FOR for (int i = 0; i < vertexNum; i++)
 	{
-		verts2[i].position.x = m_ppt3dVertices[i].x;
-		verts2[i].position.y = m_ppt3dVertices[i].y;
-		verts2[i].position.z = m_ppt3dVertices[i].z;
-		verts2[i].normal.x = m_pvec3dNormals[i].x;
-		verts2[i].normal.y = m_pvec3dNormals[i].y;
-		verts2[i].normal.z = m_pvec3dNormals[i].z;
+		verts[i].position.x = m_ppt3dVertices[i].x;
+		verts[i].position.y = m_ppt3dVertices[i].y;
+		verts[i].position.z = m_ppt3dVertices[i].z;
+		verts[i].normal.x = m_pvec3dNormals[i].x;
+		verts[i].normal.y = m_pvec3dNormals[i].y;
+		verts[i].normal.z = m_pvec3dNormals[i].z;
 	}
 
-	tmpMesh.SetVertices(verts2, vertexNum);
+	exportMesh.SetVertices(verts, vertexNum);
 
 	GLuint* inds = new GLuint[indexNum];
-	for (int i = 0; i < indexNum; i++)
+	OPENMP_FOR for (int i = 0; i < indexNum; i++)
 	{
 		inds[i] = (GLuint)m_piTriangleIndices[i];
 	}
 
-	tmpMesh.SetIndices(inds, indexNum);
-	tmpMesh.Export(fileName);
+	exportMesh.SetIndices(inds, indexNum);
+	exportMesh.Export(fileName);
+
+	delete[] verts;
 
 	cout << "export mesh end" << endl;
 }

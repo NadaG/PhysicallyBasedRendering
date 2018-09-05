@@ -33,7 +33,6 @@ public:
 
 	//void Log(const char* format, ...);
 
-	void LogError();
 
 private:
 	Debug() {}

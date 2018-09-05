@@ -187,9 +187,9 @@ void FluidRenderer::InitializeRender()
 	/*cubes[0].size.x = 30;
 	cubes[0].size.y = 20;
 	cubes[0].size.z = 30;*/
-	cubes[0].size.x = 20;
-	cubes[0].size.y = 20;
-	cubes[0].size.z = 20;
+	cubes[0].size.x = 25;
+	cubes[0].size.y = 25;
+	cubes[0].size.z = 25;
 	cubes[0].pos.x = 0.0f;
 	cubes[0].pos.y = 0.0f;
 	cubes[0].pos.z = 0.0f;
@@ -237,7 +237,8 @@ void FluidRenderer::InitializeRender()
 
 	currentFrame = 0;
 
-	mc.BuildingGird(boundarySize.x, boundarySize.y, boundarySize.z, 0.0f, 0.0f, 0.0f, 14.0f);
+	const float resolution = 4.0f;
+	mc.BuildingGird(boundarySize.x, boundarySize.y, boundarySize.z, 0.0f, 0.0f, 0.0f, resolution);
 
 	/*float* data = new float[1024 * 1024 * 3];
 	for (int i = 0; i < 1024 * 1024 * 3; i++)
@@ -248,11 +249,11 @@ void FluidRenderer::InitializeRender()
 
 	delete[] data;*/
 
-	isRenderOnDefaultFBO = true;
+	isRenderOnDefaultFBO = false;
 	isScreenSpace = false;
-	targetFrame = 147;
+	targetFrame = 188;
 
-	lastFrame = 500;
+	lastFrame = 300;
 
 	delete[] cubes;
 
@@ -261,7 +262,7 @@ void FluidRenderer::InitializeRender()
 
 void FluidRenderer::Render()
 {
-	if (currentFrame >= 1000 && !isRenderOnDefaultFBO)
+	if (currentFrame >= lastFrame && !isRenderOnDefaultFBO)
 		return;
 
 	// DLL
@@ -279,7 +280,6 @@ void FluidRenderer::Render()
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_T))
 	{
-		// 147 frame 이상함
 		isScreenSpace = false;
 		cout << "current frame: " << currentFrame << endl;
 	}
@@ -289,7 +289,7 @@ void FluidRenderer::Render()
 		if(isScreenSpace)
 			ScreenSpaceFluidNormalRender();
 		else
-			MarchingCubeFluidNormalRender();
+			MarchingCubeFluidNormalRender("", false);
 		
 		/*char tmp[1024];
 		sprintf(tmp, "%04d", currentFrame);
@@ -304,45 +304,44 @@ void FluidRenderer::Render()
 		//PhongRenderUsingNormalMap("Decoded/decode430000.png");
 		//PhongRenderUsingNormalMap("ExportData/fluid_marchingcube6/0226.png");
 	}
-	else if (!isRenderOnDefaultFBO/* && currentFrame == targetFrame*/)
+	else if (!isRenderOnDefaultFBO && currentFrame == targetFrame)
 	{
-		// PhongRenderUsingNormalMap("ExportData/model_output/denoised200.png");
-		// PhongRenderUsingNormalMap("ExportData/model_output/original200.png");
+		char currentFrameStr[512];
+		sprintf(currentFrameStr, "%04d", currentFrame);
+		string outfile = "";
 
-		//cout << "target frame에 들어옴" << endl;
+		ScreenSpaceFluidNormalRender();
 
-		//char tmp[512];
-		//sprintf(tmp, "%04d", currentFrame);
-		//string outfile = "";
+		cout << "screen space fluid normal render 끝남" << endl;
 
-		//ScreenSpaceFluidNormalRender();
+		outfile += "fluid_screenspace3/";
+		outfile += currentFrameStr;
+		outfile += ".png";
+		pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
+		cout << currentFrame << "번째 screen space 프레임 그리는 중" << endl;
+		Sleep(2000.0f);
 
-		//cout << "screen space fluid normal render 끝남" << endl;
+		cout << "png export 끝남" << endl;
 
-		//outfile += "fluid_screenspace2/";
-		//outfile += tmp;
-		//outfile += ".png";
-		//pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
-		//cout << currentFrame << "번째 screen space 프레임 그리는 중" << endl;
-		//Sleep(2000.0f);
-
-		//cout << "png export 끝남" << endl;
-
-		//// mesh file export
-		//outfile = "";
-		//outfile += "Obj/DroppingFluid/";
-		///*outfile += tmp;*/
+		// mesh file export
+		outfile = "";
+		outfile += "Obj/Anisotropic/";
+		outfile += currentFrameStr;
+		outfile += ".obj";
 		//outfile += "tmp.obj";
 
-		//MarchingCubeFluidNormalRender();
-		//
-		//outfile = "";
-		//outfile += "fluid_marchingcube2/";
-		//outfile += tmp;
-		//outfile += ".png";
-		//pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
-		//cout << currentFrame << "번째 marching cube 프레임 그리는 중" << endl;
-		//Sleep(2000.0f);
+		MarchingCubeFluidNormalRender(outfile, false);
+		
+		outfile = "";
+		outfile += "fluid_marchingcube3/";
+		outfile += currentFrameStr;
+		outfile += ".png";
+		pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
+		cout << currentFrame << "번째 marching cube 프레임 그리는 중" << endl;
+		Sleep(2000.0f);
+
+		//PhongRenderUsingNormalMap("ExportData/model_output/denoised200.png");
+		//PhongRenderUsingNormalMap("ExportData/model_output/original200.png");
 		
 		//Deep Learning
 		/*cout << currentFrame << " screen space start!" << endl;
@@ -524,21 +523,25 @@ void FluidRenderer::ScreenSpaceFluidNormalRender()
 	quad.DrawModel();
 }
 
-void FluidRenderer::MarchingCubeFluidNormalRender()
+void FluidRenderer::MarchingCubeFluidNormalRender(const string meshfile, const bool isExport)
 {
 	cout << "particle num: " << importer.particleNum << endl;
-	float* densities = mc.ComputeParticleDensity(fluidVertices, importer.particleNum);
 
-	//float* scalarField = mc.ComputeSphericalKernelGridDensity(fluidVertices, densities, importer.particleNum);
-	float* scalarField = mc.ComputeAnisotropicKernelGridDensity(fluidVertices, densities, importer.particleNum);
+	// 사용하는 부분 
+	// ComputeParticleDensity 함수에 들어가는 fluidVertices와
+	// ComputeScalarFieldUsingSphericalKernel 함수에 들어가는 fluidVertices의 형식에 맞추어 주시면 됩니다
+	mc.ComputeParticleDensity(fluidVertices, importer.particleNum);
+	//float* scalarField = mc.ComputeScalarFieldUsingSphericalKernel(fluidVertices, importer.particleNum);
+	float* scalarField = mc.ComputeScalarFieldUsingAnisotropicKernel(fluidVertices, importer.particleNum);
 
 	int vertexNum, indexNum;
-	iso.GenerateSurface(scalarField, 0.00001f,
+	iso.GenerateSurface(scalarField, 0.2f,
 		mc.nodeNumX, mc.nodeNumY, mc.nodeNumZ, 
 		mc.nodeWidth, mc.nodeHeight, mc.nodeDepth,
 		mc.initNodePosX, mc.initNodePosY, mc.initNodePosZ,
 		vertexNum, indexNum);
-	iso.ExportMesh(vertexNum, indexNum, "wired.obj");
+	if (isExport)
+		iso.ExportMesh(vertexNum, indexNum, meshfile);
 
 	float* verts;
 	GLuint* inds;
@@ -594,7 +597,6 @@ void FluidRenderer::MarchingCubeFluidNormalRender()
 	DrawFluidMesh(indexNum);
 	iso.DeleteSurface();
 
-	delete[] densities;
 	delete[] scalarField;
 
 	delete[] verts;

@@ -33,6 +33,7 @@ struct SimulationParam
 	float surfacetension;
 	float kernelSize;
 	float surfaceThreshold;
+	float gravity;
 
 	int box2d;
 	int box2d_particle;
@@ -59,15 +60,17 @@ struct ObstacleSphere
 
 int(*initialize)(SimulationParam param, FluidCube* cubes, ObstacleCube* obsobjs);
 void(*update)(float* pos, float* vel, int* issur, ObstacleSphere *spheres, int n_spheres);
+void(*add_particle)(float3 pos, float3 vel);
 void(*quit)();
 
 void FluidSimulationImporter::Initialize(const glm::vec3 boundarySize, FluidCube* cubes, int cubeNum)
 {
-	handle = LoadLibrary(SOLUTION_DIR L"\\x64\\Release\\FLing3.dll");
+	handle = LoadLibrary(SOLUTION_DIR L"\\x64\\Release\\FLing4.dll");
 
 	initialize = (int(*)(SimulationParam, FluidCube*, ObstacleCube*))GetProcAddress(handle, "initialize");
 	update = (void(*)(float*, float*, int*, ObstacleSphere *, int))GetProcAddress(handle, "update");
 	quit = (void(*)())GetProcAddress(handle, "quit");
+	add_particle = (void(*)(float3, float3))GetProcAddress(handle, "add_particle");
 
 	sparam.boundaryPos.x = 0.0f;
 	sparam.boundaryPos.y = 0.0f;
@@ -84,6 +87,7 @@ void FluidSimulationImporter::Initialize(const glm::vec3 boundarySize, FluidCube
 	sparam.surfacetension = 0.01f;
 	sparam.kernelSize = 1.0f;
 	sparam.surfaceThreshold = 3000.0f;
+	sparam.gravity = 10.0f;
 	sparam.vAtten = 0.00002f;
 
 	sparam.box2d = 0;
@@ -117,6 +121,20 @@ void FluidSimulationImporter::Initialize(const glm::vec3 boundarySize, FluidCube
 		issur[i] = 0;
 
 	posScalingFactor = 1.0f;
+}
+
+void FluidSimulationImporter::AddParticle(const glm::vec3 pos, const glm::vec3 vel)
+{
+	float3 pPos, pVel;
+	pPos.x = pos.x;
+	pPos.y = pos.y;
+	pPos.z = pos.z;
+
+	pVel.x = vel.x;
+	pVel.y = vel.y;
+	pVel.z = vel.z;
+
+	add_particle(pPos, pVel);
 }
 
 // pos와 velocity를 담음

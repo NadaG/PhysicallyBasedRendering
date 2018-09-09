@@ -769,7 +769,6 @@ template <class T> void CIsoSurface<T>::CalculateNormals()
 		m_pvec3dNormals[id2][0] += c_v1_v2.x;
 		m_pvec3dNormals[id2][1] += c_v1_v2.y;
 		m_pvec3dNormals[id2][2] += c_v1_v2.z;
-
 	}
 
 	// Normalize normals.

@@ -17,6 +17,8 @@ public:
 	~FluidSimulationImporter(){}
 
 	void Initialize(const glm::vec3 boundarySize, FluidCube* cubes, int cubeNum);
+	void AddParticle(const glm::vec3 pos, const glm::vec3 vel);
+
 	void Update(GLfloat* v);
 	void Quit();
 

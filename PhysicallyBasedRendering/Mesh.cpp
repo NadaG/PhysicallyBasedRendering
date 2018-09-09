@@ -333,9 +333,13 @@ void Mesh::Export(const string mesh)
 		fprintf(pFile, "vn %f %f %f\n", vertices[i].normal.x, vertices[i].normal.y, vertices[i].normal.z);
 	}
 
+	// vertex & face normal error fixed
 	for (int i = 0; i < indexNum; i+=3)
 	{
-		fprintf(pFile, "f %d %d %d\n", indices[i] + 1, indices[i + 1] + 1, indices[i + 2] + 1);
+		fprintf(pFile, "f %d//%d %d//%d %d//%d\n", 
+			indices[i + 2] + 1, indices[i + 2] + 1, 
+			indices[i + 1] + 1, indices[i + 1] + 1, 
+			indices[i + 0] + 1, indices[i + 0] + 1);
 	}
 
 	fclose(pFile);

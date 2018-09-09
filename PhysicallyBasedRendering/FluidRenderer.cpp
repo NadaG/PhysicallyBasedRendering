@@ -187,11 +187,11 @@ void FluidRenderer::InitializeRender()
 	/*cubes[0].size.x = 30;
 	cubes[0].size.y = 20;
 	cubes[0].size.z = 30;*/
-	cubes[0].size.x = 25;
-	cubes[0].size.y = 25;
-	cubes[0].size.z = 25;
+	cubes[0].size.x = 5;
+	cubes[0].size.y = 5;
+	cubes[0].size.z = 5;
 	cubes[0].pos.x = 0.0f;
-	cubes[0].pos.y = 0.0f;
+	cubes[0].pos.y = -12.5f;
 	cubes[0].pos.z = 0.0f;
 
 	/*cubes[1].size.x = 40;
@@ -213,6 +213,8 @@ void FluidRenderer::InitializeRender()
 	//// DLL
 	importer.Initialize(boundarySize * 1.0f, cubes, cubeNum);
 	fluidVertices = new GLfloat[importer.particleNum * 6];
+
+	GenerateSphereFluid();
 
 	//// CLIENT
 	///*clientImporter.Initialize(boundarySize, cubes, 1);
@@ -237,7 +239,7 @@ void FluidRenderer::InitializeRender()
 
 	currentFrame = 0;
 
-	const float resolution = 4.0f;
+	const float resolution = 2.0f;
 	mc.BuildingGird(boundarySize.x, boundarySize.y, boundarySize.z, 0.0f, 0.0f, 0.0f, resolution);
 
 	/*float* data = new float[1024 * 1024 * 3];
@@ -249,9 +251,9 @@ void FluidRenderer::InitializeRender()
 
 	delete[] data;*/
 
-	isRenderOnDefaultFBO = false;
+	isRenderOnDefaultFBO = true;
 	isScreenSpace = false;
-	targetFrame = 188;
+	targetFrame = 150;
 
 	lastFrame = 300;
 
@@ -265,10 +267,12 @@ void FluidRenderer::Render()
 	if (currentFrame >= lastFrame && !isRenderOnDefaultFBO)
 		return;
 
+	//PouringFluid();
+
 	// DLL
 	importer.Update(fluidVertices);
 	fluidVAO.VertexBufferData(sizeof(GLfloat)*importer.particleNum * 6, fluidVertices);
-	
+
 	//cout << importer.particleNum << endl;
 	// CLIENT
 	/*clientImporter.Update(fluidVertices);*/
@@ -284,12 +288,12 @@ void FluidRenderer::Render()
 		cout << "current frame: " << currentFrame << endl;
 	}
 
-	if (isRenderOnDefaultFBO/* && currentFrame == targetFrame*/ && currentFrame < lastFrame)
+	if (isRenderOnDefaultFBO/* && currentFrame == targetFrame*/)
 	{
 		if(isScreenSpace)
 			ScreenSpaceFluidNormalRender();
 		else
-			MarchingCubeFluidNormalRender("", false);
+			MarchingCubeFluidNormalRender("ExportData/normal_test.obj", true);
 		
 		/*char tmp[1024];
 		sprintf(tmp, "%04d", currentFrame);
@@ -304,7 +308,7 @@ void FluidRenderer::Render()
 		//PhongRenderUsingNormalMap("Decoded/decode430000.png");
 		//PhongRenderUsingNormalMap("ExportData/fluid_marchingcube6/0226.png");
 	}
-	else if (!isRenderOnDefaultFBO && currentFrame == targetFrame)
+	else if (!isRenderOnDefaultFBO/* && currentFrame == targetFrame*/)
 	{
 		char currentFrameStr[512];
 		sprintf(currentFrameStr, "%04d", currentFrame);
@@ -330,7 +334,7 @@ void FluidRenderer::Render()
 		outfile += ".obj";
 		//outfile += "tmp.obj";
 
-		MarchingCubeFluidNormalRender(outfile, false);
+		MarchingCubeFluidNormalRender(outfile, true);
 		
 		outfile = "";
 		outfile += "fluid_marchingcube3/";
@@ -566,7 +570,7 @@ void FluidRenderer::MarchingCubeFluidNormalRender(const string meshfile, const b
 		sceneNaer,
 		sceneFar);
 	glm::mat4 view = glm::inverse(camera->GetModelMatrix());
-	glm::mat4 model = glm::mat4();
+	glm::mat4 model = glm::mat4(1.0f);
 
 	glViewport(0, 0, depthWidth, depthHeight);
 	if (isRenderOnDefaultFBO)
@@ -663,6 +667,51 @@ void FluidRenderer::TerminateRender()
 	//clientImporter.Quit();
 
 	// 절대 delete[] fluidVertices 하지 말것!!
+}
+
+void FluidRenderer::PouringFluid()
+{
+	vec3 relativePos = vec3(-15.0f, 0.0f, 0.0f);
+
+	if (currentFrame % 3 == 0)
+	{
+		for (int i = 0; i < 12; i++)
+		{
+			for (int j = 0; j < 12; j++)
+			{
+				importer.AddParticle(relativePos + vec3(0.0f, i*0.4f, j*0.4f), vec3(15.0f, 0.0f, 0.0f));
+			}
+		}
+	}
+}
+
+void FluidRenderer::GenerateSphereFluid()
+{
+	const float deltaPos = 0.5f;
+	const float deltaHeight = 0.5f;
+	const int height = 23;
+
+	for (int i = 0; i < height; i++)
+	{
+		int width_depth;
+		// 1 3 5 7 9
+		if (i > (height / 2))
+			width_depth = (height - i) * 2 + 1;
+		else
+			width_depth = i * 2 + 1;
+
+		for (int j = -width_depth / 2; j <= width_depth / 2; j++)
+		{
+			for (int k = -width_depth / 2; k <= width_depth / 2; k++)
+			{
+				importer.AddParticle(
+					vec3(j*deltaPos,
+						i*deltaHeight - 5.0f, 
+						k*deltaPos),
+					vec3(0.0f, 0.0f, 0.0f));
+			}
+		}
+	}
 }
 
 void FluidRenderer::DrawFluids(const float cameraDist)

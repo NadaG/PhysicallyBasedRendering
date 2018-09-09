@@ -18,7 +18,7 @@ void main()
 	outUV = vertexUV;
 	gl_Position = projection * view * model * vec4(vertexPos, 1.0);
 	
-	outNormal = normalize(vec3(view * vec4(vertexNormal, 0.0)));
+	outNormal = normalize(vec3(view * model * vec4( vertexNormal, 0.0)));
 	//outNormal =  vec3(model * vec4(vertexNormal, 1.0));
 	//outNormal = vertexNormal;
 

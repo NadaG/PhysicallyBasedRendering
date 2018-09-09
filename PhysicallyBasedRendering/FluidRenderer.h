@@ -117,6 +117,9 @@ private:
 
 	NormalEstimateModel NEM;
 
+	void PouringFluid();
+	void GenerateSphereFluid();
+
 private:
 
 	bool isRenderOnDefaultFBO;

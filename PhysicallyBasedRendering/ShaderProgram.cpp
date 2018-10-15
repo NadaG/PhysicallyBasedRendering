@@ -94,8 +94,8 @@ GLuint ShaderProgram::LoadShader(const char* shaderFilePath, int shaderType)
 		return -1;
 	}
 
-	GLint Result = GL_FALSE;
-	int InfoLogLength;
+	GLint result = GL_FALSE;
+	int infoLogLength;
 
 	// 쉐이더를 컴파일
 	printf("Compiling shader : %s\n", shaderFilePath);
@@ -104,12 +104,12 @@ GLuint ShaderProgram::LoadShader(const char* shaderFilePath, int shaderType)
 	glCompileShader(shaderID);
 
 	// 쉐이더를 검사
-	glGetShaderiv(shaderID, GL_COMPILE_STATUS, &Result);
-	glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
-	if (InfoLogLength > 0 || Result != GL_TRUE)
+	glGetShaderiv(shaderID, GL_COMPILE_STATUS, &result);
+	glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &infoLogLength);
+	if (infoLogLength > 0 || result != GL_TRUE)
 	{
-		std::vector<char> shaderErrorMessage(InfoLogLength + 1);
-		glGetShaderInfoLog(shaderID, InfoLogLength, NULL, &shaderErrorMessage[0]);
+		std::vector<char> shaderErrorMessage(infoLogLength + 1);
+		glGetShaderInfoLog(shaderID, infoLogLength, NULL, &shaderErrorMessage[0]);
 		printf("%s\n", &shaderErrorMessage[0]);
 	}
 
@@ -120,12 +120,12 @@ GLuint ShaderProgram::LoadShader(const char* shaderFilePath, int shaderType)
 	glLinkProgram(shaderProgramID);
 
 	// 프로그램 검사
-	glGetProgramiv(shaderProgramID, GL_LINK_STATUS, &Result);
-	glGetProgramiv(shaderProgramID, GL_INFO_LOG_LENGTH, &InfoLogLength);
-	if (InfoLogLength > 0)
+	glGetProgramiv(shaderProgramID, GL_LINK_STATUS, &result);
+	glGetProgramiv(shaderProgramID, GL_INFO_LOG_LENGTH, &infoLogLength);
+	if (infoLogLength > 0)
 	{
-		std::vector<char> ProgramErrorMessage(InfoLogLength + 1);
-		glGetProgramInfoLog(shaderProgramID, InfoLogLength, NULL, &ProgramErrorMessage[0]);
+		std::vector<char> ProgramErrorMessage(infoLogLength + 1);
+		glGetProgramInfoLog(shaderProgramID, infoLogLength, NULL, &ProgramErrorMessage[0]);
 		printf("%s\n", &ProgramErrorMessage[0]);
 	}
 

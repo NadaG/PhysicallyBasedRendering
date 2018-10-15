@@ -106,12 +106,8 @@ int main(int argc, char **argv)
 	renderer->Initialize(window);
 	renderer->InitializeRender();
 
-
-
 	time_t kdstart = clock();
-
 	
-	int a = 0;
 	do
 	{
 		sceneManager->Update();
@@ -120,7 +116,7 @@ int main(int argc, char **argv)
 		glfwSwapBuffers(window);
 
 	} 
-	while (a++ < 590 && InputManager::GetInstance()->IsKey(GLFW_KEY_ESCAPE) != GLFW_PRESS &&
+	while (InputManager::GetInstance()->IsKey(GLFW_KEY_ESCAPE) != GLFW_PRESS &&
 		!WindowManager::GetInstance()->WindowShouldClose());
 
 
@@ -128,7 +124,6 @@ int main(int argc, char **argv)
 	cout << "Time " << kdend - kdstart << endl;
 
 	renderer->TerminateRender();
-
 
 	delete renderer;
 	delete sceneManager;

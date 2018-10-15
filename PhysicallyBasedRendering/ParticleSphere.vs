@@ -5,6 +5,7 @@ layout(location = 1) in vec3 vertexColor;
 
 out vec3 eyeSpacePos;
 out vec3 particleColor;
+out vec3 worldSpacePos;
 
 uniform mat4 view;
 uniform mat4 projection;
@@ -12,6 +13,9 @@ uniform mat4 projection;
 void main()
 {
 	gl_Position = projection * view * vec4(vertexPos, 1.0);
+	
 	eyeSpacePos = vec3(view * vec4(vertexPos, 1.0));
+	worldSpacePos = vertexPos;
+
 	particleColor = vertexColor;
 }

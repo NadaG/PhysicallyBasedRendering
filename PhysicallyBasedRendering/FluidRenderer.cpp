@@ -18,6 +18,12 @@ void FluidRenderer::InitializeRender()
 
 	particleColorShader = new ShaderProgram("ParticleSphere.vs", "ParticleColor.fs");
 	particleColorShader->Use();
+	particleColorShader->SetUniform1i("skyboxMap", 0);
+
+	skyBoxShader = new ShaderProgram("SkyBox.vs", "SkyBox.fs");
+	skyBoxShader->Use();
+	skyBoxShader->SetUniform1i("isHDR", 0);
+	skyBoxShader->SetUniform1i("skybox", 0);
 
 	depthBlurShader = new ShaderProgram("Quad.vs", "DepthBlur.fs");
 	depthBlurShader->Use();
@@ -39,6 +45,7 @@ void FluidRenderer::InitializeRender()
 	surfaceShader->SetUniform1i("worldDepthMap", 4);
 	surfaceShader->SetUniform1i("debugMap", 5);
 	surfaceShader->SetUniform1i("bluredColorMap", 6);
+	surfaceShader->SetUniform1i("skyboxMap", 7);
 	surfaceShader->SetUniform1f("near", depthNear);
 	surfaceShader->SetUniform1f("far", depthFar);
 	surfaceShader->SetUniformVector4f("backgroundColor", backgroundColor);
@@ -50,6 +57,16 @@ void FluidRenderer::InitializeRender()
 	phongShader->Use();
 	phongShader->SetUniform1i("normalMap", 0);
 
+	vector<string> faces;
+	faces.push_back("Texture/SkyBox2/cubemap1.jpg");
+	faces.push_back("Texture/SkyBox2/cubemap2.jpg");
+	faces.push_back("Texture/SkyBox2/cubemap3.jpg");
+	faces.push_back("Texture/SkyBox2/cubemap4.jpg");
+	faces.push_back("Texture/SkyBox2/cubemap5.jpg");
+	faces.push_back("Texture/SkyBox2/cubemap6.jpg");
+	skyBoxTex.LoadTextureCubeMap(faces, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE);
+	skyBoxTex.SetParameters(GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
 	////////////////////////
 	//textureShader = new ShaderProgram("Basic.vs", "Basic.fs");
 	//textureShader->Use();
@@ -60,7 +77,7 @@ void FluidRenderer::InitializeRender()
 	////////////////////////
 
 	///////////////////
-	floorAlbedoTex.LoadTexture("Texture/Floor/albedo.png");
+	floorAlbedoTex.LoadTexture("Texture/Gold/albedo.png");
 	floorAlbedoTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER);
 
 	///////////////////
@@ -79,8 +96,8 @@ void FluidRenderer::InitializeRender()
 	particleColorTex.LoadTexture(GL_RGBA32F, depthWidth, depthHeight, GL_RGBA, GL_FLOAT);
 	particleColorTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_REPEAT, GL_REPEAT);
 
-	normalTex.LoadTexture("ExportData/fluid_marchingcube1/0113.png");
-	normalTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_REPEAT, GL_REPEAT);
+	/*normalTex.LoadTexture("ExportData/fluid_marchingcube1/0113.png");
+	normalTex.SetParameters(GL_NEAREST, GL_NEAREST, GL_REPEAT, GL_REPEAT);*/
 
 	///////////////////
 	worldDepthTex.LoadDepthTexture(depthWidth, depthHeight);
@@ -181,44 +198,53 @@ void FluidRenderer::InitializeRender()
 	}
 
 	boundarySize = glm::vec3(30.0f, 30.0f, 30.0f);
-	//
-	const int cubeNum = 1;
-	FluidCube* cubes = new FluidCube[cubeNum];
-	/*cubes[0].size.x = 30;
-	cubes[0].size.y = 20;
-	cubes[0].size.z = 30;*/
-	cubes[0].size.x = 5;
-	cubes[0].size.y = 5;
-	cubes[0].size.z = 5;
-	cubes[0].pos.x = 0.0f;
-	cubes[0].pos.y = -12.5f;
-	cubes[0].pos.z = 0.0f;
 
-	/*cubes[1].size.x = 40;
-	cubes[1].size.y = 10;
-	cubes[1].size.z = 40;
-	cubes[1].pos.x = 0.0f;
-	cubes[1].pos.y = -13.0f;
-	cubes[1].pos.z = 0.0f;*/
-
-	/*cubes[1].size.x = 5;
-	cubes[1].size.y = 5;
-	cubes[1].size.z = 5;
-	cubes[1].pos.x = -4.0f;
-	cubes[1].pos.y = 0.0f;
-	cubes[1].pos.z = 6.0f;*/
-
-	//// simulation 공간을 약간 작게 해주어야 marching cube가 제대로 그려짐
+	int cubeNum;
+	FluidCube* cubes;
+	switch (fluidSceneType)
+	{
+	case DAM_BREAK:
+		sceneTypeStr = "DamBreak_Training/";
+		cubes = InitializeDamBreakFluid(cubeNum);
+		break;
+	/*case DAM_BREAK_VALIDATION:
+		sceneTypeStr = "DamBreak";
+		cubes = InitializeDamBreakFluid(cubeNum);
+		break;*/
+	case DOUBLE_DAM_BREAK:
+		sceneTypeStr = "DoubleDamBreak_Training/";
+		cubes = InitializeDoubleDamBreakFluid(cubeNum);
+		break;
+	case POURING_FLUID:
+		sceneTypeStr = "PouringFluid_Training/";
+		cubes = InitializePouringFluid(cubeNum);
+		break;
+	case POURING_FLUID_VALIDATION:
+		sceneTypeStr = "PouringFluid_Validation/";
+		cubes = InitializePouringFluidValidation(cubeNum);
+		break;
+	case SPHERE_CROWN:
+		sceneTypeStr = "SphereCrown_Training/";
+		cubes = InitializeSphereCrownFluid(cubeNum);
+		break;
+	default:
+		sceneTypeStr = "";
+		cubes = new FluidCube[1];
+		break;
+	}
 
 	//// DLL
 	importer.Initialize(boundarySize * 1.0f, cubes, cubeNum);
 	fluidVertices = new GLfloat[importer.particleNum * 6];
 
-	GenerateSphereFluid();
+	cout << "particle number: " << importer.particleNum << endl;
 
 	//// CLIENT
 	///*clientImporter.Initialize(boundarySize, cubes, 1);
 	//fluidVertices = new GLfloat[clientImporter.particleNum * 6];*/
+
+	if (fluidSceneType == SPHERE_CROWN)
+		GenerateSphereFluid(23, vec3(0.0f, 0.0f, 0.0f), vec3(0.0f));
 
 	fluidVAO.GenVAOVBOIBO();
 	fluidVAO.VertexBufferData(sizeof(GLfloat) * importer.particleNum * 6, fluidVertices);
@@ -236,26 +262,24 @@ void FluidRenderer::InitializeRender()
 	glBindVertexArray(0);
 
 	cout << "fluid mesh vao 생성" << endl;
+	
+	LoadSkyBox();
 
 	currentFrame = 0;
 
-	const float resolution = 2.0f;
+	const float resolution = 8.0f;
 	mc.BuildingGird(boundarySize.x, boundarySize.y, boundarySize.z, 0.0f, 0.0f, 0.0f, resolution);
 
-	/*float* data = new float[1024 * 1024 * 3];
-	for (int i = 0; i < 1024 * 1024 * 3; i++)
-		data[i] = 125.0f;
-
-	NEM.LoadModel();
-	NEM.UseModel(data);
-
-	delete[] data;*/
+	if (dynamic_cast<FluidSceneManager*>(sceneManager)->isDynamicScene)
+		sceneModeStr = "dynamic";
+	else
+		sceneModeStr = "static";
 
 	isRenderOnDefaultFBO = true;
-	isScreenSpace = false;
-	targetFrame = 150;
+	isScreenSpace = true;
+	targetFrame = 300;
 
-	lastFrame = 300;
+	lastFrame = 499;
 
 	delete[] cubes;
 
@@ -264,10 +288,13 @@ void FluidRenderer::InitializeRender()
 
 void FluidRenderer::Render()
 {
-	if (currentFrame >= lastFrame && !isRenderOnDefaultFBO)
+	if (currentFrame > lastFrame && !isRenderOnDefaultFBO)
 		return;
 
-	//PouringFluid();
+	if (fluidSceneType == POURING_FLUID)
+		UpdatePouringFluid();
+	else if (fluidSceneType == POURING_FLUID_VALIDATION)
+		UpdatePouringFluidValidation();
 
 	// DLL
 	importer.Update(fluidVertices);
@@ -276,6 +303,9 @@ void FluidRenderer::Render()
 	//cout << importer.particleNum << endl;
 	// CLIENT
 	/*clientImporter.Update(fluidVertices);*/
+
+	time_t start;
+	time_t end;
 
 	if (InputManager::GetInstance()->IsKey(GLFW_KEY_R))
 	{
@@ -290,11 +320,21 @@ void FluidRenderer::Render()
 
 	if (isRenderOnDefaultFBO/* && currentFrame == targetFrame*/)
 	{
-		if(isScreenSpace)
+		if (isScreenSpace)
+		{
+			start = clock();
 			ScreenSpaceFluidNormalRender();
+			end = clock();
+			cout << "screen space render time: " << end - start << "ms" << endl;
+		}
 		else
-			MarchingCubeFluidNormalRender("ExportData/normal_test.obj", true);
-		
+		{
+			start = clock();
+			MarchingCubeFluidNormalRender("", false);
+			end = clock();
+			cout << "marching cube render time: " << end - start << "ms" << endl;
+		}
+
 		/*char tmp[1024];
 		sprintf(tmp, "%04d", currentFrame);
 		string outfile = "";
@@ -308,7 +348,7 @@ void FluidRenderer::Render()
 		//PhongRenderUsingNormalMap("Decoded/decode430000.png");
 		//PhongRenderUsingNormalMap("ExportData/fluid_marchingcube6/0226.png");
 	}
-	else if (!isRenderOnDefaultFBO/* && currentFrame == targetFrame*/)
+	else if (!isRenderOnDefaultFBO/* && currentFrame == 22*/)
 	{
 		char currentFrameStr[512];
 		sprintf(currentFrameStr, "%04d", currentFrame);
@@ -316,52 +356,69 @@ void FluidRenderer::Render()
 
 		ScreenSpaceFluidNormalRender();
 
-		cout << "screen space fluid normal render 끝남" << endl;
-
-		outfile += "fluid_screenspace3/";
+		outfile += "1024x1024_" + sceneTypeStr + sceneModeStr + "_input/";
 		outfile += currentFrameStr;
 		outfile += ".png";
 		pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
 		cout << currentFrame << "번째 screen space 프레임 그리는 중" << endl;
-		Sleep(2000.0f);
+		Sleep(1000.0f);
 
-		cout << "png export 끝남" << endl;
+		//////////////////////////////////////////////////////////////////////////////////////////////////
 
-		// mesh file export
+		//// mesh file export
+		//outfile = "";
+		//outfile += "Obj/Anisotropic2/";
+		//outfile += currentFrameStr;
+		//outfile += ".obj";
+		////outfile += "tmp.obj";
+
+		//////////////////////////////////////////////////////////////////////////////////////////////////
+
+		MarchingCubeFluidNormalRender(outfile, false);
+
 		outfile = "";
-		outfile += "Obj/Anisotropic/";
-		outfile += currentFrameStr;
-		outfile += ".obj";
-		//outfile += "tmp.obj";
-
-		MarchingCubeFluidNormalRender(outfile, true);
-		
-		outfile = "";
-		outfile += "fluid_marchingcube3/";
+		outfile += "1024x1024_" + sceneTypeStr + "_Training/" + sceneModeStr + "_target/";
 		outfile += currentFrameStr;
 		outfile += ".png";
 		pngExporter.WritePngFile(outfile, pngTex, GL_RGB);
 		cout << currentFrame << "번째 marching cube 프레임 그리는 중" << endl;
-		Sleep(2000.0f);
+		Sleep(1000.0f);
 
+		//////////////////////////////////////////////////////////////////////////////////////////////////
 		//PhongRenderUsingNormalMap("ExportData/model_output/denoised200.png");
 		//PhongRenderUsingNormalMap("ExportData/model_output/original200.png");
-		
+		//////////////////////////////////////////////////////////////////////////////////////////////////
+
 		//Deep Learning
-		/*cout << currentFrame << " screen space start!" << endl;
+		/*cout << currentFrame << " screen space render start!" << endl;
 		ScreenSpaceFluidNormalRender();
-		cout << currentFrame << " screen space end!" << endl;
+		cout << currentFrame << " screen space render end!" << endl;
 		NEM.AppendNoisyImage(pngTex.GetTexImage(GL_RGB));
 
 		Sleep(100.0f);*/
 	}
 
-	/*if (!isRenderOnDefaultFBO && (currentFrame == lastFrame))
-	{
-		cout << "use model start" << endl;
-		NEM.UseModel("ExportData/model_output/original", "ExportData/model_output/denoised", currentFrame);
-		cout << "use model end" << endl;
-	}*/
+	//Deep Learning
+	//if (!isRenderOnDefaultFBO && currentFrame == lastFrame)
+	//{
+	//	// Model/20180730_215620/last_model
+	//	// denoised_data:0
+	//	// Model/20180907_133717/last_model
+	//	// generator/generated_data:0
+
+	//	cout << "use model start" << endl;
+	//	start = clock();
+	//	NEM.UseModel(
+	//		"Model/20180730_215620/last_model",
+	//		"denoised_data:0",
+	//		"ExportData/original",
+	//		"ExportData/output",
+	//		1);
+	//	end = clock();
+	//	cout << "use model end" << endl;
+
+	//	cout << "gan render time: " << end - start << "ms" << endl;
+	//}
 
 	currentFrame++;
 }
@@ -398,22 +455,31 @@ void FluidRenderer::ScreenSpaceFluidNormalRender()
 	pbrShader->SetUniformMatrix4f("view", view);
 	pbrShader->SetUniformMatrix4f("projection", projection);
 
-	pbrShader->SetUniformVector3f("lightPos", glm::vec3(10.0f, 0.0f, 0.0f));
+	pbrShader->SetUniformVector3f("lightPos", glm::vec3(0.0f, 10.0f, 0.0f));
 	pbrShader->SetUniformVector3f("eyePos", camera->GetWorldPosition());
 	pbrShader->SetUniformVector3f("lightColor", glm::vec3(0.8f, 0.8f, 0.8f));
 	floorAlbedoTex.Bind(GL_TEXTURE1);
 
-	/*for (int i = 0; i < 1; i++)
+	/*for (int i = 0; i < 2; i++)
 	{
 		glm::mat4 model = objs[i].GetModelMatrix();
-		model = glm::mat4();
-		model = glm::translate(model, glm::vec3(0.0f, -12.0f, -10.0f));
-		model = glm::rotate(model, -1.57f, glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(30.0f, 30.0f, 30.0f));
 		pbrShader->SetUniformMatrix4f("model", model);
 
 		objs[i].DrawModel();
 	}*/
+
+	// draw skybox as last
+	glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
+	skyBoxShader->Use();
+	// translate 성분을 무시할 것이기 때문에 transpose로 해도 됨
+	skyBoxShader->SetUniformMatrix4f("view", glm::mat4(glm::mat3(glm::transpose(camera->GetModelMatrix()))));
+	skyBoxShader->SetUniformMatrix4f("projection", projection);
+	// skybox cube
+	skyBoxVAO.Bind();
+	skyBoxTex.Bind(GL_TEXTURE0);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
+	glDepthFunc(GL_LESS);
 	// world 그리기 끝
 
 	// 파티클들 depth map 그리기
@@ -440,6 +506,8 @@ void FluidRenderer::ScreenSpaceFluidNormalRender()
 
 	particleColorShader->SetUniformMatrix4f("view", view);
 	particleColorShader->SetUniformMatrix4f("projection", projection);
+	particleColorShader->SetUniformVector3f("cameraPos", camera->GetWorldPosition());
+	skyBoxTex.Bind(GL_TEXTURE0);
 
 	DrawFluids(glm::distance(camera->GetPosition(), glm::vec3()));
 	// 파티클들 color map 그리기 끝
@@ -460,7 +528,7 @@ void FluidRenderer::ScreenSpaceFluidNormalRender()
 	glDisable(GL_BLEND);
 	// 파티클들 thickness map 그리기 끝
 
-	// depth, thickness blur 시작
+	// depth, thickness, color blur 시작
 	glViewport(0, 0, depthWidth, depthHeight);
 	for (int i = 0; i < blurNum * 2; i++)
 	{
@@ -475,6 +543,8 @@ void FluidRenderer::ScreenSpaceFluidNormalRender()
 			depthTex.Bind(GL_TEXTURE0);
 		quad.DrawModel();
 
+		blurShader->Use();
+		blurShader->SetUniformBool("horizontal", i % 2);
 		thicknessBlurFBO[a].Use();
 		thicknessBlurFBO[a].Clear(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
 		if (i)
@@ -483,8 +553,6 @@ void FluidRenderer::ScreenSpaceFluidNormalRender()
 			thicknessTex.Bind(GL_TEXTURE0);
 		quad.DrawModel();
 
-		blurShader->Use();
-		blurShader->SetUniformBool("horizontal", i % 2);
 		particleColorBlurFBO[a].Use();
 		particleColorBlurFBO[a].Clear(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
 		if (i)
@@ -493,7 +561,7 @@ void FluidRenderer::ScreenSpaceFluidNormalRender()
 			particleColorTex.Bind(GL_TEXTURE0);
 		quad.DrawModel();
 	}
-	// depth, thickness blur 끝
+	// depth, thickness, color blur 끝
 
 	// quad 그리기
 	if (isRenderOnDefaultFBO)
@@ -512,7 +580,7 @@ void FluidRenderer::ScreenSpaceFluidNormalRender()
 	surfaceShader->Use();
 	surfaceShader->SetUniformMatrix4f("projection", projection);
 	surfaceShader->SetUniformMatrix4f("view", view);
-	surfaceShader->SetUniformVector3f("eyePos", camera->GetWorldPosition());
+	surfaceShader->SetUniformVector3f("cameraPos", camera->GetWorldPosition());
 	surfaceShader->SetUniformVector3f("lightDir", glm::normalize(glm::vec3(0.0f, -1.0f, 0.0f)));
 
 	worldColorTex.Bind(GL_TEXTURE0);
@@ -522,6 +590,7 @@ void FluidRenderer::ScreenSpaceFluidNormalRender()
 	worldDepthTex.Bind(GL_TEXTURE4);
 	depthTex.Bind(GL_TEXTURE5);
 	particleColorBlurTex[0].Bind(GL_TEXTURE6);
+	skyBoxTex.Bind(GL_TEXTURE7);
 	//particleColorTex.Bind(GL_TEXTURE6);
 
 	quad.DrawModel();
@@ -661,6 +730,9 @@ void FluidRenderer::TerminateRender()
 	pbrShader->Delete();
 	delete pbrShader;
 
+	skyBoxShader->Delete();
+	delete skyBoxShader;
+
 	sceneManager->TerminateObjects();
 	importer.Quit();
 
@@ -669,7 +741,21 @@ void FluidRenderer::TerminateRender()
 	// 절대 delete[] fluidVertices 하지 말것!!
 }
 
-void FluidRenderer::PouringFluid()
+FluidCube * FluidRenderer::InitializePouringFluid(int& cubeNum)
+{
+	cubeNum = 1;
+	FluidCube* cubes = new FluidCube[cubeNum];
+	cubes[0].size.x = 60;
+	cubes[0].size.y = 10;
+	cubes[0].size.z = 60;
+	cubes[0].pos.x = 0.0f;
+	cubes[0].pos.y = -12.5f;
+	cubes[0].pos.z = 0.0f;
+
+	return cubes;
+}
+
+void FluidRenderer::UpdatePouringFluid()
 {
 	vec3 relativePos = vec3(-15.0f, 0.0f, 0.0f);
 
@@ -685,11 +771,43 @@ void FluidRenderer::PouringFluid()
 	}
 }
 
-void FluidRenderer::GenerateSphereFluid()
+FluidCube * FluidRenderer::InitializePouringFluidValidation(int & cubeNum)
+{
+	cubeNum = 1;
+	FluidCube* cubes = new FluidCube[cubeNum];
+	cubes[0].size.x = 60;
+	cubes[0].size.y = 15;
+	cubes[0].size.z = 60;
+	cubes[0].pos.x = 0.0f;
+	cubes[0].pos.y = -12.0f;
+	cubes[0].pos.z = 0.0f;
+
+	return cubes;
+}
+
+void FluidRenderer::UpdatePouringFluidValidation()
+{
+	vec3 relativePos = vec3(-15.0f, -3.0f, 0.0f);
+
+	if (currentFrame % 1 == 0)
+	{
+		for (int i = 0; i < 10; i++)
+		{
+			for (int j = 0; j < 10; j++)
+			{
+				for (int k = 0; k < 1; k++)
+				{
+					importer.AddParticle(relativePos + vec3(k*0.5f, i*0.5f, j*0.5f), vec3(26.0f, -9.0f, 0.0f));
+				}
+			}
+		}
+	}
+}
+
+void FluidRenderer::GenerateSphereFluid(const int height, const vec3 pos, const vec3 vel)
 {
 	const float deltaPos = 0.5f;
 	const float deltaHeight = 0.5f;
-	const int height = 23;
 
 	for (int i = 0; i < height; i++)
 	{
@@ -704,14 +822,74 @@ void FluidRenderer::GenerateSphereFluid()
 		{
 			for (int k = -width_depth / 2; k <= width_depth / 2; k++)
 			{
-				importer.AddParticle(
-					vec3(j*deltaPos,
-						i*deltaHeight - 5.0f, 
-						k*deltaPos),
-					vec3(0.0f, 0.0f, 0.0f));
+				importer.AddParticle(pos + vec3(j*deltaPos, i*deltaHeight - 5.0f, k*deltaPos), vel);
 			}
 		}
 	}
+}
+
+FluidCube* FluidRenderer::InitializeSphereCrownFluid(int& cubeNum)
+{
+	cubeNum = 1;
+	FluidCube* cubes = new FluidCube[cubeNum];
+	cubes[0].size.x = 40;
+	cubes[0].size.y = 10;
+	cubes[0].size.z = 40;
+	cubes[0].pos.x = 0.0f;
+	cubes[0].pos.y = -13.0f;
+	cubes[0].pos.z = 0.0f;
+
+	return cubes;
+}
+
+FluidCube * FluidRenderer::InitializeSphereCrownFluidValidation(int & cubeNum)
+{
+	return nullptr;
+}
+
+FluidCube * FluidRenderer::InitializeDamBreakFluid(int& cubeNum)
+{
+	cubeNum = 1;
+	FluidCube* cubes = new FluidCube[cubeNum];
+	cubes[0].size.x = 30;
+	cubes[0].size.y = 30;
+	cubes[0].size.z = 30;
+	cubes[0].pos.x = 0.0f;
+	cubes[0].pos.y = 0.0f;
+	cubes[0].pos.z = 0.0f;
+
+	return cubes;
+}
+
+FluidCube * FluidRenderer::InitializeDamBreakFluidValidation(int & cubeNum)
+{
+	return nullptr;
+}
+
+FluidCube * FluidRenderer::InitializeDoubleDamBreakFluid(int & cubeNum)
+{
+	cubeNum = 2;
+	FluidCube* cubes = new FluidCube[cubeNum];
+	cubes[0].size.x = 20;
+	cubes[0].size.y = 30;
+	cubes[0].size.z = 20;
+	cubes[0].pos.x = -8.0f;
+	cubes[0].pos.y = -3.0f;
+	cubes[0].pos.z = 5.0f;
+
+	cubes[1].size.x = 20;
+	cubes[1].size.y = 20;
+	cubes[1].size.z = 20;
+	cubes[1].pos.x = 7.0f;
+	cubes[1].pos.y = -5.0f;
+	cubes[1].pos.z = -3.0f;
+
+	return cubes;
+}
+
+FluidCube * FluidRenderer::InitializeDoubleDamBreakFluidValidation(int & cubeNum)
+{
+	return nullptr;
 }
 
 void FluidRenderer::DrawFluids(const float cameraDist)
@@ -733,4 +911,57 @@ void FluidRenderer::DrawFluidMesh(int indexNum)
 	fluidMeshVAO.Bind();
 
 	glDrawElements(GL_TRIANGLES, indexNum, GL_UNSIGNED_INT, 0);
+}
+
+void FluidRenderer::LoadSkyBox()
+{
+	float skyboxVertices[] = {
+		// positions          
+		-1.0f,  1.0f, -1.0f,
+		-1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+
+		-1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+
+		-1.0f, -1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+
+		-1.0f,  1.0f, -1.0f,
+		1.0f,  1.0f, -1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f, -1.0f,
+
+		-1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		1.0f, -1.0f,  1.0f
+	};
+
+	skyBoxVAO.GenVAOVBO();
+	skyBoxVAO.Bind();
+	skyBoxVAO.VertexBufferData(sizeof(skyboxVertices), &skyboxVertices);
+	skyBoxVAO.VertexAttribPointer(3, 3);
 }

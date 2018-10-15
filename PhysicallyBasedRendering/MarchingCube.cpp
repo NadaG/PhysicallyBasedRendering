@@ -35,10 +35,12 @@ MarchingCube::MarchingCube(void)
 	Ne = 15;
 
 	// 일정 수 이상의 particle이 있을 때 singular matrix에 곱해질 상수
-	Ks = 5.0f;
+	Ks = 2.5f;
 
 	// 일정 수 이하의 particle이 있을 때 identity matrix에 곱해질 상수
 	Kn = 0.6f;
+
+	// mesh get smaller when Kn & Ks get bigger 
 
 	// paper said parameter: Kr = 4, Ks = 1400, Kn = 0.5, Ne = 25
 	// my best parameter: Kr = 5, Ks = 3, Kn = 0.5, Ne = 15

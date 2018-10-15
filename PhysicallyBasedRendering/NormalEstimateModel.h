@@ -23,7 +23,11 @@ public:
 	void LoadModel();
 
 	// model¿¡ inputÀ» ³Ö¾î¼­ outputÀ» »Ì¾Æ ³¿
-	void UseModel(const string original_image, const string model_out_image, const int length);
+	void UseModel(
+		const string model_dir,
+		const string output_tensor,
+		const string original_image, 
+		const string model_out_image, const int length);
 
 	void AppendNoisyImage(float* data);
 

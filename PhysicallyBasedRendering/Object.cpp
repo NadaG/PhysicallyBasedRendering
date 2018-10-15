@@ -42,7 +42,9 @@ void Object::ModelRotate(const glm::vec3& vec, float angle)
 	// 현재 축을 기준으로 rotate
 	/*glm::vec3 v = glm::inverse(glm::fmat3(rotationMatrix)) * vec;
 	this->rotationMatrix = glm::rotate(rotationMatrix, angle, v);*/
-	this->rotationMatrix = glm::rotate(this->rotationMatrix, angle, vec);
+
+	//this->rotationMatrix = glm::rotate(angle, glm::normalize(vec)) * this->rotationMatrix;
+	this->rotationMatrix = this->rotationMatrix * glm::rotate(angle, glm::normalize(vec));
 }
 
 void Object::WorldRotate(const glm::vec3 &vec, float angle)

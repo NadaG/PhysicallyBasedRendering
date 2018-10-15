@@ -8,6 +8,23 @@
 #include "NormalEstimateModel.h"
 #include "CIsoSurface.h"
 
+#include <ctime>
+
+enum FluidSceneType
+{
+	DAM_BREAK = 0,
+	DAM_BREAK_VALIDATION = 1,
+	
+	DOUBLE_DAM_BREAK = 2,
+	DOUBLE_DAM_BREAK_VALIDATION = 3,
+	
+	POURING_FLUID = 4,
+	POURING_FLUID_VALIDATION = 5,
+	
+	SPHERE_CROWN = 6,
+	SPHERE_CROWN_VALIDATION = 7
+};
+
 struct FluidCube
 {
 	float3 pos;
@@ -18,7 +35,7 @@ class FluidRenderer : public Renderer
 {
 public:
 	FluidRenderer(SceneManager* sceneManager)
-		:Renderer(sceneManager)
+		:Renderer(sceneManager), fluidSceneType(POURING_FLUID_VALIDATION)
 	{}
 	virtual ~FluidRenderer() {};
 
@@ -47,6 +64,8 @@ private:
 
 	ShaderProgram* phongShader;
 
+	ShaderProgram* skyBoxShader;
+
 	////debug용임
 	//ShaderProgram* textureShader;
 	//Texture2D tmpTex;
@@ -57,6 +76,8 @@ private:
 	// world
 	Texture2D worldColorTex;
 	Texture2D worldDepthTex;
+
+	TextureCube skyBoxTex;
 
 	// debug용임 normal 값 저장
 	Texture2D colorTex;
@@ -77,12 +98,12 @@ private:
 	const int depthWidth = 1024;
 	const int depthHeight = 1024;
 
-	const int blurNum = 2;
+	const int blurNum = 3;
 
-	const float depthNear = 0.01f;
+	const float depthNear = 1.0f;
 	const float depthFar = 200.0f;
 
-	const float sceneNaer = 0.01f;
+	const float sceneNaer = 1.0f;
 	const float sceneFar = 200.0f;
 
 	const float pointSize = 1000.0f;
@@ -102,6 +123,8 @@ private:
 	VertexArrayObject fluidVAO;
 	VertexArrayObject fluidMeshVAO;
 
+	VertexArrayObject skyBoxVAO;
+
 	GLfloat* fluidVertices;
 	FluidSimulationImporter importer;
 	FluidSimulationClient clientImporter;
@@ -117,10 +140,30 @@ private:
 
 	NormalEstimateModel NEM;
 
-	void PouringFluid();
-	void GenerateSphereFluid();
+	void GenerateSphereFluid(const int height, const vec3 pos, const vec3 vel);
+	FluidCube* InitializeSphereCrownFluid(int& cubeNum);
+	FluidCube* InitializeSphereCrownFluidValidation(int& cubeNum);
+
+	FluidCube* InitializeDamBreakFluid(int& cubeNum);
+	FluidCube* InitializeDamBreakFluidValidation(int& cubeNum);
+
+	FluidCube* InitializeDoubleDamBreakFluid(int& cubeNum);
+	FluidCube* InitializeDoubleDamBreakFluidValidation(int& cubeNum);
+
+	FluidCube* InitializePouringFluid(int& cubeNum);
+	void UpdatePouringFluid();
+	FluidCube* InitializePouringFluidValidation(int& cubeNum);
+	void UpdatePouringFluidValidation();
 
 private:
+
+	FluidSceneType fluidSceneType;
+
+	// scene type
+	string sceneTypeStr;
+	// dynamic or static
+	string sceneModeStr;
+	bool isDynamicScene;
 
 	bool isRenderOnDefaultFBO;
 	bool isScreenSpace;
@@ -132,4 +175,6 @@ private:
 
 	void DrawFluids(const float cameraDist);
 	void DrawFluidMesh(const int indexNum);
+
+	void LoadSkyBox();
 };

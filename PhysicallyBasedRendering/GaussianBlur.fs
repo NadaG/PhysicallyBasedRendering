@@ -14,22 +14,20 @@ void main()
 	vec2 texOffset = 1.0 / textureSize(map, 0);
 	vec3 result = texture(map, outUV).rgb * weight[0];
 
-	if(horizontal)
+	// 이미 중간 값을 불러 옴
+	for(int i = 1; i < 5; ++i)
 	{
-		for(int i = 1; i < 5; ++i)
+		if(horizontal)
 		{
 			result += texture(map, outUV + vec2(texOffset.x * i, 0.0)).rgb * weight[i];
 			result += texture(map, outUV - vec2(texOffset.x * i, 0.0)).rgb * weight[i];
 		}
-	}
-	else
-	{
-		for(int i = 1; i < 5; ++i)
+		else
 		{
 			result += texture(map, outUV + vec2(0.0, texOffset.y * i)).rgb * weight[i];
 			result += texture(map, outUV - vec2(0.0, texOffset.y * i)).rgb * weight[i];
 		}
 	}
-	
+
 	color = result;
 }
